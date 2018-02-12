@@ -1,0 +1,112 @@
+﻿<Window x:Class="Player.LyricsView" 
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Player"
+        xmlns:materialicons="clr-namespace:MaterialIcons;assembly=MaterialIcons"
+        xmlns:controls1="clr-namespace:Player.Controls"
+        mc:Ignorable="d"
+        Title="LyricsView" Height="535" Width="350" Background="#FFD4D4D4">
+    <Grid x:Name="MainGrid">
+        <controls1:NumericUpDown x:Name="SizeUpDown" Margin="30,5,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Value="15" 
+                                ValueChanged="FontSizeChange" Height="18" Minimum="4" Maximum="64" Width="97"/>
+        <materialicons:MaterialIcon x:Name="FontSizeIcon" Icon="ic_format_size" HorizontalAlignment="Left" VerticalAlignment="Top" Width="30"/>
+        <ToggleButton Margin="0,5,0,0" Content="I" FontStyle="Italic" FontWeight="Bold" Height="19" x:Name="ItalicToggle"
+                      VerticalAlignment="Top" HorizontalAlignment="Right" Width="19" Unchecked="ItalicToggled" Checked="ItalicToggled"/>
+        <ToggleButton Margin="0,5,19,0" Content="B" FontWeight="Bold" Height="19" VerticalAlignment="Top"  x:Name="BoldToggle"
+                      HorizontalAlignment="Right" Width="19" Unchecked="BoldToggled" Checked="BoldToggled"/>
+        <ToggleButton Margin="0,5,38,0" FontWeight="Bold" Height="19" VerticalAlignment="Top"  x:Name="UnderlineToggle"
+                      HorizontalAlignment="Right" Width="19" Unchecked="UnderlineToggled" Checked="UnderlineToggled">
+            <TextBlock Text="U" TextDecorations="Underline" />
+        </ToggleButton>
+        <TextBox x:Name="MainViewer" TextWrapping="Wrap" IsReadOnly="True" AutoWordSelection="True" BorderThickness="0" VerticalScrollBarVisibility="Auto" Margin="0,29,0,0" Background="{x:Null}">
+            [Intro:]
+We be the illest…
+We be the illest in here…
+I know you feel us…
+We be the illest in here…
+Illest in here…
+We so motherfuckin’ ill…
+We so motherfuckin’ ill…
+Ill, motherfucker, ill…
+We so motherfuckin’ ill…
+
+[Verse:]
+Illin’ out from la – I be illin’ out all the way
+Got an email from my K-Town chick that wanna hook up and blaze
+I’ve got og cannabis, girl, one puff’ll put you in your grave
+Got three pills and four Jimmy hats ’cause we don’t Kid ‘n Play
+Hop out, yo, guess who’s gettin’ drunk?
+No motherfuckers can out-drink us
+If you’re tipping that heat, don’t get drowned
+So cold, polar bears on my nuts
+Y’all know just who we be
+I hold it down for the East
+‘Cause I keeps it pimpin’, Peter Griffin
+Yellow tinted on zebras
+
+[Bridge:]
+Dripping on your couches
+Dripping on your couches
+Sippin’ Tanqueray with orange, mane, we on that Tropicana
+I’m dripping on your couches from the Hills to public housing
+If you’re feelin’ ill, then damn, you ill
+Be the illest on the thousand
+
+[Hook:]
+We be the illest…
+We be the illest in here…
+I know you feel us…
+We be the illest in here…
+Illest in here…
+Illest…
+We be the illest in here…
+I know you feel us…
+We be the illest in here…
+Illest in here…
+We so motherfuckin’ ill…
+
+[Verse 2: Riff]
+Nice chain… what a nice night
+My ice bright, I play the wall like a night light
+Tangerine, tambourine from the West Wing
+The best thing about my new Versace bed springs
+I’m in the building, more gold than Rumpelstiltskin
+Aw shit, look who it is, the white Russell Simmons
+Jody Highroller – Far East Movement
+We so ill, I think I need some Codeine fluid
+
+[Bridge:]
+
+[Hook:]
+
+[Outro:]
+“I” is for the way these bitches love how I bang
+And double “L” is for the way I blow the smoke in your face
+We roll on Es and we be easy – rollin’ that bank
+And “St” is for the illest shit we rep every day
+Songwriters: ANDREAS SCHULLER, ERIC FREDERIC, HORST SIMCO, JAE CHOUNG, JAMES ROH, KEVIN NISHIMURA
+The Illest lyrics © Sony/ATV Music Publishing LLC, MISSING LINK MUSIC
+        </TextBox>
+        <ComboBox x:Name="FontCombo" HorizontalAlignment="Right" Margin="0,5,57,0" VerticalAlignment="Top" Width="140" Height="19" SelectionChanged="FontChange" SelectedIndex="15">
+            <ComboBoxItem Content="Segoe UI"/>
+            <ComboBoxItem Content="Segoe UI Light"/>
+            <ComboBoxItem Content="Segoe UI SemiLight"/>
+            <ComboBoxItem Content="Segoe UI SemiBold"/>
+            <ComboBoxItem Content="Segoe UI Print"/>
+            <ComboBoxItem Content="Arial"/>
+            <ComboBoxItem Content="Comic Sans MS"/>
+            <ComboBoxItem Content="Courgette"/>
+            <ComboBoxItem Content="Kalam"/>
+            <ComboBoxItem Content="Kalam Light"/>
+            <ComboBoxItem Content="Russo One"/>
+            <ComboBoxItem Content="Montserrat"/>
+            <ComboBoxItem Content="Montserrat Light"/>
+            <ComboBoxItem Content="Montserrat SemiBold"/>
+            <ComboBoxItem Content="Montserrat Alternative"/>
+            <ComboBoxItem Content="Doppio One"/>
+            <ComboBoxItem Content="Tahoma"/>
+        </ComboBox>
+    </Grid>
+</Window>

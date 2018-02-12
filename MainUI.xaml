@@ -1,0 +1,204 @@
+﻿<Window
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:player="clr-namespace:Player.Controls"
+    xmlns:m="clr-namespace:MaterialIcons;assembly=MaterialIcons"
+    x:Name="window"
+    x:Class="Player.MainUI"
+    mc:Ignorable="d"
+    Title="Main Interface"
+    Background="#FFC1C1C1"
+    MinWidth="300" MinHeight="163"
+    DragDrop.Drop="FileDrop"
+    AllowDrop="True"
+    FontWeight="Normal"
+    Height="600" Width="800"
+    Closing="UserExiting" 
+    Topmost="False" >
+    <Window.Resources>
+        <Style x:Key="MediaContext" TargetType="{x:Type MenuItem}">
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Width" Value="170"/>
+            <Setter Property="Height" Value="20"/>
+        </Style>
+    </Window.Resources>
+    <Window.Triggers>
+    </Window.Triggers>
+    <Grid x:Name="MainGrid">
+        <Popup x:Name="OtherPopup" StaysOpen="False" PopupAnimation="Fade" AllowsTransparency="True"
+             Placement="MousePoint">
+            <Canvas Height="160" Width="170" x:Name="OthersCanvas" Background="#FF191919">
+                <MenuItem Header="Lyrics" Click="MediaLyricsRequested" Style="{StaticResource MediaContext}" >
+                    <MenuItem.Icon>
+                        <m:MaterialIcon Icon="ic_short_text"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Header="Remove" Click="MediaRemoveRequested" Style="{StaticResource MediaContext}" Canvas.Top="23">
+                    <MenuItem.Icon>
+                        <m:MaterialIcon Icon="ic_delete_sweep"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Header="Delete" Click="MediaDeleteRequested" Style="{StaticResource MediaContext}" Canvas.Top="46">
+                    <MenuItem.Icon>
+                        <m:MaterialIcon Icon="ic_delete"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Header="Move To..." Click="MediaMoveRequested" Style="{StaticResource MediaContext}" Canvas.Top="69">
+                    <MenuItem.Icon>
+                        <m:MaterialIcon Icon="ic_content_cut"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Header="Copy To..." Click="MediaCopyRequested"  Style="{StaticResource MediaContext}" Canvas.Top="92" >
+                    <MenuItem.Icon>
+                        <m:MaterialIcon Icon="ic_content_copy"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Header="Open Location" Click="MediaLocationRequested" Style="{StaticResource MediaContext}" Canvas.Top="115">
+                    <MenuItem.Icon>
+                        <m:MaterialIcon Icon="ic_folder_open"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Header="Edit CC" Click="MediaCcRequested" Style="{StaticResource MediaContext}" Canvas.Top="138">
+                    <MenuItem.Icon>
+                        <m:MaterialIcon Icon="ic_copyright"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+            </Canvas>
+        </Popup>
+        <Expander x:Name="SearchExpander" Visibility="Visible" Header="Search" Margin="0,0,76,0" VerticalAlignment="Top" Expanded="ExpandSearch" Collapsed="CollapseSearch">
+            <TextBox x:Name="textBox1" Height="17" TextWrapping="Wrap" VerticalAlignment="Top" KeyUp="SearchBoxEnter" Background="{x:Null}" BorderBrush="Black" Margin="0,3,0,0"/>
+        </Expander>
+
+        <MediaElement x:Name="Player" LoadedBehavior="Manual" MouseUp="Player_MouseUp" MouseDown="Player_MouseDown"
+                      Visibility="Hidden" Volume="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+            <MediaElement.ContextMenu>
+                <ContextMenu IsOpen="False">
+                    <MenuItem Header="Enter Full Screen" x:Name="PlayerC_FullScreen" Click="PlayerCFullScreen">
+                        <MenuItem.Icon>
+                            <m:MaterialIcon Icon="ic_fullscreen" />
+                        </MenuItem.Icon>
+                    </MenuItem>
+                    <MenuItem Header="Playback" x:Name="PlayerC_PlaybackMenu">
+                        <MenuItem.Icon>
+                            <m:MaterialIcon Icon="ic_play_circle_outline" />
+                        </MenuItem.Icon>
+                        <MenuItem.Items>
+                            <MenuItem Header="Pause" x:Name="PlayerC_PlayPause">
+                                <MenuItem.Icon>
+                                    <m:MaterialIcon Icon="ic_pause" />
+                                </MenuItem.Icon>
+                            </MenuItem>
+                            <MenuItem Header="Previous" >
+                                <MenuItem.Icon>
+                                    <m:MaterialIcon Icon="ic_skip_previous" />
+                                </MenuItem.Icon>
+                            </MenuItem>
+                            <MenuItem Header="Next">
+                                <MenuItem.Icon>
+                                    <m:MaterialIcon Icon="ic_skip_next" />
+                                </MenuItem.Icon>
+                            </MenuItem>
+                            <MenuItem Header="Return">
+                                <MenuItem.Icon>
+                                    <m:MaterialIcon Icon="ic_apps" />
+                                </MenuItem.Icon>
+                            </MenuItem>
+                            <MenuItem Header="Settings">
+                                <MenuItem.Icon>
+                                    <m:MaterialIcon Icon="ic_settings" />
+                                </MenuItem.Icon>
+                            </MenuItem>
+                        </MenuItem.Items>
+                    </MenuItem>
+                    <MenuItem Header="Use subtitle" Click="PlayerCSubtitle">
+                        <MenuItem.Icon>
+                            <m:MaterialIcon Icon="ic_subtitles" />
+                        </MenuItem.Icon>
+                    </MenuItem>
+                </ContextMenu>
+            </MediaElement.ContextMenu>
+        </MediaElement>
+        <Border x:Name="MediaControlsBorder" BorderThickness="1" Height="27" VerticalAlignment="Bottom" Background="#30FFFFFF"
+                CornerRadius="6" Margin="0,0,30,3" HorizontalAlignment="Center" Width="180"/>
+        <Border x:Name="VolumeButtonBorder" BorderThickness="1" Height="26" VerticalAlignment="Bottom" Background="#30FFFFFF"
+                CornerRadius="5" Margin="3,0,0,3" HorizontalAlignment="Left" Width="29"/>
+        <Border x:Name="TimeLabelBorder" BorderThickness="1" Height="24" VerticalAlignment="Bottom" Background="#30FFFFFF" 
+                CornerRadius="5" Margin="0,0,3,5" HorizontalAlignment="Right" Width="84"/>
+        <player:MaterialButton x:Name="PreviousButton" Icon="ic_skip_previous" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,120,3"/>
+        <player:MaterialButton x:Name="NextButton" Icon="ic_skip_next" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="120,0,0,3"/>
+        <player:MaterialButton x:Name="PlayPauseButton" Icon="ic_play_arrow" Click="PlayPauseButtonClick" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,3"/>
+        <player:MaterialButton x:Name="RewindButton" Icon="ic_fast_rewind" MouseDown="BackwardButtonClick"  HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,60,3"/>
+        <player:MaterialButton x:Name="ForwardButton" Icon="ic_fast_forward" MouseDown="ForwardButtonClick"  HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="60,0,0,3" />
+        <player:MaterialButton x:Name="ReturnButton" Icon="ic_flip_to_back" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,180,3" />
+        <player:MaterialButton x:Name="VideoButton" Icon="ic_personal_video" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="180,0,0,2" Height="25"/>
+        <Slider Style="{StaticResource FlatSlider}"  x:Name="PositionSlider" Margin="1,0,-1,30" ValueChanged="PositionChanged" PreviewMouseDown="PositionMouseDown" 
+                Height="12" VerticalAlignment="Bottom" Maximum="600" Value="200" Foreground="#FF575757"  OpacityMask="Gray"/>
+        <Label x:Name="TimeLabel" Content="00:00" Margin="0,0,3,3" VerticalContentAlignment="Center" 
+               FontSize="16" HorizontalContentAlignment="Center" FontWeight="Normal" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="50"/>
+        <player:MaterialButton x:Name="AudioButton" Icon="ic_volume_up" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="5,0,0,3"  />
+        <Popup x:Name="VolumePopup" PlacementTarget="{Binding ElementName=AudioButton}" PopupAnimation="Fade" StaysOpen="False" AllowsTransparency="True" Placement="Right">
+            <Canvas Width="120" Height="20">
+                <Slider Style="{StaticResource FlatSlider}" x:Name="VolumeSlider" Focusable="False" Orientation="Horizontal" ValueChanged="VolumeSlider_ValueChanged" 
+                Maximum="100" Background="#FF00C7D1" SmallChange="1" Value="99" AutoToolTipPlacement="TopLeft" LargeChange="10" Cursor="Hand" Height="14"
+                Width="100" Canvas.Left="10" Canvas.Top="4"/>
+            </Canvas>
+        </Popup>
+        <ScrollViewer Margin="0,0,0,42" x:Name="ViewParent" SizeChanged="ViewParent_SizeChanged">
+            <Grid x:Name="View">
+                <Grid.ColumnDefinitions>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                </Grid.RowDefinitions>
+            </Grid>
+        </ScrollViewer>
+        <player:MaterialButton x:Name="FunctionButton" Icon="ic_all_inclusive" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,58,5" Height="25" />
+        <Popup x:Name="FunctionPopup" StaysOpen="False" PopupAnimation="Slide" AllowsTransparency="True"
+            PlacementTarget="{Binding ElementName=FunctionButton}" IsOpen="False">
+            <Canvas Height="150" Width="140" x:Name="FunctionCanvas">
+                <Button Height="30" Width="140" Click="BrowseFunction" Background="{x:Null}" Canvas.Top="0" >
+                    <Canvas>
+                        <m:MaterialIcon Icon="ic_folder_open" Height="25" Width="25" Canvas.Top="-12" Canvas.Left="-65" HorizontalAlignment="Left" />
+                        <Label Content="Browse" Canvas.Left="-24" Canvas.Top="-16" FontSize="15"/>
+                    </Canvas>
+                </Button>
+                <Button Height="30" Width="140" Click="SwitchClicked" Background="{x:Null}" Canvas.Top="30" >
+                    <Canvas>
+                        <m:MaterialIcon Icon="ic_track_changes" Height="25" Width="25" Canvas.Top="-12" Canvas.Left="-65" HorizontalAlignment="Left" />
+                        <Label Content="Switch" Canvas.Left="-24" Canvas.Top="-16" FontSize="15"/>
+                    </Canvas>
+                </Button>
+                <Button Height="30" Width="140" Click="ShareFunction" Background="{x:Null}" Canvas.Top="60" >
+                    <Canvas>
+                        <m:MaterialIcon Icon="ic_share" Canvas.Top="-12" Canvas.Left="-65" Width="25" Height="25"/>
+                        <Label Content="Share" FontSize="15" Canvas.Left="-24" Canvas.Top="-17"/>
+                    </Canvas>
+                </Button>
+                <Button Height="30" Width="140" Click="SettingsFunction" Background="{x:Null}" Canvas.Top="90" >
+                    <Canvas>
+                        <m:MaterialIcon Icon="ic_settings" Height="25" Width="25" Canvas.Top="-12" Canvas.Left="-65" />
+                        <Label Content="Settings" Canvas.Left="-24" FontSize="15" Canvas.Top="-16"/>
+                    </Canvas>
+                </Button>
+                <Button Height="30" Width="140" Click="AboutFunction" Background="{x:Null}" Canvas.Top="120">
+                    <Canvas>
+                        <m:MaterialIcon Icon="ic_developer_board" Height="25" Width="25" Canvas.Top="-12" Canvas.Left="-65"/>
+                        <Label Content="About" FontSize="15" Canvas.Left="-24" Canvas.Top="-17"/>
+                        <Popup x:Name="AboutPopup" PlacementTarget="{Binding ElementName=AboutButton}" >
+                            <Grid Background="White" Width="258">
+                                <Label Content="Elephant Player&#xD;&#xA;v0.9.3" FontSize="24" VerticalAlignment="Top" Margin="0,0,80,0"/>
+                                <Label Content=".NET 4.7" FontSize="18" VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="178,0,0,40"/>
+                                <Label Content="soheilkd®" FontSize="20" FontFamily="Kalam" VerticalAlignment="Bottom" HorizontalAlignment="Right" Foreground="#FF0B66B2" Margin="0,0,63,-2"/>
+                            </Grid>
+                        </Popup>
+                    </Canvas>
+                </Button>
+            </Canvas>
+        </Popup>
+        <Grid.Resources>
+        </Grid.Resources>
+    </Grid>
+</Window>
+    

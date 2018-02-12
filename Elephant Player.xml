@@ -1,0 +1,361 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Elephant Player</name>
+    </assembly>
+    <members>
+        <member name="T:Player.ColorPicker">
+            <summary>
+            Interaction logic for ColorPicker.xaml
+            </summary>
+            <summary>
+            ColorPicker
+            </summary>
+        </member>
+        <member name="M:Player.ColorPicker.InitializeComponent">
+            <summary>
+            InitializeComponent
+            </summary>
+        </member>
+        <member name="T:Player.InstanceManager.NativeMethods.MessageHandler">
+            <summary>
+            Delegate declaration that matches WndProc signatures.
+            </summary>
+        </member>
+        <member name="T:Player.InstanceManager.Instance`1">
+            <summary>
+            This class checks to make sure that only one instance of 
+            this application is running at a time.
+            </summary>
+            <remarks>
+            Note: this class should be used with some caution, because it does no
+            security checking. For example, if one instance of an app that uses this class
+            is running as Administrator, any other instance, even if it is not
+            running as Administrator, can activate it with command line arguments.
+            For most apps, this will not be much of an issue.
+            </remarks>
+        </member>
+        <member name="F:Player.InstanceManager.Instance`1.Delimiter">
+            <summary>
+            String delimiter used in channel names.
+            </summary>
+        </member>
+        <member name="F:Player.InstanceManager.Instance`1.ChannelNameSuffix">
+            <summary>
+            Suffix to the channel name.
+            </summary>
+        </member>
+        <member name="F:Player.InstanceManager.Instance`1.RemoteServiceName">
+            <summary>
+            Remote service name.
+            </summary>
+        </member>
+        <member name="F:Player.InstanceManager.Instance`1.IpcProtocol">
+            <summary>
+            IPC protocol used (string).
+            </summary>
+        </member>
+        <member name="F:Player.InstanceManager.Instance`1.singleInstanceMutex">
+            <summary>
+            Application mutex.
+            </summary>
+        </member>
+        <member name="F:Player.InstanceManager.Instance`1.channel">
+            <summary>
+            IPC channel for communications.
+            </summary>
+        </member>
+        <member name="F:Player.InstanceManager.Instance`1.commandLineArgs">
+            <summary>
+            List of command line arguments for the application.
+            </summary>
+        </member>
+        <member name="P:Player.InstanceManager.Instance`1.CommandLineArgs">
+            <summary>
+            Gets list of command line arguments for the application.
+            </summary>
+        </member>
+        <member name="M:Player.InstanceManager.Instance`1.InitializeAsFirstInstance(System.String)">
+            <summary>
+            Checks if the instance of the application attempting to start is the first instance. 
+            If not, activates the first instance.
+            </summary>
+            <returns>True if this is the first instance of the application.</returns>
+        </member>
+        <member name="M:Player.InstanceManager.Instance`1.Cleanup">
+            <summary>
+            Cleans up single-instance code, clearing shared resources, mutexes, etc.
+            </summary>
+        </member>
+        <member name="M:Player.InstanceManager.Instance`1.GetCommandLineArgs(System.String)">
+            <summary>
+            Gets command line args - for ClickOnce deployed applications, command line args may not be passed directly, they have to be retrieved.
+            </summary>
+            <returns>List of command line arg strings.</returns>
+        </member>
+        <member name="M:Player.InstanceManager.Instance`1.CreateRemoteService(System.String)">
+            <summary>
+            Creates a remote service for communication.
+            </summary>
+            <param name="channelName">Application's IPC channel name.</param>
+        </member>
+        <member name="M:Player.InstanceManager.Instance`1.SignalFirstInstance(System.String,System.Collections.Generic.IList{System.String})">
+            <summary>
+            Creates a client channel and obtains a reference to the remoting service exposed by the server - 
+            in this case, the remoting service exposed by the first instance. Calls a function of the remoting service 
+            class to pass on command line arguments from the second instance to the first and cause it to activate itself.
+            </summary>
+            <param name="channelName">Application's IPC channel name.</param>
+            <param name="args">
+            Command line arguments for the second instance, passed to the first instance to take appropriate action.
+            </param>
+        </member>
+        <member name="M:Player.InstanceManager.Instance`1.ActivateFirstInstanceCallback(System.Object)">
+            <summary>
+            Callback for activating first instance of the application.
+            </summary>
+            <param name="arg">Callback argument.</param>
+            <returns>Always null.</returns>
+        </member>
+        <member name="M:Player.InstanceManager.Instance`1.ActivateFirstInstance(System.Collections.Generic.IList{System.String})">
+            <summary>
+            Activates the first instance of the application with arguments from a second instance.
+            </summary>
+            <param name="args">List of arguments to supply the first instance of the application.</param>
+        </member>
+        <member name="T:Player.InstanceManager.Instance`1.IPCRemoteService">
+            <summary>
+            Remoting service class which is exposed by the server i.e the first instance and called by the second instance
+            to pass on the command line arguments to the first instance and cause it to activate itself.
+            </summary>
+        </member>
+        <member name="M:Player.InstanceManager.Instance`1.IPCRemoteService.InvokeFirstInstance(System.Collections.Generic.IList{System.String})">
+            <summary>
+            Activates the first instance of the application.
+            </summary>
+            <param name="args">List of arguments to pass to the first instance.</param>
+        </member>
+        <member name="M:Player.InstanceManager.Instance`1.IPCRemoteService.InitializeLifetimeService">
+            <summary>
+            Remoting Object's ease expires after every 5 minutes by default. We need to override the InitializeLifetimeService class
+            to ensure that lease never expires.
+            </summary>
+            <returns>Always null.</returns>
+        </member>
+        <member name="P:Player.Lyrics.LyricsSourceLyrdb.Name">
+            <summary>
+            Gets the name of this source
+            </summary>
+        </member>
+        <member name="M:Player.Lyrics.LyricsSourceLyrdb.GetLyrics(Player.Lyrics.Song)">
+            <summary>
+            Fetch the lyrics for the given song
+            </summary>
+            <param name="s">The song whose lyrics are to be fetched</param>
+            <returns>The lyrics or an empty string if the lyrics could not be found</returns>
+        </member>
+        <member name="T:Player.LyricsView">
+            <summary>
+            LyricsView
+            </summary>
+        </member>
+        <member name="M:Player.LyricsView.InitializeComponent">
+            <summary>
+            InitializeComponent
+            </summary>
+        </member>
+        <member name="T:Player.MediaView">
+            <summary>
+            MediaView
+            </summary>
+        </member>
+        <member name="M:Player.MediaView.InitializeComponent">
+            <summary>
+            InitializeComponent
+            </summary>
+        </member>
+        <member name="T:Player.MetaEditor">
+            <summary>
+            MetaEditor
+            </summary>
+        </member>
+        <member name="M:Player.MetaEditor.InitializeComponent">
+            <summary>
+            InitializeComponent
+            </summary>
+        </member>
+        <member name="T:Player.MiniUI">
+            <summary>
+            MiniUI
+            </summary>
+        </member>
+        <member name="F:Player.MiniUI.MiniGrid">
+            <summary>
+            MiniGrid Name Field
+            </summary>
+        </member>
+        <member name="M:Player.MiniUI.InitializeComponent">
+            <summary>
+            InitializeComponent
+            </summary>
+        </member>
+        <member name="T:Player.MaterialButton">
+            <summary>
+            MaterialButton
+            </summary>
+        </member>
+        <member name="M:Player.MaterialButton.InitializeComponent">
+            <summary>
+            InitializeComponent
+            </summary>
+        </member>
+        <member name="T:Player.Properties.Resources">
+            <summary>
+              A strongly-typed resource class, for looking up localized strings, etc.
+            </summary>
+        </member>
+        <member name="P:Player.Properties.Resources.ResourceManager">
+            <summary>
+              Returns the cached ResourceManager instance used by this class.
+            </summary>
+        </member>
+        <member name="P:Player.Properties.Resources.Culture">
+            <summary>
+              Overrides the current thread's CurrentUICulture property for all
+              resource lookups using this strongly typed resource class.
+            </summary>
+        </member>
+        <member name="P:Player.Properties.Resources.Music">
+            <summary>
+              Looks up a localized resource of type System.Drawing.Bitmap.
+            </summary>
+        </member>
+        <member name="P:Player.Properties.Resources.Next">
+            <summary>
+              Looks up a localized resource of type System.Drawing.Bitmap.
+            </summary>
+        </member>
+        <member name="P:Player.Properties.Resources.Pause">
+            <summary>
+              Looks up a localized resource of type System.Drawing.Bitmap.
+            </summary>
+        </member>
+        <member name="P:Player.Properties.Resources.Play">
+            <summary>
+              Looks up a localized resource of type System.Drawing.Bitmap.
+            </summary>
+        </member>
+        <member name="P:Player.Properties.Resources.PlayerIcon">
+            <summary>
+              Looks up a localized resource of type System.Drawing.Icon similar to (Icon).
+            </summary>
+        </member>
+        <member name="P:Player.Properties.Resources.PlayerImage">
+            <summary>
+              Looks up a localized resource of type System.Drawing.Bitmap.
+            </summary>
+        </member>
+        <member name="P:Player.Properties.Resources.Prev">
+            <summary>
+              Looks up a localized resource of type System.Drawing.Bitmap.
+            </summary>
+        </member>
+        <member name="P:Player.Properties.Resources.TaskbarIcon">
+            <summary>
+              Looks up a localized resource of type System.Drawing.Icon similar to (Icon).
+            </summary>
+        </member>
+        <member name="P:Player.Properties.Resources.TaskbarImage">
+            <summary>
+              Looks up a localized resource of type System.Drawing.Bitmap.
+            </summary>
+        </member>
+        <member name="P:Player.Properties.Resources.Video">
+            <summary>
+              Looks up a localized resource of type System.Drawing.Bitmap.
+            </summary>
+        </member>
+        <member name="T:Player.SettingsUI">
+            <summary>
+            SettingsUI
+            </summary>
+        </member>
+        <member name="F:Player.SettingsUI.FavoritesMainGrid">
+            <summary>
+            FavoritesMainGrid Name Field
+            </summary>
+        </member>
+        <member name="M:Player.SettingsUI.InitializeComponent">
+            <summary>
+            InitializeComponent
+            </summary>
+        </member>
+        <member name="F:Player.TrayControl.components">
+            <summary> 
+            Required designer variable.
+            </summary>
+        </member>
+        <member name="M:Player.TrayControl.Dispose(System.Boolean)">
+            <summary> 
+            Clean up any resources being used.
+            </summary>
+            <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+        </member>
+        <member name="M:Player.TrayControl.InitializeComponent">
+            <summary> 
+            Required method for Designer support - do not modify 
+            the contents of this method with the code editor.
+            </summary>
+        </member>
+        <member name="T:Player.App">
+            <summary>
+            App
+            </summary>
+        </member>
+        <member name="M:Player.App.InitializeComponent">
+            <summary>
+            InitializeComponent
+            </summary>
+        </member>
+        <member name="T:Player.MainUI">
+            <summary>
+            MainUI
+            </summary>
+        </member>
+        <member name="M:Player.MainUI.InitializeComponent">
+            <summary>
+            InitializeComponent
+            </summary>
+        </member>
+        <member name="T:XamlGeneratedNamespace.GeneratedInternalTypeHelper">
+            <summary>
+            GeneratedInternalTypeHelper
+            </summary>
+        </member>
+        <member name="M:XamlGeneratedNamespace.GeneratedInternalTypeHelper.CreateInstance(System.Type,System.Globalization.CultureInfo)">
+            <summary>
+            CreateInstance
+            </summary>
+        </member>
+        <member name="M:XamlGeneratedNamespace.GeneratedInternalTypeHelper.GetPropertyValue(System.Reflection.PropertyInfo,System.Object,System.Globalization.CultureInfo)">
+            <summary>
+            GetPropertyValue
+            </summary>
+        </member>
+        <member name="M:XamlGeneratedNamespace.GeneratedInternalTypeHelper.SetPropertyValue(System.Reflection.PropertyInfo,System.Object,System.Object,System.Globalization.CultureInfo)">
+            <summary>
+            SetPropertyValue
+            </summary>
+        </member>
+        <member name="M:XamlGeneratedNamespace.GeneratedInternalTypeHelper.CreateDelegate(System.Type,System.Object,System.String)">
+            <summary>
+            CreateDelegate
+            </summary>
+        </member>
+        <member name="M:XamlGeneratedNamespace.GeneratedInternalTypeHelper.AddEventHandler(System.Reflection.EventInfo,System.Object,System.Delegate)">
+            <summary>
+            AddEventHandler
+            </summary>
+        </member>
+    </members>
+</doc>

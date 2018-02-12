@@ -1,0 +1,23 @@
+﻿<UserControl x:Class="Player.MediaView"
+             BorderThickness="0"
+             BorderBrush="#50FFFFFF"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Player"
+             xmlns:materialicons="clr-namespace:MaterialIcons;assembly=MaterialIcons"
+             mc:Ignorable="d" Height="170" Width="139"
+             Loaded="UserControl_Loaded"
+             x:Name="OutputCanvas">
+    <Border  Background="#F0F0F0F0" x:Name="MainBorder" CornerRadius="3">
+        <Grid x:Name="Grid">
+            <Image x:Name="Artwork" Width="135" Height="135" Source="pack://siteoforigin:,,,/Resources/MusicArtwork.png" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="2, 0, 0, 0"/>
+            <ProgressBar x:Name="ProgressBar1" VerticalAlignment="Bottom" BorderBrush="{x:Null}" Height="6" BorderThickness="0" Margin="2,0,2,1" Background="{x:Null}" />
+            <Border x:Name="SubBorder" BorderThickness="1.5" BorderBrush="Black" CornerRadius="3" />
+            <Label x:Name="TitleLabel" Content="Song Title" HorizontalAlignment="Left" VerticalAlignment="Top" Width="135" Margin="0,132,0,0"/>
+
+            <Popup x:Name="OtherPopup" Opened="OtherPopup_Opened"/>
+        </Grid>
+    </Border>
+</UserControl>

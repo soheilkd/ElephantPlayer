@@ -1,0 +1,74 @@
+<Application xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" 
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"	
+             x:Class="Player.App" xmlns:local="clr-namespace:Player"
+             StartupUri="MainUI.xaml">
+    <Application.Resources>
+        <SolidColorBrush x:Key="SliderThumb.Static.Foreground" Color="#FFE5E5E5"/>
+        <SolidColorBrush x:Key="SliderThumb.MouseOver.Background" Color="#FFDCDCDC"/>
+        <ControlTemplate x:Key="SliderThumbHorizontalDefault" TargetType="{x:Type Thumb}">
+            <Grid UseLayoutRounding="True" >
+                <Rectangle x:Name="grip" Fill="{TemplateBinding Foreground}"/>
+            </Grid>
+            <ControlTemplate.Triggers>
+                <Trigger Property="IsMouseOver" Value="true">
+                    <Setter Property="Fill" TargetName="grip" Value="Gray"/>
+                </Trigger>
+                <Trigger Property="IsDragging" Value="true">
+                    <Setter Property="Fill" TargetName="grip" Value="DarkGray"/>
+                </Trigger>
+                <Trigger Property="IsEnabled" Value="false">
+                    <Setter Property="Fill" TargetName="grip" Value="Yellow"/>
+                </Trigger>
+            </ControlTemplate.Triggers>
+        </ControlTemplate>
+        <ControlTemplate x:Key="SliderHorizontal" TargetType="{x:Type Slider}">
+            <Border x:Name="border" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Background="{TemplateBinding Background}" SnapsToDevicePixels="True">
+                <Grid>
+                    <Border x:Name="TrackBackground" Grid.Row="1" VerticalAlignment="center">
+                        <Canvas Margin="-6,-1">
+                            <Rectangle x:Name="PART_SelectionRange" Fill="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}" Height="4.0" Visibility="Hidden"/>
+                        </Canvas>
+                    </Border>
+                    <Track x:Name="PART_Track" Grid.Row="1">
+                        <Track.DecreaseRepeatButton>
+                            <RepeatButton Command="{x:Static Slider.DecreaseLarge}" Background="{TemplateBinding Foreground}" />
+                        </Track.DecreaseRepeatButton>
+                        <Track.IncreaseRepeatButton>
+                            <RepeatButton Command="{x:Static Slider.IncreaseLarge}" Background="Transparent"/>
+                        </Track.IncreaseRepeatButton>
+                        <Track.Thumb>
+                            <Thumb x:Name="Thumb" Focusable="False" OverridesDefaultStyle="True" Template="{StaticResource SliderThumbHorizontalDefault}" VerticalAlignment="Stretch" Width="11"/>
+                        </Track.Thumb>
+                    </Track>
+                </Grid>
+            </Border>
+            <ControlTemplate.Triggers>
+                <Trigger Property="IsSelectionRangeEnabled" Value="true">
+                    <Setter Property="Visibility" TargetName="PART_SelectionRange" Value="Visible"/>
+                </Trigger>
+                <Trigger Property="IsKeyboardFocused" Value="true">
+                    <Setter Property="Foreground" TargetName="Thumb" Value="Blue"/>
+                </Trigger>
+            </ControlTemplate.Triggers>
+        </ControlTemplate>
+        <Style x:Key="FlatSlider" TargetType="{x:Type Slider}">
+            <Setter Property="Stylus.IsPressAndHoldEnabled" Value="false"/>
+            <Setter Property="Template" Value="{StaticResource SliderHorizontal}"/>
+        </Style>
+
+        <Style x:Key="Test" TargetType="{x:Type local:MainUI}">
+            <Setter Property="Width" Value="140"/>
+            <Setter Property="MinWidth" Value="70"/>
+            <Setter Property="MaxWidth" Value="535"/>
+            <Setter Property="Height" Value="40"/>
+            <Setter Property="MinHeight" Value="30"/>
+            <Setter Property="MaxHeight" Value="60"/>
+            <Setter Property="Switchment" Value="True" />
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Opacity" Value="0.5"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </Application.Resources>
+</Application>
