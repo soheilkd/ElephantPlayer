@@ -20,6 +20,7 @@ namespace Player
             File file2 = File.Create(file.Path);
             MainViewer.Text = file2.Tag.Lyrics;
             MainViewer.Clear();
+            var test = Lyrics.Get(Media.Path);
             MainViewer.AppendText(Lyrics.Get(Media.Path));
             Show();
         }
@@ -29,6 +30,11 @@ namespace Player
         private void ItalicToggled(object sender, RoutedEventArgs e) => MainViewer.FontStyle = MainViewer.FontStyle == FontStyles.Normal ? FontStyles.Italic : FontStyles.Normal;
         private void BoldToggled(object sender, RoutedEventArgs e) => MainViewer.FontWeight = MainViewer.FontWeight == FontWeights.Bold ? FontWeights.Normal : FontWeights.Bold;
         private void FontChange(object sender, SelectionChangedEventArgs e) => MainViewer.FontFamily = new FontFamily(((ComboBoxItem)FontCombo.SelectedItem).Content.ToString());
-        
+
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            e.Cancel = true;
+            Hide();
+        }
     }
 }

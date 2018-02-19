@@ -1,5 +1,4 @@
-﻿using Player.Enums;
-using Player.Styling;
+﻿using Player.Styling;
 using Player.Types;
 using System;
 using System.Collections.Generic;
@@ -16,7 +15,7 @@ namespace Player.Controls
     /// </summary>
     public partial class GroupView : UserControl
     {
-        const int ExpandDuration = 500;
+        const int ExpandDuration = 400;
         bool isOpen = false;
         public ImageSource TileImageSource { get => TileImage.Source; set => TileImage.Source = value; }
         private List<MediaView> MediaViews = new List<MediaView>();
@@ -25,8 +24,8 @@ namespace Player.Controls
         static MediaViewMode mediaViewMode = MediaViewMode.Default;
         private DoubleAnimation ExpandAnimation = new DoubleAnimation()
         {
-            From = 172,
-            To = 193 + Styling.XAML.Size.MediaView.Self(mediaViewMode).h,
+            From = 125,
+            To = 145 + Styling.XAML.Size.MediaView.Self(mediaViewMode).Height,
             AccelerationRatio = 0.75,
             AutoReverse = false,
             Duration = TimeSpan.FromMilliseconds(ExpandDuration)
@@ -48,23 +47,16 @@ namespace Player.Controls
         {
             InitializeComponent();
         }
-        public GroupView(MediaView mediaView, Theme theme = null, ViewMode mode = ViewMode.GroupByArtist)
-            : this(new MediaView[] { mediaView }, mediaView.Media.Artwork, mode, theme){ }
-        public GroupView(MediaView[] mediaViews, ImageSource image = null, ViewMode viewMode = ViewMode.GroupByArtist, Theme theme = null)
+        public GroupView(MediaView mediaView, Theme theme = null, string match = "")
+            : this(new MediaView[] { mediaView }, mediaView.Artwork.Source, theme, match){ }
+        public GroupView(MediaView[] mediaViews, ImageSource image = null, Theme theme = null, string match = "")
         {
             InitializeComponent();
             for (int i = 0; i < mediaViews.Length; i++)
                 MediaViews.Add(mediaViews[i]);
             TileImage.Source = image ?? Getters.Image.ToBitmapSource(Properties.Resources.Music);
-            switch (viewMode)
-            {
-                case ViewMode.GroupByArtist: TitleLabel.Content = MediaViews[0].Media.Artist; break;
-                case ViewMode.GroupByDir: TitleLabel.Content = MediaViews[0].Media.Path.Substring(MediaViews[0].Media.Path.LastIndexOf("\\")); break;
-                case ViewMode.GroupByAlbum: TitleLabel.Content = MediaViews[0].Media.Album; break;
-                    
-                default: break;
-            }
-            MatchString = TitleLabel.Content != null ? TitleLabel.Content.ToString() : "Unknown";
+            TitleLabel.Content = match;
+            MatchString = match != "" ? match : "Unknown";
             ActiveTheme = theme;
             Rebuild();
             for (int i = 0; i < MediaViews.Count; i++)
@@ -78,7 +70,7 @@ namespace Player.Controls
         {
             RefreshMeta();
             mediaViewMode = e.Sender.ViewMode;
-            ExpandAnimation.To = 193 + Styling.XAML.Size.MediaView.Self(mediaViewMode).h;
+            ExpandAnimation.To = 145 + Styling.XAML.Size.MediaView.Self(mediaViewMode).Height;
         }
 
         public void Add(MediaView mediaView)
@@ -127,7 +119,7 @@ namespace Player.Controls
             int index = -1;
             for (int i = 0; i < MediaViews.Count; i++)
                 if (MediaViews[i].IsPlaying) index = i;
-            string pkat = index == -1 ? "None playing here" : $"Currently Playing: \r\n{MediaViews[index].Media.Name}";
+            string pkat = index == -1 ? "None playing here" : $"Currently Playing: \r\n{MediaViews[index].TitleLabel.Content}";
 
             MetadataLabel.Content =
                 $"Totally {MediaViews.Count} medias\r\n{pkat}";
@@ -157,6 +149,10 @@ namespace Player.Controls
             Storyboard.SetTarget(ExpandAnimation, this);
             Storyboard.SetTargetProperty(ExpandAnimation, new PropertyPath(HeightProperty));
             ExpandStory.Children.Add(ExpandAnimation);
+            await Task.Delay(400);
+            MaterialButton_Click(this, null);
+            await Task.Delay(3000);
+            MaterialButton_Click(this, null);
         }
     }
 }

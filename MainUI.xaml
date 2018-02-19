@@ -5,16 +5,17 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:player="clr-namespace:Player.Controls"
     xmlns:m="clr-namespace:MaterialIcons;assembly=MaterialIcons"
+    xmlns:system="clr-namespace:System;assembly=mscorlib"
     x:Name="window"
     x:Class="Player.MainUI"
     mc:Ignorable="d"
     Title="Main Interface"
     Background="#FFC1C1C1"
-    MinWidth="300" MinHeight="163"
+    MinWidth="260" MinHeight="75"
     DragDrop.Drop="FileDrop"
     AllowDrop="True"
     FontWeight="Normal"
-    Height="600" Width="800"
+    Height="479.5" Width="771"
     Closing="UserExiting" 
     Topmost="False" >
     <Window.Resources>
@@ -68,9 +69,6 @@
                 </MenuItem>
             </Canvas>
         </Popup>
-        <Expander x:Name="SearchExpander" Visibility="Visible" Header="Search" Margin="0,0,76,0" VerticalAlignment="Top" Expanded="ExpandSearch" Collapsed="CollapseSearch">
-            <TextBox x:Name="textBox1" Height="17" TextWrapping="Wrap" VerticalAlignment="Top" KeyUp="SearchBoxEnter" Background="{x:Null}" BorderBrush="Black" Margin="0,3,0,0"/>
-        </Expander>
 
         <MediaElement x:Name="Player" LoadedBehavior="Manual" MouseUp="Player_MouseUp" MouseDown="Player_MouseDown"
                       Visibility="Hidden" Volume="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
@@ -126,14 +124,14 @@
         <Border x:Name="VolumeButtonBorder" BorderThickness="1" Height="26" VerticalAlignment="Bottom" Background="#30FFFFFF"
                 CornerRadius="5" Margin="3,0,0,3" HorizontalAlignment="Left" Width="29"/>
         <Border x:Name="TimeLabelBorder" BorderThickness="1" Height="24" VerticalAlignment="Bottom" Background="#30FFFFFF" 
-                CornerRadius="5" Margin="0,0,3,5" HorizontalAlignment="Right" Width="84"/>
+                CornerRadius="5" Margin="0,0,3,5" HorizontalAlignment="Right" Width="50"/>
         <player:MaterialButton x:Name="PreviousButton" Icon="ic_skip_previous" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,120,3"/>
         <player:MaterialButton x:Name="NextButton" Icon="ic_skip_next" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="120,0,0,3"/>
         <player:MaterialButton x:Name="PlayPauseButton" Icon="ic_play_arrow" Click="PlayPauseButtonClick" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,3"/>
         <player:MaterialButton x:Name="RewindButton" Icon="ic_fast_rewind" MouseDown="BackwardButtonClick"  HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,60,3"/>
         <player:MaterialButton x:Name="ForwardButton" Icon="ic_fast_forward" MouseDown="ForwardButtonClick"  HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="60,0,0,3" />
-        <player:MaterialButton x:Name="ReturnButton" Icon="ic_flip_to_back" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,180,3" />
-        <player:MaterialButton x:Name="VideoButton" Icon="ic_personal_video" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="180,0,0,2" Height="25"/>
+        <player:MaterialButton x:Name="ReturnButton" Icon="ic_flip_to_back" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,180,3" Visibility="Hidden"/>
+        <player:MaterialButton x:Name="VideoButton" Icon="ic_personal_video" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="180,0,0,2" Height="25" Visibility="Hidden"/>
         <Slider Style="{StaticResource FlatSlider}"  x:Name="PositionSlider" Margin="1,0,-1,30" ValueChanged="PositionChanged" PreviewMouseDown="PositionMouseDown" 
                 Height="12" VerticalAlignment="Bottom" Maximum="600" Value="200" Foreground="#FF575757"  OpacityMask="Gray"/>
         <Label x:Name="TimeLabel" Content="00:00" Margin="0,0,3,3" VerticalContentAlignment="Center" 
@@ -147,6 +145,10 @@
             </Canvas>
         </Popup>
         <ScrollViewer Margin="0,0,0,42" x:Name="ViewParent" SizeChanged="ViewParent_SizeChanged">
+            <ScrollViewer.Resources>
+                <system:Double x:Key="{x:Static SystemParameters.VerticalScrollBarWidthKey}">10</system:Double>
+                <system:Double x:Key="{x:Static SystemParameters.HorizontalScrollBarHeightKey}">10</system:Double>
+            </ScrollViewer.Resources>
             <Grid x:Name="View">
                 <Grid.ColumnDefinitions>
                 </Grid.ColumnDefinitions>
@@ -154,7 +156,7 @@
                 </Grid.RowDefinitions>
             </Grid>
         </ScrollViewer>
-        <player:MaterialButton x:Name="FunctionButton" Icon="ic_all_inclusive" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,58,5" Height="25" />
+        <player:MaterialButton x:Name="FunctionButton" Icon="ic_all_inclusive" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,58,5" Height="25" Visibility="Hidden"/>
         <Popup x:Name="FunctionPopup" StaysOpen="False" PopupAnimation="Slide" AllowsTransparency="True"
             PlacementTarget="{Binding ElementName=FunctionButton}" IsOpen="False">
             <Canvas Height="150" Width="140" x:Name="FunctionCanvas">

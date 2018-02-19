@@ -1,5 +1,4 @@
 ﻿using Player.Events;
-using Player.Enums;
 using Player.Getters;
 using Player.Types;
 using Player.User;
@@ -32,10 +31,7 @@ namespace Player
         public event EventHandler<MediaEventArgs> MoveRequested;
         public event EventHandler<MediaEventArgs> ArtworkClicked;
         public event EventHandler<MediaEventArgs> SomethingChanged;
-        public new bool Equals(object obj)
-        {
-            try { return (obj as MediaView).Media.Path.Equals(Media.Path); } catch (NullReferenceException) { return false; }
-        }
+
         public int GetIndex(MediaView[] array)
         {
             for (int i = 0; i < array.Length; i++) { if (Equals(array[i])) return i; }
@@ -48,8 +44,8 @@ namespace Player
                
                 Artwork.Margin = M.MediaView.Artwork(value);
                 TitleLabel.Margin = M.MediaView.TitleLabel(value);
-                Height = S.MediaView.Self(value).h;
-                Width = S.MediaView.Self(value).w;
+                Height = S.MediaView.Self(value).Height;
+                Width = S.MediaView.Self(value).Width;
                 Artwork.Height = S.MediaView.Artwork(value).h;
                 Artwork.Width = S.MediaView.Artwork(value).w;
                 TitleLabel.Width = S.MediaView.TitleLabel(value);
@@ -81,7 +77,7 @@ namespace Player
             }
         }
         public Theme activeTheme = Theme.Get();
-        public Media Media;
+
         public double Progress { get => ProgressBar1.Value; set => ProgressBar1.Value = value; }
         public double Max { get => ProgressBar1.Maximum; set => ProgressBar1.Maximum = value; }
         public MediaView()
@@ -101,8 +97,7 @@ namespace Player
                 if (ClickCount == 2)
                 {
                     //ClickTimer.Stop();
-                    ArtworkClicked?.Invoke(this, new MediaEventArgs() { Sender = this });
-                    SomethingChanged.Invoke(this, new MediaEventArgs() { Sender = this });
+                    ArtworkClicked?.Invoke(this, null);
                 }
             }
             if (e.RightButton == MouseButtonState.Pressed)
@@ -113,20 +108,16 @@ namespace Player
                 OtherPopup.StaysOpen = false;
             }
         }
-
-        Random rand;
-        public MediaView(Media media, Preferences pref, ref Random rand)
+        public long MediaLength { get; set; }
+        public MediaView(Preferences pref)
         {
             viewMode = (MediaViewMode)pref.TileScheme;
             InitializeComponent();
-            this.rand = rand;
             Artwork.MouseDown += Artwork_MouseUp;
             TitleLabel.MouseDown += Artwork_MouseUp;
             //MoveButton.MouseUp += (sender, e) => MoveRequested?.Invoke(this);
-            Media = media;
-            TitleLabel.Content = media.Name;
             ActiveTheme = pref.TileTheme;
-            ProgressBar1.Maximum = media.Length != 0 ? media.Length : 1;
+            ProgressBar1.Maximum = MediaLength != 0 ? MediaLength : 1;
             ProgressBar1.Visibility = pref.TileProgress ? Visibility.Visible : Visibility.Hidden;
             IsPlaying = false;
             FontFamily = pref.TileFont;
@@ -135,72 +126,34 @@ namespace Player
             Settings = pref;
         }
         System.Windows.Forms.Timer ClickTimer = new System.Windows.Forms.Timer() { Enabled = true, Interval = 600 };
-        private void Timer1_Tick(object sender, System.EventArgs e)
+        private void Timer1_Tick(object sender, EventArgs e)
         {
             ClickCount = 0;
             ClickTimer.Enabled = false;
         }
-        public async void UserControl_Loaded(object sender, RoutedEventArgs e)
+        public void UserControl_Loaded(object sender, RoutedEventArgs e)
         {
-            if (Media != null) Artwork.Source = Media.Artwork;
-            ProgressBar1.Visibility = Visibility.Hidden;
-            Artwork.Visibility = Visibility.Hidden;
-            ProgressBar ProgressBar2 = new ProgressBar()
-            {
-                IsIndeterminate = true,
-                Margin = Artwork.Margin,
-                Height = Artwork.Height,
-                Width = Artwork.Width,
-                Background = Theming.ToBrush(Colors.Transparent),
-                HorizontalAlignment = HorizontalAlignment.Left,
-                VerticalAlignment = VerticalAlignment.Top,
-                Foreground = ActiveTheme.ContextBrush
-            };
-            Grid.Children.Add(ProgressBar2);
             if (ViewMode != MediaViewMode.Compact)
             {
                 var opa = new DoubleAnimation()
                 {
                     From = 0,
-                    To = Settings.Orientation == 0 ? S.MediaView.Self(ViewMode).h : S.MediaView.Self(viewMode).w,
-                    Duration = TimeSpan.FromMilliseconds(1000),
-                    By = 1,
-                    AccelerationRatio = 1
+                    To = Settings.Orientation == 0 ? S.MediaView.Self(ViewMode).Height : S.MediaView.Self(viewMode).Width,
+                    SpeedRatio = 0.7,
+                    DecelerationRatio = 1
                 };
                 Storyboard.SetTarget(opa, OutputCanvas);
                 Storyboard.SetTargetProperty(opa, new PropertyPath(Settings.Orientation == 0? HeightProperty: WidthProperty));
-                var sb2 = new Storyboard() { AutoReverse = false };
                 sb2.Children.Add(opa);
                 sb2.Begin();
-                await Task.Delay(1000);
-                sb2.Stop();
-                sb2 = null;
-                
-                if (rand != null) await Task.Delay(rand.Next(500, 2000));
-                var fade = new DoubleAnimation()
-                {
-                    From = 0,
-                    To = 1,
-                    Duration = TimeSpan.FromMilliseconds(1000)
-                };
-
-                Storyboard.SetTarget(fade, Artwork);
-                Storyboard.SetTargetProperty(fade, new PropertyPath(OpacityProperty));
-
-                var sb1 = new Storyboard() { AutoReverse = false };
-                sb1.Children.Add(fade);
-                Artwork.Visibility = Visibility.Visible;
-                sb1.Begin();
-                Grid.Children.RemoveAt(Grid.Children.Count - 1);
-                await Task.Delay(1000);
-                sb1.Stop();
-                ProgressBar2 = null;
-                sb1 = null;
-                fade = null;
+                sb2.Completed += Sb2_Completed;
             }
             ProgressBar1.Visibility = IsPlaying ? Visibility.Visible : Visibility.Hidden;
             ActiveTheme = activeTheme;
         }
+
+        Storyboard sb2 = new Storyboard() { AutoReverse = false };
+        private void Sb2_Completed(object sender, EventArgs e) => sb2 = null;
 
         private void OtherPopup_Opened(object sender, EventArgs e)
         {

@@ -55,20 +55,5 @@
             <Setter Property="Stylus.IsPressAndHoldEnabled" Value="false"/>
             <Setter Property="Template" Value="{StaticResource SliderHorizontal}"/>
         </Style>
-
-        <Style x:Key="Test" TargetType="{x:Type local:MainUI}">
-            <Setter Property="Width" Value="140"/>
-            <Setter Property="MinWidth" Value="70"/>
-            <Setter Property="MaxWidth" Value="535"/>
-            <Setter Property="Height" Value="40"/>
-            <Setter Property="MinHeight" Value="30"/>
-            <Setter Property="MaxHeight" Value="60"/>
-            <Setter Property="Switchment" Value="True" />
-            <Style.Triggers>
-                <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Opacity" Value="0.5"/>
-                </Trigger>
-            </Style.Triggers>
-        </Style>
     </Application.Resources>
 </Application>

@@ -2,7 +2,6 @@
 using Player.Events;
 using Player.Getters;
 using Player.Types;
-using Player.User;
 using System;
 using System.Windows;
 using System.Windows.Input;
@@ -19,7 +18,6 @@ namespace Player
         public event EventHandler<MediaEventArgs> SaveRequested;
         public event EventHandler<MediaEventArgs> PreviousTagRequested;
         public event EventHandler<MediaEventArgs> NextTagRequested;
-        new public MediaView Parent { get; set; }
         bool IsDigitsOnly(string str)
         {
             for (int i = 0; i < str.Length; i++)
@@ -39,10 +37,10 @@ namespace Player
             TrackBox.Background = Theming.ToBrush(Colors.White);
         }
 
-        TagLib.File MainFile;
-        public void Load(ref MediaView RefToParent)
+        public TagLib.File MainFile;
+        public void Load(Media RefToMedia)
         {
-            media = RefToParent.Media;
+            media = RefToMedia;
             MainFile = TagLib.File.Create(media.Path);
             var t = MainFile.Tag;
             TitleBox.Text = t.Title;
@@ -60,7 +58,6 @@ namespace Player
             CommentBox.Text = t.Comment;
             ArtworkImage.Source = media.Artwork;
             _Artwork = Image.ToImage(media.Artwork);
-            Parent = RefToParent;
             Show();
         }
         BitmapImage _Artwork;
@@ -102,13 +99,13 @@ namespace Player
 
                 };
             }
-            SaveRequested.Invoke(this, new MediaEventArgs() { File = MainFile, Sender = Parent });
-            Close();
+            SaveRequested?.Invoke(this, new MediaEventArgs() { File = MainFile });
+            CancelButton_Click(this, null);
         }
 
-        private void CancelButton_Click(object sender, RoutedEventArgs e) => Close();
+        private void CancelButton_Click(object sender, RoutedEventArgs e) => Hide();
 
-        private void Grid_MouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        private void Grid_MouseDown(object sender, MouseButtonEventArgs e)
         {
             try { DragMove(); } catch (Exception) { }
         }
@@ -126,13 +123,13 @@ namespace Player
         private void MaterialButton_MouseUp(object sender, EventArgs e)
         {
             SaveClick(this, null);
-            PreviousTagRequested?.Invoke(this, new MediaEventArgs() { Sender = Parent });
+            PreviousTagRequested?.Invoke(this, null);
         }
 
         private void MaterialButton_MouseUp_1(object sender, EventArgs e)
         {
             SaveClick(this, null);
-            NextTagRequested?.Invoke(this, new MediaEventArgs() { Sender = Parent });
+            NextTagRequested?.Invoke(this, null);
         }
 
         private void LyricsProviderBox_Checked(object sender, RoutedEventArgs e)

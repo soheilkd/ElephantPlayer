@@ -29,7 +29,7 @@
                         <ComboBoxItem Content="High"/>
                         <ComboBoxItem Content="Rasman High"/>
                         <ComboBoxItem Content="Namusan High"/>
-                        <ComboBoxItem Content="Jane kordlu"/>
+                        <ComboBoxItem Content="Kordlui (vahshi)"/>
                         <ComboBoxItem Content="Asan ra nadare"/>
                         <ComboBoxItem Content="zire delam"/>
                         <ComboBoxItem Content="vokh"/>
@@ -46,7 +46,6 @@
                             <ComboBoxItem Content="Blue" />
                         </ComboBox.Items>
                     </ComboBox>
-                    <CheckBox x:Name="SearchToggle" VerticalAlignment="Top" HorizontalAlignment="Left" Content="Search Box" FontSize="15" Margin="10,93,0,0"/>
                 </Grid>
             </TabItem>
             <TabItem Header="Playback" Padding="12, 3">

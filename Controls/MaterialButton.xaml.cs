@@ -56,7 +56,7 @@ namespace Player.Controls
         public MaterialButton() => InitializeComponent();
         public void UXMouseDown(object sender, MouseButtonEventArgs e)
         {
-            MainEllipse.StrokeThickness = 3;
+            MainEllipse.StrokeThickness = 2;
         }
         public void UXMouseUp(object sender, MouseButtonEventArgs e)
         {

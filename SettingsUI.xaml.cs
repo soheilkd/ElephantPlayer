@@ -38,8 +38,6 @@ namespace Player
         {
             Settings = new Preferences();
             Reload();
-            SearchToggle.Checked += AnySettingChanged;
-            SearchToggle.Unchecked += AnySettingChanged;
             TileProgressToggle.Checked += AnySettingChanged;
             TileProgressToggle.Unchecked += AnySettingChanged;
             TileFontCombo.SelectionChanged += AnySettingChanged;
@@ -60,7 +58,6 @@ namespace Player
         private void AnySettingChanged(object sender, EventArgs e)
         {
             Settings.PlayMode = PlayModeCombo.SelectedIndex;
-            Settings.Search = SearchToggle.IsChecked.Value;
             Settings.TileFontIndex = TileFontCombo.SelectedIndex;
             Settings.TileFontSize = TileFontSizeNumeric.Value;
             Settings.TileProgress = TileProgressToggle.IsChecked.Value;
@@ -135,7 +132,6 @@ namespace Player
         public int MainKey { get; set; }
         public int TileFontIndex { get; set; }
         public int TileScheme { get; set; }
-        public bool Search { get; set; }
         public bool TileProgress { get; set; }
         public double TileFontSize { get; set; }
         public int ViewMode { get; set; }
@@ -151,7 +147,6 @@ namespace Player
             MainKey = 0,
             MainThemeIndex = 1,
             PlayMode = 3,
-            Search = false,
             TileFontIndex = 2,
             TileFontSize = 14,
             TileProgress = true,
@@ -173,9 +168,6 @@ namespace Player
                             MainThemeIndex = int.Parse(reader.GetAttribute("Theme"));
                             LatencyIndex = int.Parse(reader.GetAttribute("Latency"));
                             ViewMode = int.Parse(reader.GetAttribute("ViewMode"));
-                            break;
-                        case "Search":
-                            Search = reader.GetAttribute("Enabled") == "true";
                             break;
                         case "Playback":
                             PlayMode = int.Parse(reader.GetAttribute("Mode"));
@@ -219,12 +211,6 @@ namespace Player
             writer.WriteEndAttribute();
             writer.WriteStartAttribute("ViewMode");
             writer.WriteValue(ViewMode);
-            writer.WriteEndAttribute();
-            writer.WriteEndElement();
-
-            writer.WriteStartElement("Search");
-            writer.WriteStartAttribute("Enabled");
-            writer.WriteValue(Search);
             writer.WriteEndAttribute();
             writer.WriteEndElement();
 

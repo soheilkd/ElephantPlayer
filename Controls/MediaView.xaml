@@ -7,12 +7,12 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:Player"
              xmlns:materialicons="clr-namespace:MaterialIcons;assembly=MaterialIcons"
-             mc:Ignorable="d" Height="170" Width="139"
+             mc:Ignorable="d" Height="130" Width="100"
              Loaded="UserControl_Loaded"
              x:Name="OutputCanvas">
     <Border  Background="#F0F0F0F0" x:Name="MainBorder" CornerRadius="3">
         <Grid x:Name="Grid">
-            <Image x:Name="Artwork" Width="135" Height="135" Source="pack://siteoforigin:,,,/Resources/MusicArtwork.png" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="2, 0, 0, 0"/>
+            <Image x:Name="Artwork" Width="100" Height="100" Source="pack://siteoforigin:,,,/Resources/MusicArtwork.png" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="2, 0, 0, 0"/>
             <ProgressBar x:Name="ProgressBar1" VerticalAlignment="Bottom" BorderBrush="{x:Null}" Height="6" BorderThickness="0" Margin="2,0,2,1" Background="{x:Null}" />
             <Border x:Name="SubBorder" BorderThickness="1.5" BorderBrush="Black" CornerRadius="3" />
             <Label x:Name="TitleLabel" Content="Song Title" HorizontalAlignment="Left" VerticalAlignment="Top" Width="135" Margin="0,132,0,0"/>

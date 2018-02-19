@@ -1,8 +1,8 @@
 ﻿using Player.Controls;
-using Player.Enums;
 using Player.Events;
 using Player.Extensions;
 using Player.InstanceManager;
+using Player.Management;
 using Player.Taskbar;
 using Player.Types;
 using Player.User;
@@ -59,6 +59,7 @@ namespace Player
     }
     public partial class MainUI : Window
     {
+        MediaManager Manager = new MediaManager() { Preferences = new Preferences() };
         #region Window & Mini Interface
 
         private List<MaterialButton> MainSegoeButtons = new List<MaterialButton>();
@@ -66,22 +67,22 @@ namespace Player
         public MainUI()
         {
             InitializeComponent();
-            MainSettings.Reload();
+            Manager.Preferences = MainSettings;
+            Manager.Change += Manager_Change;
             App.NewInstanceRequested += App_NewInstanceRequested;
             Loaded += MainUI_Loaded;
             var args = Environment.GetCommandLineArgs();
             if (args.Length != 0)
                 Load(args, true);
         }
-
-        private List<MediaView> MediaViews = new List<MediaView>();
+        
         ushort UpdaterLatency = 0;
         TrayControl TrayController = new TrayControl();
         private void MainUI_Loaded(object sender, RoutedEventArgs e)
         {
             #region Initializing Controls
             TrayController.SwitchViewClicked += ContextSwitchView;
-            TrayController.ClearViewClicked += (_, __) => { MediaViews.Clear(); RebuildView(new List<UIElement>(), new Size(1, 1)); GC.Collect(); GC.WaitForPendingFinalizers(); };
+            TrayController.ClearViewClicked += (_, __) => { Manager.Clear(); RebuildView(new List<UIElement>(), new Size(1, 1));};
             TrayController.SettingsClicked += (_, __) => SettingsUI.Show();
             TrayController.CallGCClicked += (_, __) => { GC.Collect(); GC.WaitForPendingFinalizers(); };
             TrayController.ExitClicked += (_, __) => UserExiting(_, null);
@@ -100,9 +101,6 @@ namespace Player
             NextButton.Click += (_, __) => Play(PlayPara.Next);
             PreviousButton.Click += (_, __) => Play(PlayPara.Prev);
             FunctionButton.MouseUp += (_, __) => FunctionPopup.IsOpen = true;
-            UniversalMetaEditor.SaveRequested += MainUI_TagSaveRequested1;
-            UniversalMetaEditor.PreviousTagRequested += MainUI_PreviousTagRequested;
-            UniversalMetaEditor.NextTagRequested += MainUI_NextTagRequested;
             #endregion
             ElementTimer.Elapsed += ElementTimer_Elapsed;
             Keyboard.KeyDown += Keyboard_KeyDown;
@@ -132,9 +130,47 @@ namespace Player
 
             SettingsUI.SettingsChanged += SettingsChanged;
             SettingsUI.PlaybackSettingsChanged += SettingsUI_PlaybackSettingsChanged;
-            ActiveViewMode = (ViewMode)MainSettings.ViewMode;
             UserExperience();
-           
+        }
+
+        private void Manager_Change(object sender, ManagementChangeEventArgs e)
+        {
+            switch (e.Change)
+            {
+                case ManagementChange.EditingTag:
+                    var pos = PositionSlider.Value;
+                    Player.Stop();
+                    Player.Source = null;
+                    Thread.Sleep(10);
+                    bool saven = false;
+                    while (!saven)
+                    {
+                        try { e.MediaChanges.File.Save(); saven = true; }
+                        catch (IOException) { Thread.Sleep(100); }
+                    }
+                    Manager.Reload(-1);
+                    Play(Manager.CurrentlyPlaying);
+                    ForcePositionChange(pos, true);
+                    break;
+                case ManagementChange.InterfaceUpdate:
+                    RebuildView();
+                    break;
+                case ManagementChange.MediaUpdate:
+                    break;
+                case ManagementChange.Crash:
+                    break;
+                case ManagementChange.PopupRequest:
+                    ActivePopup = e.MediaChanges.Sender;
+                    OtherPopup.IsOpen = true;
+                    break;
+                case ManagementChange.ArtworkClick:
+                    Play(e.MediaChanges.Index);
+                    break;
+                case ManagementChange.SomethingHappened:
+                    break;
+                default:
+                    break;
+            }
         }
 
         private void ElementTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
@@ -165,24 +201,17 @@ namespace Player
             MainSettings = e.NewSettings;
             ReloadBrush();
             CurrentPlayMode = (PlayMode)e.NewSettings.PlayMode;
-            SearchEnabled = e.NewSettings.Search;
-            if (e.NewSettings.Search)
-                SearchExpander.Visibility = Visibility.Visible;
-            else
-            {
-                SearchExpander.IsExpanded = false;
-                SearchExpander.Visibility = Visibility.Hidden;
-            }
-
-            for (int i = 0; i < MediaViews.Count; i++)
-                MediaViews[i].Change(e);
-            MinHeight = Styling.XAML.Size.MediaView.Self((MediaViewMode)MainSettings.TileScheme).h + 100;
-            MinWidth = Styling.XAML.Size.MediaView.Self((MediaViewMode)MainSettings.TileScheme).w + 30;
+            Manager.ChangeSettings(e.NewSettings);
+            MinHeight = Styling.XAML.Size.MediaView.Self((MediaViewMode)MainSettings.TileScheme).Height + 100;
+            MinWidth = Styling.XAML.Size.MediaView.Self((MediaViewMode)MainSettings.TileScheme).Width + 30;
             RebuildView();
+
         }
         private void FileDrop(object sender, DragEventArgs e)
         {
-            if (e.Data.GetDataPresent(DataFormats.FileDrop)) Load((string[])e.Data.GetData(DataFormats.FileDrop), false);
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+                Load((string[])e.Data.GetData(DataFormats.FileDrop), false);
+            RebuildView();
         }
         private void Keyboard_KeyUp(object sender, KeyPressEventArgs e)
         {
@@ -228,67 +257,47 @@ namespace Player
                     PositionSlider.Maximum = TimeSpan.TotalMilliseconds;
                     PositionSlider.SmallChange = 1 * PositionSlider.Maximum / 100;
                     PositionSlider.LargeChange = 5 * PositionSlider.Maximum / 100;
-                    try { CurrentlyPlaying.Max = PositionSlider.Maximum; } catch (NullReferenceException) { }
+                    try { Manager.CurrentlyPlayingView.Max = PositionSlider.Maximum; } catch (NullReferenceException) { }
                 }
             PositionSlider.Value = Player.Position.TotalMilliseconds;
             TimeLabel.Content = ConvertTime(Player.Position);
-            (CurrentlyPlaying ?? null).Progress = PositionSlider.Value;
+            (Manager.CurrentlyPlayingView ?? null).Progress = PositionSlider.Value;
             if (PositionSlider.Value >= PositionSlider.Maximum - 250)
                 Play(PlayPara.Next);
             goto UX;
         }
         #endregion
         #region Variables
-        public static DependencyProperty SwitchmentDependency =
-            DependencyProperty.Register("Switchment", typeof(bool), typeof(MainUI), new PropertyMetadata(false));
-        public bool Switchment { get => (bool)GetValue(SwitchmentDependency); set => SetValue(SwitchmentDependency, value); }
-        private List<GroupView> GroupViews = new List<GroupView>();
+        private bool switchment = false;
+        private bool Switchment
+        {
+            get => switchment;
+            set
+            {
+                switchment = value;
+                FunctionButton.Visibility = value ? Visibility.Hidden : Visibility.Visible;
+                MinHeight = value? 75:
+                MaxHeight = 75;
+                MinWidth = 160;
+                MaxWidth = 500;
+                MainGrid.Children.Remove(ViewParent);
+            }
+        }
         private double LastWidth;
         private double LastHeight;
         private double LastLeft;
         private System.Timers.Timer ElementTimer = new System.Timers.Timer(250) { AutoReset = false };
-        private ViewMode activeViewMode;
-        private ViewMode ActiveViewMode { get => activeViewMode; set
+        private ViewMode ActiveViewMode
+        {
+            get => Manager.ActiveViewMode;
+            set
             {
-                activeViewMode = value;
-                if (value == ViewMode.Singular)
-                {
-                    for (int i = 0; i < GroupViews.Count; i++)
-                    {
-                        GroupViews[i].Items.Clear();
-                    }
-                    GroupViews.Clear();
-                    RebuildView(MediaViews, new Size()
-                    {
-                        Height = Styling.XAML.Size.MediaView.Self((MediaViewMode)MainSettings.TileScheme).h,
-                        Width = Styling.XAML.Size.MediaView.Self((MediaViewMode)MainSettings.TileScheme).w
-                    });
-                }
-                else
-                {
-                    RebuildView(new List<GroupView>(), new Size(1, 1));
-                    GroupViews.Clear();
-                    for (int i = 0; i < MediaViews.Count; i++)
-                    {
-                        int index = -1;
-                        for (int j = 0; j < GroupViews.Count; j++)
-                            if (GroupViews[j].DoesMatch(MediaViews[i].Media, ActiveViewMode))
-                                index = j;
-                        if (index == -1)
-                        {
-                            GroupViews.Add(new GroupView(MediaViews[i], MainSettings.TileTheme, ActiveViewMode));
-                        }
-                        else
-                        {
-                            GroupViews[index].Add(MediaViews[i]);
-                        }
-                    }
-                    RebuildView(GroupViews, Styling.XAML.Size.GroupView.Self);
-                }
-            } }
+                Manager.ActiveViewMode = value;
+                RebuildView();
+            }
+        }
         private double LastTop;
         private bool FullScreen = false;
-        private bool SearchEnabled;
         private int ViewRows = 0;
         private int ViewColumns = 0;
         private int CapableColumns = 0;
@@ -298,7 +307,6 @@ namespace Player
         private Preferences MainSettings = new Preferences(true);
         private TimeSpan TimeSpan;
         private PlayMode CurrentPlayMode = PlayMode.RepeatAll;
-        private MediaView CurrentlyPlaying = new MediaView();
         private Random Shuffle = new Random(0);
         private Random MediaViewRandom = new Random(100);
         private Boolean UserChangingPosition = false;
@@ -307,18 +315,11 @@ namespace Player
         private WindowState _State;
         private User.Keyboard Keyboard = new User.Keyboard();
         private (int mins, int secs) TimeConvertion;
-        private MetaEditor UniversalMetaEditor = new MetaEditor();
-        private LyricsView UniversalLyricsView = new LyricsView();
 
         private int RebuildHeight;
         private int RebuildWidth;
         #endregion
         #region Media Controls
-        void MediaArtworkClicked(object sender, MediaEventArgs e)
-        {
-            if (CurrentlyPlaying == sender) PlayPauseButtonClick(this, null);
-            else Play(e.Sender);
-        }
         void PositionChanged(object sender, Routed e)
         {
             if (UserChangingPosition) Player.Position = new TimeSpan(0, 0, 0, 0, PositionSlider.Value.ToInt());
@@ -409,11 +410,6 @@ namespace Player
                 UserResizingWindow = false;
             }
         }
-        void Med_PlayRequested(MediaView sender)
-        {
-            if (CurrentlyPlaying.Equals(sender)) PlayPauseButtonClick(this, null);
-            else Play(sender);
-        }
         void SearchBoxEnter(object sender, KeyEventArgs e)
         {
             /*if (e.Key == Key.Enter)
@@ -428,8 +424,6 @@ namespace Player
                 }
             }*/
         }
-        void ExpandSearch(object sender, RoutedEventArgs e) => View.Margin = new Thickness(0, 46, 0, 60);
-        void CollapseSearch(object sender, RoutedEventArgs e) => View.Margin = new Thickness(0, 26, 0, 60);
         #endregion
         #region Methods
         private void ForcePositionChange(double ms, bool Seek = false)
@@ -445,22 +439,19 @@ namespace Player
             TimeConvertion.secs = time.TotalSeconds.ToInt() % 60;
             return $"{TimeConvertion.mins}:{(TimeConvertion.secs.ToString().Length == 1 ? $"0{TimeConvertion.secs}" : TimeConvertion.secs.ToString())}";
         }
-        private void Play(MediaView media)
+        private void Play(int index) => Play(Manager.Next(index));
+        private void Play(Media media)
         {
-            for (int i = 0; i < MediaViews.Count; i++)
-                MediaViews[i].IsPlaying = false;
+            Manager.Play(media);
             PositionSlider.Value = 0;
-            CurrentlyPlaying = media;
             PlayPauseButton.Icon = I.ic_pause;
-            Player.Source = new Uri(media.Media.Path);
+            Player.Source = new Uri(media.Path);
             Player.Play();
-            Title = "Player - " + CurrentlyPlaying.Media.Name;
-            media.IsPlaying = true;
+            Title = "Player - " + media.Name;
             SwitchMode();
         }
         private void Play(PlayPara para)
         {
-            
             if (para == PlayPara.Prev && PositionSlider.Value >= 10000)
             {
                 ForcePositionChange(0, true);
@@ -468,27 +459,23 @@ namespace Player
             }
             else
             {
-                MediaView media = MediaViews[0];
-                switch (CurrentPlayMode)
-                {
-                    case PlayMode.Single: PositionSlider.Value = 0; Player.Pause(); return;
-                    case PlayMode.RepeatOne: Play(CurrentlyPlaying); break;
-                    case PlayMode.Shuffle: Play(MediaViews[Shuffle.Next(0, MediaViews.Count)]); break;
-                    case PlayMode.RepeatAll: Play(MediaViews[GetIndex(para, CurrentlyPlaying)]); break;
-                    default: break;
-                }
+                if (para == PlayPara.Next) Play(Manager.Next());
+                else if (para == PlayPara.Prev) Play(Manager.Previous());
+                else Play(Manager.CurrentlyPlaying);
             }
         }
         private void SwitchMode(WindowMode mode = WindowMode.Auto)
         {
-            if (mode == WindowMode.Default) RebuildView();
+            if (Switchment) return;
+            if (mode == WindowMode.Default)
+                RebuildView();
             if (mode == WindowMode.Auto)
             {
-                switch (CurrentlyPlaying.Media.MediaType)
+                switch (Manager.CurrentlyPlaying.MediaType)
                 {
-                    case Media.Type.Music: SwitchMode(WindowMode.Default); break;
-                    case Media.Type.Video: SwitchMode(WindowMode.VideoWithControls); break;
-                    case Media.Type.NotMedia: break;
+                    case MediaType.Music: SwitchMode(WindowMode.Default); break;
+                    case MediaType.Video: SwitchMode(WindowMode.VideoWithControls); break;
+                    case MediaType.NotMedia: break;
                     default: break;//
                 }
                 return;
@@ -498,8 +485,6 @@ namespace Player
             TimeLabelBorder.Visibility = MediaControlsBorder.Visibility;
             var MainControlsHidden = mode != WindowMode.Default;
             ViewParent.Visibility = MainControlsHidden ? Visibility.Hidden : Visibility.Visible;
-            SearchExpander.Visibility = MainControlsHidden || !SearchEnabled ? Visibility.Hidden : Visibility.Visible;
-            textBox1.Visibility = MainControlsHidden ? Visibility.Hidden : Visibility.Visible;
             Player.Visibility = MainControlsHidden ? Visibility.Visible : Visibility.Hidden;
             var VideoControlsVisibility = mode == WindowMode.VideoWithoutControls ? Visibility.Hidden : Visibility.Visible;
             PositionSlider.Visibility = VideoControlsVisibility;
@@ -514,7 +499,8 @@ namespace Player
             FunctionButton.Visibility = VideoControlsVisibility;
             ReturnButton.Visibility = VideoControlsVisibility == Visibility.Hidden || !MainControlsHidden ? Visibility.Hidden : Visibility.Visible;
           
-            if (CurrentlyPlaying.Media != null) VideoButton.Visibility = !MainControlsHidden && CurrentlyPlaying.Media.MediaType == Media.Type.Video ? Visibility.Visible : Visibility.Hidden;
+            if (Manager.CurrentlyPlaying != null)
+                VideoButton.Visibility = !MainControlsHidden && Manager.CurrentlyPlaying.MediaType == MediaType.Video ? Visibility.Visible : Visibility.Hidden;
             else VideoButton.Visibility = Visibility.Hidden;
             window.Cursor = (VideoControlsVisibility == Visibility.Hidden && FullScreen) ? Cursors.None : Cursors.Arrow;
             if (MainControlsHidden)
@@ -530,115 +516,22 @@ namespace Player
             }
             Topmost = VideoControlsVisibility == Visibility.Hidden;
         }
-        private void Add(Media media)
-        {
-                MediaViews.Add(new MediaView(media, MainSettings, ref MediaViewRandom));
-                MediaViews[MediaViews.Count - 1].ArtworkClicked += MediaArtworkClicked;
-                MediaViews[MediaViews.Count - 1].PopupRequested += MainUI_PopupRequested;
-            if (ActiveViewMode != ViewMode.Singular)
-            {
-                int index = -1;
-                for (int i = 0; i < GroupViews.Count; i++)
-                    if (GroupViews[i].DoesMatch(media, ActiveViewMode))
-                        index = i;
-                if (index == -1)
-                {
-                    GroupViews.Add(new GroupView(MediaViews[MediaViews.Count - 1], MainSettings.TileTheme, ActiveViewMode));
-                    RebuildView(GroupViews, Styling.XAML.Size.GroupView.Self);
-                }
-                else
-                {
-                    GroupViews[index].Add(MediaViews[MediaViews.Count - 1]);
-                }
-            }
-        }
         private void Load(string[] files, bool autoPlay = true)
         {
-            var c = MediaViews.Count;
-            for (int i = 0; i < files.Length; i++)
-                if (Playlist.IsPlaylist(files[i], out var pL))
-                {
-                    var tr = pL.TracksMedia;
-                    for (int j = 0; j < tr.Length; j++)
-                        Add(tr[j]);
-                }
-            foreach (var item in Media.GetEnum(files))
-                Add(item);
-            RebuildView();
-            if (c < MediaViews.Count && autoPlay)
-                Play(MediaViews[c]);
-        }
-        private void MainUI_PopupRequested(object sender, MediaEventArgs e)
-        {
-            ActivePopup = e.Sender;
-            OtherPopup.IsOpen = true;
-        }
-        private int GetIndex(PlayPara para, MediaView input)
-        {
-            int u = -1;
-            for (int i = 0; i < MediaViews.Count; i++)
-                if (MediaViews[i] == input) u = i;
-            if (u == -1) return -1;
-            switch (para)
-            {
-                case PlayPara.None: return u;
-                case PlayPara.Next: if (u != MediaViews.Count - 1) return u + 1; else return 0;
-                case PlayPara.Prev: if (u != 0) return u - 1; else return MediaViews.Count - 1;
-                default: return -2;
-            }
-
-        }
-        private void MainUI_PreviousTagRequested(object sender, MediaEventArgs e)
-        {
-            ActivePopup = MediaViews[GetIndex(PlayPara.Prev, ActivePopup)];
-            MediaCcRequested(this, null);
-        }
-        private void MainUI_NextTagRequested(object sender, MediaEventArgs e)
-        {
-            ActivePopup = MediaViews[GetIndex(PlayPara.Next, ActivePopup)];
-            MediaCcRequested(this, null);
-        }
-        private void MainUI_TagSaveRequested1(object sender, MediaEventArgs e)
-        {
-            if (e.Sender == CurrentlyPlaying)
-            {
-                var pos = PositionSlider.Value;
-                Player.Stop();
-                Player.Source = null;
-                Thread.Sleep(10);
-                bool saven = false;
-                while (!saven)
-                {
-                    try { e.File.Save(); saven = true; }
-                    catch (IOException) { Thread.Sleep(100); }
-                }
-                e.Sender.Media = new Media(e.Media.Path);
-                e.Sender.Artwork.Source = e.Sender.Media.Artwork;
-                e.Sender.UserControl_Loaded(this, null);
-                Play(CurrentlyPlaying);
-                ForcePositionChange(pos, true);
-            }
-            else
-            {
-                e.File.Save();
-                e.Sender.Media = new Media(e.Media.Path);
-                e.Sender.Artwork.Source = e.Sender.Media.Artwork;
-                e.Sender.UserControl_Loaded(this, null);
-            }
+            var c = Manager.Total;
+            if (Manager.Add(files) && autoPlay)
+                Play(Manager.Next(c));
+            ViewParent.ScrollToEnd();
+            ViewParent.ScrollToRightEnd();
         }
 
-        private void Add(string path) => Add(new Media(path));
         private void RebuildView()
         {
-            if (MainSettings.ViewMode == 0)
-                RebuildView(MediaViews, new Size()
-                {
-                    Height = Styling.XAML.Size.MediaView.Self((MediaViewMode)MainSettings.TileScheme).h,
-                    Width = Styling.XAML.Size.MediaView.Self((MediaViewMode)MainSettings.TileScheme).w
-                });
+            if (Manager.ActiveViewMode == ViewMode.Singular)
+                RebuildView(Manager.MediaViews, Styling.XAML.Size.MediaView.Self((MediaViewMode)MainSettings.TileScheme));
             else
             {
-                RebuildView(GroupViews, Styling.XAML.Size.GroupView.Self);
+                RebuildView(Manager.GroupViews, Styling.XAML.Size.GroupView.Self);
             }
         }
         private void RebuildView<T>(List<T> Collection, Size standardSize) where T : UIElement
@@ -777,7 +670,7 @@ namespace Player
             FunctionPopup.IsOpen = false;
             var (ok, path) = Dialogs.SaveFile("Player Playlist | *.elp", "Playlist", "elp", "Share Playlist");
             if (ok.Value)
-                Playlist.SavePlaylist((from item in MediaViews select item.Media).ToArray(), path);
+                Manager.UploadPlaylist(path);
         }
         private void AboutFunction(object sender, RoutedEventArgs e)
         {
@@ -787,7 +680,8 @@ namespace Player
         {
             FunctionPopup.IsOpen = false;
             var (ok, folder) = Dialogs.RequestDirectory();
-            if (ok) Load(Directory.GetFiles(folder, "*", SearchOption.AllDirectories));
+            if (ok)
+                Load(Directory.GetFiles(folder, "*", SearchOption.AllDirectories));
         }
         private void PlayerCSubtitle(object sender, RoutedEventArgs e)
         {
@@ -808,64 +702,14 @@ namespace Player
             SettingsUI.Show();
             FunctionPopup.IsOpen = false;
         }
-        #endregion
-        #region Views Controller
-        private void MediaLyricsRequested(object sender, RoutedEventArgs e)
-        {
-            UniversalLyricsView.Load(ActivePopup.Media);
-            OtherPopup.IsOpen = false;
-        }
-        private void MediaRemoveRequested(object sender, RoutedEventArgs e)
-        {
-            if (ActiveViewMode == ViewMode.Singular)
-                MediaViews.Remove(ActivePopup);
-            else
-            {
-                for (int i = 0; i < GroupViews.Count; i++)
-                {
-                    if (GroupViews[i].DoesHave(ActivePopup))
-                    {
-                        GroupViews[i].Remove(ActivePopup);
-                        if (GroupViews[i].Items.Count == 0)
-                            GroupViews.RemoveAt(i);
-                        break;
-                    }
-                }
-            }
-            RebuildView();
-        }
-        private void MediaDeleteRequested(object sender, RoutedEventArgs e)
-        {
-            var res = W.MessageBox.Show($"Sure? this file will be deleted:\r\n{ActivePopup.Media.Path}", " ", W.MessageBoxButtons.OKCancel, W.MessageBoxIcon.Warning);
-            if (res != W.DialogResult.OK) return;
-            try { File.Delete(ActivePopup.Media.Path); } catch (Exception f) { Debug.Display(f.Message, "Error"); return; }
-            MediaRemoveRequested(sender, e); 
-        }
-        private void MediaMoveRequested(object sender, RoutedEventArgs e)
-        {
 
-            var (ok, path) = Dialogs.SaveFile(ActivePopup.Media.Filter(), ActivePopup.Media.Name, ActivePopup.Media.GetExt(), "Move To...");
-            if (ok.Value)
-            {
-                try { File.Move(ActivePopup.Media.Path, path); } catch (Exception t) { Debug.Display(t.Message, "Error"); return; }
-                ActivePopup.Media.Path = path;
-            }
-        }
-        private void MediaCopyRequested(object sender, RoutedEventArgs e)
-        {
-
-            var (ok, path) = Dialogs.SaveFile(ActivePopup.Media.Filter(), ActivePopup.Media.Name, ActivePopup.Media.GetExt(), "Copy To...");
-            if (ok.Value)
-            {
-                try { File.Copy(ActivePopup.Media.Path, path); } catch (Exception t) { Debug.Display(t.Message, "Error"); return; }
-            }
-        }
-        private void MediaLocationRequested(object sender, RoutedEventArgs e) => Process.Start("explorer.exe", "/select," + ActivePopup.Media.Path);
-        private void MediaCcRequested(object sender, RoutedEventArgs e)
-        {
-            OtherPopup.IsOpen = false;
-            UniversalMetaEditor.Load(ref ActivePopup);
-        }
+        private void MediaRemoveRequested(object sender, RoutedEventArgs e) { Manager.Remove(ActivePopup); OtherPopup.IsOpen = false; }
+        private void MediaDeleteRequested(object sender, RoutedEventArgs e) { Manager.RequestDelete(ActivePopup); OtherPopup.IsOpen = false; }
+        private void MediaMoveRequested(object sender, RoutedEventArgs e) {Manager.RequestMove(ActivePopup); OtherPopup.IsOpen = false; }
+        private void MediaCopyRequested(object sender, RoutedEventArgs e) { Manager.RequestCopy(ActivePopup); OtherPopup.IsOpen = false; }
+        private void MediaLocationRequested(object sender, RoutedEventArgs e) { Manager.RequestLocation(ActivePopup); OtherPopup.IsOpen = false; }
+        private void MediaLyricsRequested(object sender, RoutedEventArgs e) { Manager.RequestLyrics(ActivePopup); OtherPopup.IsOpen = false; }
+        private void MediaCcRequested(object sender, RoutedEventArgs e) { Manager.RequestMetaEdit(ActivePopup); OtherPopup.IsOpen = false; }
         #endregion
 
         private void SwitchClicked(object sender, RoutedEventArgs e)
