@@ -63,9 +63,9 @@ namespace Player.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        public static System.Drawing.Bitmap Music {
+        public static System.Drawing.Bitmap MusicArtwork {
             get {
-                object obj = ResourceManager.GetObject("Music", resourceCulture);
+                object obj = ResourceManager.GetObject("MusicArtwork", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -113,19 +113,9 @@ namespace Player.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        public static System.Drawing.Bitmap PlayerImage {
+        public static System.Drawing.Bitmap Previous {
             get {
-                object obj = ResourceManager.GetObject("PlayerImage", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        public static System.Drawing.Bitmap Prev {
-            get {
-                object obj = ResourceManager.GetObject("Prev", resourceCulture);
+                object obj = ResourceManager.GetObject("Previous", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -143,19 +133,9 @@ namespace Player.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        public static System.Drawing.Bitmap TaskbarImage {
+        public static System.Drawing.Bitmap VideoArtwork {
             get {
-                object obj = ResourceManager.GetObject("TaskbarImage", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        public static System.Drawing.Bitmap Video {
-            get {
-                object obj = ResourceManager.GetObject("Video", resourceCulture);
+                object obj = ResourceManager.GetObject("VideoArtwork", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

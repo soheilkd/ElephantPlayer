@@ -7,11 +7,13 @@
         <SolidColorBrush x:Key="SliderThumb.MouseOver.Background" Color="#FFDCDCDC"/>
         <ControlTemplate x:Key="SliderThumbHorizontalDefault" TargetType="{x:Type Thumb}">
             <Grid UseLayoutRounding="True" >
-                <Rectangle x:Name="grip" Fill="{TemplateBinding Foreground}"/>
+                <Ellipse Width="13" Height="13" x:Name="grip" Fill="{TemplateBinding Background}" Margin="-2,-3" Stroke="{TemplateBinding Foreground}"  StrokeThickness="2.5"/>
             </Grid>
             <ControlTemplate.Triggers>
                 <Trigger Property="IsMouseOver" Value="true">
                     <Setter Property="Fill" TargetName="grip" Value="Gray"/>
+                    <Setter Property="Width" TargetName="grip" Value="20"/>
+                    <Setter Property="Height" TargetName="grip" Value="20" />
                 </Trigger>
                 <Trigger Property="IsDragging" Value="true">
                     <Setter Property="Fill" TargetName="grip" Value="DarkGray"/>
@@ -31,13 +33,13 @@
                     </Border>
                     <Track x:Name="PART_Track" Grid.Row="1">
                         <Track.DecreaseRepeatButton>
-                            <RepeatButton Command="{x:Static Slider.DecreaseLarge}" Background="{TemplateBinding Foreground}" />
+                            <RepeatButton Height="8" Command="{x:Static Slider.DecreaseLarge}" Background="{TemplateBinding Foreground}" />
                         </Track.DecreaseRepeatButton>
                         <Track.IncreaseRepeatButton>
-                            <RepeatButton Command="{x:Static Slider.IncreaseLarge}" Background="Transparent"/>
+                            <RepeatButton Height="6" Command="{x:Static Slider.IncreaseLarge}" Background="Transparent"/>
                         </Track.IncreaseRepeatButton>
                         <Track.Thumb>
-                            <Thumb x:Name="Thumb" Focusable="False" OverridesDefaultStyle="True" Template="{StaticResource SliderThumbHorizontalDefault}" VerticalAlignment="Stretch" Width="11"/>
+                           <Thumb x:Name="Thumb" Focusable="False" OverridesDefaultStyle="True" Template="{StaticResource SliderThumbHorizontalDefault}" VerticalAlignment="Stretch" Width="16"/>
                         </Track.Thumb>
                     </Track>
                 </Grid>

@@ -18,7 +18,7 @@
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
     <PublishUrl>ftp://localhost/</PublishUrl>
-    <Install>true</Install>
+    <Install>false</Install>
     <InstallFrom>Web</InstallFrom>
     <UpdateEnabled>false</UpdateEnabled>
     <UpdateMode>Foreground</UpdateMode>
@@ -31,7 +31,7 @@
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
     <ApplicationRevision>1</ApplicationRevision>
-    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <ApplicationVersion>1.0.0.1</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
     <BootstrapperEnabled>true</BootstrapperEnabled>
@@ -48,7 +48,7 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
+    <PlatformTarget>x64</PlatformTarget>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>C:\Program Files\soheilkd\Player\</OutputPath>
@@ -56,7 +56,7 @@
     </DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <LangVersion>7.2</LangVersion>
+    <LangVersion>default</LangVersion>
     <DebugSymbols>true</DebugSymbols>
     <Prefer32Bit>false</Prefer32Bit>
     <DocumentationFile>
@@ -65,7 +65,9 @@
     <RunCodeAnalysis>false</RunCodeAnalysis>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <CodeAnalysisIgnoreGeneratedCode>true</CodeAnalysisIgnoreGeneratedCode>
-    <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
+    <GenerateSerializationAssemblies>Auto</GenerateSerializationAssemblies>
+    <CheckForOverflowUnderflow>false</CheckForOverflowUnderflow>
+    <FileAlignment>512</FileAlignment>
   </PropertyGroup>
   <PropertyGroup>
     <StartupObject>Player.App</StartupObject>
@@ -80,7 +82,7 @@
     <ManifestKeyFile>Player_TemporaryKey.pfx</ManifestKeyFile>
   </PropertyGroup>
   <PropertyGroup>
-    <GenerateManifests>true</GenerateManifests>
+    <GenerateManifests>false</GenerateManifests>
   </PropertyGroup>
   <PropertyGroup>
     <TargetZone>LocalIntranet</TargetZone>
@@ -102,16 +104,11 @@
     <AssemblyOriginatorKeyFile>
     </AssemblyOriginatorKeyFile>
   </PropertyGroup>
-  <PropertyGroup>
-    <ApplicationManifest>Properties\app.manifest</ApplicationManifest>
-  </PropertyGroup>
+  <PropertyGroup />
   <ItemGroup>
-    <Reference Include="Gma.System.MouseKeyHook">
-      <HintPath>..\..\..\..\..\Zero One\App\APIs\globalmousekeyhook-vNext\Gma.System.MouseKeyHook.dll</HintPath>
-    </Reference>
     <Reference Include="MaterialIcons, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\MaterialIcons.1.0.3\lib\MaterialIcons.dll</HintPath>
-      <EmbedInteropTypes>False</EmbedInteropTypes>
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>Libraries\MaterialIcons.dll</HintPath>
     </Reference>
     <Reference Include="System">
       <Private>False</Private>
@@ -120,55 +117,43 @@
     <Reference Include="System.Configuration">
       <Private>False</Private>
     </Reference>
-    <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Management" />
     <Reference Include="System.Runtime.Remoting" />
-    <Reference Include="System.Web.Extensions" />
     <Reference Include="System.Windows" />
-    <Reference Include="System.Windows.Forms" />
-    <Reference Include="System.Xml" />
-    <Reference Include="Microsoft.CSharp">
-      <Private>False</Private>
-    </Reference>
     <Reference Include="System.Core">
       <Private>False</Private>
     </Reference>
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="System.Xaml">
       <RequiredTargetFramework>4.0</RequiredTargetFramework>
     </Reference>
-    <Reference Include="taglib-sharp">
-      <HintPath>..\..\..\..\..\Zero One\App\APIs\taglib-sharp-master\taglib-sharp.dll</HintPath>
-    </Reference>
-    <Reference Include="UIAutomationProvider" />
     <Reference Include="PresentationCore">
       <Private>False</Private>
     </Reference>
     <Reference Include="PresentationFramework">
       <Private>False</Private>
     </Reference>
+    <Reference Include="taglib-sharp, Version=2.1.0.0, Culture=neutral, PublicKeyToken=db62eba44689b5b0, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>Libraries\taglib-sharp.dll</HintPath>
+    </Reference>
     <Reference Include="WindowsBase" />
-    <Reference Include="WindowsFormsIntegration" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Code.cs" />
-    <Compile Include="Controls\GroupView.xaml.cs">
-      <DependentUpon>GroupView.xaml</DependentUpon>
+    <Compile Include="Controls\PositionSlider.xaml.cs">
+      <DependentUpon>PositionSlider.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Controls\NumericUpDown.xaml.cs">
-      <DependentUpon>NumericUpDown.xaml</DependentUpon>
-    </Compile>
+    <Compile Include="Hook\Hook.cs" />
+    <Compile Include="Hook\HotKeys.cs" />
+    <Compile Include="Hook\Implementations.cs" />
+    <Compile Include="Hook\WinAPI.cs" />
     <Compile Include="InstanceManager.cs" />
-    <Compile Include="LyricsView.xaml.cs">
-      <DependentUpon>LyricsView.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Controls\MediaView.xaml.cs">
       <DependentUpon>MediaView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="MetaEditor.xaml.cs">
-      <DependentUpon>MetaEditor.xaml</DependentUpon>
+    <Compile Include="MainUI.xaml.cs">
+      <DependentUpon>MainUI.xaml</DependentUpon>
     </Compile>
     <Compile Include="Controls\MaterialButton.xaml.cs">
       <DependentUpon>MaterialButton.xaml</DependentUpon>
@@ -178,52 +163,23 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="SettingsUI.xaml.cs">
-      <DependentUpon>SettingsUI.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="TrayControl.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="TrayControl.Designer.cs">
-      <DependentUpon>TrayControl.cs</DependentUpon>
-    </Compile>
     <Page Include="App.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Controls\GroupView.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Controls\NumericUpDown.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="LyricsView.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Controls\MediaView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="MetaEditor.xaml">
+    <Page Include="Controls\PositionSlider.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="MainUI.xaml">
-      <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Compile Include="MainUI.xaml.cs">
-      <DependentUpon>MainUI.xaml</DependentUpon>
-      <SubType>Code</SubType>
-    </Compile>
     <Page Include="Controls\MaterialButton.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="SettingsUI.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -232,25 +188,12 @@
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Properties\Settings.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Settings.settings</DependentUpon>
-      <DesignTimeSharedInput>True</DesignTimeSharedInput>
-    </Compile>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
       <SubType>Designer</SubType>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <EmbeddedResource Include="TrayControl.resx">
-      <DependentUpon>TrayControl.cs</DependentUpon>
-    </EmbeddedResource>
     <None Include="packages.config" />
-    <None Include="Properties\app.manifest" />
-    <None Include="Properties\Settings.settings">
-      <Generator>PublicSettingsSingleFileGenerator</Generator>
-      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config">
@@ -270,34 +213,55 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Resources\Player.png" />
+    <Resource Include="Resources\Player.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\Taskbar.png" />
+    <Resource Include="Resources\Taskbar.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\MusicArtwork.png" />
+    <Resource Include="Resources\Taskbar.ico">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\VideoArtwork.png" />
+    <Resource Include="Resources\Player.ico">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Resources\Taskbar.ico" />
+    <WCFMetadata Include="Connected Services\" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Resources\Player.ico" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Prev.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Next.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Pause.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Play.png" />
+    <Content Include="Libraries\MaterialIcons.dll" />
+    <Content Include="Libraries\taglib-sharp.dll" />
+    <Content Include="Libraries\WindowsAPICodePack.dll" />
+    <Content Include="Libraries\WindowsAPICodePack.Shell.dll" />
+    <Resource Include="Resources\MusicArtwork.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resources\Next.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resources\Pause.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resources\Play.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resources\Previous.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resources\VideoArtwork.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PreBuildEvent>
+    </PreBuildEvent>
+  </PropertyGroup>
 </Project>
