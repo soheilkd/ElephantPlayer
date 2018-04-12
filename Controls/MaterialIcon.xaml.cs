@@ -48,24 +48,20 @@ namespace Player.Controls
             ((FrameworkElement)FindName(nameof(PART_ContentControl))).DataContext = this;
         }
 
-        public static ResourceDictionary res = new ResourceDictionary()
-        {
-            Source = new Uri(@"pack://application:,,,/Controls/Icons.xaml")
-        };
         private static void OnIconChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             IconType newValue = (IconType)e.NewValue;
             if (newValue == IconType.ic_none)
                 return;
             string str = newValue.ToString();
-            object resource = res[(object)str];
+            object resource = App.IconDictionary[str];
             d.SetValue(IconResourceProperty, resource);
         }
 
         public IconType Icon
         {
             get => (IconType)GetValue(IconProperty);
-            set => SetValue(IconProperty, (object)value);
+            set => SetValue(IconProperty, value);
         }
 
         public object IconResource
