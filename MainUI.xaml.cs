@@ -1,7 +1,7 @@
-﻿using Player.Events;
+﻿using Player.Controls;
+using Player.Events;
 using Player.Extensions;
 using Player.Management;
-using Player.Types;
 using Player.User;
 using System;
 using System.Collections.Generic;
@@ -9,8 +9,9 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media.Animation;
 using Routed = System.Windows.RoutedPropertyChangedEventArgs<double>;
-
+using Forms = System.Windows.Forms;
 namespace Player
 {
     /// <summary>
@@ -18,34 +19,75 @@ namespace Player
     /// </summary>
     public partial class MainUI : Window
     {
-        enum Tabs {Minimal, NowPlaying, Songs, Explore, Meta, Vision, SpaceBuilder, Settings }
+        enum Tabs { NowPlaying, Songs, Vision, SpaceBuilder, Settings }
+
         Preferences P = Preferences.Load();
         MediaManager Manager = new MediaManager();
         List<MediaView> MediaViews = new List<MediaView>();
         Taskbar.Thumb Thumb = new Taskbar.Thumb();
+
+        double Position_Value
+        {
+            get => (double)Resources["Position_Value"];
+            set => Resources["Position_Value"] = value;
+        }
+        double Position_Max
+        {
+            get => (double)Resources["Position_Max"];
+            set => Resources["Position_Max"] = value;
+        }
+        double Position_SmallChange
+        {
+            get => (double)Resources["Position_ChangeS"];
+            set => Resources["Position_ChangeS"] = value;
+        }
+        double Position_LargeChange
+        {
+            get => (double)Resources["Position_ChangeL"];
+            set => Resources["Position_ChangeL"] = value;
+        }
+        System.Windows.Media.ImageSource Art
+        {
+            get => NP_ArtworkImage.Source;
+            set
+            {
+                NP_ArtworkImage.Source = value;
+                MiniArtworkImage.Source = value;
+            }
+        }
+        new string Title
+        {
+            get => (string)Resources["Res_Title"];
+            set => Resources["Res_Title"] = value;
+        }
+        IconType PPIcon
+        {
+            get => PlayPauseButton1.Icon;
+            set
+            {
+                PlayPauseButton1.Icon = value;
+                PlayPauseButton2.Icon = value;
+            }
+        }
+
         public MainUI()
         {
             InitializeComponent(); 
             Manager.Change += Manager_Change;
             App.NewInstanceRequested += App_NewInstanceRequested;
-
-            Pref_BackOpt.IsChecked = P.BackgroundOptimization;
+            
             Pref_Latency.IsChecked = P.HighLatency;
             Pref_IPC.IsChecked = P.IPC;
             Pref_MassLib.IsChecked = P.MassiveLibrary;
             Pref_DoubleValid.IsChecked = P.LibraryValidation;
             Pref_LightWeight.IsChecked = P.LightWeight;
-            Pref_LyrInit.IsChecked = P.LyricsProvider;
             Pref_GC.IsChecked = P.ManualGarbageCollector;
-            Pref_MetaInit.IsChecked = P.MetaInit;
             Pref_MediaRestr.IsChecked = P.Restrict;
-            Pref_SideColl.IsChecked = P.SideBarColl;
             
-            Pref_LiveStr.IsChecked = P.Stream;
             Pref_VisionOrient.IsChecked = P.VisionOrientation;
             Pref_VolBal.IsChecked = P.VolumeSetter;
             Pref_WM.IsChecked = P.WMDebug;
-            Pref_DefaultPathBox.Text = P.DefaultPath;
+
         }
 
         private void App_NewInstanceRequested(object sender, InstanceEventArgs e)
@@ -65,15 +107,14 @@ namespace Player
                 {
                     //Update TimeSpan
                     TimeSpan = Player.NaturalDuration.TimeSpan;
-                    PositionSlider.Maximum = TimeSpan.TotalMilliseconds;
-                    PositionSlider.SmallChange = 1 * PositionSlider.Maximum / 100;
-                    PositionSlider.LargeChange = 5 * PositionSlider.Maximum / 100;
+                    Position_Max = TimeSpan.TotalMilliseconds;
+                    Position_SmallChange = 1 * Position_Max / 100;
+                    Position_LargeChange = 5 * Position_Max / 100;
                 }
-            PositionSlider.Value = Player.Position.TotalMilliseconds;
+            Position_Value = Player.Position.TotalMilliseconds;
             NP_Label5.Content = $"{ConvertTime(Player.Position)}   -    {Manager.CurrentlyPlayingIndex + 1} \\ {Manager.Count} ";
-            if (PositionSlider.Value >= PositionSlider.Maximum - 250)
+            if (Position_Value >= Position_Max - 250)
                 Play(Manager.Next());
-               
             goto UX;
         }
         private async void Manager_Change(object sender, ManagementChangeEventArgs e)
@@ -81,9 +122,10 @@ namespace Player
             switch (e.Change)
             {
                 case ManagementChange.NewMedia:
-                    MediaViews.Add(new MediaView(e.Changes.Index, e.Changes.Media.Title, e.Changes.Media.Artist, e.Changes.Media.MediaType));
+                   MediaViews.Add(new MediaView(e.Changes.Index, Manager[e.Changes.Index].Title, Manager[e.Changes.Index].Artist, Manager[e.Changes.Index].MediaType));
                     QueueListView.Items.Add(MediaViews[MediaViews.Count - 1]);
                     MediaViews[MediaViews.Count - 1].DoubleClicked += MainUI_DoubleClicked;
+                    Window_SizeChanged(this, null);
                     break;
                 case ManagementChange.EditingTag:
                     if (e.Changes.File.Name == Manager.CurrentlyPlaying.Path)
@@ -95,15 +137,6 @@ namespace Player
                         e.Changes.File.Save();
                         Play(Manager[Manager.Find(e.Changes.File.Name)]);
                         Player.Position = pos;
-                        Manager_Change(this, new ManagementChangeEventArgs()
-                        {
-                            Change = ManagementChange.MediaUpdate,
-                            Changes = new MediaEventArgs()
-                            {
-                                Index = Manager.Find(e.Changes.File.Name),
-                                Media = Manager[Manager.Find(e.Changes.File.Name)]
-                            }
-                        });
                     }
                     else
                         e.Changes.File.Save();
@@ -133,16 +166,13 @@ namespace Player
         {
             Play(Manager.Next(e.Index));
         }
-        private void TabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-
-        }
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             Left = P.LastLoc.X;
             Top = P.LastLoc.Y;
-            Width = P.LastSize.Width;
-            Height = P.LastSize.Height;
+            Sizes = P.Sizes;
+            Height = Sizes[0].H;
+            Width = Sizes[0].W;
             if (Environment.GetCommandLineArgs().Length != 0)
                 if (Manager.Add(Environment.GetCommandLineArgs()))
                 {
@@ -151,22 +181,78 @@ namespace Player
                         OrinateVideoUI(true);
                 }
             DraggerTimer.Elapsed += DraggerTimer_Elapsed;
-            UserExperience();
-            Grid_MouseUp(this, null);
             TaskbarItemInfo = Thumb.Info;
             Thumb.NextPressed += (obj, f) => NextButton_Click(obj, f);
             Thumb.PausePressed += (obj, f) => PlayPauseButtonClick(obj, f);
             Thumb.PlayPressed += (obj, f) => PlayPauseButtonClick(obj, f);
             Thumb.PrevPressed += (obj, f) => PreviousButton_Click(obj, f);
+
+            User.Keyboard.KeyDown += Keyboard_KeyDown;
+            User.Keyboard.KeyUp += Keyboard_KeyUp;
+            User.Keyboard.KeyPress += Keyboard_KeyPress;
+            UserExperience();
+        }
+
+        private void Keyboard_KeyPress(object sender, Forms::KeyPressEventArgs e)
+        {
+
+        }
+
+        private void Keyboard_KeyUp(object sender, Forms::KeyEventArgs e)
+        {
+            
+        }
+
+        private async void Keyboard_KeyDown(object sender, Forms::KeyEventArgs e)
+        {
+            if (IsFocused || e.Alt)
+            {
+                switch (e.KeyCode)
+                {
+                    case Forms::Keys.Left:
+                        ForcePositionChange(Position_SmallChange * -1);
+                        await Task.Delay(200);
+                        break;
+                    case Forms::Keys.Right:
+                        ForcePositionChange(Position_SmallChange);
+                        await Task.Delay(200);
+                        break;
+                    case Forms::Keys.Up:
+                        if (Player.Volume >= 1)
+                            break;
+                        Player.Volume += 0.01;
+                        await Task.Delay(50);
+                        break;
+                    case Forms::Keys.Down:
+                        if (Player.Volume <= 0)
+                            break;
+                        Player.Volume -= 0.01;
+                        await Task.Delay(50);
+                        break;
+                    default: break;
+                }
+            }
+            switch (e.KeyCode)
+            {
+                case Forms::Keys.MediaNextTrack:
+                    NextButton_Click(this, null);
+                    break;
+                case Forms::Keys.MediaPreviousTrack:
+                    PreviousButton_Click(this, null);
+                    break;
+                case Forms::Keys.MediaPlayPause:
+                    PlayPauseButtonClick(this, null);
+                    break;
+                case Forms::Keys.MediaStop:
+                    break;
+                default:
+                    break;
+            }
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            P.LastSize = new Size()
-            {
-                Height = Height,
-                Width = Width
-            };
+            P.Sizes = Sizes;
             P.LastLoc = new Point()
             {
                 X = Left,
@@ -179,17 +265,13 @@ namespace Player
 
         private void Play(Media media)
         {
-            if (P.MetaInit)
-                Meta_LoadClick(this, null);
-            if (P.LyricsProvider)
-                Lyrics_LoadClick(this, null);
-            PositionSlider.Value = 0;
-            PlayPauseButton.Icon = MaterialIcons.MaterialIconType.ic_pause;
+            LyricsBox.Text = media.Lyrics;
+            Position_Value = 0;
+            PPIcon = IconType.ic_pause;
             Player.Source = new Uri(media.Path);
             Player.Play();
-            Title = "Player - " + media.Name;
-            NP_ArtworkImage.Source = media.Artwork;
-            NP_Label1.Content = media.Title;
+            Art = media.Artwork;
+            Title = media.Title;
             NP_Label2.Content = media.Artist;
             NP_Label3.Content = media.Name;
             NP_Label4.Content = media.MediaType.ToString();
@@ -207,29 +289,30 @@ namespace Player
 
         private void Window_SizeChanged(object sender, SizeChangedEventArgs e)
         {
-            TabsSpaceBuilderGrid.Width = Width > 365 ? Width - 365 : 1;
+            for (int i = 0; i < MediaViews.Count; i++)
+                MediaViews[i].Width = QueueListView.ActualWidth > 25 ? QueueListView.ActualWidth - 25 : 25;
+            Expander_CollapsAnim.From = Height + 50;
+            Expander_ExpandAnim.To = Height + 50;
+            if (PlayingExpander.IsExpanded)
+                Height = Height + 50;
         }
         
         private void PlayPauseButtonClick(object sender, EventArgs e)
         {
-            if (PlayPauseButton.Icon == MaterialIcons.MaterialIconType.ic_pause)
+            if (PPIcon == IconType.ic_pause)
             {
                 Player.Pause();
-                PlayPauseButton.Icon = MaterialIcons.MaterialIconType.ic_play_arrow;
+                PPIcon = IconType.ic_play_arrow;
                 Thumb.Refresh(false);
             }
             else
             {
                 Player.Play();
-                PlayPauseButton.Icon = MaterialIcons.MaterialIconType.ic_pause;
+                PPIcon = IconType.ic_pause;
                 Thumb.Refresh(true);
             }
         }
         
-        private void Grid_MouseUp(object sender, MouseButtonEventArgs e)
-        {
-
-        }
         private string ConvertTime(TimeSpan time)
         {
             TimeConvertion.mins = (time.TotalSeconds - (time.TotalSeconds % 60)).ToInt() / 60;
@@ -239,8 +322,8 @@ namespace Player
         private void ForcePositionChange(double ms, bool Seek = false)
         {
             UserChangingPosition = true;
-            if (Seek) PositionSlider.Value = ms;
-            else PositionSlider.Value += ms;
+            if (Seek) Position_Value = ms;
+            else Position_Value += ms;
             UserChangingPosition = false;
         }
         async void PositionMouseDown(object sender, MouseButtonEventArgs e)
@@ -253,16 +336,25 @@ namespace Player
                 Player.Play();
                 await Task.Delay(50);
             }
-            PlayPauseButton.Icon = MaterialIcons.MaterialIconType.ic_pause;
+            PPIcon = IconType.ic_pause;
             Player.Play();
             UserChangingPosition = false;
         }
-        void PositionChanged(object sender, Routed e)
+        private void PositionChanged(object sender, Routed e)
         {
-            if (UserChangingPosition) Player.Position = new TimeSpan(0, 0, 0, 0, PositionSlider.Value.ToInt());
+            if (UserChangingPosition)
+            {
+                Player.Position = new TimeSpan(0, 0, 0, 0, Position_Value.ToInt());
+                Position_Value = ((Slider)sender).Value;
+                PositionSlider1.SetResourceReference(Slider.ValueProperty, "Position_Value");
+                PositionSlider2.SetResourceReference(Slider.ValueProperty, "Position_Value");
+            }
         }
         private (int mins, int secs) TimeConvertion;
-
+        private (double W, double H)[] Sizes = new(double, double)[]
+        {
+            (0, 0), (0, 0)
+        };
         #region VideoUI
 
         private double LastWidth, LastHeight, LastLeft;
@@ -281,14 +373,7 @@ namespace Player
 
         public void OrinateVideoUI(bool Enabled)
         {
-            MainTabControl.Margin = Enabled ? new Thickness(0) : new Thickness(0, 0, 0, 18);
-            Topmost = Enabled;
-            WindowStyle = Enabled ? WindowStyle.None : WindowStyle.ThreeDBorderWindow;
-            foreach (TabItem item in MainTabControl.Items)
-                    item.Style = (Style)Resources[Enabled ? "InvisibleTabStyle": "DefaultTabStyle"];
-            if (Enabled && MainTabControl.SelectedIndex != (int)Tabs.Vision)
-                MainTabControl.SelectedIndex = (int)Tabs.Vision;
-            PositionSlider.Visibility = Enabled ? Visibility.Hidden : Visibility.Visible;
+
         }
         private void Player_MouseUp(object sender, MouseButtonEventArgs e) { }
         private void Player_MouseDown(object sender, MouseButtonEventArgs e)
@@ -348,145 +433,30 @@ namespace Player
 
         #endregion
 
-        #region MetaUI
-
-        TagLib.File Meta_CurrentFile;
-        bool IsLoadingMedia = false;
-        private void Meta_LoadClick(object sender, EventArgs e)
-        {
-            try
-            {
-                //var pos = Player.Position;
-                //Player.Stop();
-                //Player.Source = null;
-                Meta_CurrentFile = TagLib.File.Create(Manager.CurrentlyPlaying.Path, TagLib.ReadStyle.None);
-                Meta_AlbumArtistBox.Text = Meta_CurrentFile.Tag.FirstAlbumArtist;
-                Meta_AlbumBox.Text = Meta_CurrentFile.Tag.Album;
-                Meta_ArtistBox.Text = Meta_CurrentFile.Tag.FirstPerformer;
-                Meta_ArtworkImage.Source = Manager.CurrentlyPlaying.Artwork;
-                Meta_CommentBox.Text = Meta_CurrentFile.Tag.Comment;
-                Meta_ComposerBox.Text = Meta_CurrentFile.Tag.FirstComposer;
-                Meta_ConductorBox.Text = Meta_CurrentFile.Tag.Conductor;
-                Meta_CopyrightBox.Text = Meta_CurrentFile.Tag.Copyright;
-                Meta_GenreBox.Text = Meta_CurrentFile.Tag.FirstGenre;
-                Meta_TitleBox.Text = Meta_CurrentFile.Tag.Title;
-                Meta_TrackBox.Text = Meta_CurrentFile.Tag.Track.ToString();
-                Meta_YearBox.Text = Meta_CurrentFile.Tag.Year.ToString();
-
-            }
-            catch(Exception ex)
-            {
-                Debug.Display(ex.Message, ex.Source);
-                throw;
-            }
-        }
-        private void Meta_SaveClick(object sender, EventArgs e)
-        {
-            try
-            {
-                Meta_CurrentFile.Tag.AlbumArtists = new string[] { Meta_AlbumArtistBox.Text };
-                Meta_CurrentFile.Tag.Album = Meta_AlbumBox.Text;
-                Meta_CurrentFile.Tag.Performers = new string[] { Meta_ArtistBox.Text };
-                Meta_CurrentFile.Tag.Pictures = new TagLib.IPicture[] { };
-                Meta_CurrentFile.Tag.Comment = Meta_CommentBox.Text;
-                Meta_CurrentFile.Tag.Composers = new string[] { Meta_ComposerBox.Text };
-                Meta_CurrentFile.Tag.Copyright = Meta_CopyrightBox.Text;
-                Meta_CurrentFile.Tag.Genres = Meta_GenreBox.Text.Split(',');
-                Meta_CurrentFile.Tag.Title = Meta_TitleBox.Text;
-                Meta_CurrentFile.Tag.Track = UInt32.Parse(Meta_TrackBox.Text);
-                Meta_CurrentFile.Tag.Year = UInt32.Parse(Meta_YearBox.Text);
-                Manager_Change(this, new ManagementChangeEventArgs()
-                {
-                    Change = ManagementChange.EditingTag,
-                    Changes = new MediaEventArgs()
-                    {
-                        File = Meta_CurrentFile
-                    }
-                });
-            }
-            catch (Exception ex)
-            {
-                Debug.Display(ex.Message, ex.Source);
-            }
-        }
-
-        #endregion
-
         private void NextButton_Click(object sender, EventArgs e) => Play(Manager.Next());
 
         private void PreviousButton_Click(object sender, EventArgs e)
         {
-            if (PositionSlider.Value > PositionSlider.Maximum / 100 * 10)
+            if (Position_Value > Position_Max / 100 * 10)
                 ForcePositionChange(0, true);
             else
                 Play(Manager.Previous());
         }
-        #region LyricsUI
-        private void Lyrics_LoadClick(object sender, EventArgs e) => Lyrics_FloatBox.Text = Manager.CurrentlyPlaying.Lyrics;
-        #endregion
 
-        async void window_KeyDown(object sender, KeyEventArgs e)
+        private void LyricsButton_Click(object sender, EventArgs e)
         {
-            switch (e.Key)
-            {
-                case Key.Left:
-                    while(e.KeyStates == KeyStates.Down)
-                    {
-                        ForcePositionChange(PositionSlider.SmallChange * -1);
-                        await Task.Delay(200);
-                    }
-                    break;
-                case Key.Right:
-                    while(e.KeyStates == KeyStates.Down)
-                    {
-                        ForcePositionChange(PositionSlider.SmallChange);
-                        await Task.Delay(200);
-                    }
-                    break;
-                case Key.Up:
-                    while (e.KeyStates == KeyStates.Down)
-                    {
-                        if (Player.Volume >= 1)
-                            break;
-                        Player.Volume += 0.01;
-                        await Task.Delay(50);
-                    }
-                    break;
-                case Key.Down:
-                    while (e.KeyStates == KeyStates.Down)
-                    {
-                        if (Player.Volume <= 0)
-                            break;
-                        Player.Volume -= 0.01;
-                        await Task.Delay(50);
-                    }
-                    break;
-                case Key.MediaNextTrack:
-                    NextButton_Click(this, null);
-                    break;
-                case Key.MediaPreviousTrack:
-                    PreviousButton_Click(this, null);
-                    break;
-                case Key.MediaPlayPause:
-                    PlayPauseButtonClick(this, null);
-                    break;
-                case Key.MediaStop:
-                    break;
-                default:
-                    break;
-            }
+            LyricsPopup.IsOpen = !LyricsPopup.IsOpen;
         }
 
-        private void CopyButton_Click(object sender, EventArgs e)
+        private void RepeatButton_Click(object sender, RoutedEventArgs e)
         {
-            try
-            {
-                System.IO.File.Copy(Manager.CurrentlyPlaying.Path, P.DefaultPath + Manager.CurrentlyPlaying.Name);
-            }
-            catch(Exception f)
-            {
-                System.Windows.MessageBox.Show(f.Message);
-            }
+            Position_Value -= Position_LargeChange;
+        }
+
+        private void RepeatButton_Click_1(object sender, RoutedEventArgs e)
+        {
+
+            Position_Value += Position_LargeChange;
         }
 
         private void window_KeyUp(object sender, KeyEventArgs e)
@@ -504,22 +474,16 @@ namespace Player
         {
             if (!IsLoaded)
                 return;
-            P.BackgroundOptimization = Pref_BackOpt.IsChecked.Value;
             P.HighLatency = Pref_Latency.IsChecked.Value;
             P.IPC = Pref_IPC.IsChecked.Value;
             P.LibraryValidation = Pref_DoubleValid.IsChecked.Value;
             P.LightWeight = Pref_LightWeight.IsChecked.Value;
-            P.LyricsProvider = Pref_LyrInit.IsChecked.Value;
             P.ManualGarbageCollector = Pref_GC.IsChecked.Value;
             P.MassiveLibrary = Pref_MassLib.IsChecked.Value;
-            P.MetaInit = Pref_MetaInit.IsChecked.Value;
             P.Restrict = Pref_MediaRestr.IsChecked.Value;
-            P.SideBarColl = Pref_SideColl.IsChecked.Value;
-            P.Stream = Pref_LiveStr.IsChecked.Value;
             P.VisionOrientation = Pref_VisionOrient.IsChecked.Value;
             P.VolumeSetter = Pref_VolBal.IsChecked.Value;
             P.WMDebug = Pref_WM.IsChecked.Value;
-            P.DefaultPath = Pref_DefaultPathBox.Text;
             P.Save();
         }
     }

@@ -5,13 +5,37 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:materialicons="clr-namespace:MaterialIcons;assembly=MaterialIcons"
-             mc:Ignorable="d" 
+             xmlns:controls="clr-namespace:Player.Controls"
+             mc:Ignorable="d" Width="200" Background="#1000"
              Loaded="UserControl_Loaded" MouseDoubleClick="OutputCanvas_MouseDoubleClick"
              x:Name="OutputCanvas">
-    <Grid>
+    <Grid >
         <Label Content="MainLabel" HorizontalAlignment="Left" VerticalAlignment="Top" x:Name="MainLabel" Foreground="White" FontWeight="Medium" FontSize="14" Margin="30,0,0,0"/>
         <Label Content="SubLabel" HorizontalAlignment="Left" Margin="30,20,0,0" VerticalAlignment="Top" x:Name="SubLabel" Foreground="White"/>
-        <materialicons:MaterialIcon  x:Name="MainIcon" HorizontalAlignment="Left" Width="30" Icon="ic_music_note" Foreground="White"/>
-    </Grid> 
+        <controls:MaterialIcon  x:Name="MainIcon" HorizontalAlignment="Left" Width="30" Icon="ic_music_note" Foreground="White"/>
+        <controls:MaterialButton HorizontalAlignment="Right" Margin="0, 0, 5, 0" Icon="ic_more_horiz" EllipseType="Rectular" x:Name="OtherButton"/>
+        <controls:MaterialButton HorizontalAlignment="Right" Margin="0, 0, 50, 0" Icon="ic_play_arrow" EllipseType="Rectular" x:Name="PlayButton" Click="MaterialButton_Click" />
+    </Grid>
+    <UserControl.Triggers>
+        <EventTrigger RoutedEvent="MouseEnter" SourceName="OutputCanvas">
+            <BeginStoryboard>
+                <Storyboard SpeedRatio="3" Storyboard.TargetProperty="Opacity">
+                    <DoubleAnimation From="{Binding ElementName=PlayButton, Path=Opacity}" To="1"
+                                     Storyboard.TargetName="PlayButton" />
+                    <DoubleAnimation From="{Binding ElementName=PlayButton, Path=Opacity}" To="1"
+                                     Storyboard.TargetName="OtherButton"  />
+                </Storyboard>
+            </BeginStoryboard>
+        </EventTrigger>
+        <EventTrigger RoutedEvent="MouseLeave" SourceName="OutputCanvas">
+            <BeginStoryboard>
+                <Storyboard  SpeedRatio="2" Storyboard.TargetProperty="Opacity">
+                    <DoubleAnimation From="{Binding ElementName=PlayButton, Path=Opacity}" To="0"
+                                     Storyboard.TargetName="PlayButton" />
+                    <DoubleAnimation From="{Binding ElementName=PlayButton, Path=Opacity}" To="0"
+                                     Storyboard.TargetName="OtherButton"/>
+                </Storyboard>
+            </BeginStoryboard>
+        </EventTrigger>
+    </UserControl.Triggers>
 </UserControl>

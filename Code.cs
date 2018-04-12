@@ -1,24 +1,32 @@
-﻿using Microsoft.Win32;
-using Player.InstanceManager;
-using Player.Types;
+﻿
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Runtime.Remoting;
+using System.Runtime.Remoting.Channels;
+using System.Runtime.Remoting.Channels.Ipc;
+using System.Runtime.Serialization;
+using System.Runtime.Serialization.Formatters;
+using System.Runtime.Serialization.Formatters.Binary;
+using System.Security;
+using System.Threading;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shell;
+using System.Windows.Threading;
 using DColor = System.Drawing.Color;
 using Draw = System.Drawing;
-using System.Runtime.Serialization;
-using System.Runtime.Serialization.Formatters.Binary;
-
+using Forms = System.Windows.Forms;
+using GmaHook = Gma.System.MouseKeyHook;
 namespace Player.User
 {
+
     public static class UI
     {
         public static IEnumerable<T> FindVisualChildren<T>(DependencyObject depObj) where T : DependencyObject
@@ -55,10 +63,32 @@ namespace Player.User
             get
             {
                 Win32Point w32 = new Win32Point();
-                NativeMethods.GetCursorPos(ref w32);
+                InstanceManager.NativeMethods.GetCursorPos(ref w32);
                 return new Draw.Point(w32.X, w32.Y);
             }
         }
+    }
+    public class Keyboard
+    {
+        private static GmaHook.IKeyboardMouseEvents _events = GmaHook.Hook.GlobalEvents();
+        public static event Forms::KeyPressEventHandler KeyPress
+        {
+            add => _events.KeyPress += value;
+            remove => _events.KeyPress -= value;
+        }
+        public static event Forms::KeyEventHandler KeyDown
+        {
+            add => _events.KeyDown += value;
+            remove => _events.KeyDown -= value;
+        }
+        public static event Forms::KeyEventHandler KeyUp
+        {
+            add => _events.KeyDown += value;
+            remove => _events.KeyDown -= value;
+        }
+        public Keyboard() { }
+        ~Keyboard() => _events.Dispose();
+        
     }
 }
 
@@ -94,6 +124,11 @@ namespace Player.Events
         public int Index { get; set; }
         public Media Media { get; set; }
         public MediaView Sender { get; set; }
+
+        public MediaEventArgs(int index) => Index = index;
+        public MediaEventArgs(TagLib.File f) => File = f;
+        public MediaEventArgs(Media media) => Media = media;
+        public MediaEventArgs(MediaView sender) => Sender = sender;
     }
     public class SettingsEventArgs
     {
@@ -135,7 +170,7 @@ namespace Player.Management
         public static ManagementChangeEventArgs CreateForArtwork(Events.MediaEventArgs e)
         => new ManagementChangeEventArgs() { Change = ManagementChange.ArtworkClick, Changes = e };
         public static ManagementChangeEventArgs CreateForArtwork(int index)
-        => new ManagementChangeEventArgs() { Change = ManagementChange.ArtworkClick, Changes = new Events.MediaEventArgs() { Index = index } };
+        => new ManagementChangeEventArgs() { Change = ManagementChange.ArtworkClick, Changes = new Events.MediaEventArgs(index) };
         public static ManagementChangeEventArgs CreateForInterfaceUpdate(Events.MediaEventArgs e)
         => new ManagementChangeEventArgs() { Change = ManagementChange.InterfaceUpdate, Changes = e };
         public static ManagementChangeEventArgs CreateForMediaUpdate(Events.MediaEventArgs e)
@@ -289,11 +324,7 @@ namespace Player.Management
             Change?.Invoke(this, new ManagementChangeEventArgs()
             {
                 Change = ManagementChange.NewMedia,
-                Changes = new Events.MediaEventArgs()
-                {
-                    Media = AllMedias[p],
-                    Index = p
-                }
+                Changes = new Events.MediaEventArgs(p)
             });
             return true;
         }
@@ -541,7 +572,7 @@ namespace Player.Management
 
 namespace Player
 {
-    public partial class App : Application, ISingleInstanceApp
+    public partial class App : Application, InstanceManager.ISingleInstanceApp
     {
         public static event EventHandler<Events.InstanceEventArgs> NewInstanceRequested;
         public const string LauncherIdentifier = "ElephantPlayerBySoheilKD_CERTID8585";
@@ -558,13 +589,13 @@ namespace Player
                 MessageBox.Show("Jizzzze", "LOL", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
-            if (Instance<App>.InitializeAsFirstInstance(LauncherIdentifier))
+            if (InstanceManager.Instance<App>.InitializeAsFirstInstance(LauncherIdentifier))
             {
                 var application = new App();
 
                 application.InitializeComponent();
                 application.Run();
-                Instance<App>.Cleanup();
+                InstanceManager.Instance<App>.Cleanup();
             }
         }
 
@@ -581,15 +612,13 @@ namespace Player
         public int MainKey { get; set; } = 0;
         public int TileFontIndex { get; set; } = 0;
         public int ViewMode { get; set; } = 0;
-        public Size LastSize { get; set; } = new Size(700, 400);
+        public (double W, double H)[] Sizes { get; set; } = new (double, double)[2]
+        {
+            (250, 250), (250, 250)
+        };
         public Point LastLoc { get; set; } = new Point(20, 20);
 
         public bool VisionOrientation { get; set; } = true;
-        public bool MetaInit { get; set; } = true;
-        public bool LyricsProvider { get; set; } = true;
-        public bool SideBarColl { get; set; } = true;
-        public bool BackgroundOptimization { get; set; } = false;
-        public bool Stream { get; set; } = false;
         public bool Restrict { get; set; } = false;
         public bool VolumeSetter { get; set; } = false;
         public bool MassiveLibrary { get; set; } = false;
@@ -599,7 +628,6 @@ namespace Player
         public bool WMDebug { get; set; } = false;
         public bool IPC { get; set; } = true;
         public bool ManualGarbageCollector { get; set; } = false;
-        public string DefaultPath { get; set; }
         
         public static Preferences Load()
         {
@@ -619,7 +647,121 @@ namespace Player
         }
         
     }
-    
+
+
+    public enum ViewMode { Singular, GroupByArtist, GroupByDir, GroupByAlbum }
+    public enum ContextTool { Border, MainDisplay }
+    public enum Orientation { Portrait, Landscape }
+    public enum PlayPara { None, Next, Prev }
+
+    public enum PlayMode { Single, Shuffle, RepeatOne, RepeatAll, Queue }
+    public enum MediaViewMode { Default, Compact, Expanded }
+    public enum MediaComparsion { Title, Name, Path, Type, Artist, Album }
+    public enum MediaType { Music, Video, NotMedia }
+    public class Media : IDisposable
+    {
+        public Media() { }
+        public bool IsPlaying { get; set; }
+        public bool IsMedia => MediaType != MediaType.NotMedia;
+        public bool IsVideo => MediaType == MediaType.Video;
+        public string Name { get; set; }
+        public string Artist { get; set; }
+        public string Title { get; set; }
+        public string Album { get; set; }
+        public string Path { get; set; }
+        public string Lyrics { get; set; }
+        public long Duration { get; set; }
+        public ImageSource Artwork { get; set; }
+        public MediaType MediaType;
+        public bool Contains(string para)
+        {
+            return Name.ToLower().Contains(para.ToLower())
+                || Title.ToLower().Contains(para.ToLower())
+                || Album.ToLower().Contains(para.ToLower())
+                || Artist.ToLower().Contains(para.ToLower());
+        }
+        public override string ToString() => Path;
+        public static readonly Media Empty = new Media()
+        {
+            Artist = "",
+            Album = "",
+            Artwork = null,
+            disposedValue = false,
+            MediaType = MediaType.NotMedia,
+            Name = "",
+            Path = "",
+            Title = ""
+        };
+        public Media(string path)
+        {
+            switch (Management.MediaManager.GetType(path))
+            {
+                case MediaType.Music:
+                    using (var t = TagLib.File.Create(path))
+                    {
+                        Name = path.Substring(path.LastIndexOf("\\") + 1);
+                        Path = path;
+                        Artist = t.Tag.FirstPerformer;
+                        Title = t.Tag.Title;
+                        Album = t.Tag.Album;
+                        Duration = t.Length;
+                        Artwork = t.Tag.Pictures.Length >= 1 ? Resource.Image.ToBitmapSource(t.Tag.Pictures[0]) : Resource.Image.ToBitmapSource(Properties.Resources.MusicArtwork);
+                        MediaType = MediaType.Music;
+                        Lyrics = t.Tag.Lyrics ?? " ";
+                    }
+                    break;
+                case MediaType.Video:
+                    Name = path.Substring(path.LastIndexOf("\\") + 1);
+                    Title = Name;
+                    Path = path;
+                    Artist = path.Substring(0, path.LastIndexOf("\\"));
+                    Album = "Video";
+                    Duration = 1;
+                    Artwork = Resource.Image.ToBitmapSource(Properties.Resources.VideoArtwork);
+                    MediaType = MediaType.Video;
+                    break;
+                case MediaType.NotMedia:
+                    throw new IOException($"Given path is not valid media\r\nPath:{path}");
+                default: break;
+            }
+        }
+        public override bool Equals(object obj) => Path == (obj as Media).Path;
+        public bool Equals(Media obj) => Path == obj.Path;
+        public override int GetHashCode() => base.GetHashCode();
+        #region IDisposable Support
+        private bool disposedValue = false; // To detect redundant calls
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    // TODO: dispose managed state (managed objects).
+                    Album = String.Empty;
+                    Artist = String.Empty;
+                    Name = String.Empty;
+                    Path = String.Empty;
+                    Title = String.Empty;
+                    Lyrics = String.Empty;
+                    Artwork = null;
+                    MediaType = 0;
+                }
+                disposedValue = true;
+            }
+        }
+        
+        ~Media() => Dispose(false);
+        
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        #endregion 
+    }
+
     public static class Debug
     {
         public static void Print<T>(T obj) => Console.WriteLine(obj.ToString());
@@ -740,132 +882,6 @@ namespace Player.Taskbar
     }
 }
 
-namespace Player.Types
-{
-    public enum ViewMode { Singular, GroupByArtist, GroupByDir, GroupByAlbum }
-    public enum ContextTool { Border, MainDisplay }
-    public enum Orientation { Portrait, Landscape }
-    public enum PlayPara { None, Next, Prev }
-   
-    public enum PlayMode { Single, Shuffle, RepeatOne, RepeatAll, Queue }
-    public enum MediaViewMode { Default, Compact, Expanded }
-    public enum MediaComparsion { Title, Name, Path, Type, Artist, Album }
-    public enum MediaType { Music, Video, NotMedia }
-    public class Media : IDisposable
-    {
-        public Media() { }
-        public bool IsPlaying { get; set; }
-        public bool IsMedia => MediaType != MediaType.NotMedia;
-        public bool IsVideo => MediaType == MediaType.Video;
-        public string Name { get; set; }
-        public string Artist { get; set; }
-        public string Title { get; set; }
-        public string Album { get; set; }
-        public string Path { get; set; }
-        public string Lyrics { get; set; }
-        public long Duration { get; set; }
-        public ImageSource Artwork { get; set; }
-        public MediaType MediaType;
-        public bool Contains(string para)
-        {
-            return Name.ToLower().Contains(para.ToLower())
-                || Title.ToLower().Contains(para.ToLower())
-                || Album.ToLower().Contains(para.ToLower())
-                || Artist.ToLower().Contains(para.ToLower());
-        }
-        public override string ToString() => Path;
-        public static readonly Media Empty = new Media()
-        {
-            Artist = "",
-            Album = "",
-            Artwork = null,
-            disposedValue = false,
-            MediaType = MediaType.NotMedia,
-            Name = "",
-            Path = "",
-            Title = ""
-        };
-        public Media(string path)
-        {
-            switch (Management.MediaManager.GetType(path))
-            {
-                case MediaType.Music:
-                    using (var t = TagLib.File.Create(path))
-                    {
-                        Name = path.Substring(path.LastIndexOf("\\") + 1);
-                        Path = path;
-                        Artist = t.Tag.FirstPerformer;
-                        Title = t.Tag.Title;
-                        Album = t.Tag.Album;
-                        Duration = t.Length;
-                        Artwork = t.Tag.Pictures.Length >= 1 ? Resource.Image.ToBitmapSource(t.Tag.Pictures[0]) : Resource.Image.ToBitmapSource(Properties.Resources.MusicArtwork);
-                        MediaType = MediaType.Music;
-                        Lyrics = t.Tag.Lyrics ?? " ";
-                    }
-                    break;
-                case MediaType.Video:
-                    Name = path.Substring(path.LastIndexOf("\\") + 1);
-                    Title = Name;
-                    Path = path;
-                    Artist = path.Substring(0, path.LastIndexOf("\\"));
-                    Album = "Video";
-                    Duration = 1;
-                    Artwork = Resource.Image.ToBitmapSource(Properties.Resources.VideoArtwork);
-                    MediaType = MediaType.Video;
-                    break;
-                case MediaType.NotMedia:
-                    throw new IOException($"Given path is not valid media\r\nPath:{path}");
-                default: break;
-            }
-        }
-        public override bool Equals(object obj) => Path == (obj as Media).Path;
-        public bool Equals(Media obj) => Path == obj.Path;
-        public override int GetHashCode() => base.GetHashCode();
-        #region IDisposable Support
-        private bool disposedValue = false; // To detect redundant calls
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!disposedValue)
-            {
-                if (disposing)
-                {
-                    // TODO: dispose managed state (managed objects).
-                    Album = null;
-                    Artist = null;
-                    Artwork = null;
-                    MediaType = 0;
-                    Name = null;
-                    Path = null;
-                    Title = null;
-                }
-
-                // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.
-                // TODO: set large fields to null.
-
-                disposedValue = true;
-            }
-        }
-
-        // TODO: override a finalizer only if Dispose(bool disposing) above has code to free unmanaged resources.
-        ~Media() {
-            //   // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
-            Dispose(false);
-        }
-
-        // This code added to correctly implement the disposable pattern.
-        public void Dispose()
-        {
-            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
-            Dispose(true);
-            // TODO: uncomment the following line if the finalizer is overridden above.
-            GC.SuppressFinalize(this);
-        }
-        
-        #endregion
-    }
-}
-
 namespace Player.Resource
 {
     public static class Theming
@@ -951,5 +967,182 @@ namespace Player.Extensions
             return true;
         }
         public static int ToInt(this double e) => Convert.ToInt32(e);
+    }
+}
+namespace Player.InstanceManager
+{
+    internal enum WM
+    {
+        NULL = 0x0000, CREATE = 0x0001, DESTROY = 0x0002, MOVE = 0x0003, SIZE = 0x0005, ACTIVATE = 0x0006,
+        SETFOCUS = 0x0007, KILLFOCUS = 0x0008, ENABLE = 0x000A, SETREDRAW = 0x000B, SETTEXT = 0x000C, GETTEXT = 0x000D,
+        GETTEXTLENGTH = 0x000E, PAINT = 0x000F, CLOSE = 0x0010, QUERYENDSESSION = 0x0011, QUIT = 0x0012, QUERYOPEN = 0x0013,
+        ERASEBKGND = 0x0014, SYSCOLORCHANGE = 0x0015, SHOWWINDOW = 0x0018, ACTIVATEAPP = 0x001C, SETCURSOR = 0x0020, MOUSEACTIVATE = 0x0021,
+        CHILDACTIVATE = 0x0022, QUEUESYNC = 0x0023, GETMINMAXINFO = 0x0024, WINDOWPOSCHANGING = 0x0046, WINDOWPOSCHANGED = 0x0047,
+        CONTEXTMENU = 0x007B, STYLECHANGING = 0x007C, STYLECHANGED = 0x007D, DISPLAYCHANGE = 0x007E, GETICON = 0x007F, SETICON = 0x0080,
+        NCCREATE = 0x0081, NCDESTROY = 0x0082, NCCALCSIZE = 0x0083, NCHITTEST = 0x0084, NCPAINT = 0x0085, NCACTIVATE = 0x0086,
+        GETDLGCODE = 0x0087, SYNCPAINT = 0x0088, NCMOUSEMOVE = 0x00A0, NCLBUTTONDOWN = 0x00A1, NCLBUTTONUP = 0x00A2, NCLBUTTONDBLCLK = 0x00A3,
+        NCRBUTTONDOWN = 0x00A4, NCRBUTTONUP = 0x00A5, NCRBUTTONDBLCLK = 0x00A6, NCMBUTTONDOWN = 0x00A7, NCMBUTTONUP = 0x00A8, NCMBUTTONDBLCLK = 0x00A9,
+        SYSKEYDOWN = 0x0104, SYSKEYUP = 0x0105, SYSCHAR = 0x0106, SYSDEADCHAR = 0x0107, COMMAND = 0x0111, SYSCOMMAND = 0x0112,
+        LBUTTONDOWN = 0x0201, LBUTTONUP = 0x0202, LBUTTONDBLCLK = 0x0203, RBUTTONDOWN = 0x0204, RBUTTONUP = 0x0205, RBUTTONDBLCLK = 0x0206,
+        MBUTTONDOWN = 0x0207, MBUTTONUP = 0x0208, MBUTTONDBLCLK = 0x0209, MOUSEWHEEL = 0x020A, MOUSEHWHEEL = 0x020E, MOUSEMOVE = 0x0200,
+        XBUTTONDOWN = 0x020B, XBUTTONUP = 0x020C, XBUTTONDBLCLK = 0x020D, CAPTURECHANGED = 0x0215, ENTERSIZEMOVE = 0x0231, EXITSIZEMOVE = 0x0232,
+        IME_SETCONTEXT = 0x0281, IME_NOTIFY = 0x0282, IME_CONTROL = 0x0283, IME_COMPOSITIONFULL = 0x0284, IME_SELECT = 0x0285, IME_CHAR = 0x0286,
+        IME_REQUEST = 0x0288, IME_KEYDOWN = 0x0290, IME_KEYUP = 0x0291, NCMOUSELEAVE = 0x02A2, USER = 0x0400, TRAYMOUSEMESSAGE = 0x800, APP = 0x8000,
+        DWMCOMPOSITIONCHANGED = 0x031E, DWMNCRENDERINGCHANGED = 0x031F, DWMCOLORIZATIONCOLORCHANGED = 0x0320,
+        DWMWINDOWMAXIMIZEDCHANGE = 0x0321, DWMSENDICONICTHUMBNAIL = 0x0323, DWMSENDICONICLIVEPREVIEWBITMAP = 0x0326
+    }
+
+    [SuppressUnmanagedCodeSecurity]
+    internal static class NativeMethods
+    {
+        [DllImport("user32.dll")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        internal static extern bool GetCursorPos(ref User.Mouse.Win32Point pt);
+        public delegate IntPtr MessageHandler(WM uMsg, IntPtr wParam, IntPtr lParam, out bool handled);
+        [DllImport("shell32.dll", EntryPoint = "CommandLineToArgvW", CharSet = CharSet.Unicode)]
+        private static extern IntPtr _CommandLineToArgvW([MarshalAs(UnmanagedType.LPWStr)] string cmdLine, out int numArgs);
+        [DllImport("kernel32.dll", EntryPoint = "LocalFree", SetLastError = true)]
+        private static extern IntPtr _LocalFree(IntPtr hMem);
+        public static string[] CommandLineToArgvW(string cmdLine)
+        {
+            IntPtr argv = IntPtr.Zero;
+            try
+            {
+                argv = _CommandLineToArgvW(cmdLine, out int numArgs);
+                if (argv == IntPtr.Zero)
+                    throw new Win32Exception();
+                var result = new string[numArgs];
+                for (int i = 0; i < numArgs; i++)
+                {
+                    IntPtr currArg = Marshal.ReadIntPtr(argv, i * Marshal.SizeOf(typeof(IntPtr)));
+                    result[i] = Marshal.PtrToStringUni(currArg);
+                }
+                return result;
+            }
+            finally
+            {
+                IntPtr p = _LocalFree(argv);
+            }
+        }
+
+    }
+
+    public interface ISingleInstanceApp
+    {
+        bool SignalExternalCommandLineArgs(IList<string> args);
+    }
+
+    public static class Instance<TApplication>
+                where TApplication : Application, ISingleInstanceApp
+    {
+        private const string Delimiter = ":";
+        private const string ChannelNameSuffix = "SingeInstanceIPCChannel";
+        private const string RemoteServiceName = "SingleInstanceApplicationService";
+        private const string IpcProtocol = "ipc://";
+        private static Mutex singleInstanceMutex;
+        private static IpcServerChannel channel;
+        private static IList<string> commandLineArgs;
+        public static IList<string> CommandLineArgs => commandLineArgs;
+
+        public static bool InitializeAsFirstInstance(string uniqueName)
+        {
+            commandLineArgs = GetCommandLineArgs(uniqueName);
+            string applicationIdentifier = uniqueName + Environment.UserName;
+            string channelName = String.Concat(applicationIdentifier, Delimiter, ChannelNameSuffix);
+            singleInstanceMutex = new Mutex(true, applicationIdentifier, out bool firstInstance);
+            if (firstInstance)
+                CreateRemoteService(channelName);
+            else
+                SignalFirstInstance(channelName, commandLineArgs);
+            return firstInstance;
+        }
+        public static void Cleanup()
+        {
+            if (singleInstanceMutex != null)
+            {
+                singleInstanceMutex.Close();
+                singleInstanceMutex = null;
+            }
+            if (channel != null)
+            {
+                ChannelServices.UnregisterChannel(channel);
+                channel = null;
+            }
+        }
+        private static IList<string> GetCommandLineArgs(string uniqueApplicationName)
+        {
+            string[] args = null;
+            if (AppDomain.CurrentDomain.ActivationContext == null)
+                args = Environment.GetCommandLineArgs();
+            else
+            {
+                string appFolderPath = Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), uniqueApplicationName);
+                string cmdLinePath = Path.Combine(appFolderPath, "cmdline.txt");
+                if (File.Exists(cmdLinePath))
+                {
+                    try
+                    {
+                        using (TextReader reader = new StreamReader(cmdLinePath, System.Text.Encoding.Unicode))
+                            args = NativeMethods.CommandLineToArgvW(reader.ReadToEnd());
+
+                        File.Delete(cmdLinePath);
+                    }
+                    catch (IOException) { }
+                }
+            }
+            if (args == null)
+                args = new string[] { };
+
+            return new List<string>(args);
+        }
+        private static void CreateRemoteService(string channelName)
+        {
+            BinaryServerFormatterSinkProvider serverProvider = new BinaryServerFormatterSinkProvider
+            {
+                TypeFilterLevel = TypeFilterLevel.Full
+            };
+            IDictionary props = new Dictionary<string, string>
+            {
+                ["name"] = channelName,
+                ["portName"] = channelName,
+                ["exclusiveAddressUse"] = "false"
+            };
+            channel = new IpcServerChannel(props, serverProvider);
+            ChannelServices.RegisterChannel(channel, true);
+            IPCRemoteService remoteService = new IPCRemoteService();
+            RemotingServices.Marshal(remoteService, RemoteServiceName);
+        }
+        private static void SignalFirstInstance(string channelName, IList<string> args)
+        {
+            IpcClientChannel secondInstanceChannel = new IpcClientChannel();
+            ChannelServices.RegisterChannel(secondInstanceChannel, true);
+            string remotingServiceUrl = IpcProtocol + channelName + "/" + RemoteServiceName;
+            IPCRemoteService firstInstanceRemoteServiceReference = (IPCRemoteService)RemotingServices.Connect(typeof(IPCRemoteService), remotingServiceUrl);
+            if (firstInstanceRemoteServiceReference != null)
+                firstInstanceRemoteServiceReference.InvokeFirstInstance(args);
+        }
+        private static object ActivateFirstInstanceCallback(object arg)
+        {
+            IList<string> args = arg as IList<string>;
+            ActivateFirstInstance(args);
+            return null;
+        }
+        private static void ActivateFirstInstance(IList<string> args)
+        {
+            if (Application.Current == null)
+                return;
+            ((TApplication)Application.Current).SignalExternalCommandLineArgs(args);
+        }
+        private class IPCRemoteService : MarshalByRefObject
+        {
+            public void InvokeFirstInstance(IList<string> args)
+            {
+                if (Application.Current != null)
+                    Application.Current.Dispatcher.BeginInvoke(
+                        DispatcherPriority.Normal, new DispatcherOperationCallback(Instance<TApplication>.ActivateFirstInstanceCallback), args);
+            }
+            public override object InitializeLifetimeService() => null;
+        }
     }
 }

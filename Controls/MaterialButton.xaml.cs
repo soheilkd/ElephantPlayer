@@ -1,7 +1,6 @@
 ﻿using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
-using MaterialIcons;
 using System.Windows.Media.Animation;
 using System;
 using System.Windows.Controls;
@@ -10,62 +9,60 @@ namespace Player.Controls
 {
     public partial class MaterialButton : UserControl
     {
+        public enum EllipseTypes { Rectular, Circular }
         public event EventHandler Click;
-        public const int HED = 100; //Hover Ellipse Duration
-        private ThicknessAnimation ButtonPressedAnimation =
-            new ThicknessAnimation()
+
+        public EllipseTypes EllipseType
+        {
+            get => (EllipseTypes)GetValue(EllipseProperty);
+            set
             {
-                AutoReverse = false,
-                Duration = TimeSpan.FromMilliseconds(HED),
-                From = new Thickness(-2),
-                To = new Thickness(-5)
-            };
-        Storyboard ButtonPressedStory = new Storyboard() { AutoReverse = true };
+                SetValue(EllipseProperty, value);
+                MainEllipse.CornerRadius = new CornerRadius(value == 0 ? 10 : 20);
+            }
+        }
+        public IconType Icon
+        {
+            get => (IconType)GetValue(IconProperty);
+            set
+            {
+                SetValue(IconProperty, value);
+                MainIcon.Icon = value;
+            }
+        }
+        public bool AutoHandle
+        {
+            get => (bool)GetValue(HandleProperty);
+            set => SetValue(HandleProperty, value);
+        }
+        public static readonly DependencyProperty EllipseProperty =
+            DependencyProperty.Register(nameof(EllipseType), typeof(EllipseTypes), typeof(MaterialButton), new PropertyMetadata(EllipseTypes.Circular));
         public static readonly DependencyProperty IconProperty =
-            DependencyProperty.Register("Icon", typeof(MaterialIconType), typeof(MaterialButton), new PropertyMetadata(MaterialIconType.ic_warning));
-        public MaterialIconType Icon { get => (MaterialIconType)GetValue(IconProperty); set { SetValue(IconProperty, value); MainIcon.Icon = value; } }
-
-        public void UXMouseEnter(object sender, MouseEventArgs e)
-        {
-            ButtonPressedStory.AutoReverse = true;
-            ButtonPressedStory.Begin();
-            ButtonPressedStory.Seek(TimeSpan.FromMilliseconds(HED));
-        }
-        public void UXMouseLeave(object sender, MouseEventArgs e)
-        {
-            ButtonPressedStory.AutoReverse = false;
-            ButtonPressedStory.Begin();
-            ButtonPressedStory.Seek(TimeSpan.FromMilliseconds(0));
-            MainEllipse.Fill = System.Windows.Media.Brushes.Transparent;
-        }
-        bool GoingToUX_Leave = false;
-        bool GoingToUX_Enter = false;
-        private void ButtonPressedStory_Completed(object sender, EventArgs e)
-        {
-
-        }
-
+            DependencyProperty.Register(nameof(Icon), typeof(IconType), typeof(MaterialButton), new PropertyMetadata(IconType.ic_arrow_upward));
+        public static readonly DependencyProperty HandleProperty =
+            DependencyProperty.Register(nameof(AutoHandle), typeof(bool), typeof(MaterialButton), new PropertyMetadata(true));
+        
         public MaterialButton()
         {
             InitializeComponent();
-            ButtonPressedStory.Completed += ButtonPressedStory_Completed;
         }
          public void UXMouseDown(object sender, MouseButtonEventArgs e)
         {
-            MainEllipse.Fill = MainIcon.Foreground;
+            //MainEllipse.Background = MainIcon.Foreground;
+            Be2.Begin();
+            e.Handled = AutoHandle;
         }
         public void UXMouseUp(object sender, MouseButtonEventArgs e)
         {
             Click?.Invoke(this, null);
-            MainEllipse.Fill = System.Windows.Media.Brushes.Transparent;
+            //MainEllipse.Background = System.Windows.Media.Brushes.Transparent;
         }
         async void UserControl_Loaded(object sender, RoutedEventArgs e)
         {
             await Task.Delay(500);
+            MainEllipse.CornerRadius = new CornerRadius(EllipseType == 0 ? 2 : 20);
             MainIcon.Icon = Icon;
-            Storyboard.SetTarget(ButtonPressedAnimation, MainEllipse);
-            Storyboard.SetTargetProperty(ButtonPressedAnimation, new PropertyPath(MarginProperty));
-            ButtonPressedStory.Children.Add(ButtonPressedAnimation);
         }
+        
     }
 }

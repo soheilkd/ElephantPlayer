@@ -2,277 +2,259 @@
     x:Class="Player.MainUI" Background="Transparent"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:m="clr-namespace:MaterialIcons;assembly=MaterialIcons"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:local="clr-namespace:Player" KeyDown="window_KeyDown" KeyUp="window_KeyUp"
-    xmlns:player="clr-namespace:Player.Controls" xmlns:sys="clr-namespace:System;assembly=mscorlib" x:Name="window"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" KeyUp="window_KeyUp"
+    xmlns:player="clr-namespace:Player.Controls" xmlns:sys="clr-namespace:System;assembly=mscorlib"
+    x:Name="window"
     mc:Ignorable="d" Loaded="Window_Loaded" Closing="Window_Closing" Drop="Window_Drop" AllowDrop="True"
-    Title="MainUI" Height="446" Width="544" SizeChanged="Window_SizeChanged">
+    Title="Elephant Player" Height="446" Width="432" SizeChanged="Window_SizeChanged">
     <Grid Background="{DynamicResource KeyOfBackground}">
-        <TabControl BorderThickness="0" x:Name="MainTabControl" SelectionChanged="TabControl_SelectionChanged" Background="{DynamicResource KeyOfBackground}" Margin="0,0,0,15" TabStripPlacement="Top">
-            <TabControl.Focusable>false</TabControl.Focusable>
-            <TabItem Style="{DynamicResource DefaultTabStyle}">
-                <TabItem.Header>
-                    <Grid Style="{DynamicResource ResourceKey=TabItemGrid}">
-                        <m:MaterialIcon Icon="ic_airplay" Style="{DynamicResource ResourceKey=TabItemMaterial}"/>
-                        <Label Content="Now Playing" Style="{DynamicResource ResourceKey=TabItemLabel}"/>
-                    </Grid>
-                </TabItem.Header>
-                <Grid>
-                    
-                    <Image x:Name="NP_ArtworkImage" VerticalAlignment="Stretch" Margin="0,0,0,200"/>
-                    <Label x:Name="NP_Label1" Content="Sample Label 1" Margin="0,0,0,160"/>
-                    <Label x:Name="NP_Label2" Content="Sample Label 2" Margin="0,0,0,130"/>
-                    <Label x:Name="NP_Label3" Content="Sample Label 3" Margin="0,0,0,100"/>
-                    <Label x:Name="NP_Label4" Content="Sample Label 4" Margin="0,0,0,70"/>
-                    <Label x:Name="NP_Label5" Content="Sample Label 5" Margin="0,0,0,40"/>
-                    <player:MaterialButton x:Name="PreviousButton" Icon="ic_skip_previous" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="60,0,0,5" Click="PreviousButton_Click" Height="22"/>
-                    <player:MaterialButton x:Name="NextButton" Icon="ic_skip_next" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,60,5" Click="NextButton_Click" Height="22"/>
-                    <player:MaterialButton x:Name="PlayPauseButton" Icon="ic_play_arrow" Click="PlayPauseButtonClick" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,5" Width="30" Height="30"/>
-                    <player:MaterialButton x:Name="CopyButton" Icon="ic_content_copy" Click="CopyButton_Click" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0, 0, 0, 5" />
-                    <Grid.Resources>
-                        <Style TargetType="Label">
-                            <Setter Property="HorizontalContentAlignment" Value="Center"/>
-                            <Setter Property="Foreground" Value="White" />
-                            <Setter Property="VerticalAlignment" Value="Bottom" />
-                        </Style>
-                    </Grid.Resources>
-                </Grid>
-            </TabItem>
-            <TabItem Style="{DynamicResource DefaultTabStyle}">
-                <TabItem.Header>
-                    <Grid Style="{DynamicResource TabItemGrid}">
-                        <m:MaterialIcon Icon="ic_queue_music" Style="{DynamicResource ResourceKey=TabItemMaterial}"/>
-                        <Label Content="Queue" Style="{DynamicResource ResourceKey=TabItemLabel}"/>
-                    </Grid>
-                </TabItem.Header>
-                <Grid>
-                    <ListView x:Name="QueueListView"/>
-                </Grid>
-            </TabItem>
-            <TabItem Style="{DynamicResource DefaultTabStyle}">
-                <TabItem.Header>
-                    <Grid Style="{DynamicResource TabItemGrid}">
-                        <m:MaterialIcon Icon="ic_explore" Style="{DynamicResource ResourceKey=TabItemMaterial}"/>
-                        <Label Content="Explore" Style="{DynamicResource ResourceKey=TabItemLabel}"/>
-                    </Grid>
-                </TabItem.Header>
-                <Grid>
-                    <TabControl>
-                        <TabItem Header="Online" >
-                            <Grid>
-                                <WebBrowser Margin="0,20,0,0"/>
-                                <TextBox VerticalAlignment="Top" />
-                            </Grid>
-                        </TabItem>
-                        <TabItem Header="Offline" >
-                            <Grid>
-                                <Grid Margin="0,0,300,0">
-
-                                </Grid>
-                                <Grid Margin="200,0,0,0">
-
-                                </Grid>
-                            </Grid>
-                        </TabItem>
-                    </TabControl>
-                </Grid>
-            </TabItem>
-            <TabItem Style="{DynamicResource DefaultTabStyle}">
-                <TabItem.Header>
-                    <Grid Style="{DynamicResource ResourceKey=TabItemGrid}">
-                        <m:MaterialIcon Icon="ic_edit" Style="{DynamicResource ResourceKey=TabItemMaterial}" />
-                        <Label Content="Meta Editor" Style="{DynamicResource ResourceKey=TabItemLabel}"/>
-                    </Grid>
-                </TabItem.Header>
-                <Grid >
-                    <TabControl Background="Transparent">
-                        <TabItem Header="Meta">
-                            <Grid >
-                                <Grid.Resources>
-                                    <Style TargetType="{x:Type TextBox}">
-                                        <Setter Property="HorizontalAlignment" Value="Stretch" />
-                                        <Setter Property="Height" Value="22" />
-                                        <Setter Property="VerticalAlignment" Value="Top" />
-                                        <Setter Property="MaxLines" Value="1" />
-                                        <Setter Property="Text" Value="Sample" />
-                                        <Setter Property="Background" Value="Transparent" />
-                                        <Setter Property="Foreground" Value="White" />
-
-                                        <Style.Triggers>
-                                            <Trigger Property="IsEnabled" Value="true">
-                                                <Setter Property="Text" Value="NotSupported" />
-
-                                            </Trigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                    <Style TargetType="{x:Type Label}">
-                                        <Setter Property="HorizontalAlignment" Value="Left" />
-                                        <Setter Property="VerticalAlignment" Value="Top" />
-                                        <Setter Property="Foreground" Value="White" />
-                                    </Style>
-                                </Grid.Resources>
-                                <Label Content="Title" Margin="154,30,0,0" />
-                                <TextBox x:Name="Meta_TitleBox" Margin="232,30,5,0"/>
-                                <Label Content="Artist" Margin="154,55,0,0"/>
-                                <TextBox x:Name="Meta_ArtistBox" Margin="232,55,5,0" />
-                                <Label Content="Album" Margin="154,80,0,0"/>
-                                <TextBox x:Name="Meta_AlbumBox" Margin="232,80,5,0" />
-                                <Label Content="Album Artist" Margin="151,105,0,0" />
-                                <TextBox x:Name="Meta_AlbumArtistBox" Margin="232,105,5,0" />
-                                <Label Content="Composer" Margin="151,130,0,0" />
-                                <TextBox x:Name="Meta_ComposerBox" Margin="232,130,5,0" />
-                                <Label Content="Conductor" Margin="151,155,0,0" />
-                                <TextBox x:Name="Meta_ConductorBox" Margin="232,155,5,0" />
-                                <Label Content="Genre" Margin="151,180,0,0" />
-                                <TextBox x:Name="Meta_GenreBox" Margin="232,180,5,0"  />
-                                <Label Content="Track" Margin="151,205,0,0"/>
-                                <TextBox x:Name="Meta_TrackBox" Margin="232,205,5,0" />
-                                <Label Content="Comment" Margin="151,230,0,0" />
-                                <TextBox x:Name="Meta_YearBox" Margin="232,230,5,0" />
-                                <Label Content="Year" Margin="151,255,0,0"/>
-                                <TextBox x:Name="Meta_CommentBox" Margin="232,255,5,0" />
-                                <Label Content="Copyright" Margin="151,280,0,0" />
-                                <TextBox x:Name="Meta_CopyrightBox" Margin="232,280,5,0" />
-
-                                <Image x:Name="Meta_ArtworkImage" Height="150" Width="150"  VerticalAlignment="Top" HorizontalAlignment="Left"/>
-                            </Grid>
-                        </TabItem>
-                        <TabItem Header="Lyrics">
-                            <TextBox x:Name="Meta_LyricsBox" Background="Transparent" Foreground="White"/>
-                        </TabItem>
-                    </TabControl>
-                    <player:MaterialButton Icon="ic_file_download" HorizontalAlignment="Right" VerticalAlignment="Top" Height="22" Margin="0,0,25,0" Click="Meta_LoadClick"/>
-                    <player:MaterialButton Icon="ic_save" HorizontalAlignment="Right" VerticalAlignment="Top" Height="22"  Click="Meta_SaveClick"/>
-                </Grid>
-            </TabItem>
-            <TabItem Style="{DynamicResource DefaultTabStyle}">
-                <TabItem.Header>
-                    <Grid Style="{DynamicResource ResourceKey=TabItemGrid}">
-                        <m:MaterialIcon Icon="ic_texture" Style="{DynamicResource ResourceKey=TabItemMaterial}" />
-                        <Label Content="Float Lyrics"  Style="{DynamicResource ResourceKey=TabItemLabel}"/>
-                    </Grid>
-                </TabItem.Header>
-                <Grid>
-                    <TextBox IsReadOnly="True" x:Name="Lyrics_FloatBox" Foreground="White" Background="Transparent"/>
-                    <player:MaterialButton Icon="ic_file_download" HorizontalAlignment="Right" VerticalAlignment="Top" Height="30"  Click="Lyrics_LoadClick"/>
-                </Grid>
-            </TabItem>
-            <TabItem Style="{DynamicResource DefaultTabStyle}">
-                <TabItem.Header>
-                    <Grid Style="{DynamicResource ResourceKey=TabItemGrid}">
-                        <m:MaterialIcon Icon="ic_ondemand_video" Style="{DynamicResource ResourceKey=TabItemMaterial}" />
-                        <Label Content="Vision"  Style="{DynamicResource ResourceKey=TabItemLabel}"/>
-                    </Grid>
-                </TabItem.Header>
-                <Grid>
-                    <MediaElement x:Name="Player" UnloadedBehavior="Manual" LoadedBehavior="Manual" MouseUp="Player_MouseUp" 
+        <MediaElement Visibility="Hidden" x:Name="Player" UnloadedBehavior="Manual" LoadedBehavior="Manual" MouseUp="Player_MouseUp" 
                                   MouseDown="Player_MouseDown" Volume="1">
-                        <MediaElement.ContextMenu>
-                            <ContextMenu>
-                                <MenuItem Header="Enter Full Screen" x:Name="PlayerC_FullScreen" Click="PlayerCFullScreen">
-                                    <MenuItem.Icon>
-                                        <m:MaterialIcon Icon="ic_fullscreen" />
-                                    </MenuItem.Icon>
-                                </MenuItem>
-                                <MenuItem Header="Use subtitle" Click="PlayerCSubtitle">
-                                    <MenuItem.Icon>
-                                        <m:MaterialIcon Icon="ic_subtitles" />
-                                    </MenuItem.Icon>
-                                </MenuItem>
-                            </ContextMenu>
-                        </MediaElement.ContextMenu>
-                    </MediaElement>
+            <MediaElement.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="Enter Full Screen" x:Name="PlayerC_FullScreen" Click="PlayerCFullScreen">
+                        <MenuItem.Icon>
+                            <player:MaterialIcon Icon="ic_fullscreen" />
+                        </MenuItem.Icon>
+                    </MenuItem>
+                    <MenuItem Header="Use subtitle" Click="PlayerCSubtitle">
+                        <MenuItem.Icon>
+                            <player:MaterialIcon Icon="ic_subtitle" />
+                        </MenuItem.Icon>
+                    </MenuItem>
+                </ContextMenu>
+            </MediaElement.ContextMenu>
+        </MediaElement>
+        <player:MaterialButton x:Name="SettingsButton" Icon="ic_settings" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="4"/>
+        <Popup PlacementTarget="{Binding ElementName=SettingsButton}" Placement="Left">
+            <Grid Background="#F333">
+                <Grid.Resources>
+                    <Style TargetType="CheckBox">
+                        <Setter Property="Foreground" Value="White" />
+                        <EventSetter Event="Checked" Handler="AnySettingChanged" />
+                        <EventSetter Event="Unchecked" Handler="AnySettingChanged" />
+                    </Style>
+                    <Style TargetType="GroupBox">
+                        <Setter Property="BorderBrush" Value="#FF004080" />
+                        <Setter Property="BorderThickness" Value="1,0,0,2" />
+                    </Style>
+                    <Style TargetType="Label">
+                        <Setter Property="Foreground" Value="White" />
+                    </Style>
+                </Grid.Resources>
+                <ScrollViewer>
+                    <ScrollViewer.Resources>
+                        <sys:Double x:Key="{x:Static SystemParameters.VerticalScrollBarWidthKey}">10</sys:Double>
+                    </ScrollViewer.Resources>
+                    <StackPanel Width="500">
+                        <GroupBox Height="50">
+                            <GroupBox.Header>
+                                <Label Content="Playback" Foreground="White" FontWeight="Light" FontSize="18"/>
+                            </GroupBox.Header>
+                            <Canvas>
+                                
+                            </Canvas>
+                        </GroupBox>
+
+                        <GroupBox Height="110">
+                            <GroupBox.Header>
+                                <Label Content="Automation" Foreground="White" FontWeight="Light" FontSize="18"/>
+                            </GroupBox.Header>
+                            <Canvas>
+                                <CheckBox Content="Vision Orientation" x:Name="Pref_VisionOrient" />
+                                <CheckBox Content="Media Restriction" Canvas.Top="20" x:Name="Pref_MediaRestr"/>
+                                <CheckBox Content="Volume Balancer" Canvas.Top="40" x:Name="Pref_VolBal"/>
+                            </Canvas>
+                        </GroupBox>
+                        <GroupBox Height="140">
+                            <GroupBox.Header>
+                                <Label Content="Library" FontWeight="Light" FontSize="18" Foreground="White"/>
+                            </GroupBox.Header>
+                            <Canvas>
+                                <CheckBox Content="Massive Library" x:Name="Pref_MassLib"/>
+                                <CheckBox Content="Double Validation" Canvas.Top="20" x:Name="Pref_DoubleValid"/>
+                                <CheckBox Content="Light-Weight Initialization" Canvas.Top="40" x:Name="Pref_LightWeight"/>
+                                <Label Content="Library Location: " Foreground="White" Canvas.Top="60" Canvas.Left="30"/>
+                                <player:MaterialButton Icon="ic_folder_open" Canvas.Top="60" Foreground="White" />
+                            </Canvas>
+                        </GroupBox>
+                        <GroupBox Height="140">
+                            <GroupBox.Header>
+                                <Label Content="Debug" FontWeight="Light" FontSize="18" Foreground="White"/>
+                            </GroupBox.Header>
+                            <Canvas>
+                                <CheckBox Content="High Latency" x:Name="Pref_Latency"/>
+                                <CheckBox Content="Send WM Debug Messages " Canvas.Top="20" x:Name="Pref_WM"/>
+                                <CheckBox Content="Windows Presentation Acceleration" Canvas.Top="40" x:Name="Pref_WPF"/>
+                                <CheckBox Content="IPC Pipes" Canvas.Top="60" x:Name="Pref_IPC"/>
+                                <CheckBox Content="Manual Garbage Collection" Canvas.Top="80" x:Name="Pref_GC"/>
+                            </Canvas>
+                        </GroupBox>
+                    </StackPanel>
+                </ScrollViewer>
+            </Grid>
+        </Popup>
+        <ListView x:Name="QueueListView" BorderThickness="0,0 ,0 ,1" Margin="0, 0, 0, 85">
+            <ListView.Resources>
+                <sys:Double x:Key="{x:Static SystemParameters.VerticalScrollBarWidthKey}">10</sys:Double>
+            </ListView.Resources>
+        </ListView>
+        <Expander x:Name="PlayingExpander" VerticalAlignment="Bottom" >
+            <Expander.Template>
+                <ControlTemplate TargetType="{x:Type Expander}">
+                    <Border BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Background="{TemplateBinding Background}" CornerRadius="3" SnapsToDevicePixels="True">
+                        <DockPanel>
+                            <ToggleButton x:Name="HeaderSite" ContentTemplate="{TemplateBinding HeaderTemplate}" Content="{TemplateBinding Header}" DockPanel.Dock="Top" Foreground="{TemplateBinding Foreground}" FontWeight="{TemplateBinding FontWeight}" FontStyle="{TemplateBinding FontStyle}" FontStretch="{TemplateBinding FontStretch}" FontSize="{TemplateBinding FontSize}" FontFamily="{TemplateBinding FontFamily}" HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}" IsChecked="{Binding IsExpanded, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}" MinWidth="0" MinHeight="0" Padding="{TemplateBinding Padding}" VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                                <ContentPresenter x:Name="ExpandSite" ContentTemplate="{TemplateBinding ContentTemplate}" Content="{TemplateBinding Content}" ContentStringFormat="{TemplateBinding ContentStringFormat}" DockPanel.Dock="Bottom" Focusable="False" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" Margin="{TemplateBinding Padding}" Visibility="Collapsed" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                        </DockPanel>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsExpanded" Value="True">
+                            <Setter Property="Visibility" TargetName="ExpandSite" Value="Visible"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Expander.Template>
+            <Expander.Header>
+                <Grid Width="{Binding ElementName=PlayingExpander, Path=ActualWidth}" Height="80" Background="{DynamicResource KeyOfBackground}">
+                    <Image x:Name="MiniArtworkImage" Height="55" Width="55" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="3,3,0,0"/>
+                    <Label Content="{DynamicResource Res_Title}" Foreground="White" Margin="60, 0, 0, 0"/>
+                    <player:MaterialButton Icon="ic_skip_previous" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="60,0,0,20" Click="PreviousButton_Click" Height="22"/>
+                    <player:MaterialButton Icon="ic_skip_next" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,60,20" Click="NextButton_Click" Height="22"/>
+                    <player:MaterialButton x:Name="PlayPauseButton2" Icon="{DynamicResource Button_PlayIcon}" Click="PlayPauseButtonClick" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,20" Height="24"/>
+
+                    <Slider x:Name="PositionSlider2"  ValueChanged="PositionChanged" PreviewMouseDown="PositionMouseDown"  
+               VerticalAlignment="Bottom" SmallChange="{DynamicResource Position_ChangeS}" Template="{DynamicResource FlatSlider}"
+                        LargeChange="{DynamicResource Position_ChangeL}"
+                        Maximum="{DynamicResource Position_Max}" 
+                        Value="{DynamicResource Position_Value}" 
+                        Foreground="#FF575757" Margin="0, 0, 30, 3">
+                    </Slider>
                 </Grid>
-            </TabItem>
-            <TabItem x:Name="TabsSpaceBuilderGrid" Style="{DynamicResource DefaultTabStyle}">
-                <TabItem.Header>
-                    <Grid/>
-                </TabItem.Header>
-            </TabItem>
-            <TabItem Style="{DynamicResource DefaultTabStyle}">
-                <TabItem.Header>
-                    <Grid Style="{DynamicResource ResourceKey=TabItemGrid}">
-                        <m:MaterialIcon Icon="ic_settings_input_svideo" Style="{DynamicResource ResourceKey=TabItemMaterial}"/>
-                        <Label Content="Settings"  Style="{DynamicResource ResourceKey=TabItemLabel}"/>
+            </Expander.Header>
+            <Expander.Triggers>
+                <EventTrigger RoutedEvent="Expander.Expanded">
+                    <BeginStoryboard>
+                        <Storyboard>
+                            <DoubleAnimation From="80" x:Name="Expander_ExpandAnim"
+                                                     SpeedRatio="2" 
+                                                     AccelerationRatio="0.5" DecelerationRatio="0.5"
+                                                     Storyboard.TargetProperty="Height"
+                                        />
+                        </Storyboard>
+                    </BeginStoryboard>
+                </EventTrigger>
+                <EventTrigger RoutedEvent="Expander.Collapsed">
+                    <BeginStoryboard>
+                        <Storyboard>
+                            <DoubleAnimation  x:Name="Expander_CollapsAnim"
+                                                     To="80"
+                                                     AccelerationRatio="0.2" DecelerationRatio="0.8"
+                                                     Storyboard.TargetProperty="Height"
+                                                     SpeedRatio="1"
+                                        />
+                        </Storyboard>
+                    </BeginStoryboard>
+                </EventTrigger>
+            </Expander.Triggers>
+            <Expander.Resources>
+
+            </Expander.Resources>
+            <Grid Background="{DynamicResource KeyOfBackground}">
+                <Grid.Resources>
+                    <Style TargetType="{x:Type Label}">
+                        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                        <Setter Property="Foreground" Value="White" />
+                        <Setter Property="VerticalAlignment" Value="Bottom" />
+                    </Style>
+                </Grid.Resources>
+
+                <Slider x:Name="PositionSlider1"  ValueChanged="PositionChanged" PreviewMouseDown="PositionMouseDown"  
+               VerticalAlignment="Bottom" SmallChange="{DynamicResource Position_ChangeS}" Template="{DynamicResource FlatSlider}"
+                        LargeChange="{DynamicResource Position_ChangeL}"
+                        Maximum="{DynamicResource Position_Max}" 
+                        Value="{DynamicResource Position_Value}" 
+                        Foreground="#FF575757" Margin="0, 0, 0, 3">
+                </Slider>
+                <Image x:Name="NP_ArtworkImage" VerticalAlignment="Stretch" Margin="0,0,0,210"/>
+                <Label x:Name="NP_Label1" Content="Sample Label 1" Margin="0,0,0,170"/>
+                <Label x:Name="NP_Label2" Content="Sample Label 2" Margin="0,0,0,140"/>
+                <Label x:Name="NP_Label3" Content="Sample Label 3" Margin="0,0,0,110"/>
+                <Label x:Name="NP_Label4" Content="Sample Label 4" Margin="0,0,0,80"/>
+                <Label x:Name="NP_Label5" Content="Sample Label 5" Margin="0,0,0,50"/>
+                <player:MaterialButton Click="LyricsButton_Click" x:Name="LyricsButton" Icon="ic_short_text" HorizontalAlignment="Left" VerticalAlignment="Bottom" Height="22" Margin="5, 0, 0, 20"/>
+                <Popup PlacementTarget="{Binding ElementName=LyricsButton}" AllowsTransparency="True"
+                           Placement="Top" x:Name="LyricsPopup" PopupAnimation="Slide" StaysOpen="False">
+                    <Grid Width="{Binding Width, ElementName=window}"
+                              Height="255">
+                        <TextBox Background="#AFFFFFFF" x:Name="LyricsBox" IsReadOnly="True" BorderThickness="0" Text="Lorem Ipsum" FontSize="16"/>
                     </Grid>
-                </TabItem.Header>
-                <Grid>
-                    <Grid.Resources>
-                        <Style TargetType="CheckBox">
-                            <Setter Property="Foreground" Value="White" />
-                            <EventSetter Event="Checked" Handler="AnySettingChanged" />
-                            <EventSetter Event="Unchecked" Handler="AnySettingChanged" />
-                        </Style>
-                        <Style TargetType="GroupBox">
-                            <Setter Property="BorderBrush" Value="#FF004080" />
-                            <Setter Property="BorderThickness" Value="1,0,0,2" />
-                        </Style>
-                        <Style TargetType="Label">
-                            <Setter Property="Foreground" Value="White" />
-                        </Style>
-                    </Grid.Resources>
-                    <ScrollViewer>
-                        <ScrollViewer.Resources>
-                            <sys:Double x:Key="{x:Static SystemParameters.VerticalScrollBarWidthKey}">10</sys:Double>
-                        </ScrollViewer.Resources>
-                        <StackPanel>
-                            <GroupBox Height="200">
-                                <GroupBox.Header>
-                                    <Label Content="Playback" Foreground="White" FontWeight="Light" FontSize="18"/>
-                                </GroupBox.Header>
-                                <Canvas>
-                                    <Label Content="Default Path" />
-                                    <TextBox x:Name="Pref_DefaultPathBox" Width="190" Canvas.Left="80" Canvas.Top="5" />
-                                </Canvas>
-                            </GroupBox>
+                </Popup>
+                <player:MaterialButton Icon="ic_skip_previous" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="60,0,0,20" Click="PreviousButton_Click" Height="22"/>
+                <player:MaterialButton Icon="ic_skip_next" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,60,20" Click="NextButton_Click" Height="22"/>
+                <player:MaterialButton x:Name="PlayPauseButton1" Icon="{DynamicResource Button_PlayIcon}" Click="PlayPauseButtonClick" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,20" Height="24"/>
+            </Grid>
+        </Expander>
+        <Grid.Resources>
+            <Popup x:Key="MetaPopup">
+                <ScrollViewer Background="Transparent">
+                    <StackPanel >
+                        <Grid >
+                            <Grid.Resources>
+                                <Style TargetType="{x:Type TextBox}">
+                                    <Setter Property="HorizontalAlignment" Value="Stretch" />
+                                    <Setter Property="Height" Value="22" />
+                                    <Setter Property="VerticalAlignment" Value="Top" />
+                                    <Setter Property="MaxLines" Value="1" />
+                                    <Setter Property="Text" Value="Sample" />
+                                    <Setter Property="Background" Value="Transparent" />
+                                    <Setter Property="Foreground" Value="White" />
 
-                            <GroupBox Height="200">
-                                <GroupBox.Header>
-                                    <Label Content="Automation" Foreground="White" FontWeight="Light" FontSize="18"/>
-                                </GroupBox.Header>
-                                <Canvas>
-                                    <CheckBox Content="Vision Orientation" x:Name="Pref_VisionOrient" />
-                                    <CheckBox Content="Meta Editor Initialization"  Canvas.Top="20" x:Name="Pref_MetaInit"/>
-                                    <CheckBox Content="Lyrics Initialization" Canvas.Top="40" x:Name="Pref_LyrInit"/>
-                                    <CheckBox Content="Sidebar Collapsion" Canvas.Top="60" x:Name="Pref_SideColl"/>
-                                    <CheckBox Content="Background Optimization" Canvas.Top="80" x:Name="Pref_BackOpt"/>
-                                    <CheckBox Content="Live Stream" Canvas.Top="100" x:Name="Pref_LiveStr"/>
-                                    <CheckBox Content="Media Restriction" Canvas.Top="120" x:Name="Pref_MediaRestr"/>
-                                    <CheckBox Content="Volume Balancer" Canvas.Top="140" x:Name="Pref_VolBal"/>
-                                </Canvas>
-                            </GroupBox>
-                            <GroupBox Height="140">
-                                <GroupBox.Header>
-                                    <Label Content="Library" FontWeight="Light" FontSize="18" Foreground="White"/>
-                                </GroupBox.Header>
-                                <Canvas>
-                                    <CheckBox Content="Massive Library" x:Name="Pref_MassLib"/>
-                                    <CheckBox Content="Double Validation" Canvas.Top="20" x:Name="Pref_DoubleValid"/>
-                                    <CheckBox Content="Light-Weight Initialization" Canvas.Top="40" x:Name="Pref_LightWeight"/>
-                                    <Label Content="Library Location: " Foreground="White" Canvas.Top="60" Canvas.Left="30"/>
-                                    <player:MaterialButton Icon="ic_folder_open" Canvas.Top="60" Foreground="White" />
-                                </Canvas>
-                            </GroupBox>
-                            <GroupBox Height="140">
-                                <GroupBox.Header>
-                                    <Label Content="Debug" FontWeight="Light" FontSize="18" Foreground="White"/>
-                                </GroupBox.Header>
-                                <Canvas>
-                                    <CheckBox Content="High Latency" x:Name="Pref_Latency"/>
-                                    <CheckBox Content="Send WM Debug Messages " Canvas.Top="20" x:Name="Pref_WM"/>
-                                    <CheckBox Content="Windows Presentation Acceleration" Canvas.Top="40" x:Name="Pref_WPF"/>
-                                    <CheckBox Content="IPC Pipes" Canvas.Top="60" x:Name="Pref_IPC"/>
-                                    <CheckBox Content="Manual Garbage Collection" Canvas.Top="80" x:Name="Pref_GC"/>
-                                </Canvas>
-                            </GroupBox>
-                        </StackPanel>
-                    </ScrollViewer>
-                </Grid>
-            </TabItem>
-        </TabControl>
-        <Slider Style="{StaticResource FlatSlider}"  x:Name="PositionSlider"  ValueChanged="PositionChanged" PreviewMouseDown="PositionMouseDown" 
-                Height="12" VerticalAlignment="Bottom" Maximum="600" Value="200" Foreground="#FF575757"  OpacityMask="Gray"/>
+                                    <Style.Triggers>
+                                        <Trigger Property="IsEnabled" Value="true">
+                                            <Setter Property="Text" Value="NotSupported" />
 
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                                <Style TargetType="{x:Type Label}">
+                                    <Setter Property="HorizontalAlignment" Value="Left" />
+                                    <Setter Property="VerticalAlignment" Value="Top" />
+                                    <Setter Property="Foreground" Value="White" />
+                                </Style>
+                            </Grid.Resources>
+                            <Label Content="Title" Margin="154,30,0,0" />
+                            <TextBox x:Name="Meta_TitleBox" Margin="232,30,5,0"/>
+                            <Label Content="Artist" Margin="154,55,0,0"/>
+                            <TextBox x:Name="Meta_ArtistBox" Margin="232,55,5,0" />
+                            <Label Content="Album" Margin="154,80,0,0"/>
+                            <TextBox x:Name="Meta_AlbumBox" Margin="232,80,5,0" />
+                            <Label Content="Album Artist" Margin="151,105,0,0" />
+                            <TextBox x:Name="Meta_AlbumArtistBox" Margin="232,105,5,0" />
+                            <Label Content="Composer" Margin="151,130,0,0" />
+                            <TextBox x:Name="Meta_ComposerBox" Margin="232,130,5,0" />
+                            <Label Content="Conductor" Margin="151,155,0,0" />
+                            <TextBox x:Name="Meta_ConductorBox" Margin="232,155,5,0" />
+                            <Label Content="Genre" Margin="151,180,0,0" />
+                            <TextBox x:Name="Meta_GenreBox" Margin="232,180,5,0"  />
+                            <Label Content="Track" Margin="151,205,0,0"/>
+                            <TextBox x:Name="Meta_TrackBox" Margin="232,205,5,0" />
+                            <Label Content="Comment" Margin="151,230,0,0" />
+                            <TextBox x:Name="Meta_YearBox" Margin="232,230,5,0" />
+                            <Label Content="Year" Margin="151,255,0,0"/>
+                            <TextBox x:Name="Meta_CommentBox" Margin="232,255,5,0" />
+                            <Label Content="Copyright" Margin="151,280,0,0" />
+                            <TextBox x:Name="Meta_CopyrightBox" Margin="232,280,5,0" />
+                            <Label Content="Lyrics" Margin="0, 305, 5, 0" />
+                            <TextBox x:Name="Meta_LyricsBox" Margin="0, 325, 0, 0" Height="250"/>
+
+                            <Image x:Name="Meta_ArtworkImage" Height="150" Width="150"  VerticalAlignment="Top" HorizontalAlignment="Left"/>
+                        </Grid>
+                    </StackPanel>
+                </ScrollViewer>
+            </Popup>
+        </Grid.Resources>
     </Grid>
     <Window.Resources>
         <SolidColorBrush x:Key="KeyOfBackground" Color="#FF202020" />
@@ -306,43 +288,121 @@
             <Setter Property="Foreground" Value="{DynamicResource KeyOfForeground}" />
             <Setter Property="FontSize" Value="16" />
         </Style>
-        <Style TargetType="{x:Type m:MaterialIcon}" x:Key="TabItemMaterial">
+        <Style TargetType="{x:Type player:MaterialIcon}" x:Key="TabItemMaterial">
             <Setter Property="Height" Value="23" />
             <Setter Property="HorizontalAlignment" Value="Left"/>
             <Setter Property="Foreground" Value="{DynamicResource KeyOfForeground}" />
             <Setter Property="Background" Value="#1111" />
         </Style>
         <ControlTemplate x:Key="TabItemControlTemplate1" TargetType="{x:Type TabItem}">
-            <Grid x:Name="templateRoot" SnapsToDevicePixels="True">
-                <Border x:Name="mainBorder" BorderThickness="3,0,0,0" BorderBrush="#FFC0C0C0">
-                    <Border x:Name="innerBorder" BorderBrush="#FFACACAC" BorderThickness="2,2,2,2" Margin="0" Opacity="0"/>
+            <Grid x:Name="templateRoot" Background="#02020202">
+                <Border x:Name="mainBorder" Background="#02010101">
+                    <Border.Triggers>
+                    </Border.Triggers>
                 </Border>
-                <ContentPresenter x:Name="contentPresenter" ContentTemplate="{TemplateBinding HeaderTemplate}" Content="{TemplateBinding Header}" ContentStringFormat="{TemplateBinding HeaderStringFormat}" ContentSource="Header" Focusable="False" HorizontalAlignment="{Binding HorizontalContentAlignment, RelativeSource={RelativeSource FindAncestor, AncestorLevel=1, AncestorType={x:Type ItemsControl}}}" Margin="{TemplateBinding Padding}" RecognizesAccessKey="True" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" VerticalAlignment="{Binding VerticalContentAlignment, RelativeSource={RelativeSource FindAncestor, AncestorLevel=1, AncestorType={x:Type ItemsControl}}}"/>
+                <ContentPresenter x:Name="contentPresenter" ContentTemplate="{TemplateBinding HeaderTemplate}" 
+                                  Content="{TemplateBinding Header}" ContentStringFormat="{TemplateBinding HeaderStringFormat}"
+                                  ContentSource="Header" Focusable="False"
+                                  HorizontalAlignment="{Binding HorizontalContentAlignment, RelativeSource={RelativeSource FindAncestor, AncestorLevel=1, AncestorType={x:Type ItemsControl}}}" 
+                                  Margin="{TemplateBinding Padding}" RecognizesAccessKey="True" 
+                                  SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" 
+                                  VerticalAlignment="{Binding VerticalContentAlignment, RelativeSource={RelativeSource FindAncestor, AncestorLevel=1, AncestorType={x:Type ItemsControl}}}">
+                    <ContentPresenter.Triggers>
+                    </ContentPresenter.Triggers>
+                </ContentPresenter>
+                <Grid.Triggers>
+                </Grid.Triggers>
             </Grid>
             <ControlTemplate.Triggers>
-                <Trigger Property="IsSelected" Value="false">
-                    <Setter Property="BorderThickness" TargetName="mainBorder" Value="0" />
-                </Trigger>
                 <Trigger Property="IsSelected" Value="true">
                     <Setter Property="Background" TargetName="mainBorder">
                         <Setter.Value>
                             <LinearGradientBrush EndPoint="0,1" StartPoint="0,0">
-                                <GradientStop Color="#FF303030" Offset="0"/>
+                                <GradientStop Color="#FF303030" Offset="1"/>
                                 <GradientStop Color="#FF404040" Offset="1"/>
                             </LinearGradientBrush>
                         </Setter.Value>
                     </Setter>
                     <Setter Property="BorderBrush" TargetName="mainBorder" Value="#FF7E7E7E"/>
-                    <Setter Property="BorderThickness" TargetName="innerBorder" Value="0,1,2,1"/>
-                    <Setter Property="BorderThickness" TargetName="mainBorder" Value="0,3,0,0"/>
+                    <Setter Property="BorderThickness" TargetName="mainBorder" Value="0,0,0,2"/>
                 </Trigger>
-                <Trigger Property="IsMouseOver" Value="true">
-                    <Setter Property="Panel.ZIndex" Value="1"/>
-                    <Setter Property="Opacity" TargetName="innerBorder" Value="1"/>
-                    <Setter Property="BorderThickness" TargetName="innerBorder" Value="0,0,0,0"/>
-                    <Setter Property="BorderThickness" TargetName="mainBorder" Value="0,3,0,0"/>
-                </Trigger>
+
             </ControlTemplate.Triggers>
         </ControlTemplate>
+
+        <ControlTemplate x:Key="FlatSlider" TargetType="{x:Type Slider}">
+            <Border x:Name="border" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Background="{TemplateBinding Background}" SnapsToDevicePixels="True">
+                <Grid>
+                    <Border x:Name="TrackBackground" Grid.Row="1" VerticalAlignment="center">
+                        <Canvas Margin="-6,-1">
+                            <Rectangle x:Name="PART_SelectionRange" Fill="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}" Height="4.0" Visibility="Hidden"/>
+                        </Canvas>
+                    </Border>
+                    <Track x:Name="PART_Track" Grid.Row="1">
+                        <Track.DecreaseRepeatButton>
+                            <RepeatButton Height="9" Click="RepeatButton_Click"  Background="{TemplateBinding Foreground}" BorderBrush="Transparent"/>
+                        </Track.DecreaseRepeatButton>
+                        <Track.IncreaseRepeatButton>
+                            <RepeatButton Height="5" Click="RepeatButton_Click_1" Background="Transparent" />
+                        </Track.IncreaseRepeatButton>
+                        <Track.Thumb>
+                            <Thumb x:Name="Thumb" Focusable="False" OverridesDefaultStyle="True" >
+                                <Thumb.Template>
+                                    <ControlTemplate TargetType="{x:Type Thumb}">
+                                        <Grid >
+                                            <Ellipse Width="15" Height="15" x:Name="grip"  StrokeThickness="2" Stroke="{TemplateBinding Foreground}"
+                                                             Fill="Transparent" Margin="-2, 0, 0, 0"/>
+                                        </Grid>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="true">
+                                                <Setter Property="StrokeThickness" TargetName="grip" Value="3"/>
+
+                                            </Trigger>
+                                            <Trigger Property="IsDragging" Value="true">
+                                                <Setter Property="Fill" TargetName="grip" Value="DarkGray"/>
+                                                <Setter Property="StrokeThickness" TargetName="grip" Value="0" />
+                                            </Trigger>
+                                            <EventTrigger RoutedEvent="UIElement.MouseEnter">
+                                                <BeginStoryboard>
+                                                    <Storyboard >
+                                                        <DoubleAnimation SpeedRatio="4" AccelerationRatio="1" From="15" To="20" Storyboard.TargetName="grip" Storyboard.TargetProperty="Width"/>
+                                                    </Storyboard>
+                                                </BeginStoryboard>
+                                                <BeginStoryboard>
+                                                    <Storyboard >
+                                                        <DoubleAnimation SpeedRatio="4" AccelerationRatio="1" From="15" To="20" Storyboard.TargetName="grip" Storyboard.TargetProperty="Height"/>
+                                                    </Storyboard>
+                                                </BeginStoryboard>
+                                            </EventTrigger>
+                                            <EventTrigger RoutedEvent="UIElement.MouseLeave">
+                                                <BeginStoryboard>
+                                                    <Storyboard >
+                                                        <DoubleAnimation SpeedRatio="2" AccelerationRatio="0.3" From="20" To="15" Storyboard.TargetName="grip" Storyboard.TargetProperty="Width"/>
+                                                    </Storyboard>
+                                                </BeginStoryboard>
+                                                <BeginStoryboard>
+                                                    <Storyboard >
+                                                        <DoubleAnimation SpeedRatio="2" AccelerationRatio="0.3" From="20" To="15" Storyboard.TargetName="grip" Storyboard.TargetProperty="Height"/>
+                                                    </Storyboard>
+                                                </BeginStoryboard>
+                                            </EventTrigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Thumb.Template>
+                            </Thumb>
+                        </Track.Thumb>
+                    </Track>
+                </Grid>
+            </Border>
+        </ControlTemplate>
+        <sys:Double x:Key="Position_Value">2</sys:Double>
+        <sys:Double x:Key="Position_Max">1000</sys:Double>
+        <sys:Double x:Key="Position_ChangeS">0.05</sys:Double>
+        <sys:Double x:Key="Position_ChangeL" >0.1</sys:Double>
+        <sys:String x:Key="Res_Title">Player</sys:String>
+        <player:IconType x:Key="Button_PlayIcon">ic_play_arrow</player:IconType>
+
+        <!--<SolidColorBrush x:Key="SliderThumb.Static.Foreground" Color="#FFE5E5E5"/>
+        <SolidColorBrush x:Key="SliderThumb.MouseOver.Background" Color="#FFDCDCDC"/>-->
     </Window.Resources>
 </Window>

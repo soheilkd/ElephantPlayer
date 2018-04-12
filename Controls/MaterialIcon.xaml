@@ -1,0 +1,20 @@
+﻿<UserControl x:Class="Player.Controls.MaterialIcon"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Grid>
+        <Viewbox Width="{Binding Width}" Height="{Binding Height}">
+            <Canvas Width="24" Height="24" Background="{Binding Background}">
+                <FrameworkElement.Resources>
+                    <Style TargetType="{x:Type Path}">
+                        <Setter Property="Shape.Fill" Value="{Binding Foreground}"/>
+                    </Style>
+                    <Style TargetType="{x:Type Ellipse}">
+                        <Setter Property="Shape.Fill" Value="{Binding Foreground}"/>
+                    </Style>
+                </FrameworkElement.Resources>
+                <ContentControl x:Name="PART_ContentControl" HorizontalAlignment="Center" VerticalAlignment="Center"
+                        Content="{Binding IconResource, Mode=OneWay}"/>
+            </Canvas>
+        </Viewbox>
+    </Grid>
+</UserControl>
