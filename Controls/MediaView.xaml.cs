@@ -1,6 +1,5 @@
 ﻿using Player.Controls;
 using Player.Events;
-using Player.Types;
 using System;
 using System.Windows.Media;
 using System.Threading.Tasks;
