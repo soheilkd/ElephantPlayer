@@ -10,12 +10,70 @@
              Loaded="UserControl_Loaded" MouseDoubleClick="OutputCanvas_MouseDoubleClick"
              x:Name="OutputCanvas">
     <Grid >
-        <Label Content="MainLabel" HorizontalAlignment="Left" VerticalAlignment="Top" x:Name="MainLabel" Foreground="White" FontWeight="Medium" FontSize="14" Margin="30,0,0,0"/>
-        <Label Content="SubLabel" HorizontalAlignment="Left" Margin="30,20,0,0" VerticalAlignment="Top" x:Name="SubLabel" Foreground="White"/>
+        <Label Content="         " x:Name="MainLabel" FontWeight="Medium" FontSize="14" Margin="30,0,0,0" Foreground="White" HorizontalAlignment="Left" VerticalAlignment="Top">
+            <Label.Triggers>
+                <EventTrigger RoutedEvent="Loaded">
+                    <BeginStoryboard>
+                        <Storyboard>
+                            <StringAnimationUsingKeyFrames Storyboard.TargetName="MainLabel" Storyboard.TargetProperty="Content" x:Name="LoadAnim" SpeedRatio="0.5" AccelerationRatio="0.3" DecelerationRatio="0.4"/>
+                        </Storyboard>
+                    </BeginStoryboard>
+                </EventTrigger>
+            </Label.Triggers>
+        </Label>
+        <Label Content="       " Margin="30,20,0,0" x:Name="SubLabel" Foreground="White" HorizontalAlignment="Left" VerticalAlignment="Top">
+            <Label.Triggers>
+                <EventTrigger RoutedEvent="Loaded">
+                    <BeginStoryboard>
+                        <Storyboard>
+                            <StringAnimationUsingKeyFrames Storyboard.TargetName="SubLabel" Storyboard.TargetProperty="Content" x:Name="LoadAnim2" SpeedRatio="0.5" AccelerationRatio="0.3" DecelerationRatio="0.4"/>
+                        </Storyboard>
+                    </BeginStoryboard>
+                </EventTrigger>
+            </Label.Triggers>
+        </Label>
         <controls:MaterialIcon  x:Name="MainIcon" HorizontalAlignment="Left" Width="30" Icon="ic_music_note" Foreground="White"/>
-        <controls:MaterialButton HorizontalAlignment="Right" Margin="0, 0, 5, 0" Icon="ic_more_horiz" EllipseType="Rectular" x:Name="OtherButton"/>
-        <controls:MaterialButton HorizontalAlignment="Right" Margin="0, 0, 50, 0" Icon="ic_play_arrow" EllipseType="Rectular" x:Name="PlayButton" Click="MaterialButton_Click" />
+        <controls:MaterialButton HorizontalAlignment="Right" Margin="0, 0, 5, 0" Icon="ic_more_horiz" EllipseType="Rectular" x:Name="OtherButton" Click="Other_Click"/>
+        <controls:MaterialButton HorizontalAlignment="Right" Margin="0, 0, 50, 0" Icon="ic_play_arrow" EllipseType="Rectular" x:Name="PlayButton" Click="Play_Click" />
+
+        <Popup PlacementTarget="{Binding ElementName=OtherButton}" x:Name="OtherPopup" StaysOpen="False" PopupAnimation="Slide">
+            <StackPanel Background="#9222" >
+                <MenuItem Header="Play After" Click="PlayAfter_Click"/>
+                <MenuItem Header="Repeat" >
+                    <MenuItem.Items>
+                        <MenuItem Header="2 times" />
+                        <MenuItem Header="3 times" />
+                        <MenuItem Header="5 times" />
+                        <MenuItem Header="10 times" />
+                        <MenuItem Header="Forever" />
+                    </MenuItem.Items>
+                </MenuItem>
+                <MenuItem Header="Remove" Click="Remove_Click" />
+                <MenuItem Header="Delete" Click="Delete_Click"/>
+                <MenuItem Header="Move" >
+                    <MenuItem.Items>
+                        <MenuItem Header="Default" />
+                        <MenuItem Header="..." />
+                    </MenuItem.Items>
+                </MenuItem>
+                <MenuItem Header="Copy">
+                    <MenuItem.Items>
+                        <MenuItem Header="Default" />
+                        <MenuItem Header="..." />
+                    </MenuItem.Items>
+                </MenuItem>
+                <MenuItem Header="Open Location" Click="Location_Click"/>
+                <MenuItem Header="Properties"  Click="Properties_Click"/>
+            </StackPanel>
+        </Popup>
     </Grid>
+    <UserControl.Resources>
+        <Style TargetType="MenuItem">
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="HorizontalContentAlignment" Value="Left" />
+            <Setter Property="Background" Value="#9222"/>
+        </Style>
+    </UserControl.Resources>
     <UserControl.Triggers>
         <EventTrigger RoutedEvent="MouseEnter" SourceName="OutputCanvas">
             <BeginStoryboard>

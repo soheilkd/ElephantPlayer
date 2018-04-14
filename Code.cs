@@ -27,7 +27,6 @@ using Forms = System.Windows.Forms;
 using GmaHook = Gma.System.MouseKeyHook;
 namespace Player.User
 {
-
     public static class UI
     {
         public static IEnumerable<T> FindVisualChildren<T>(DependencyObject depObj) where T : DependencyObject
@@ -104,10 +103,6 @@ namespace Player.Events
         public int ArgsCount => _Args.Count;
         public string[] Args => _Args.ToArray();
     }
-}
-
-namespace Player.Events
-{
     public enum InfoExchangeType
     {
         Integer, Double,
@@ -125,6 +120,7 @@ namespace Player.Events
         public int Index { get; set; }
         public Media Media { get; set; }
         public MediaView Sender { get; set; }
+        public int Para { get; set; }
 
         public MediaEventArgs(int index) => Index = index;
         public MediaEventArgs(TagLib.File f) => File = f;
@@ -154,13 +150,16 @@ namespace Player.Management
     public enum ManagementChange
     {
         NewMedia,
+        MediaRequested,
         EditingTag,
         InterfaceUpdate,
         MediaUpdate,
         Crash,
         PopupRequest,
         ArtworkClick,
-        SomethingHappened
+        SomethingHappened,
+        MediaRemoved,
+        MediaMoved
     }
     public class ManagementChangeEventArgs : EventArgs
     {
@@ -181,48 +180,29 @@ namespace Player.Management
         public static ManagementChangeEventArgs Default(Events.MediaEventArgs optional = null)
         => new ManagementChangeEventArgs() { Change = ManagementChange.SomethingHappened, Changes = optional };
     }
-    [Serializable()]
-    public class MassiveLibrary : IDisposable, ISerializable
+    [Serializable]
+    public class MassiveLibrary
     {
-        public void GetObjectData(SerializationInfo info, StreamingContext context)
+        public Media[] Medias { get; set; } = new Media[0];
+        public MassiveLibrary(Media[] medias) => Medias = medias;
+        public MassiveLibrary() { }
+        public void Save()
         {
-            throw new NotImplementedException();
+            using (FileStream stream = new FileStream(App.LibraryPath, FileMode.Create))
+                (new BinaryFormatter()).Serialize(stream, this);
         }
-        #region IDisposable Support
-        private bool disposedValue = false; // To detect redundant calls
-
-
-        protected virtual void Dispose(bool disposing)
+        public static void Save(Media[] medias)
         {
-            if (!disposedValue)
-            {
-                if (disposing)
-                {
-                    // TODO: dispose managed state (managed objects).
-                }
-
-                // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.
-                // TODO: set large fields to null.
-
-                disposedValue = true;
-            }
+            using (FileStream stream = new FileStream(App.LibraryPath, FileMode.Create))
+                (new BinaryFormatter()).Serialize(stream, new MassiveLibrary(medias));
         }
-
-        // TODO: override a finalizer only if Dispose(bool disposing) above has code to free unmanaged resources.
-        // ~MassiveLibrary() {
-        //   // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
-        //   Dispose(false);
-        // }
-
-        // This code added to correctly implement the disposable pattern.
-        void IDisposable.Dispose()
+        public static MassiveLibrary Load()
         {
-            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
-            Dispose(true);
-            // TODO: uncomment the following line if the finalizer is overridden above.
-            // GC.SuppressFinalize(this);
+            if (!File.Exists(App.LibraryPath))
+                return new MassiveLibrary();
+            using (FileStream stream = new FileStream(App.LibraryPath, FileMode.Open))
+                return (new BinaryFormatter()).Deserialize(stream) as MassiveLibrary;
         }
-        #endregion
     }
 
     public class MediaManager
@@ -313,13 +293,26 @@ namespace Player.Management
         }
         private Random Shuffle = new Random(2);
         
-        public bool Add(string path)
+        public bool Add(string path, bool requestPlay = false)
         {
             if (path.EndsWith(".elp"))
                 return DownloadPlaylist(path);
             if (GetType(path) == MediaType.NotMedia)
                 return false;
             int p = AllMedias.Count;
+            int index = AllMedias.FindIndex(item => item.Path == path);
+            if (index != -1)
+            {
+                if (!requestPlay)
+                    return false;
+                Change?.Invoke(this, new ManagementChangeEventArgs()
+                {
+                    Change = ManagementChange.MediaRequested,
+                    Changes = new Events.MediaEventArgs(index)
+                });
+                return false;
+            }
+
             AllMedias.Add(new Media(path));
            
             Change?.Invoke(this, new ManagementChangeEventArgs()
@@ -327,17 +320,46 @@ namespace Player.Management
                 Change = ManagementChange.NewMedia,
                 Changes = new Events.MediaEventArgs(p)
             });
+            if (requestPlay)
+                Change?.Invoke(this, new ManagementChangeEventArgs()
+                {
+                    Change = ManagementChange.MediaRequested,
+                    Changes = new Events.MediaEventArgs(p)
+                });
             return true;
         }
-        public bool Add(string[] paths)
+        public bool Add(string[] paths, bool requestPlay = false)
         {
             var c = AllMedias.Count;
             for (int i = 0; i < paths.Length; i++)
                 Add(paths[i]);
             if (c != AllMedias.Count)
+            {
+                if (requestPlay)
+                    Change?.Invoke(this, new ManagementChangeEventArgs()
+                    {
+                        Change = ManagementChange.MediaRequested,
+                        Changes = new Events.MediaEventArgs(AllMedias[c])
+                    });
                 return true;
+            }
             else
                 return false;
+        }
+        public bool Add(Media media)
+        {
+            if (media.IsMedia == false)
+                return false;
+            int p = AllMedias.Count;
+            if (!media.IsLoaded)
+                media = new Media(media.Path);
+            AllMedias.Add(media);
+            Change?.Invoke(this, new ManagementChangeEventArgs()
+            {
+                Change = ManagementChange.NewMedia,
+                Changes = new Events.MediaEventArgs(p)
+            });
+            return true;
         }
 
         public bool Remove(string path)
@@ -355,8 +377,7 @@ namespace Player.Management
             AllMedias.RemoveAt(index);
             if (index < CurrentlyPlayingIndex)
                 CurrentlyPlayingIndex--;
-            Change?.Invoke(this, new ManagementChangeEventArgs() { Change = ManagementChange.InterfaceUpdate });
-
+            Change?.Invoke(this, new ManagementChangeEventArgs() { Change = ManagementChange.MediaRemoved, Changes = new Events.MediaEventArgs(index) });
             return true;
         }
 
@@ -563,6 +584,30 @@ namespace Player.Management
             return CurrentlyPlaying;
         }
         
+        public void Repeat(int index, int times)
+        {
+
+        }
+        public void Repeat(int index)
+        {
+
+        }
+
+        public void PlayNext(int index)
+        {
+
+        }
+        
+        public void ShowProperties(int index)
+        {
+
+        }
+
+        public void Close()
+        {
+            MassiveLibrary.Save(AllMedias.ToArray());
+        }
+
         public void Play(Media media) => Next(Find(media));
         public void ChangeSettings(Preferences newSettings)
         {
@@ -575,17 +620,14 @@ namespace Player
 {
     public partial class App : Application, InstanceManager.ISingleInstanceApp
     {
-        public static ResourceDictionary IconDictionary = new ResourceDictionary()
-        {
-            Source = new Uri(@"pack://application:,,,/Controls/Icons.xaml")
-        };
+        public static ResourceDictionary IconDictionary;
         public static event EventHandler<Events.InstanceEventArgs> NewInstanceRequested;
         public const string LauncherIdentifier = "ElephantPlayerBySoheilKD_CERTID8585";
         public static string ExeFullPath = Environment.GetCommandLineArgs()[0];
         public static string ExePath = ExeFullPath.Substring(0, ExeFullPath.LastIndexOf("\\") + 1);
         public static string PrefPath = $"{ExePath}SettingsProvider.dll";
-        public static string LyricsPath = $"{ExePath}LyricsProvider.dll";
         public static string AppName = $"ELPWMP";
+        public static string LibraryPath = $"{ExePath}Library.dll";
         [STAThread]
         public static void Main(string[] args)
         {
@@ -599,6 +641,7 @@ namespace Player
                 var application = new App();
 
                 application.InitializeComponent();
+                IconDictionary = Current.Resources;
                 application.Run();
                 InstanceManager.Instance<App>.Cleanup();
             }
@@ -617,10 +660,8 @@ namespace Player
         public int MainKey { get; set; } = 0;
         public int TileFontIndex { get; set; } = 0;
         public int ViewMode { get; set; } = 0;
-        public (double W, double H)[] Sizes { get; set; } = new (double, double)[2]
-        {
-            (250, 250), (250, 250)
-        };
+
+        public Size LastSize { get; set; } = new Size(400, 400);
         public Point LastLoc { get; set; } = new Point(20, 20);
 
         public bool VisionOrientation { get; set; } = true;
@@ -633,6 +674,7 @@ namespace Player
         public bool WMDebug { get; set; } = false;
         public bool IPC { get; set; } = true;
         public bool ManualGarbageCollector { get; set; } = false;
+        public double ExpanderHeight { get; set; } = 200;
         
         public static Preferences Load()
         {
@@ -650,10 +692,8 @@ namespace Player
                 bin.Serialize(stream, this);
             }
         }
-        
     }
-
-
+    
     public enum ViewMode { Singular, GroupByArtist, GroupByDir, GroupByAlbum }
     public enum ContextTool { Border, MainDisplay }
     public enum Orientation { Portrait, Landscape }
@@ -663,10 +703,11 @@ namespace Player
     public enum MediaViewMode { Default, Compact, Expanded }
     public enum MediaComparsion { Title, Name, Path, Type, Artist, Album }
     public enum MediaType { Music, Video, NotMedia }
+
+    [Serializable]
     public class Media : IDisposable
     {
         public Media() { }
-        public bool IsPlaying { get; set; }
         public bool IsMedia => MediaType != MediaType.NotMedia;
         public bool IsVideo => MediaType == MediaType.Video;
         public string Name { get; set; }
@@ -674,10 +715,14 @@ namespace Player
         public string Title { get; set; }
         public string Album { get; set; }
         public string Path { get; set; }
-        public string Lyrics { get; set; }
-        public long Duration { get; set; }
-        public ImageSource Artwork { get; set; }
+        public int PlayCount;
+        [NonSerialized] public bool IsPlaying;
+        [NonSerialized] public string Lyrics;
+        [NonSerialized] public bool IsLoaded;
+        [NonSerialized] public long Duration;
+        [NonSerialized] public BitmapSource Artwork;
         public MediaType MediaType;
+        
         public bool Contains(string para)
         {
             return Name.ToLower().Contains(para.ToLower())
@@ -707,12 +752,13 @@ namespace Player
                         Name = path.Substring(path.LastIndexOf("\\") + 1);
                         Path = path;
                         Artist = t.Tag.FirstPerformer;
-                        Title = t.Tag.Title;
+                        Title = t.Tag.Title ?? Name.Substring(0, Name.LastIndexOf("."));
                         Album = t.Tag.Album;
                         Duration = t.Length;
                         Artwork = t.Tag.Pictures.Length >= 1 ? Resource.Image.ToBitmapSource(t.Tag.Pictures[0]) : Resource.Image.ToBitmapSource(Properties.Resources.MusicArtwork);
                         MediaType = MediaType.Music;
                         Lyrics = t.Tag.Lyrics ?? " ";
+                        IsLoaded = true;
                     }
                     break;
                 case MediaType.Video:
@@ -724,6 +770,7 @@ namespace Player
                     Duration = 1;
                     Artwork = Resource.Image.ToBitmapSource(Properties.Resources.VideoArtwork);
                     MediaType = MediaType.Video;
+                    IsLoaded = true;
                     break;
                 case MediaType.NotMedia:
                     throw new IOException($"Given path is not valid media\r\nPath:{path}");
@@ -735,7 +782,7 @@ namespace Player
         public override int GetHashCode() => base.GetHashCode();
         #region IDisposable Support
         private bool disposedValue = false; // To detect redundant calls
-
+        
         protected virtual void Dispose(bool disposing)
         {
             if (!disposedValue)
@@ -897,6 +944,7 @@ namespace Player.Resource
         public static DColor ToDrawingColor(Color e) => DColor.FromArgb(e.A, e.R, e.G, e.B);
         public static DColor ToDrawingColor(Color? e) => ToDrawingColor(e.Value);
         public static Color ToColor(DColor e) => Color.FromArgb(e.A, e.R, e.G, e.B);
+
         public static async Task<Draw::Icon[]> GetTaskbarIcons()
         {
             await Task.Delay(10);
@@ -966,6 +1014,7 @@ namespace Player.Resource
 
             return bImg;
         }
+
         private static BitmapSource ToBitmapSource(Draw.Bitmap source)
         {
             return System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap(
@@ -988,19 +1037,7 @@ namespace Player.Resource
             return bitmapSource;
         }
         public static BitmapSource ToBitmapSource(TagLib.IPicture picture) => ToBitmapSource(ToImage(picture));
-
-        public static byte[] ToByte(BitmapImage image)
-        {
-            byte[] data;
-            BitmapEncoder encoder = new PngBitmapEncoder();
-            encoder.Frames.Add(BitmapFrame.Create(image));
-            using (MemoryStream ms = new MemoryStream())
-            {
-                encoder.Save(ms);
-                data = ms.ToArray();
-            }
-            return data;
-        }
+        
     }
     public static class String
     {
@@ -1021,6 +1058,7 @@ namespace Player.Extensions
         public static int ToInt(this double e) => Convert.ToInt32(e);
     }
 }
+
 namespace Player.InstanceManager
 {
     internal enum WM

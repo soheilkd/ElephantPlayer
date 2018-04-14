@@ -12,6 +12,8 @@ using System.Windows.Input;
 using System.Windows.Media.Animation;
 using Routed = System.Windows.RoutedPropertyChangedEventArgs<double>;
 using Forms = System.Windows.Forms;
+using System.Timers;
+
 namespace Player
 {
     /// <summary>
@@ -26,48 +28,11 @@ namespace Player
         List<MediaView> MediaViews = new List<MediaView>();
         Taskbar.Thumb Thumb = new Taskbar.Thumb();
 
-        double Position_Value
-        {
-            get => (double)Resources["Position_Value"];
-            set => Resources["Position_Value"] = value;
-        }
-        double Position_Max
-        {
-            get => (double)Resources["Position_Max"];
-            set => Resources["Position_Max"] = value;
-        }
-        double Position_SmallChange
-        {
-            get => (double)Resources["Position_ChangeS"];
-            set => Resources["Position_ChangeS"] = value;
-        }
-        double Position_LargeChange
-        {
-            get => (double)Resources["Position_ChangeL"];
-            set => Resources["Position_ChangeL"] = value;
-        }
-        System.Windows.Media.ImageSource Art
-        {
-            get => NP_ArtworkImage.Source;
-            set
-            {
-                NP_ArtworkImage.Source = value;
-                MiniArtworkImage.Source = value;
-            }
-        }
+        Timer PlayCountTimer = new Timer(100000) { AutoReset = false };
         new string Title
         {
             get => (string)Resources["Res_Title"];
             set => Resources["Res_Title"] = value;
-        }
-        IconType PPIcon
-        {
-            get => PlayPauseButton1.Icon;
-            set
-            {
-                PlayPauseButton1.Icon = value;
-                PlayPauseButton2.Icon = value;
-            }
         }
 
         public MainUI()
@@ -92,8 +57,7 @@ namespace Player
 
         private void App_NewInstanceRequested(object sender, InstanceEventArgs e)
         {
-            Manager.Add(e.Args);
-            Play(Manager.Next(Manager.Count - e.ArgsCount + 1));
+            Manager.Add(e.Args, true);
             if (Manager.CurrentlyPlaying.IsVideo && P.VisionOrientation)
                 OrinateVideoUI(true);
         }
@@ -107,13 +71,17 @@ namespace Player
                 {
                     //Update TimeSpan
                     TimeSpan = Player.NaturalDuration.TimeSpan;
-                    Position_Max = TimeSpan.TotalMilliseconds;
-                    Position_SmallChange = 1 * Position_Max / 100;
-                    Position_LargeChange = 5 * Position_Max / 100;
+                    PositionSlider.Maximum = TimeSpan.TotalMilliseconds;
+                    PositionSlider.SmallChange = 1 * PositionSlider.Maximum / 100;
+                    PositionSlider.LargeChange = 5 * PositionSlider.Maximum / 100;
+                    TimeLabel_Full.Content = ConvertTime(TimeSpan);
+                    PlayCountTimer.Stop();
+                    PlayCountTimer.Interval = PositionSlider.Maximum / 3;
+                    PlayCountTimer.Start();
                 }
-            Position_Value = Player.Position.TotalMilliseconds;
-            NP_Label5.Content = $"{ConvertTime(Player.Position)}   -    {Manager.CurrentlyPlayingIndex + 1} \\ {Manager.Count} ";
-            if (Position_Value >= Position_Max - 250)
+            PositionSlider.Value = Player.Position.TotalMilliseconds;
+            TimeLabel_Current.Content = ConvertTime(Player.Position);
+            if (PositionSlider.Value >= PositionSlider.Maximum - 250)
                 Play(Manager.Next());
             goto UX;
         }
@@ -125,6 +93,12 @@ namespace Player
                    MediaViews.Add(new MediaView(e.Changes.Index, Manager[e.Changes.Index].Title, Manager[e.Changes.Index].Artist, Manager[e.Changes.Index].MediaType));
                     QueueListView.Items.Add(MediaViews[MediaViews.Count - 1]);
                     MediaViews[MediaViews.Count - 1].DoubleClicked += MainUI_DoubleClicked;
+                    MediaViews[MediaViews.Count - 1].PlayClicked += (n, f) => Play(Manager.Next(f.Index));
+                    MediaViews[MediaViews.Count - 1].DeleteRequested += (n, f) => Manager.RequestDelete(f.Index);
+                    MediaViews[MediaViews.Count - 1].LocationRequested += (n, f) => Manager.RequestLocation(f.Index);
+                    MediaViews[MediaViews.Count - 1].RemoveRequested += (n, f) => Manager.Remove(f.Index);
+                    MediaViews[MediaViews.Count - 1].PropertiesRequested += (n, f) => Manager.ShowProperties(f.Index);
+                    MediaViews[MediaViews.Count - 1].RepeatRequested += (n, f) => Manager.Repeat(f.Index, f.Para);
                     Window_SizeChanged(this, null);
                     break;
                 case ManagementChange.EditingTag:
@@ -141,7 +115,19 @@ namespace Player
                     else
                         e.Changes.File.Save();
                     break;
-                case ManagementChange.InterfaceUpdate:
+                case ManagementChange.MediaRemoved:
+                    int index = MediaViews.FindIndex(item => item.MediaIndex == e.Changes.Index);
+                    MediaViews.RemoveAt(index);
+                    QueueListView.Items.Clear();
+                    for (int i = 0; i < MediaViews.Count; i++)
+                    {
+                        QueueListView.Items.Add(MediaViews[i]);
+                    }
+                    break;
+                case ManagementChange.MediaRequested:
+                    Play(Manager.Next(e.Changes.Index));
+
+                    break;
                 case ManagementChange.MediaUpdate:
                     for (int i = 0; i < MediaViews.Count; i++)
                         if (MediaViews[i].MediaIndex == e.Changes.Index)
@@ -168,11 +154,15 @@ namespace Player
         }
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
+            var lib = MassiveLibrary.Load();
+            for (int i = 0; i < lib.Medias.Length; i++)
+            {
+                Manager.Add(lib.Medias[i]);
+            }
             Left = P.LastLoc.X;
             Top = P.LastLoc.Y;
-            Sizes = P.Sizes;
-            Height = Sizes[0].H;
-            Width = Sizes[0].W;
+            Width = P.LastSize.Width;
+            Height = P.LastSize.Height;
             if (Environment.GetCommandLineArgs().Length != 0)
                 if (Manager.Add(Environment.GetCommandLineArgs()))
                 {
@@ -189,15 +179,16 @@ namespace Player
 
             User.Keyboard.KeyDown += Keyboard_KeyDown;
             User.Keyboard.KeyUp += Keyboard_KeyUp;
-            User.Keyboard.KeyPress += Keyboard_KeyPress;
             UserExperience();
+            PlayCountTimer.Elapsed += PlayCountTimer_Elapsed;
         }
 
-        private void Keyboard_KeyPress(object sender, Forms::KeyPressEventArgs e)
+        private void PlayCountTimer_Elapsed(object sender, ElapsedEventArgs e)
         {
 
         }
 
+        MassiveLibrary Library = new MassiveLibrary();
         private void Keyboard_KeyUp(object sender, Forms::KeyEventArgs e)
         {
             
@@ -210,11 +201,11 @@ namespace Player
                 switch (e.KeyCode)
                 {
                     case Forms::Keys.Left:
-                        ForcePositionChange(Position_SmallChange * -1);
+                        ForcePositionChange(PositionSlider.SmallChange * -1);
                         await Task.Delay(200);
                         break;
                     case Forms::Keys.Right:
-                        ForcePositionChange(Position_SmallChange);
+                        ForcePositionChange(PositionSlider.SmallChange);
                         await Task.Delay(200);
                         break;
                     case Forms::Keys.Up:
@@ -252,33 +243,33 @@ namespace Player
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            P.Sizes = Sizes;
+            P.LastSize = new Size()
+            {
+                Width = Width,
+                Height = Height
+            };
             P.LastLoc = new Point()
             {
                 X = Left,
                 Y = Top
             };
             P.Save();
+            Manager.Close();
             Application.Current.Shutdown();
-            
         }
 
         private void Play(Media media)
         {
-            LyricsBox.Text = media.Lyrics;
-            Position_Value = 0;
-            PPIcon = IconType.ic_pause;
+            PositionSlider.Value = 0;
+            PlayPauseButton2.Icon = IconType.ic_pause;
             Player.Source = new Uri(media.Path);
             Player.Play();
-            Art = media.Artwork;
+            MiniArtworkImage.Source = media.Artwork;
             Title = media.Title;
-            NP_Label2.Content = media.Artist;
-            NP_Label3.Content = media.Name;
-            NP_Label4.Content = media.MediaType.ToString();
-            NP_Label5.Content = "0:00";
             for (int i = 0; i < MediaViews.Count; i++)
                 MediaViews[i].IsPlaying = false;
-            MediaViews[MediaViews.FindIndex(item => item.MediaIndex == Manager.CurrentlyPlayingIndex)].IsPlaying = true;
+            int index = MediaViews.FindIndex(item => item.MediaIndex == Manager.CurrentlyPlayingIndex);
+            MediaViews[index].IsPlaying = true; 
 
         }
 
@@ -291,24 +282,20 @@ namespace Player
         {
             for (int i = 0; i < MediaViews.Count; i++)
                 MediaViews[i].Width = QueueListView.ActualWidth > 25 ? QueueListView.ActualWidth - 25 : 25;
-            Expander_CollapsAnim.From = Height + 50;
-            Expander_ExpandAnim.To = Height + 50;
-            if (PlayingExpander.IsExpanded)
-                Height = Height + 50;
         }
         
         private void PlayPauseButtonClick(object sender, EventArgs e)
         {
-            if (PPIcon == IconType.ic_pause)
+            if (PlayPauseButton2.Icon == IconType.ic_pause)
             {
                 Player.Pause();
-                PPIcon = IconType.ic_play_arrow;
+                PlayPauseButton2.Icon = IconType.ic_play_arrow;
                 Thumb.Refresh(false);
             }
             else
             {
                 Player.Play();
-                PPIcon = IconType.ic_pause;
+                PlayPauseButton2.Icon = IconType.ic_pause;
                 Thumb.Refresh(true);
             }
         }
@@ -322,8 +309,8 @@ namespace Player
         private void ForcePositionChange(double ms, bool Seek = false)
         {
             UserChangingPosition = true;
-            if (Seek) Position_Value = ms;
-            else Position_Value += ms;
+            if (Seek) PositionSlider.Value = ms;
+            else PositionSlider.Value += ms;
             UserChangingPosition = false;
         }
         async void PositionMouseDown(object sender, MouseButtonEventArgs e)
@@ -336,7 +323,7 @@ namespace Player
                 Player.Play();
                 await Task.Delay(50);
             }
-            PPIcon = IconType.ic_pause;
+            PlayPauseButton2.Icon = IconType.ic_pause;
             Player.Play();
             UserChangingPosition = false;
         }
@@ -344,17 +331,11 @@ namespace Player
         {
             if (UserChangingPosition)
             {
-                Player.Position = new TimeSpan(0, 0, 0, 0, Position_Value.ToInt());
-                Position_Value = ((Slider)sender).Value;
-                PositionSlider1.SetResourceReference(Slider.ValueProperty, "Position_Value");
-                PositionSlider2.SetResourceReference(Slider.ValueProperty, "Position_Value");
+                Player.Position = new TimeSpan(0, 0, 0, 0, PositionSlider.Value.ToInt());
+                PositionSlider.Value = ((Slider)sender).Value;
             }
         }
         private (int mins, int secs) TimeConvertion;
-        private (double W, double H)[] Sizes = new(double, double)[]
-        {
-            (0, 0), (0, 0)
-        };
         #region VideoUI
 
         private double LastWidth, LastHeight, LastLeft;
@@ -437,28 +418,29 @@ namespace Player
 
         private void PreviousButton_Click(object sender, EventArgs e)
         {
-            if (Position_Value > Position_Max / 100 * 10)
+            if (PositionSlider.Value > PositionSlider.Maximum / 100 * 10)
                 ForcePositionChange(0, true);
             else
                 Play(Manager.Previous());
         }
-
-        private void LyricsButton_Click(object sender, EventArgs e)
-        {
-            LyricsPopup.IsOpen = !LyricsPopup.IsOpen;
-        }
-
+        
         private void RepeatButton_Click(object sender, RoutedEventArgs e)
         {
-            Position_Value -= Position_LargeChange;
+            PositionSlider.Value -= PositionSlider.LargeChange;
         }
 
         private void RepeatButton_Click_1(object sender, RoutedEventArgs e)
         {
 
-            Position_Value += Position_LargeChange;
+            PositionSlider.Value += PositionSlider.LargeChange;
         }
 
+        private void GridSplitter_DragDelta(object sender, System.Windows.Controls.Primitives.DragDeltaEventArgs e)
+        {
+            if (LowContentGrid.Height + (-1 * e.VerticalChange) <= 100)
+                return;
+            LowContentGrid.Height += -1 * e.VerticalChange;
+        }
         private void window_KeyUp(object sender, KeyEventArgs e)
         {
             switch (e.Key)

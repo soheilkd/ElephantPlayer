@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media.Animation;
 #pragma warning disable 1591
 namespace Player
 {
@@ -14,15 +15,28 @@ namespace Player
         public event EventHandler<MediaEventArgs> DoubleClicked;
         public event EventHandler<MediaEventArgs> PlayClicked;
 
+        public event EventHandler<MediaEventArgs> DeleteRequested;
+        public event EventHandler<MediaEventArgs> RemoveRequested;
+        public event EventHandler<MediaEventArgs> PlayAfterRequested;
+        public event EventHandler<MediaEventArgs> PropertiesRequested;
+        public event EventHandler<MediaEventArgs> RepeatRequested;
+        public event EventHandler<MediaEventArgs> LocationRequested;
+
+
         public int MediaIndex { get; set; }
         public Preferences Settings;
         private bool isPlaying = false;
-        public bool IsPlaying { get => isPlaying; set
+        public bool IsPlaying
+        {
+            get => isPlaying; set
             {
                 isPlaying = value;
                 MainIcon.Icon = value ? IconType.ic_equalizer : DefaultIcon;
                 MainIcon.Foreground = value ? Brushes.DeepSkyBlue : Brushes.White;
-            } }
+                MainLabel.Foreground = value ? Brushes.DeepSkyBlue : Brushes.White;
+                SubLabel.Foreground = value ? Brushes.DeepSkyBlue : Brushes.White;
+            }
+        }
         public IconType DefaultIcon { get; set; }
         public MediaView()
         {
@@ -31,10 +45,24 @@ namespace Player
         public MediaView(int index, string main, string sub, MediaType type = MediaType.Music)
         {
             InitializeComponent();
+            string manip = "";
+            if (main == null)
+                main = "Unknown";
+            string full = main;
+            for (int i = 0; i < full.Length; i++)
+            {
+                manip += full[i];
+                LoadAnim.KeyFrames.Add(new DiscreteStringKeyFrame(manip));
+            }
+            manip = "";
+            full = sub;
+            for (int i = 0; i < full.Length; i++)
+            {
+                manip += full[i];
+                LoadAnim2.KeyFrames.Add(new DiscreteStringKeyFrame(manip));
+            }
             MediaIndex = index;
-            MainLabel.Content = main;
-            SubLabel.Content = sub;
-            
+
             MainIcon.Icon = type == MediaType.Music ? IconType.ic_music_note : IconType.ic_ondemand_video;
             DefaultIcon = MainIcon.Icon;
         }
@@ -59,7 +87,8 @@ namespace Player
         }
         public void UserControl_Loaded(object sender, RoutedEventArgs e)
         {
-
+            PlayButton.Opacity = 0;
+            OtherButton.Opacity = 0;
         }
 
         private void OutputCanvas_MouseDoubleClick(object sender, MouseButtonEventArgs e)
@@ -67,9 +96,40 @@ namespace Player
             DoubleClicked?.Invoke(this, new MediaEventArgs(MediaIndex));
         }
 
-        private void MaterialButton_Click(object sender, EventArgs e)
+        private void Play_Click(object sender, EventArgs e)
         {
+            
             PlayClicked?.Invoke(this, new MediaEventArgs(MediaIndex));
+            OtherPopup.IsOpen = false;
+        }
+        private void PlayAfter_Click(object sender, RoutedEventArgs e)
+        {
+            PlayAfterRequested?.Invoke(this, new MediaEventArgs(MediaIndex));
+            OtherPopup.IsOpen = false;
+        }
+        private void Remove_Click(object sender, RoutedEventArgs e)
+        {
+            RemoveRequested?.Invoke(this, new MediaEventArgs(MediaIndex));
+            OtherPopup.IsOpen = false;
+        }
+        private void Delete_Click(object sender, RoutedEventArgs e)
+        {
+            DeleteRequested?.Invoke(this, new MediaEventArgs(MediaIndex));
+            OtherPopup.IsOpen = false;
+        }
+        private void Location_Click(object sender, RoutedEventArgs e)
+        {
+            LocationRequested?.Invoke(this, new MediaEventArgs(MediaIndex));
+            OtherPopup.IsOpen = false;
+        }
+        private void Properties_Click(object sender, RoutedEventArgs e)
+        {
+            PropertiesRequested?.Invoke(this, new MediaEventArgs(MediaIndex));
+            OtherPopup.IsOpen = false;
+        }
+        private void Other_Click(object sender, EventArgs e)
+        {
+            OtherPopup.IsOpen = true;
         }
     }
 }

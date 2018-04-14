@@ -7,25 +7,8 @@
     xmlns:player="clr-namespace:Player.Controls" xmlns:sys="clr-namespace:System;assembly=mscorlib"
     x:Name="window"
     mc:Ignorable="d" Loaded="Window_Loaded" Closing="Window_Closing" Drop="Window_Drop" AllowDrop="True"
-    Title="Elephant Player" Height="446" Width="432" SizeChanged="Window_SizeChanged">
+    Title="Elephant Player" Height="544" Width="432" SizeChanged="Window_SizeChanged">
     <Grid Background="{DynamicResource KeyOfBackground}">
-        <MediaElement Visibility="Hidden" x:Name="Player" UnloadedBehavior="Manual" LoadedBehavior="Manual" MouseUp="Player_MouseUp" 
-                                  MouseDown="Player_MouseDown" Volume="1">
-            <MediaElement.ContextMenu>
-                <ContextMenu>
-                    <MenuItem Header="Enter Full Screen" x:Name="PlayerC_FullScreen" Click="PlayerCFullScreen">
-                        <MenuItem.Icon>
-                            <player:MaterialIcon Icon="ic_fullscreen" />
-                        </MenuItem.Icon>
-                    </MenuItem>
-                    <MenuItem Header="Use subtitle" Click="PlayerCSubtitle">
-                        <MenuItem.Icon>
-                            <player:MaterialIcon Icon="ic_subtitle" />
-                        </MenuItem.Icon>
-                    </MenuItem>
-                </ContextMenu>
-            </MediaElement.ContextMenu>
-        </MediaElement>
         <player:MaterialButton x:Name="SettingsButton" Icon="ic_settings" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="4"/>
         <Popup PlacementTarget="{Binding ElementName=SettingsButton}" Placement="Left">
             <Grid Background="#F333">
@@ -95,107 +78,113 @@
                 </ScrollViewer>
             </Grid>
         </Popup>
-        <ListView x:Name="QueueListView" BorderThickness="0,0 ,0 ,1" Margin="0, 0, 0, 85">
+        <ListView x:Name="QueueListView" BorderThickness="0" Margin="0, 0, 0, 85" Background="{DynamicResource KeyOfBackground}">
             <ListView.Resources>
                 <sys:Double x:Key="{x:Static SystemParameters.VerticalScrollBarWidthKey}">10</sys:Double>
             </ListView.Resources>
         </ListView>
-        <Expander x:Name="PlayingExpander" VerticalAlignment="Bottom" >
-            <Expander.Template>
-                <ControlTemplate TargetType="{x:Type Expander}">
-                    <Border BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Background="{TemplateBinding Background}" CornerRadius="3" SnapsToDevicePixels="True">
-                        <DockPanel>
-                            <ToggleButton x:Name="HeaderSite" ContentTemplate="{TemplateBinding HeaderTemplate}" Content="{TemplateBinding Header}" DockPanel.Dock="Top" Foreground="{TemplateBinding Foreground}" FontWeight="{TemplateBinding FontWeight}" FontStyle="{TemplateBinding FontStyle}" FontStretch="{TemplateBinding FontStretch}" FontSize="{TemplateBinding FontSize}" FontFamily="{TemplateBinding FontFamily}" HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}" IsChecked="{Binding IsExpanded, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}" MinWidth="0" MinHeight="0" Padding="{TemplateBinding Padding}" VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"/>
-                                <ContentPresenter x:Name="ExpandSite" ContentTemplate="{TemplateBinding ContentTemplate}" Content="{TemplateBinding Content}" ContentStringFormat="{TemplateBinding ContentStringFormat}" DockPanel.Dock="Bottom" Focusable="False" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" Margin="{TemplateBinding Padding}" Visibility="Collapsed" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
-                        </DockPanel>
-                    </Border>
-                    <ControlTemplate.Triggers>
-                        <Trigger Property="IsExpanded" Value="True">
-                            <Setter Property="Visibility" TargetName="ExpandSite" Value="Visible"/>
-                        </Trigger>
-                    </ControlTemplate.Triggers>
-                </ControlTemplate>
-            </Expander.Template>
-            <Expander.Header>
-                <Grid Width="{Binding ElementName=PlayingExpander, Path=ActualWidth}" Height="80" Background="{DynamicResource KeyOfBackground}">
+        <GridSplitter DragDelta="GridSplitter_DragDelta" VerticalAlignment="Bottom" Margin="0,0,0,80" Height="1" HorizontalAlignment="Stretch" Background="#9444"/>
+        <Grid Height="80" Background="{DynamicResource KeyOfBackground}" VerticalAlignment="Bottom" x:Name="LowContentGrid">
                     <Image x:Name="MiniArtworkImage" Height="55" Width="55" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="3,3,0,0"/>
-                    <Label Content="{DynamicResource Res_Title}" Foreground="White" Margin="60, 0, 0, 0"/>
-                    <player:MaterialButton Icon="ic_skip_previous" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="60,0,0,20" Click="PreviousButton_Click" Height="22"/>
-                    <player:MaterialButton Icon="ic_skip_next" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,60,20" Click="NextButton_Click" Height="22"/>
-                    <player:MaterialButton x:Name="PlayPauseButton2" Icon="{DynamicResource Button_PlayIcon}" Click="PlayPauseButtonClick" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,20" Height="24"/>
+                    <Label Content="{DynamicResource Res_Title}" Foreground="White" Margin="60, 0, 0, 0" Height="30" VerticalAlignment="Top"/>
+                    <player:MaterialButton Icon="ic_skip_previous" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="80,0,0,25" Click="PreviousButton_Click" Height="22"/>
+                    <player:MaterialButton Icon="ic_skip_next" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="165,0,0,25" Click="NextButton_Click" Height="22"/>
+            <player:MaterialButton x:Name="PlayPauseButton2" Icon="{DynamicResource Button_PlayIcon}" Click="PlayPauseButtonClick" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="120,0,0,24" Height="28"/>
+            <GridSplitter Height="2" HorizontalAlignment="Stretch" VerticalAlignment="Bottom"  DragDelta="GridSplitter_DragDelta" Background="#F777"/>
+        </Grid>
+                <MediaElement Visibility="Hidden" x:Name="Player" UnloadedBehavior="Manual" LoadedBehavior="Manual" MouseUp="Player_MouseUp" 
+                                  MouseDown="Player_MouseDown" Volume="1">
+                    <MediaElement.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem Header="Enter Full Screen" x:Name="PlayerC_FullScreen" Click="PlayerCFullScreen">
+                                <MenuItem.Icon>
+                                    <player:MaterialIcon Icon="ic_fullscreen" />
+                                </MenuItem.Icon>
+                            </MenuItem>
+                            <MenuItem Header="Use subtitle" Click="PlayerCSubtitle">
+                                <MenuItem.Icon>
+                                    <player:MaterialIcon Icon="ic_subtitle" />
+                                </MenuItem.Icon>
+                            </MenuItem>
+                        </ContextMenu>
+                    </MediaElement.ContextMenu>
+                </MediaElement>
 
-                    <Slider x:Name="PositionSlider2"  ValueChanged="PositionChanged" PreviewMouseDown="PositionMouseDown"  
-               VerticalAlignment="Bottom" SmallChange="{DynamicResource Position_ChangeS}" Template="{DynamicResource FlatSlider}"
-                        LargeChange="{DynamicResource Position_ChangeL}"
-                        Maximum="{DynamicResource Position_Max}" 
-                        Value="{DynamicResource Position_Value}" 
-                        Foreground="#FF575757" Margin="0, 0, 30, 3">
-                    </Slider>
-                </Grid>
-            </Expander.Header>
-            <Expander.Triggers>
-                <EventTrigger RoutedEvent="Expander.Expanded">
-                    <BeginStoryboard>
-                        <Storyboard>
-                            <DoubleAnimation From="80" x:Name="Expander_ExpandAnim"
-                                                     SpeedRatio="2" 
-                                                     AccelerationRatio="0.5" DecelerationRatio="0.5"
-                                                     Storyboard.TargetProperty="Height"
-                                        />
-                        </Storyboard>
-                    </BeginStoryboard>
-                </EventTrigger>
-                <EventTrigger RoutedEvent="Expander.Collapsed">
-                    <BeginStoryboard>
-                        <Storyboard>
-                            <DoubleAnimation  x:Name="Expander_CollapsAnim"
-                                                     To="80"
-                                                     AccelerationRatio="0.2" DecelerationRatio="0.8"
-                                                     Storyboard.TargetProperty="Height"
-                                                     SpeedRatio="1"
-                                        />
-                        </Storyboard>
-                    </BeginStoryboard>
-                </EventTrigger>
-            </Expander.Triggers>
-            <Expander.Resources>
+        <Slider x:Name="PositionSlider"  ValueChanged="PositionChanged" PreviewMouseDown="PositionMouseDown"  
+               VerticalAlignment="Bottom" Maximum="1000"
+                        Foreground="#FF575757" Margin="40, 0, 40, 5">
+            <Slider.Triggers>
+            </Slider.Triggers>
+            <Slider.Template>
+                <ControlTemplate >
+                    <Border x:Name="border" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Background="{TemplateBinding Background}" SnapsToDevicePixels="True">
+                        <Grid>
+                            <Border x:Name="TrackBackground" Grid.Row="1" VerticalAlignment="center">
+                                <Canvas Margin="-6,-1">
+                                    <Rectangle x:Name="PART_SelectionRange" Fill="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}" Height="4.0" Visibility="Hidden"/>
+                                </Canvas>
+                            </Border>
+                            <Track x:Name="PART_Track" Grid.Row="1">
+                                <Track.DecreaseRepeatButton>
+                                    <RepeatButton Height="9" Click="RepeatButton_Click"  Background="{TemplateBinding Foreground}" BorderBrush="Transparent"/>
+                                </Track.DecreaseRepeatButton>
+                                <Track.IncreaseRepeatButton>
+                                    <RepeatButton Height="5" Click="RepeatButton_Click_1" Background="Transparent" />
+                                </Track.IncreaseRepeatButton>
+                                <Track.Thumb>
+                                    <Thumb x:Name="Thumb" Focusable="False" OverridesDefaultStyle="True" >
+                                        <Thumb.Template>
+                                            <ControlTemplate TargetType="{x:Type Thumb}">
+                                                <Grid >
+                                                    <Ellipse Width="15" Height="15" x:Name="grip"  StrokeThickness="2" Stroke="{TemplateBinding Foreground}"
+                                                             Fill="Transparent" Margin="-2, 0, 0, 0"/>
+                                                </Grid>
+                                                <ControlTemplate.Triggers>
+                                                    <Trigger Property="IsMouseOver" Value="true">
+                                                        <Setter Property="StrokeThickness" TargetName="grip" Value="3"/>
 
-            </Expander.Resources>
-            <Grid Background="{DynamicResource KeyOfBackground}">
-                <Grid.Resources>
-                    <Style TargetType="{x:Type Label}">
-                        <Setter Property="HorizontalContentAlignment" Value="Center"/>
-                        <Setter Property="Foreground" Value="White" />
-                        <Setter Property="VerticalAlignment" Value="Bottom" />
-                    </Style>
-                </Grid.Resources>
-
-                <Slider x:Name="PositionSlider1"  ValueChanged="PositionChanged" PreviewMouseDown="PositionMouseDown"  
-               VerticalAlignment="Bottom" SmallChange="{DynamicResource Position_ChangeS}" Template="{DynamicResource FlatSlider}"
-                        LargeChange="{DynamicResource Position_ChangeL}"
-                        Maximum="{DynamicResource Position_Max}" 
-                        Value="{DynamicResource Position_Value}" 
-                        Foreground="#FF575757" Margin="0, 0, 0, 3">
-                </Slider>
-                <Image x:Name="NP_ArtworkImage" VerticalAlignment="Stretch" Margin="0,0,0,210"/>
-                <Label x:Name="NP_Label1" Content="Sample Label 1" Margin="0,0,0,170"/>
-                <Label x:Name="NP_Label2" Content="Sample Label 2" Margin="0,0,0,140"/>
-                <Label x:Name="NP_Label3" Content="Sample Label 3" Margin="0,0,0,110"/>
-                <Label x:Name="NP_Label4" Content="Sample Label 4" Margin="0,0,0,80"/>
-                <Label x:Name="NP_Label5" Content="Sample Label 5" Margin="0,0,0,50"/>
-                <player:MaterialButton Click="LyricsButton_Click" x:Name="LyricsButton" Icon="ic_short_text" HorizontalAlignment="Left" VerticalAlignment="Bottom" Height="22" Margin="5, 0, 0, 20"/>
-                <Popup PlacementTarget="{Binding ElementName=LyricsButton}" AllowsTransparency="True"
-                           Placement="Top" x:Name="LyricsPopup" PopupAnimation="Slide" StaysOpen="False">
-                    <Grid Width="{Binding Width, ElementName=window}"
-                              Height="255">
-                        <TextBox Background="#AFFFFFFF" x:Name="LyricsBox" IsReadOnly="True" BorderThickness="0" Text="Lorem Ipsum" FontSize="16"/>
-                    </Grid>
-                </Popup>
-                <player:MaterialButton Icon="ic_skip_previous" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="60,0,0,20" Click="PreviousButton_Click" Height="22"/>
-                <player:MaterialButton Icon="ic_skip_next" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,60,20" Click="NextButton_Click" Height="22"/>
-                <player:MaterialButton x:Name="PlayPauseButton1" Icon="{DynamicResource Button_PlayIcon}" Click="PlayPauseButtonClick" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,20" Height="24"/>
-            </Grid>
-        </Expander>
+                                                    </Trigger>
+                                                    <Trigger Property="IsDragging" Value="true">
+                                                        <Setter Property="Fill" TargetName="grip" Value="DarkGray"/>
+                                                        <Setter Property="StrokeThickness" TargetName="grip" Value="0" />
+                                                    </Trigger>
+                                                    <EventTrigger RoutedEvent="MouseEnter">
+                                                        <BeginStoryboard>
+                                                            <Storyboard >
+                                                                <DoubleAnimation SpeedRatio="4" AccelerationRatio="0" DecelerationRatio="1" From="15" To="20" Storyboard.TargetName="grip" Storyboard.TargetProperty="Width"/>
+                                                            </Storyboard>
+                                                        </BeginStoryboard>
+                                                        <BeginStoryboard>
+                                                            <Storyboard >
+                                                                <DoubleAnimation SpeedRatio="4" AccelerationRatio="0" DecelerationRatio="1" From="15" To="20" Storyboard.TargetName="grip" Storyboard.TargetProperty="Height"/>
+                                                            </Storyboard>
+                                                        </BeginStoryboard>
+                                                    </EventTrigger>
+                                                    <EventTrigger RoutedEvent="MouseLeave">
+                                                        <BeginStoryboard>
+                                                            <Storyboard >
+                                                                <DoubleAnimation SpeedRatio="2" AccelerationRatio="0" DecelerationRatio="1"  From="20" To="15" Storyboard.TargetName="grip" Storyboard.TargetProperty="Width"/>
+                                                            </Storyboard>
+                                                        </BeginStoryboard>
+                                                        <BeginStoryboard>
+                                                            <Storyboard >
+                                                                <DoubleAnimation SpeedRatio="2"  AccelerationRatio="0" DecelerationRatio="1" From="20" To="15" Storyboard.TargetName="grip" Storyboard.TargetProperty="Height"/>
+                                                            </Storyboard>
+                                                        </BeginStoryboard>
+                                                    </EventTrigger>
+                                                </ControlTemplate.Triggers>
+                                            </ControlTemplate>
+                                        </Thumb.Template>
+                                    </Thumb>
+                                </Track.Thumb>
+                            </Track>
+                        </Grid>
+                    </Border>
+                </ControlTemplate>
+            </Slider.Template>
+        </Slider>
+        <Label Content="00:00" Style="{DynamicResource TimeLabel}" HorizontalAlignment="Left" x:Name="TimeLabel_Current"/>
+        <Label Content="00:00" Style="{DynamicResource TimeLabel}" HorizontalAlignment="Right" x:Name="TimeLabel_Full" Width="38"/>
         <Grid.Resources>
             <Popup x:Key="MetaPopup">
                 <ScrollViewer Background="Transparent">
@@ -259,148 +248,20 @@
     <Window.Resources>
         <SolidColorBrush x:Key="KeyOfBackground" Color="#FF202020" />
         <SolidColorBrush x:Key="KeyOfForeground" Color="#FEEE" />
-        <Style TargetType="ListView">
-            <Setter Property="Background" Value="Transparent" />
+        <Style TargetType="{x:Type Label}" x:Key="TimeLabel">
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="VerticalAlignment" Value="Bottom"/>
+            <Setter Property="Width" Value="40" />
         </Style>
-        <Style TargetType="{x:Type TabItem}" x:Key="InvisibleTabStyle">
-            <Setter Property="Width" Value="0"/>
-            <Setter Property="Height" Value="0" />
-        </Style>
-        <Style TargetType="{x:Type TabItem}" x:Key="DefaultTabStyle">
-            <Setter Property="FontFamily" Value="Segoe UI Semibold" />
-            <Setter Property="Background" Value="{DynamicResource KeyOfBackground}" />
-            <Setter Property="BorderThickness" Value="0" />
-            <Setter Property="Width" Value="35" />
-            <Setter Property="Height" Value="33" />
-            <Setter Property="Template" Value="{DynamicResource TabItemControlTemplate1}"/>
-            <Style.Triggers>
-                <Trigger Property="IsSelected" Value="True">
-                    <Setter Property="Width" Value="130" />
-                </Trigger>
-            </Style.Triggers>
-        </Style>
-        <Style TargetType="{x:Type Grid}" x:Key="TabItemGrid">
-            <Setter Property="Height" Value="30" />
-        </Style>
-        <Style TargetType="{x:Type Label}" x:Key="TabItemLabel">
-            <Setter Property="HorizontalAlignment" Value="Stretch"/>
-            <Setter Property="Margin" Value="20,0,0,0"/>
-            <Setter Property="Foreground" Value="{DynamicResource KeyOfForeground}" />
-            <Setter Property="FontSize" Value="16" />
-        </Style>
-        <Style TargetType="{x:Type player:MaterialIcon}" x:Key="TabItemMaterial">
-            <Setter Property="Height" Value="23" />
-            <Setter Property="HorizontalAlignment" Value="Left"/>
-            <Setter Property="Foreground" Value="{DynamicResource KeyOfForeground}" />
-            <Setter Property="Background" Value="#1111" />
-        </Style>
-        <ControlTemplate x:Key="TabItemControlTemplate1" TargetType="{x:Type TabItem}">
-            <Grid x:Name="templateRoot" Background="#02020202">
-                <Border x:Name="mainBorder" Background="#02010101">
-                    <Border.Triggers>
-                    </Border.Triggers>
-                </Border>
-                <ContentPresenter x:Name="contentPresenter" ContentTemplate="{TemplateBinding HeaderTemplate}" 
-                                  Content="{TemplateBinding Header}" ContentStringFormat="{TemplateBinding HeaderStringFormat}"
-                                  ContentSource="Header" Focusable="False"
-                                  HorizontalAlignment="{Binding HorizontalContentAlignment, RelativeSource={RelativeSource FindAncestor, AncestorLevel=1, AncestorType={x:Type ItemsControl}}}" 
-                                  Margin="{TemplateBinding Padding}" RecognizesAccessKey="True" 
-                                  SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" 
-                                  VerticalAlignment="{Binding VerticalContentAlignment, RelativeSource={RelativeSource FindAncestor, AncestorLevel=1, AncestorType={x:Type ItemsControl}}}">
-                    <ContentPresenter.Triggers>
-                    </ContentPresenter.Triggers>
-                </ContentPresenter>
-                <Grid.Triggers>
-                </Grid.Triggers>
-            </Grid>
-            <ControlTemplate.Triggers>
-                <Trigger Property="IsSelected" Value="true">
-                    <Setter Property="Background" TargetName="mainBorder">
-                        <Setter.Value>
-                            <LinearGradientBrush EndPoint="0,1" StartPoint="0,0">
-                                <GradientStop Color="#FF303030" Offset="1"/>
-                                <GradientStop Color="#FF404040" Offset="1"/>
-                            </LinearGradientBrush>
-                        </Setter.Value>
-                    </Setter>
-                    <Setter Property="BorderBrush" TargetName="mainBorder" Value="#FF7E7E7E"/>
-                    <Setter Property="BorderThickness" TargetName="mainBorder" Value="0,0,0,2"/>
-                </Trigger>
 
-            </ControlTemplate.Triggers>
-        </ControlTemplate>
-
-        <ControlTemplate x:Key="FlatSlider" TargetType="{x:Type Slider}">
-            <Border x:Name="border" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Background="{TemplateBinding Background}" SnapsToDevicePixels="True">
-                <Grid>
-                    <Border x:Name="TrackBackground" Grid.Row="1" VerticalAlignment="center">
-                        <Canvas Margin="-6,-1">
-                            <Rectangle x:Name="PART_SelectionRange" Fill="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}" Height="4.0" Visibility="Hidden"/>
-                        </Canvas>
-                    </Border>
-                    <Track x:Name="PART_Track" Grid.Row="1">
-                        <Track.DecreaseRepeatButton>
-                            <RepeatButton Height="9" Click="RepeatButton_Click"  Background="{TemplateBinding Foreground}" BorderBrush="Transparent"/>
-                        </Track.DecreaseRepeatButton>
-                        <Track.IncreaseRepeatButton>
-                            <RepeatButton Height="5" Click="RepeatButton_Click_1" Background="Transparent" />
-                        </Track.IncreaseRepeatButton>
-                        <Track.Thumb>
-                            <Thumb x:Name="Thumb" Focusable="False" OverridesDefaultStyle="True" >
-                                <Thumb.Template>
-                                    <ControlTemplate TargetType="{x:Type Thumb}">
-                                        <Grid >
-                                            <Ellipse Width="15" Height="15" x:Name="grip"  StrokeThickness="2" Stroke="{TemplateBinding Foreground}"
-                                                             Fill="Transparent" Margin="-2, 0, 0, 0"/>
-                                        </Grid>
-                                        <ControlTemplate.Triggers>
-                                            <Trigger Property="IsMouseOver" Value="true">
-                                                <Setter Property="StrokeThickness" TargetName="grip" Value="3"/>
-
-                                            </Trigger>
-                                            <Trigger Property="IsDragging" Value="true">
-                                                <Setter Property="Fill" TargetName="grip" Value="DarkGray"/>
-                                                <Setter Property="StrokeThickness" TargetName="grip" Value="0" />
-                                            </Trigger>
-                                            <EventTrigger RoutedEvent="UIElement.MouseEnter">
-                                                <BeginStoryboard>
-                                                    <Storyboard >
-                                                        <DoubleAnimation SpeedRatio="4" AccelerationRatio="1" From="15" To="20" Storyboard.TargetName="grip" Storyboard.TargetProperty="Width"/>
-                                                    </Storyboard>
-                                                </BeginStoryboard>
-                                                <BeginStoryboard>
-                                                    <Storyboard >
-                                                        <DoubleAnimation SpeedRatio="4" AccelerationRatio="1" From="15" To="20" Storyboard.TargetName="grip" Storyboard.TargetProperty="Height"/>
-                                                    </Storyboard>
-                                                </BeginStoryboard>
-                                            </EventTrigger>
-                                            <EventTrigger RoutedEvent="UIElement.MouseLeave">
-                                                <BeginStoryboard>
-                                                    <Storyboard >
-                                                        <DoubleAnimation SpeedRatio="2" AccelerationRatio="0.3" From="20" To="15" Storyboard.TargetName="grip" Storyboard.TargetProperty="Width"/>
-                                                    </Storyboard>
-                                                </BeginStoryboard>
-                                                <BeginStoryboard>
-                                                    <Storyboard >
-                                                        <DoubleAnimation SpeedRatio="2" AccelerationRatio="0.3" From="20" To="15" Storyboard.TargetName="grip" Storyboard.TargetProperty="Height"/>
-                                                    </Storyboard>
-                                                </BeginStoryboard>
-                                            </EventTrigger>
-                                        </ControlTemplate.Triggers>
-                                    </ControlTemplate>
-                                </Thumb.Template>
-                            </Thumb>
-                        </Track.Thumb>
-                    </Track>
-                </Grid>
-            </Border>
-        </ControlTemplate>
         <sys:Double x:Key="Position_Value">2</sys:Double>
         <sys:Double x:Key="Position_Max">1000</sys:Double>
         <sys:Double x:Key="Position_ChangeS">0.05</sys:Double>
         <sys:Double x:Key="Position_ChangeL" >0.1</sys:Double>
         <sys:String x:Key="Res_Title">Player</sys:String>
         <player:IconType x:Key="Button_PlayIcon">ic_play_arrow</player:IconType>
+        <sys:Double x:Key="Exp_Height">84</sys:Double>
+        <sys:Double x:Key="Exp_ContentHeight">400</sys:Double>
 
         <!--<SolidColorBrush x:Key="SliderThumb.Static.Foreground" Color="#FFE5E5E5"/>
         <SolidColorBrush x:Key="SliderThumb.MouseOver.Background" Color="#FFDCDCDC"/>-->
