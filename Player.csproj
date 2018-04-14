@@ -266,10 +266,7 @@
     <WCFMetadata Include="Connected Services\" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Libraries\MaterialIcons.dll" />
     <Content Include="Libraries\taglib-sharp.dll" />
-    <Content Include="Libraries\WindowsAPICodePack.dll" />
-    <Content Include="Libraries\WindowsAPICodePack.Shell.dll" />
     <Resource Include="Resources\MusicArtwork.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
