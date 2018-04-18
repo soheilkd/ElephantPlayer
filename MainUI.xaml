@@ -87,9 +87,9 @@
         <Grid Height="80" Background="{DynamicResource KeyOfBackground}" VerticalAlignment="Bottom" x:Name="LowContentGrid">
                     <Image x:Name="MiniArtworkImage" Height="55" Width="55" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="3,3,0,0"/>
                     <Label Content="{DynamicResource Res_Title}" Foreground="White" Margin="60, 0, 0, 0" Height="30" VerticalAlignment="Top"/>
-                    <player:MaterialButton Icon="ic_skip_previous" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="80,0,0,25" Click="PreviousButton_Click" Height="22"/>
-                    <player:MaterialButton Icon="ic_skip_next" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="165,0,0,25" Click="NextButton_Click" Height="22"/>
-            <player:MaterialButton x:Name="PlayPauseButton2" Icon="{DynamicResource Button_PlayIcon}" Click="PlayPauseButtonClick" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="120,0,0,24" Height="28"/>
+            <player:MaterialButton Icon="ic_skip_previous" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="80,0,0,25" Click="PreviousButton_Click" Height="22" Width="22" />
+                    <player:MaterialButton Icon="ic_skip_next" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="165,0,0,25" Click="NextButton_Click" Height="22" Width="22"/>
+            <player:MaterialButton x:Name="PlayPauseButton2" Icon="ic_play_arrow" Click="PlayPauseButtonClick" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="120,0,0,24" Height="28" Width="28"/>
             <GridSplitter Height="2" HorizontalAlignment="Stretch" VerticalAlignment="Bottom"  DragDelta="GridSplitter_DragDelta" Background="#F777"/>
         </Grid>
                 <MediaElement Visibility="Hidden" x:Name="Player" UnloadedBehavior="Manual" LoadedBehavior="Manual" MouseUp="Player_MouseUp" 
