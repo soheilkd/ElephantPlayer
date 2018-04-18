@@ -8,8 +8,8 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Runtime.Remoting;
 using System.Runtime.Remoting.Channels;
+using System.Xml.Serialization;
 using System.Runtime.Remoting.Channels.Ipc;
-using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Security;
@@ -628,9 +628,11 @@ namespace Player
         public static string PrefPath = $"{ExePath}SettingsProvider.dll";
         public static string AppName = $"ELPWMP";
         public static string LibraryPath = $"{ExePath}Library.dll";
+        public static BitmapImage[] TaskbarIcons;
         [STAThread]
         public static void Main(string[] args)
         {
+
             if (!Environment.MachineName.Equals("Soheil-PC", StringComparison.CurrentCultureIgnoreCase) && !File.Exists($"{ExePath}\\Bakhshesh.LazemNistEdamKonid"))
             {
                 MessageBox.Show("Jizzzze", "LOL", MessageBoxButton.OK, MessageBoxImage.Warning);
@@ -642,6 +644,7 @@ namespace Player
 
                 application.InitializeComponent();
                 IconDictionary = Current.Resources;
+
                 application.Run();
                 InstanceManager.Instance<App>.Cleanup();
             }
@@ -872,7 +875,7 @@ namespace Player.Taskbar
             CommandParameter = "",
             Visibility = Visibility.Visible,
             Description = "Play",
-            ImageSource = Resource.Image.ToBitmapSource( Properties.Resources.Play)
+            ImageSource = Resource.Image.GetBitmap(new Controls.MaterialIcon() { Icon = Controls.IconType.ic_play_arrow })
         };
         public ThumbButtonInfo PauseThumb = new ThumbButtonInfo()
         {
@@ -883,7 +886,7 @@ namespace Player.Taskbar
             CommandParameter = "",
             Visibility = Visibility.Visible,
             Description = "Pause",
-            ImageSource = Resource.Image.ToBitmapSource(Properties.Resources.Pause)
+            ImageSource = Resource.Image.GetBitmap(new Controls.MaterialIcon() { Icon = Controls.IconType.ic_pause })
         };
         public ThumbButtonInfo PrevThumb = new ThumbButtonInfo()
         {
@@ -894,7 +897,7 @@ namespace Player.Taskbar
             CommandParameter = "",
             Visibility = Visibility.Visible,
             Description = "Previous",
-            ImageSource = Resource.Image.ToBitmapSource(Properties.Resources.Previous)
+            ImageSource = Resource.Image.GetBitmap(new Controls.MaterialIcon() { Icon = Controls.IconType.ic_skip_previous })
         };
         public ThumbButtonInfo NextThumb = new ThumbButtonInfo()
         {
@@ -905,7 +908,7 @@ namespace Player.Taskbar
             CommandParameter = "",
             Visibility = Visibility.Visible,
             Description = "Next",
-            ImageSource = Resource.Image.ToBitmapSource(Properties.Resources.Next)
+            ImageSource = Resource.Image.GetBitmap(new Controls.MaterialIcon() { Icon = Controls.IconType.ic_skip_next })
         };
         private TaskbarItemInfo TaskbarItem = new TaskbarItemInfo();
         private Commands.Play PlayHandler = new Commands.Play();
@@ -945,56 +948,51 @@ namespace Player.Resource
         public static DColor ToDrawingColor(Color? e) => ToDrawingColor(e.Value);
         public static Color ToColor(DColor e) => Color.FromArgb(e.A, e.R, e.G, e.B);
 
-        public static async Task<Draw::Icon[]> GetTaskbarIcons()
-        {
-            await Task.Delay(10);
-            Controls.MaterialIcon[] matIcons = new Controls.MaterialIcon[]
-            {
-                new Controls.MaterialIcon() { Icon = Controls.IconType.ic_play_arrow },
-                new Controls.MaterialIcon() { Icon = Controls.IconType.ic_pause },
-                new Controls.MaterialIcon() { Icon= Controls.IconType.ic_skip_previous },
-                new Controls.MaterialIcon() { Icon= Controls.IconType.ic_skip_next }
-            };
-            Draw::Icon[] output = new Draw.Icon[4];
-            PngBitmapEncoder encoder = new PngBitmapEncoder();
-            for (int i = 0; i < 4; i++)
-            {
-                // Clear encoder in order to add new frames of current loop
-                encoder.Frames.Clear();
-                // Save current canvas transform
-                Transform transform = matIcons[i].LayoutTransform;
-                // reset current transform (in case it is scaled or rotated)
-                matIcons[i].LayoutTransform = null;
-                // Get the size of canvas
-                Size size = new Size(matIcons[i].Width, matIcons[i].Height);
-                // Measure and arrange the surface
-                // VERY IMPORTANT
-                matIcons[i].Measure(size);
-                matIcons[i].Arrange(new Rect(size));
-
-                // Create a render bitmap and push the surface to it
-                RenderTargetBitmap renderBitmap =
-                  new RenderTargetBitmap(
-                    (int)size.Width,
-                    (int)size.Height,
-                    96d,
-                    96d,
-                    PixelFormats.Pbgra32);
-                renderBitmap.Render(matIcons[i]);
-
-                // Create a file stream for saving image
-                MemoryStream memStream = new MemoryStream();
-  
-                encoder.Frames.Add(BitmapFrame.Create(renderBitmap));
-                encoder.Save(memStream);
-                memStream.Flush();
-                output[i] = new Draw::Icon(memStream);
-            }
-            return output;
-        }
     }
     public static class Image
     {
+        public static bool b = false;
+        public static BitmapImage GetBitmap(System.Windows.Controls.UserControl element)
+        {
+            element.BeginInit();
+            element.UpdateLayout();
+            //MessageBox.Show("2");
+            PngBitmapEncoder encoder = new PngBitmapEncoder();
+            // Clear encoder in order to add new frames of current loop
+            encoder.Frames.Clear();
+            // Save current canvas transform
+            Transform transform = element.LayoutTransform;
+            // reset current transform (in case it is scaled or rotated)
+            element.LayoutTransform = null;
+            // Get the size of canvas
+            Size size = new Size(element.Width, element.Height);
+            // Measure and arrange the surface
+            // VERY IMPORTANT
+            element.Measure(size);
+            element.Arrange(new Rect(size));
+
+            // Create a render bitmap and push the surface to it
+            RenderTargetBitmap renderBitmap =
+              new RenderTargetBitmap(
+                (int)size.Width,
+                (int)size.Height,
+                96d,
+                96d,
+                PixelFormats.Pbgra32);
+            renderBitmap.Render(element);
+
+            // Create a file stream for saving image
+            MemoryStream memStream = new MemoryStream();
+
+            encoder.Frames.Add(BitmapFrame.Create(renderBitmap));
+            encoder.Save(memStream);
+            memStream.Flush();
+            var output = new BitmapImage();
+            output.BeginInit();
+            output.StreamSource = memStream;
+            output.EndInit();
+            return output;
+        }
         public static Draw.Image ToImage(TagLib.IPicture picture) => Draw.Image.FromStream(new MemoryStream(picture.Data.Data));
         public static BitmapImage ToImage(BitmapSource source)
         {
