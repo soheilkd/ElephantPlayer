@@ -269,10 +269,7 @@ namespace Player
 
         }
 
-        private void Window_Drop(object sender, DragEventArgs e)
-        {
-            Manager.Add((string[])e.Data.GetData(DataFormats.FileDrop));
-        }
+        private void Window_Drop(object sender, DragEventArgs e) => Manager.Add((string[])e.Data.GetData(DataFormats.FileDrop));
 
         private void Window_SizeChanged(object sender, SizeChangedEventArgs e)
         {
@@ -316,7 +313,7 @@ namespace Player
             else PositionSlider.Value += ms;
             UserChangingPosition = false;
         }
-        async void PositionMouseDown(object sender, MouseButtonEventArgs e)
+        private async void PositionMouseDown(object sender, MouseButtonEventArgs e)
         {
             UserChangingPosition = true;
             while (e.ButtonState == MouseButtonState.Pressed)
@@ -342,7 +339,7 @@ namespace Player
         #region VideoUI
 
         private double LastWidth, LastHeight, LastLeft;
-        private System.Timers.Timer DraggerTimer = new System.Timers.Timer(250) { AutoReset = false };
+        private Timer DraggerTimer = new Timer(250) { AutoReset = false };
         private double LastTop;
         private bool FullScreen = false;
         private TimeSpan TimeSpan;
@@ -427,25 +424,10 @@ namespace Player
                 Play(Manager.Previous());
         }
         
-        private void RepeatButton_Click(object sender, RoutedEventArgs e)
-        {
-            PositionSlider.Value -= PositionSlider.LargeChange;
-        }
+        private void Position_RepeatBackwardClick(object sender, RoutedEventArgs e) => PositionSlider.Value -= PositionSlider.LargeChange;
+        private void Position_RepeatForwardClick(object sender, RoutedEventArgs e) => PositionSlider.Value += PositionSlider.LargeChange;
 
-        private void RepeatButton_Click_1(object sender, RoutedEventArgs e)
-        {
-
-            PositionSlider.Value += PositionSlider.LargeChange;
-        }
-
-        private void GridSplitter_DragDelta(object sender, System.Windows.Controls.Primitives.DragDeltaEventArgs e)
-        {
-            if (LowContentGrid.Height + (-1 * e.VerticalChange) <= 100)
-                return;
-            LowContentGrid.Height += -1 * e.VerticalChange;
-        }
-
-        private void VisionOnButton_Click(object sender, EventArgs e)
+        private void VisionButtonClick(object sender, EventArgs e)
         {
             IsVisionOn = !IsVisionOn;
             VisionButton.Icon = IsVisionOn ? IconType.expand_less : IconType.ondemand_video;
