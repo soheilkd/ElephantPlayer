@@ -38,7 +38,7 @@ namespace Player.Controls
         public static readonly DependencyProperty EllipseProperty =
             DependencyProperty.Register(nameof(EllipseType), typeof(EllipseTypes), typeof(MaterialButton), new PropertyMetadata(EllipseTypes.Circular));
         public static readonly DependencyProperty IconProperty =
-            DependencyProperty.Register(nameof(Icon), typeof(IconType), typeof(MaterialButton), new PropertyMetadata(IconType.ic_arrow_upward));
+            DependencyProperty.Register(nameof(Icon), typeof(IconType), typeof(MaterialButton), new PropertyMetadata(IconType.arrow_upward));
         public static readonly DependencyProperty HandleProperty =
             DependencyProperty.Register(nameof(AutoHandle), typeof(bool), typeof(MaterialButton), new PropertyMetadata(true));
         

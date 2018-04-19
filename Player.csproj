@@ -142,8 +142,9 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Gma.System.MouseKeyHook">
-      <HintPath>D:\Users\Soheil\Zero One\App\APIs\globalmousekeyhook-vNext\Gma.System.MouseKeyHook.dll</HintPath>
+    <Reference Include="Gma.System.MouseKeyHook, Version=5.4.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>Libraries\Gma.System.MouseKeyHook.dll</HintPath>
     </Reference>
     <Reference Include="System">
       <Private>False</Private>
@@ -258,13 +259,11 @@
     <WCFMetadata Include="Connected Services\" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Libraries\Gma.System.MouseKeyHook.dll" />
     <Content Include="Libraries\taglib-sharp.dll" />
-    <Resource Include="Resources\MusicArtwork.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="Resources\VideoArtwork.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Resource>
+    <Resource Include="Resources\MusicArt.png" />
+    <Resource Include="Resources\NetArt.png" />
+    <Resource Include="Resources\VideoArt.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

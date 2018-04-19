@@ -1,30 +1,27 @@
-﻿
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Runtime.InteropServices;
 using System.Runtime.Remoting;
 using System.Runtime.Remoting.Channels;
-using System.Xml.Serialization;
 using System.Runtime.Remoting.Channels.Ipc;
 using System.Runtime.Serialization.Formatters;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Security;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shell;
 using System.Windows.Threading;
-using DColor = System.Drawing.Color;
 using Draw = System.Drawing;
 using Forms = System.Windows.Forms;
-using GmaHook = Gma.System.MouseKeyHook;
+
 namespace Player.User
 {
     public static class UI
@@ -70,7 +67,7 @@ namespace Player.User
     }
     public class Keyboard
     {
-        private static GmaHook.IKeyboardMouseEvents _events = GmaHook.Hook.GlobalEvents();
+        private static Gma.System.MouseKeyHook.IKeyboardMouseEvents _events = Gma.System.MouseKeyHook.Hook.GlobalEvents();
         public static event Forms::KeyPressEventHandler KeyPress
         {
             add => _events.KeyPress += value;
@@ -193,6 +190,17 @@ namespace Player.Management
         }
         public static void Save(Media[] medias)
         {
+            var newMedias = 
+                from item in medias
+                where !item.IsRemoved
+                select item;
+            int c = newMedias.Count();
+            medias = new Media[c];
+            int i = 0;
+            foreach (var item in newMedias)
+            {
+                medias[i++] = item;
+            }
             using (FileStream stream = new FileStream(App.LibraryPath, FileMode.Create))
                 (new BinaryFormatter()).Serialize(stream, new MassiveLibrary(medias));
         }
@@ -209,7 +217,7 @@ namespace Player.Management
     {
         public MediaManager()
         {
-            ActiveViewMode = (ViewMode)Preferences.ViewMode;
+
         }
         public int Count => AllMedias.Count;
         private static string[] SupportedMusics = new string[]
@@ -256,7 +264,7 @@ namespace Player.Management
         private List<Media> AllMedias = new List<Media>();
         public Preferences Preferences { private get; set; } = Preferences.Load();
         public Media this[int index] => AllMedias[index];
-        private Queue<int> PlayQueue = new Queue<int>();
+        private List<int> PlayQueue = new List<int>();
         private Random Randomness = new Random(2);
         public static MediaType GetType(string FileName)
         {
@@ -268,17 +276,7 @@ namespace Player.Management
                 if (ext == SupportedVideos[i]) return MediaType.Video;
             return MediaType.NotMedia;
         }
-        public int Total => AllMedias.Count;
         public PlayMode ActivePlayMode { get; set; } = PlayMode.RepeatAll;
-        private ViewMode activeViewMode;
-        public ViewMode ActiveViewMode
-        {
-            get => activeViewMode;
-            set
-            {
-                activeViewMode = value;
-            }
-        }
         private int currentlyPlayingIndex;
         public int CurrentlyPlayingIndex
         {
@@ -292,7 +290,27 @@ namespace Player.Management
             }
         }
         private Random Shuffle = new Random(2);
-        
+        private WebClient WebParser = new WebClient();
+        private WebHeaderCollection WebHeaderCollection = new WebHeaderCollection();
+        private int CurrentQueuePosition = 0;
+
+        public bool Add(Uri uri, bool requestPlay = false)
+        {
+            WebParser.Headers.Set(HttpRequestHeader.Range, "bytes=0-0");
+            WebParser.DownloadString(uri);
+            var TypeOfContent = WebParser.ResponseHeaders["Content-Type"];
+            Debug.Print(TypeOfContent);
+            Add(new Media(uri.AbsoluteUri));
+            if (requestPlay)
+            {
+                Change?.Invoke(this, new ManagementChangeEventArgs()
+                {
+                    Change = ManagementChange.MediaRequested,
+                    Changes = new Events.MediaEventArgs(AllMedias.Count - 1)
+                });
+            }
+            return true;
+        }
         public bool Add(string path, bool requestPlay = false)
         {
             if (path.EndsWith(".elp"))
@@ -374,7 +392,7 @@ namespace Player.Management
         public bool Remove(Media media) => Remove(Find(media));
         public bool Remove(int index)
         {
-            AllMedias.RemoveAt(index);
+            AllMedias[index].IsRemoved = true;
             if (index < CurrentlyPlayingIndex)
                 CurrentlyPlayingIndex--;
             Change?.Invoke(this, new ManagementChangeEventArgs() { Change = ManagementChange.MediaRemoved, Changes = new Events.MediaEventArgs(index) });
@@ -560,7 +578,15 @@ namespace Player.Management
             switch (ActivePlayMode)
             {
                 case PlayMode.Shuffle: CurrentlyPlayingIndex = Shuffle.Next(0, AllMedias.Count); break;
-                case PlayMode.Queue: CurrentlyPlayingIndex = PlayQueue.Dequeue(); break;
+                case PlayMode.Queue:
+                    if (CurrentQueuePosition == PlayQueue.Count - 1)
+                    {
+                        CurrentlyPlayingIndex = PlayQueue[0];
+                        CurrentQueuePosition = 0;
+                    }
+                    else
+                        CurrentlyPlayingIndex = PlayQueue[CurrentQueuePosition++];
+                    break;
                 case PlayMode.RepeatAll:
                     if (CurrentlyPlayingIndex != AllMedias.Count - 1) CurrentlyPlayingIndex++;
                     else CurrentlyPlayingIndex = 0;
@@ -574,7 +600,15 @@ namespace Player.Management
             switch (ActivePlayMode)
             {
                 case PlayMode.Shuffle: CurrentlyPlayingIndex = Shuffle.Next(0, AllMedias.Count); break;
-                case PlayMode.Queue: CurrentlyPlayingIndex = PlayQueue.Dequeue(); break;
+                case PlayMode.Queue:
+                    if (CurrentQueuePosition == 0)
+                    {
+                        CurrentQueuePosition = PlayQueue.Count - 1;
+                        CurrentlyPlayingIndex = PlayQueue[CurrentQueuePosition];
+                    }
+                    else
+                        CurrentlyPlayingIndex = PlayQueue[CurrentQueuePosition--];
+                    break;
                 case PlayMode.RepeatAll:
                     if (CurrentlyPlayingIndex != 0) CurrentlyPlayingIndex--;
                     else CurrentlyPlayingIndex = AllMedias.Count - 1;
@@ -611,7 +645,7 @@ namespace Player.Management
         public void Play(Media media) => Next(Find(media));
         public void ChangeSettings(Preferences newSettings)
         {
-            Preferences = newSettings;
+            Preferences = newSettings; 
         }
     }
 }
@@ -656,6 +690,97 @@ namespace Player
             return true;
         }
     }
+    
+
+    public static class Converters
+    {
+        public static BitmapImage GetBitmap<T>(T element) where T : System.Windows.Controls.Control
+        {
+            element.BeginInit();
+            element.UpdateLayout();
+            element.UpdateLayout();
+            //MessageBox.Show("2");
+            PngBitmapEncoder encoder = new PngBitmapEncoder();
+            // Clear encoder in order to add new frames of current loop
+            encoder.Frames.Clear();
+            // Save current canvas transform
+            Transform transform = element.LayoutTransform;
+            // reset current transform (in case it is scaled or rotated)
+            element.LayoutTransform = null;
+            // Get the size of canvas
+            Size size = new Size(element.Width, element.Height);
+            // Measure and arrange the surface
+            // VERY IMPORTANT
+            element.Measure(size);
+            element.Arrange(new Rect(size));
+
+            // Create a render bitmap and push the surface to it
+            RenderTargetBitmap renderBitmap =
+              new RenderTargetBitmap(
+                (int)size.Width,
+                (int)size.Height,
+                96d,
+                96d,
+                PixelFormats.Pbgra32);
+            renderBitmap.Render(element);
+
+            // Create a file stream for saving image
+            MemoryStream memStream = new MemoryStream();
+
+            encoder.Frames.Add(BitmapFrame.Create(renderBitmap));
+            encoder.Save(memStream);
+            memStream.Flush();
+            var output = new BitmapImage();
+            output.BeginInit();
+            output.StreamSource = memStream;
+            output.EndInit();
+            return output;
+        }
+        public static Draw.Image ToImage(TagLib.IPicture picture) => Draw.Image.FromStream(new MemoryStream(picture.Data.Data));
+        public static BitmapImage ToImage(BitmapSource source)
+        {
+            JpegBitmapEncoder encoder = new JpegBitmapEncoder();
+            MemoryStream memoryStream = new MemoryStream();
+            BitmapImage bImg = new BitmapImage();
+
+            encoder.Frames.Add(BitmapFrame.Create(source));
+            encoder.Save(memoryStream);
+
+            memoryStream.Position = 0;
+            bImg.BeginInit();
+            bImg.StreamSource = memoryStream;
+            bImg.EndInit();
+
+            memoryStream.Close();
+
+            return bImg;
+        }
+
+        public static BitmapSource GetBitmapSource(Draw.Bitmap source)
+        {
+            return System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap(
+                          source.GetHbitmap(),
+                          IntPtr.Zero,
+                          Int32Rect.Empty,
+                          BitmapSizeOptions.FromEmptyOptions());
+        }
+        public static BitmapSource GetBitmapSource(Draw::Image myImage)
+        {
+            var bitmap = new Draw.Bitmap(myImage);
+            IntPtr bmpPt = bitmap.GetHbitmap();
+            BitmapSource bitmapSource =
+             System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap(
+                   bmpPt,
+                   IntPtr.Zero,
+                   Int32Rect.Empty,
+                   BitmapSizeOptions.FromEmptyOptions());
+            bitmapSource.Freeze();
+            return bitmapSource;
+        }
+        public static BitmapSource GetBitmapSource(TagLib.IPicture picture) => GetBitmapSource(ToImage(picture));
+    }
+
+
     [Serializable]
     public class Preferences
     {
@@ -697,15 +822,10 @@ namespace Player
         }
     }
     
-    public enum ViewMode { Singular, GroupByArtist, GroupByDir, GroupByAlbum }
-    public enum ContextTool { Border, MainDisplay }
-    public enum Orientation { Portrait, Landscape }
     public enum PlayPara { None, Next, Prev }
 
-    public enum PlayMode { Single, Shuffle, RepeatOne, RepeatAll, Queue }
-    public enum MediaViewMode { Default, Compact, Expanded }
-    public enum MediaComparsion { Title, Name, Path, Type, Artist, Album }
-    public enum MediaType { Music, Video, NotMedia }
+    public enum PlayMode { Shuffle, RepeatOne, RepeatAll, Queue }
+    public enum MediaType { Music, Video, Online, NotMedia }
 
     [Serializable]
     public class Media : IDisposable
@@ -719,11 +839,14 @@ namespace Player
         public string Album { get; set; }
         public string Path { get; set; }
         public int PlayCount;
+        public bool IsOffline;
         [NonSerialized] public bool IsPlaying;
         [NonSerialized] public string Lyrics;
         [NonSerialized] public bool IsLoaded;
         [NonSerialized] public long Duration;
         [NonSerialized] public BitmapSource Artwork;
+        [NonSerialized] public bool IsRemoved;
+        
         public MediaType MediaType;
         
         public bool Contains(string para)
@@ -747,37 +870,53 @@ namespace Player
         };
         public Media(string path)
         {
-            switch (Management.MediaManager.GetType(path))
+            Uri uri = new Uri(path);
+            if (uri.IsFile)
             {
-                case MediaType.Music:
-                    using (var t = TagLib.File.Create(path))
-                    {
+                switch (Management.MediaManager.GetType(path))
+                {
+                    case MediaType.Music:
+                        using (var t = TagLib.File.Create(path))
+                        {
+                            Name = path.Substring(path.LastIndexOf("\\") + 1);
+                            Path = path;
+                            Artist = t.Tag.FirstPerformer;
+                            Title = t.Tag.Title ?? Name.Substring(0, Name.LastIndexOf("."));
+                            Album = t.Tag.Album;
+                            Duration = t.Length;
+                            Artwork = t.Tag.Pictures.Length >= 1 ? Converters.GetBitmapSource(t.Tag.Pictures[0]) : Converters.GetBitmapSource(Properties.Resources.MusicArt);
+                            MediaType = MediaType.Music;
+                            Lyrics = t.Tag.Lyrics ?? " ";
+                            IsLoaded = true;
+                        }
+                        break;
+                    case MediaType.Video:
                         Name = path.Substring(path.LastIndexOf("\\") + 1);
+                        Title = Name;
                         Path = path;
-                        Artist = t.Tag.FirstPerformer;
-                        Title = t.Tag.Title ?? Name.Substring(0, Name.LastIndexOf("."));
-                        Album = t.Tag.Album;
-                        Duration = t.Length;
-                        Artwork = t.Tag.Pictures.Length >= 1 ? Resource.Image.ToBitmapSource(t.Tag.Pictures[0]) : Resource.Image.ToBitmapSource(Properties.Resources.MusicArtwork);
-                        MediaType = MediaType.Music;
-                        Lyrics = t.Tag.Lyrics ?? " ";
+                        Artist = path.Substring(0, path.LastIndexOf("\\"));
+                        Album = "Video";
+                        Duration = 1;
+                        Artwork = Converters.GetBitmapSource(Properties.Resources.VideoArt);
+                        MediaType = MediaType.Video;
                         IsLoaded = true;
-                    }
-                    break;
-                case MediaType.Video:
-                    Name = path.Substring(path.LastIndexOf("\\") + 1);
-                    Title = Name;
-                    Path = path;
-                    Artist = path.Substring(0, path.LastIndexOf("\\"));
-                    Album = "Video";
-                    Duration = 1;
-                    Artwork = Resource.Image.ToBitmapSource(Properties.Resources.VideoArtwork);
-                    MediaType = MediaType.Video;
-                    IsLoaded = true;
-                    break;
-                case MediaType.NotMedia:
-                    throw new IOException($"Given path is not valid media\r\nPath:{path}");
-                default: break;
+                        break;
+                    case MediaType.NotMedia:
+                        throw new IOException($"Given path is not valid media\r\nPath:{path}");
+                    default: break;
+                }
+            }
+            else
+            {
+                Name = uri.Segments[uri.Segments.Count() - 1];
+                Title = Name;
+                Path = uri.AbsoluteUri;
+                Artist = uri.Host;
+                Album = "Cloud";
+                Duration = 1;
+                Artwork = Converters.GetBitmapSource(Properties.Resources.NetArt);
+                MediaType = MediaType.Online;
+                IsLoaded = true;
             }
         }
         public override bool Equals(object obj) => Path == (obj as Media).Path;
@@ -875,7 +1014,7 @@ namespace Player.Taskbar
             CommandParameter = "",
             Visibility = Visibility.Visible,
             Description = "Play",
-            ImageSource = Resource.Image.GetBitmap(new Controls.MaterialIcon() { Icon = Controls.IconType.ic_play_arrow })
+            ImageSource = Converters.GetBitmap(new Controls.MaterialIcon() { Icon = Controls.IconType.play_arrow, Foreground = Brushes.White })
         };
         public ThumbButtonInfo PauseThumb = new ThumbButtonInfo()
         {
@@ -886,7 +1025,7 @@ namespace Player.Taskbar
             CommandParameter = "",
             Visibility = Visibility.Visible,
             Description = "Pause",
-            ImageSource = Resource.Image.GetBitmap(new Controls.MaterialIcon() { Icon = Controls.IconType.ic_pause })
+            ImageSource = Converters.GetBitmap(new Controls.MaterialIcon() { Icon = Controls.IconType.pause, Foreground = Brushes.White })
         };
         public ThumbButtonInfo PrevThumb = new ThumbButtonInfo()
         {
@@ -897,7 +1036,7 @@ namespace Player.Taskbar
             CommandParameter = "",
             Visibility = Visibility.Visible,
             Description = "Previous",
-            ImageSource = Resource.Image.GetBitmap(new Controls.MaterialIcon() { Icon = Controls.IconType.ic_skip_previous })
+            ImageSource = Converters.GetBitmap(new Controls.MaterialIcon() { Icon = Controls.IconType.skip_previous, Foreground = Brushes.White })
         };
         public ThumbButtonInfo NextThumb = new ThumbButtonInfo()
         {
@@ -908,7 +1047,7 @@ namespace Player.Taskbar
             CommandParameter = "",
             Visibility = Visibility.Visible,
             Description = "Next",
-            ImageSource = Resource.Image.GetBitmap(new Controls.MaterialIcon() { Icon = Controls.IconType.ic_skip_next })
+            ImageSource = Converters.GetBitmap(new Controls.MaterialIcon() { Icon = Controls.IconType.skip_next, Foreground = Brushes.White })
         };
         private TaskbarItemInfo TaskbarItem = new TaskbarItemInfo();
         private Commands.Play PlayHandler = new Commands.Play();
@@ -934,112 +1073,6 @@ namespace Player.Taskbar
         public void Refresh(bool IsPlaying = false) => TaskbarItem.ThumbButtonInfos[1] = IsPlaying ? PauseThumb : PlayThumb;
         public void SetProgressState(TaskbarItemProgressState state) => TaskbarItem.ProgressState = state;
         public void SetProgressValue(double value) => TaskbarItem.ProgressValue = value;
-    }
-}
-
-namespace Player.Resource
-{
-    public static class Theming
-    {
-        public static Brush ToBrush(DColor e) => ToBrush(ToColor(e));
-        public static Brush ToBrush(Color e) => new SolidColorBrush(e);
-        public static Brush ToBrush(Color? e) => new SolidColorBrush(e.Value);
-        public static DColor ToDrawingColor(Color e) => DColor.FromArgb(e.A, e.R, e.G, e.B);
-        public static DColor ToDrawingColor(Color? e) => ToDrawingColor(e.Value);
-        public static Color ToColor(DColor e) => Color.FromArgb(e.A, e.R, e.G, e.B);
-
-    }
-    public static class Image
-    {
-        public static bool b = false;
-        public static BitmapImage GetBitmap(System.Windows.Controls.UserControl element)
-        {
-            element.BeginInit();
-            element.UpdateLayout();
-            //MessageBox.Show("2");
-            PngBitmapEncoder encoder = new PngBitmapEncoder();
-            // Clear encoder in order to add new frames of current loop
-            encoder.Frames.Clear();
-            // Save current canvas transform
-            Transform transform = element.LayoutTransform;
-            // reset current transform (in case it is scaled or rotated)
-            element.LayoutTransform = null;
-            // Get the size of canvas
-            Size size = new Size(element.Width, element.Height);
-            // Measure and arrange the surface
-            // VERY IMPORTANT
-            element.Measure(size);
-            element.Arrange(new Rect(size));
-
-            // Create a render bitmap and push the surface to it
-            RenderTargetBitmap renderBitmap =
-              new RenderTargetBitmap(
-                (int)size.Width,
-                (int)size.Height,
-                96d,
-                96d,
-                PixelFormats.Pbgra32);
-            renderBitmap.Render(element);
-
-            // Create a file stream for saving image
-            MemoryStream memStream = new MemoryStream();
-
-            encoder.Frames.Add(BitmapFrame.Create(renderBitmap));
-            encoder.Save(memStream);
-            memStream.Flush();
-            var output = new BitmapImage();
-            output.BeginInit();
-            output.StreamSource = memStream;
-            output.EndInit();
-            return output;
-        }
-        public static Draw.Image ToImage(TagLib.IPicture picture) => Draw.Image.FromStream(new MemoryStream(picture.Data.Data));
-        public static BitmapImage ToImage(BitmapSource source)
-        {
-            JpegBitmapEncoder encoder = new JpegBitmapEncoder();
-            MemoryStream memoryStream = new MemoryStream();
-            BitmapImage bImg = new BitmapImage();
-
-            encoder.Frames.Add(BitmapFrame.Create(source));
-            encoder.Save(memoryStream);
-
-            memoryStream.Position = 0;
-            bImg.BeginInit();
-            bImg.StreamSource = memoryStream;
-            bImg.EndInit();
-
-            memoryStream.Close();
-
-            return bImg;
-        }
-
-        private static BitmapSource ToBitmapSource(Draw.Bitmap source)
-        {
-            return System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap(
-                          source.GetHbitmap(),
-                          IntPtr.Zero,
-                          Int32Rect.Empty,
-                          BitmapSizeOptions.FromEmptyOptions());
-        }
-        public static BitmapSource ToBitmapSource(Draw::Image myImage)
-        {
-            var bitmap = new Draw.Bitmap(myImage);
-            IntPtr bmpPt = bitmap.GetHbitmap();
-            BitmapSource bitmapSource =
-             System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap(
-                   bmpPt,
-                   IntPtr.Zero,
-                   Int32Rect.Empty,
-                   BitmapSizeOptions.FromEmptyOptions());
-            bitmapSource.Freeze();
-            return bitmapSource;
-        }
-        public static BitmapSource ToBitmapSource(TagLib.IPicture picture) => ToBitmapSource(ToImage(picture));
-        
-    }
-    public static class String
-    {
-        public static string Dumps => @"C:\Users\Soheil\AppData\Local\CrashDumps";
     }
 }
 

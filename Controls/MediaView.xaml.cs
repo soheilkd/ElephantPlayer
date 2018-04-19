@@ -31,7 +31,7 @@ namespace Player
             get => isPlaying; set
             {
                 isPlaying = value;
-                MainIcon.Icon = value ? IconType.ic_equalizer : DefaultIcon;
+                MainIcon.Icon = value ? IconType.equalizer : DefaultIcon;
                 MainIcon.Foreground = value ? Brushes.DeepSkyBlue : Brushes.White;
                 MainLabel.Foreground = value ? Brushes.DeepSkyBlue : Brushes.White;
                 SubLabel.Foreground = value ? Brushes.DeepSkyBlue : Brushes.White;
@@ -62,16 +62,32 @@ namespace Player
                 LoadAnim2.KeyFrames.Add(new DiscreteStringKeyFrame(manip));
             }
             MediaIndex = index;
-
-            MainIcon.Icon = type == MediaType.Music ? IconType.ic_music_note : IconType.ic_ondemand_video;
-            DefaultIcon = MainIcon.Icon;
+            switch (type)
+            {
+                case MediaType.Music:
+                    DefaultIcon = IconType.musnote;
+                    break;
+                case MediaType.Video:
+                    DefaultIcon = IconType.ondemand_video;
+                    break;
+                case MediaType.Online:
+                    DefaultIcon = IconType.cloud;
+                    break;
+                case MediaType.NotMedia:
+                    DefaultIcon = IconType.none;
+                    break;
+                default:
+                    DefaultIcon = IconType.none;
+                    break;
+            }
+            MainIcon.Icon = DefaultIcon;
         }
         public void Revoke(int index, string main, string sub, MediaType type = MediaType.Music)
         {
             MediaIndex = index;
             MainLabel.Content = main;
             SubLabel.Content = sub;
-            MainIcon.Icon = type == MediaType.Music ? IconType.ic_music_note : IconType.ic_music_video;
+            MainIcon.Icon = type == MediaType.Music ? IconType.musnote : IconType.musvideo;
             DefaultIcon = MainIcon.Icon;
         }
         public void Revoke(MediaEventArgs e)

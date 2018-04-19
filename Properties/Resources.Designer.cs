@@ -63,9 +63,19 @@ namespace Player.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        public static System.Drawing.Bitmap MusicArtwork {
+        public static System.Drawing.Bitmap MusicArt {
             get {
-                object obj = ResourceManager.GetObject("MusicArtwork", resourceCulture);
+                object obj = ResourceManager.GetObject("MusicArt", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        public static System.Drawing.Bitmap NetArt {
+            get {
+                object obj = ResourceManager.GetObject("NetArt", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -83,9 +93,9 @@ namespace Player.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        public static System.Drawing.Bitmap VideoArtwork {
+        public static System.Drawing.Bitmap VideoArt {
             get {
-                object obj = ResourceManager.GetObject("VideoArtwork", resourceCulture);
+                object obj = ResourceManager.GetObject("VideoArt", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

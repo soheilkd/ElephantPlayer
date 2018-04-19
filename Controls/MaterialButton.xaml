@@ -56,6 +56,6 @@
                 </EventTrigger>
     </UserControl.Triggers>
     <UserControl.Resources>
-        <controls:IconType x:Key="Icon_Res">ic_settings</controls:IconType>
+        <controls:IconType x:Key="Icon_Res">settings</controls:IconType>
     </UserControl.Resources>
 </UserControl>

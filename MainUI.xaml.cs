@@ -21,13 +21,11 @@ namespace Player
     /// </summary>
     public partial class MainUI : Window
     {
-        enum Tabs { NowPlaying, Songs, Vision, SpaceBuilder, Settings }
-
         Preferences P = Preferences.Load();
         MediaManager Manager = new MediaManager();
         List<MediaView> MediaViews = new List<MediaView>();
         Taskbar.Thumb Thumb = new Taskbar.Thumb();
-
+        Boolean IsVisionOn;
         Timer PlayCountTimer = new Timer(100000) { AutoReset = false };
         new string Title
         {
@@ -81,8 +79,6 @@ namespace Player
                 }
             PositionSlider.Value = Player.Position.TotalMilliseconds;
             TimeLabel_Current.Content = ConvertTime(Player.Position);
-            if (PositionSlider.Value >= PositionSlider.Maximum - 250)
-                Play(Manager.Next());
             goto UX;
         }
         private async void Manager_Change(object sender, ManagementChangeEventArgs e)
@@ -261,7 +257,7 @@ namespace Player
         private void Play(Media media)
         {
             PositionSlider.Value = 0;
-            PlayPauseButton2.Icon = IconType.ic_pause;
+            PlayPauseButton.Icon = IconType.pause;
             Player.Source = new Uri(media.Path);
             Player.Play();
             MiniArtworkImage.Source = media.Artwork;
@@ -282,20 +278,27 @@ namespace Player
         {
             for (int i = 0; i < MediaViews.Count; i++)
                 MediaViews[i].Width = QueueListView.ActualWidth > 25 ? QueueListView.ActualWidth - 25 : 25;
+            Resources["Height"] = Height;
+            Resources["Width"] = Width;
+            if (IsVisionOn)
+            {
+                Player.Width = Width;
+                Player.Height = Height;
+            }
         }
         
         private void PlayPauseButtonClick(object sender, EventArgs e)
         {
-            if (PlayPauseButton2.Icon == IconType.ic_pause)
+            if (PlayPauseButton.Icon == IconType.pause)
             {
                 Player.Pause();
-                PlayPauseButton2.Icon = IconType.ic_play_arrow;
+                PlayPauseButton.Icon = IconType.play_arrow;
                 Thumb.Refresh(false);
             }
             else
             {
                 Player.Play();
-                PlayPauseButton2.Icon = IconType.ic_pause;
+                PlayPauseButton.Icon = IconType.pause;
                 Thumb.Refresh(true);
             }
         }
@@ -323,7 +326,7 @@ namespace Player
                 Player.Play();
                 await Task.Delay(50);
             }
-            PlayPauseButton2.Icon = IconType.ic_pause;
+            PlayPauseButton.Icon = IconType.pause;
             Player.Play();
             UserChangingPosition = false;
         }
@@ -441,6 +444,59 @@ namespace Player
                 return;
             LowContentGrid.Height += -1 * e.VerticalChange;
         }
+
+        private void VisionOnButton_Click(object sender, EventArgs e)
+        {
+            IsVisionOn = !IsVisionOn;
+            VisionButton.Icon = IsVisionOn ? IconType.expand_less : IconType.ondemand_video;
+            Player.BeginStoryboard(Player.Resources[IsVisionOn ? "VisionOnBoard": "VisionOffBoard"] as Storyboard);
+        }
+
+        private void Player_MediaEnded(object sender, RoutedEventArgs e)
+        {
+            Play(Manager.Next());
+        }
+
+        private void PlayModeButton_Click(object sender, EventArgs e)
+        {
+            switch (Manager.ActivePlayMode)
+            {
+                case PlayMode.Shuffle:
+                    PlayModeButton.Icon = IconType.repeat_one;
+                    Manager.ActivePlayMode = PlayMode.RepeatOne;
+                    break;
+                case PlayMode.RepeatOne:
+                    PlayModeButton.Icon = IconType.repeat;
+                    Manager.ActivePlayMode = PlayMode.RepeatAll;
+                    break;
+                case PlayMode.RepeatAll:
+                    PlayModeButton.Icon = IconType.queue_music;
+                    Manager.ActivePlayMode = PlayMode.Queue;
+                    break;
+                case PlayMode.Queue:
+                    PlayModeButton.Icon = IconType.shuffle;
+                    Manager.ActivePlayMode = PlayMode.Shuffle;
+                    break;
+                default:
+                    break;
+            }
+            P.PlayMode = (int)Manager.ActivePlayMode;
+        }
+        
+
+        private void AddUrlButton_Click(object sender, EventArgs e)
+        {
+            UrlPopup.IsOpen = true;
+        }
+
+        private void UrlTextBox_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+            {
+                Manager.Add(new Uri(UrlTextBox.Text, UriKind.Absolute));
+            }
+        }
+
         private void window_KeyUp(object sender, KeyEventArgs e)
         {
             switch (e.Key)

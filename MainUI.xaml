@@ -9,7 +9,7 @@
     mc:Ignorable="d" Loaded="Window_Loaded" Closing="Window_Closing" Drop="Window_Drop" AllowDrop="True"
     Title="Elephant Player" Height="544" Width="432" SizeChanged="Window_SizeChanged">
     <Grid Background="{DynamicResource KeyOfBackground}">
-        <player:MaterialButton x:Name="SettingsButton" Icon="ic_settings" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="4"/>
+        <player:MaterialButton x:Name="SettingsButton" Icon="settings" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="4"/>
         <Popup PlacementTarget="{Binding ElementName=SettingsButton}" Placement="Left">
             <Grid Background="#F333">
                 <Grid.Resources>
@@ -59,7 +59,7 @@
                                 <CheckBox Content="Double Validation" Canvas.Top="20" x:Name="Pref_DoubleValid"/>
                                 <CheckBox Content="Light-Weight Initialization" Canvas.Top="40" x:Name="Pref_LightWeight"/>
                                 <Label Content="Library Location: " Foreground="White" Canvas.Top="60" Canvas.Left="30"/>
-                                <player:MaterialButton Icon="ic_folder_open" Canvas.Top="60" Foreground="White" />
+                                <player:MaterialButton Icon="folder_open" Canvas.Top="60" Foreground="White" />
                             </Canvas>
                         </GroupBox>
                         <GroupBox Height="140">
@@ -87,27 +87,55 @@
         <Grid Height="80" Background="{DynamicResource KeyOfBackground}" VerticalAlignment="Bottom" x:Name="LowContentGrid">
                     <Image x:Name="MiniArtworkImage" Height="55" Width="55" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="3,3,0,0"/>
                     <Label Content="{DynamicResource Res_Title}" Foreground="White" Margin="60, 0, 0, 0" Height="30" VerticalAlignment="Top"/>
-            <player:MaterialButton Icon="ic_skip_previous" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="80,0,0,25" Click="PreviousButton_Click" Height="22" Width="22" />
-                    <player:MaterialButton Icon="ic_skip_next" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="165,0,0,25" Click="NextButton_Click" Height="22" Width="22"/>
-            <player:MaterialButton x:Name="PlayPauseButton2" Icon="ic_play_arrow" Click="PlayPauseButtonClick" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="120,0,0,24" Height="28" Width="28"/>
+            <player:MaterialButton Icon="skip_previous" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="80,0,0,25" Click="PreviousButton_Click" />
+            <player:MaterialButton Icon="skip_next" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="165,0,0,25" Click="NextButton_Click" />
+            <player:MaterialButton x:Name="PlayPauseButton" Icon="play_arrow" Click="PlayPauseButtonClick" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="120,0,0,24" Height="28" Width="28"/>
+            <player:MaterialButton x:Name="VisionButton" Icon="ondemand_video" Click="VisionOnButton_Click" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,5,34" Height="34" Width="34" EllipseType="Rectular"/>
+            <player:MaterialButton x:Name="PlayModeButton" Icon="shuffle" Click="PlayModeButton_Click" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,55,25" />
+            <player:MaterialButton x:Name="AddUrlButton" Icon="add" Click="AddUrlButton_Click" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,100,25" />
+            <Popup x:Name="UrlPopup" PlacementTarget="{Binding ElementName=AddUrlButton}" Placement="Top" StaysOpen="False">
+                <StackPanel>
+                    <Grid>
+                        <TextBox x:Name="UrlTextBox" Text="http://URL" KeyDown="UrlTextBox_KeyDown"/>
+                    </Grid>
+                </StackPanel>
+            </Popup>
             <GridSplitter Height="2" HorizontalAlignment="Stretch" VerticalAlignment="Bottom"  DragDelta="GridSplitter_DragDelta" Background="#F777"/>
         </Grid>
-                <MediaElement Visibility="Hidden" x:Name="Player" UnloadedBehavior="Manual" LoadedBehavior="Manual" MouseUp="Player_MouseUp" 
-                                  MouseDown="Player_MouseDown" Volume="1">
-                    <MediaElement.ContextMenu>
-                        <ContextMenu>
-                            <MenuItem Header="Enter Full Screen" x:Name="PlayerC_FullScreen" Click="PlayerCFullScreen">
-                                <MenuItem.Icon>
-                                    <player:MaterialIcon Icon="ic_fullscreen" />
-                                </MenuItem.Icon>
-                            </MenuItem>
-                            <MenuItem Header="Use subtitle" Click="PlayerCSubtitle">
-                                <MenuItem.Icon>
-                                    <player:MaterialIcon Icon="ic_subtitle" />
-                                </MenuItem.Icon>
-                            </MenuItem>
-                        </ContextMenu>
-                    </MediaElement.ContextMenu>
+        <MediaElement Visibility="Visible" x:Name="Player" UnloadedBehavior="Manual" LoadedBehavior="Manual" MouseUp="Player_MouseUp" 
+              Width="0" Height="0" MouseDown="Player_MouseDown" Volume="1" MediaEnded="Player_MediaEnded">
+            <MediaElement.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="Enter Full Screen" x:Name="PlayerC_FullScreen" Click="PlayerCFullScreen">
+                        <MenuItem.Icon>
+                            <player:MaterialIcon Icon="fullscreen" />
+                        </MenuItem.Icon>
+                    </MenuItem>
+                    <MenuItem Header="Use subtitle" Click="PlayerCSubtitle">
+                        <MenuItem.Icon>
+                            <player:MaterialIcon Icon="subtitle" />
+                        </MenuItem.Icon>
+                    </MenuItem>
+                </ContextMenu>
+            </MediaElement.ContextMenu>
+            <MediaElement.Resources>
+                <Storyboard x:Key="VisionOnBoard">
+                    <DoubleAnimation Storyboard.TargetName="Player" Storyboard.TargetProperty="Height"
+                        From="{Binding ElementName=Player, Path=Height}" To="{DynamicResource Height}" 
+                         AccelerationRatio="0.1" DecelerationRatio="0.8"           />
+                    <DoubleAnimation Storyboard.TargetName="Player" Storyboard.TargetProperty="Width"
+                        From="{Binding ElementName=Player, Path=Width}" To="{DynamicResource Width}" 
+                               AccelerationRatio="0.1" DecelerationRatio="0.8"           />
+                </Storyboard>
+                <Storyboard x:Key="VisionOffBoard">
+                    <DoubleAnimation Storyboard.TargetName="Player" Storyboard.TargetProperty="Height"
+                        From="{Binding ElementName=Player, Path=Height}" To="0" 
+                                AccelerationRatio="0.1" DecelerationRatio="0.8"          />
+                    <DoubleAnimation Storyboard.TargetName="Player" Storyboard.TargetProperty="Width"
+                        From="{Binding ElementName=Player, Path=Width}" To="0"
+                                AccelerationRatio="0.1" DecelerationRatio="0.8"          />
+                </Storyboard>
+            </MediaElement.Resources>
                 </MediaElement>
 
         <Slider x:Name="PositionSlider"  ValueChanged="PositionChanged" PreviewMouseDown="PositionMouseDown"  
@@ -253,15 +281,10 @@
             <Setter Property="VerticalAlignment" Value="Bottom"/>
             <Setter Property="Width" Value="40" />
         </Style>
-
-        <sys:Double x:Key="Position_Value">2</sys:Double>
-        <sys:Double x:Key="Position_Max">1000</sys:Double>
-        <sys:Double x:Key="Position_ChangeS">0.05</sys:Double>
-        <sys:Double x:Key="Position_ChangeL" >0.1</sys:Double>
         <sys:String x:Key="Res_Title">Player</sys:String>
-        <player:IconType x:Key="Button_PlayIcon">ic_play_arrow</player:IconType>
-        <sys:Double x:Key="Exp_Height">84</sys:Double>
-        <sys:Double x:Key="Exp_ContentHeight">400</sys:Double>
+        <player:IconType x:Key="Button_PlayIcon">play_arrow</player:IconType>
+        <sys:Double x:Key="Height">400</sys:Double>
+        <sys:Double x:Key="Width">400</sys:Double>
 
         <!--<SolidColorBrush x:Key="SliderThumb.Static.Foreground" Color="#FFE5E5E5"/>
         <SolidColorBrush x:Key="SliderThumb.MouseOver.Background" Color="#FFDCDCDC"/>-->

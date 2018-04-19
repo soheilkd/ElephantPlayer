@@ -11,32 +11,30 @@ namespace Player.Controls
 {
     public enum IconType
     {
-        ic_none,
-        ic_music_note,
-        ic_music_video,
-        ic_ondemand_video,
-        ic_pause,
-        ic_play_arrow,
-        ic_warning,
-        ic_fullscreen,
-        ic_subtitle,
-        ic_settings,
-        ic_short_text,
-        ic_folder_open,
-        ic_skip_next,
-        ic_skip_previous,
-        ic_content_copy,
-        ic_arrow_downward,
-        ic_arrow_upward,
-        ic_more_horiz,
-        ic_equalizer,
-        ic_expand_less,
-        ic_expand_more
+        none,
+        musnote, musvideo,
+        ondemand_video,
+        pause, play_arrow,
+        warning,
+        fullscreen,
+        subtitle,
+        settings,
+        short_text,
+        folder_open,
+        skip_next, skip_previous,
+        content_copy,
+        arrow_downward, arrow_upward,
+        more_horiz,
+        equalizer,
+        expand_less, expand_more,
+        repeat, repeat_one, shuffle,
+        volume_0, volume_1, volume_2, volume_3,
+        queue_music, cloud, add
     }
     public partial class MaterialIcon : UserControl, IComponentConnector
     {
         public static readonly DependencyProperty IconProperty = 
-            DependencyProperty.Register(nameof(Icon), typeof(IconType), typeof(MaterialIcon), new FrameworkPropertyMetadata(IconType.ic_none, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, new PropertyChangedCallback(OnIconChanged)));
+            DependencyProperty.Register(nameof(Icon), typeof(IconType), typeof(MaterialIcon), new FrameworkPropertyMetadata(IconType.none, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, new PropertyChangedCallback(OnIconChanged)));
         public static readonly DependencyProperty IconResourceProperty =
             DependencyProperty.Register(nameof(IconResource), typeof(object), typeof(MaterialIcon), new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
         //internal ContentControl PART_ContentControl;
@@ -51,10 +49,9 @@ namespace Player.Controls
         private static void OnIconChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             IconType newValue = (IconType)e.NewValue;
-            if (newValue == IconType.ic_none)
+            if (newValue == IconType.none)
                 return;
-            string str = newValue.ToString();
-            object resource = App.IconDictionary[str];
+            object resource = App.IconDictionary[newValue.ToString()];
             d.SetValue(IconResourceProperty, resource);
         }
 
