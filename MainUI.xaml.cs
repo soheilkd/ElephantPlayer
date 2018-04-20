@@ -72,13 +72,13 @@ namespace Player
                     PositionSlider.Maximum = TimeSpan.TotalMilliseconds;
                     PositionSlider.SmallChange = 1 * PositionSlider.Maximum / 100;
                     PositionSlider.LargeChange = 5 * PositionSlider.Maximum / 100;
-                    TimeLabel_Full.Content = $"{TimeSpan.Minutes}:{TimeSpan.Seconds}";
+                    TimeLabel_Full.Content = ConvertTime(TimeSpan);
                     PlayCountTimer.Stop();
                     PlayCountTimer.Interval = PositionSlider.Maximum / 3;
                     PlayCountTimer.Start();
                 }
             PositionSlider.Value = Player.Position.TotalMilliseconds;
-            TimeLabel_Current.Content = $"{Player.Position.Minutes}:{Player.Position.Seconds}";
+            TimeLabel_Current.Content = ConvertTime(Player.Position);
             goto UX;
         }
         private async void Manager_Change(object sender, ManagementChangeEventArgs e)

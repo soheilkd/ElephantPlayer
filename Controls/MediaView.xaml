@@ -10,28 +10,8 @@
              Loaded="UserControl_Loaded" MouseDoubleClick="OutputCanvas_MouseDoubleClick"
              x:Name="OutputCanvas">
     <Grid >
-        <Label Content="         " x:Name="MainLabel" FontWeight="Medium" FontSize="14" Margin="30,0,0,0" Foreground="White" HorizontalAlignment="Left" VerticalAlignment="Top">
-            <Label.Triggers>
-                <EventTrigger RoutedEvent="Loaded">
-                    <BeginStoryboard>
-                        <Storyboard>
-                            <StringAnimationUsingKeyFrames Storyboard.TargetName="MainLabel" Storyboard.TargetProperty="Content" x:Name="LoadAnim" SpeedRatio="0.5" AccelerationRatio="0.3" DecelerationRatio="0.4"/>
-                        </Storyboard>
-                    </BeginStoryboard>
-                </EventTrigger>
-            </Label.Triggers>
-        </Label>
-        <Label Content="       " Margin="30,20,0,0" x:Name="SubLabel" Foreground="White" HorizontalAlignment="Left" VerticalAlignment="Top">
-            <Label.Triggers>
-                <EventTrigger RoutedEvent="Loaded">
-                    <BeginStoryboard>
-                        <Storyboard>
-                            <StringAnimationUsingKeyFrames Storyboard.TargetName="SubLabel" Storyboard.TargetProperty="Content" x:Name="LoadAnim2" SpeedRatio="0.5" AccelerationRatio="0.3" DecelerationRatio="0.4"/>
-                        </Storyboard>
-                    </BeginStoryboard>
-                </EventTrigger>
-            </Label.Triggers>
-        </Label>
+        <Label Content="         " x:Name="MainLabel" FontWeight="Medium" FontSize="14" Margin="30,0,0,0" Foreground="White" HorizontalAlignment="Left" VerticalAlignment="Top" />
+        <Label Content="       " Margin="30,20,0,0" x:Name="SubLabel" Foreground="White" HorizontalAlignment="Left" VerticalAlignment="Top"/>
         <controls:MaterialIcon  x:Name="MainIcon" HorizontalAlignment="Left" Width="30" Icon="musnote" Foreground="White"/>
         <controls:MaterialButton HorizontalAlignment="Right" Margin="0, 0, 5, 0" Icon="more_horiz" EllipseType="Rectular" x:Name="OtherButton" Click="Other_Click"/>
         <controls:MaterialButton HorizontalAlignment="Right" Margin="0, 0, 45, 0" Icon="play_arrow" EllipseType="Rectular" x:Name="PlayButton" Click="Play_Click" />
@@ -83,6 +63,8 @@
                                      Storyboard.TargetName="PlayButton" />
                     <DoubleAnimation From="{Binding ElementName=PlayButton, Path=Opacity}" To="1"
                                      Storyboard.TargetName="OtherButton"  />
+                    <DoubleAnimation From="{Binding ElementName=PlayButton, Path=Opacity}" To="1"
+                                     Storyboard.TargetName="DownloadButton"  />
                 </Storyboard>
             </BeginStoryboard>
         </EventTrigger>
@@ -93,6 +75,8 @@
                                      Storyboard.TargetName="PlayButton" />
                     <DoubleAnimation From="{Binding ElementName=PlayButton, Path=Opacity}" To="0"
                                      Storyboard.TargetName="OtherButton"/>
+                    <DoubleAnimation From="{Binding ElementName=PlayButton, Path=Opacity}" To="0"
+                                     Storyboard.TargetName="DownloadButton"/>
                 </Storyboard>
             </BeginStoryboard>
         </EventTrigger>

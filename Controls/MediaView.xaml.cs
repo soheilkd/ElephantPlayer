@@ -49,22 +49,8 @@ namespace Player
         public MediaView(int index, string main, string sub, MediaType type = MediaType.Music)
         {
             InitializeComponent();
-            string manip = "";
-            if (main == null)
-                main = "Unknown";
-            string full = main;
-            for (int i = 0; i < full.Length; i++)
-            {
-                manip += full[i];
-                LoadAnim.KeyFrames.Add(new DiscreteStringKeyFrame(manip));
-            }
-            manip = "";
-            full = sub;
-            for (int i = 0; i < full.Length; i++)
-            {
-                manip += full[i];
-                LoadAnim2.KeyFrames.Add(new DiscreteStringKeyFrame(manip));
-            }
+            MainLabel.Content = main;
+            SubLabel.Content = main;
             MediaIndex = index;
             switch (type)
             {
@@ -160,16 +146,25 @@ namespace Player
         public void Download(Media media)
         {
             var SavePath = $"{Environment.GetFolderPath(Environment.SpecialFolder.MyMusic)}\\{media.Title}";
-            DownloadButton.Icon = IconType.cloud;
+            DownloadButton.Icon = IconType.cancel;
             Client = new WebClient();
             Client.DownloadProgressChanged += (o, f) =>
             {
                 MainLabel.Content = $"Downloading... - {f.ProgressPercentage}% ";
-                SubLabel.Content = $"{f.BytesReceived}KB \\ {f.TotalBytesToReceive}KB";
+                SubLabel.Content = $"{f.BytesReceived / 1024} KB \\ {f.TotalBytesToReceive / 1024} KB";
             };
             Client.DownloadFileCompleted += (o, f) =>
             {
+                if (downloadCanceled)
+                {
+                    DownloadButton.Icon = IconType.cloud_download;
+                    MainLabel.Content = Manip[0];
+                    SubLabel.Content = Manip[1];
+                    System.IO.File.Delete(SavePath);
+                    return;
+                }
                 MainLabel.Content = "Downloaded, Processing...";
+                DownloadButton.Visibility = Visibility.Hidden;
                 Downloaded?.Invoke(this, new MediaEventArgs()
                 {
                     Index = MediaIndex,
@@ -180,20 +175,24 @@ namespace Player
         }
         private void DownloadButton_Click(object sender, EventArgs e)
         {
+            if (Client == null)
+                Client = new WebClient();
             if (Client.IsBusy)
             {
                 var res = MessageBox.Show("Sure to cancel?", "", MessageBoxButton.YesNo, MessageBoxImage.Question);
                 if (res == MessageBoxResult.Yes)
                 {
+                    downloadCanceled = true;
                     Client.CancelAsync();
-                    DownloadButton.Icon = IconType.cloud_download;
-                    MainLabel.Content = Manip[0];
-                    SubLabel.Content = Manip[1];
                     return;
                 }
             }
-            else
+            else { 
+
                 DownloadRequested?.Invoke(this, new MediaEventArgs() { Index = MediaIndex, Sender = this });
+                downloadCanceled = false;
         }
+        }
+        bool downloadCanceled = true;
     }
 }
