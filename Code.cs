@@ -123,6 +123,7 @@ namespace Player.Events
         public MediaEventArgs(TagLib.File f) => File = f;
         public MediaEventArgs(Media media) => Media = media;
         public MediaEventArgs(MediaView sender) => Sender = sender;
+        public MediaEventArgs() { }
     }
     public class SettingsEventArgs
     {
@@ -263,7 +264,23 @@ namespace Player.Management
         public event EventHandler<ManagementChangeEventArgs> Change;
         private List<Media> AllMedias = new List<Media>();
         public Preferences Preferences { private get; set; } = Preferences.Load();
-        public Media this[int index] => AllMedias[index];
+        public Media this[int index]
+        {
+            get => AllMedias[index];
+            set
+            {
+                AllMedias[index] = value;
+                Change?.Invoke(this, new ManagementChangeEventArgs()
+                {
+                    Change = ManagementChange.MediaUpdate,
+                    Changes = new Events.MediaEventArgs()
+                    {
+                        Index = index,
+                        Media = value
+                    }
+                });
+            }
+        }
         private List<int> PlayQueue = new List<int>();
         private Random Randomness = new Random(2);
         public static MediaType GetType(string FileName)
@@ -290,17 +307,22 @@ namespace Player.Management
             }
         }
         private Random Shuffle = new Random(2);
-        private WebClient WebParser = new WebClient();
-        private WebHeaderCollection WebHeaderCollection = new WebHeaderCollection();
         private int CurrentQueuePosition = 0;
 
         public bool Add(Uri uri, bool requestPlay = false)
         {
-            WebParser.Headers.Set(HttpRequestHeader.Range, "bytes=0-0");
-            WebParser.DownloadString(uri);
-            var TypeOfContent = WebParser.ResponseHeaders["Content-Type"];
-            Debug.Print(TypeOfContent);
-            Add(new Media(uri.AbsoluteUri));
+            var request = (HttpWebRequest)WebRequest.Create(uri);
+            request.AddRange(0, 10);
+            using (var response = request.GetResponse())
+            {
+                if (!response.ContentType.EndsWith("octet-stream"))
+                {
+                    MessageBox.Show("Requested Uri is not a valid octet-stream", "NET", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return false;
+                }
+            }
+
+                Add(new Media(uri.AbsoluteUri));
             if (requestPlay)
             {
                 Change?.Invoke(this, new ManagementChangeEventArgs()
@@ -647,6 +669,9 @@ namespace Player.Management
         {
             Preferences = newSettings; 
         }
+        public void AddCount() => AllMedias[CurrentlyPlayingIndex].PlayCount++;
+
+        public void Set(Media oldMedia, Media newMedia) => this[Find(oldMedia)] = newMedia;
     }
 }
 
@@ -908,7 +933,7 @@ namespace Player
             }
             else
             {
-                Name = uri.Segments[uri.Segments.Count() - 1];
+                Name = Uri.UnescapeDataString(uri.Segments[uri.Segments.Count() - 1]);
                 Title = Name;
                 Path = uri.AbsoluteUri;
                 Artist = uri.Host;

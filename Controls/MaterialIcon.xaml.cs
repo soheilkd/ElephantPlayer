@@ -11,25 +11,10 @@ namespace Player.Controls
 {
     public enum IconType
     {
-        none,
-        musnote, musvideo,
-        ondemand_video,
-        pause, play_arrow,
-        warning,
-        fullscreen,
-        subtitle,
-        settings,
-        short_text,
-        folder_open,
-        skip_next, skip_previous,
-        content_copy,
-        arrow_downward, arrow_upward,
-        more_horiz,
-        equalizer,
-        expand_less, expand_more,
-        repeat, repeat_one, shuffle,
-        volume_0, volume_1, volume_2, volume_3,
-        queue_music, cloud, add
+        none, musnote, musvideo, ondemand_video, pause, play_arrow,
+        warning, fullscreen, subtitle, settings, short_text, folder_open, skip_next, skip_previous, content_copy,
+        arrow_downward, arrow_upward, more_horiz, equalizer, expand_less, expand_more, repeat, repeat_one, shuffle,
+        volume_0, volume_1, volume_2, volume_3, queue_music, cloud, add, cloud_download, cloud_done
     }
     public partial class MaterialIcon : UserControl, IComponentConnector
     {

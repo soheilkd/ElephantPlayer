@@ -72,13 +72,13 @@ namespace Player
                     PositionSlider.Maximum = TimeSpan.TotalMilliseconds;
                     PositionSlider.SmallChange = 1 * PositionSlider.Maximum / 100;
                     PositionSlider.LargeChange = 5 * PositionSlider.Maximum / 100;
-                    TimeLabel_Full.Content = ConvertTime(TimeSpan);
+                    TimeLabel_Full.Content = $"{TimeSpan.Minutes}:{TimeSpan.Seconds}";
                     PlayCountTimer.Stop();
                     PlayCountTimer.Interval = PositionSlider.Maximum / 3;
                     PlayCountTimer.Start();
                 }
             PositionSlider.Value = Player.Position.TotalMilliseconds;
-            TimeLabel_Current.Content = ConvertTime(Player.Position);
+            TimeLabel_Current.Content = $"{Player.Position.Minutes}:{Player.Position.Seconds}";
             goto UX;
         }
         private async void Manager_Change(object sender, ManagementChangeEventArgs e)
@@ -95,6 +95,8 @@ namespace Player
                     MediaViews[MediaViews.Count - 1].RemoveRequested += (n, f) => Manager.Remove(f.Index);
                     MediaViews[MediaViews.Count - 1].PropertiesRequested += (n, f) => Manager.ShowProperties(f.Index);
                     MediaViews[MediaViews.Count - 1].RepeatRequested += (n, f) => Manager.Repeat(f.Index, f.Para);
+                    MediaViews[MediaViews.Count - 1].DownloadRequested += (n, f) => f.Sender.Download(Manager[f.Index]);
+                    MediaViews[MediaViews.Count - 1].Downloaded += (n, f) => Manager[f.Index] = f.Media;
                     Window_SizeChanged(this, null);
                     break;
                 case ManagementChange.EditingTag:
@@ -148,6 +150,7 @@ namespace Player
         {
             Play(Manager.Next(e.Index));
         }
+
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             var lib = MassiveLibrary.Load();
@@ -177,11 +180,23 @@ namespace Player
             User.Keyboard.KeyUp += Keyboard_KeyUp;
             UserExperience();
             PlayCountTimer.Elapsed += PlayCountTimer_Elapsed;
+            AddUrlButton.Click += (obj, f) => UrlPopup.IsOpen = true;
+        }
+
+        private void Downloader_DownloadingDone(object sender, MediaEventArgs e)
+        {
+            Manager[e.Index] = e.Media;
+            if (Manager.CurrentlyPlayingIndex == e.Index)
+            {
+                var pos = Player.Position;
+                Play(e.Media);
+                ForcePositionChange(Player.Position.TotalMilliseconds, true);
+            }
         }
 
         private void PlayCountTimer_Elapsed(object sender, ElapsedEventArgs e)
         {
-
+            Manager.AddCount();
         }
 
         MassiveLibrary Library = new MassiveLibrary();
@@ -465,12 +480,6 @@ namespace Player
             P.PlayMode = (int)Manager.ActivePlayMode;
         }
         
-
-        private void AddUrlButton_Click(object sender, EventArgs e)
-        {
-            UrlPopup.IsOpen = true;
-        }
-
         private void UrlTextBox_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Enter)

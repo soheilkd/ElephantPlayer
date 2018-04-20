@@ -34,7 +34,8 @@
         </Label>
         <controls:MaterialIcon  x:Name="MainIcon" HorizontalAlignment="Left" Width="30" Icon="musnote" Foreground="White"/>
         <controls:MaterialButton HorizontalAlignment="Right" Margin="0, 0, 5, 0" Icon="more_horiz" EllipseType="Rectular" x:Name="OtherButton" Click="Other_Click"/>
-        <controls:MaterialButton HorizontalAlignment="Right" Margin="0, 0, 50, 0" Icon="play_arrow" EllipseType="Rectular" x:Name="PlayButton" Click="Play_Click" />
+        <controls:MaterialButton HorizontalAlignment="Right" Margin="0, 0, 45, 0" Icon="play_arrow" EllipseType="Rectular" x:Name="PlayButton" Click="Play_Click" />
+        <controls:MaterialButton HorizontalAlignment="Right" Margin="0, 0, 85, 0" Icon="cloud_download" EllipseType="Rectular" x:Name="DownloadButton" Click="DownloadButton_Click" />
 
         <Popup PlacementTarget="{Binding ElementName=OtherButton}" x:Name="OtherPopup" StaysOpen="False" PopupAnimation="Slide">
             <StackPanel Background="#9222" >
