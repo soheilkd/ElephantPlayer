@@ -13,40 +13,40 @@
         <Label Content="         " x:Name="MainLabel" FontWeight="Medium" FontSize="14" Margin="30,0,0,0" Foreground="White" HorizontalAlignment="Left" VerticalAlignment="Top" />
         <Label Content="       " Margin="30,20,0,0" x:Name="SubLabel" Foreground="White" HorizontalAlignment="Left" VerticalAlignment="Top"/>
         <controls:MaterialIcon  x:Name="MainIcon" HorizontalAlignment="Left" Width="30" Icon="musnote" Foreground="White"/>
-        <controls:MaterialButton HorizontalAlignment="Right" Margin="0, 0, 5, 0" Icon="more_horiz" EllipseType="Rectular" x:Name="OtherButton" Click="Other_Click"/>
-        <controls:MaterialButton HorizontalAlignment="Right" Margin="0, 0, 45, 0" Icon="play_arrow" EllipseType="Rectular" x:Name="PlayButton" Click="Play_Click" />
-        <controls:MaterialButton HorizontalAlignment="Right" Margin="0, 0, 85, 0" Icon="cloud_download" EllipseType="Rectular" x:Name="DownloadButton" Click="DownloadButton_Click" />
-
-        <Popup PlacementTarget="{Binding ElementName=OtherButton}" x:Name="OtherPopup" StaysOpen="False" PopupAnimation="Slide">
-            <StackPanel Background="#9222" >
-                <MenuItem Header="Play After" Click="PlayAfter_Click"/>
-                <MenuItem Header="Repeat" >
-                    <MenuItem.Items>
-                        <MenuItem Header="2 times" />
-                        <MenuItem Header="3 times" />
-                        <MenuItem Header="5 times" />
-                        <MenuItem Header="10 times" />
-                        <MenuItem Header="Forever" />
-                    </MenuItem.Items>
-                </MenuItem>
-                <MenuItem Header="Remove" Click="Remove_Click" />
-                <MenuItem Header="Delete" Click="Delete_Click"/>
-                <MenuItem Header="Move" >
-                    <MenuItem.Items>
-                        <MenuItem Header="Default" />
-                        <MenuItem Header="..." />
-                    </MenuItem.Items>
-                </MenuItem>
-                <MenuItem Header="Copy">
-                    <MenuItem.Items>
-                        <MenuItem Header="Default" />
-                        <MenuItem Header="..." />
-                    </MenuItem.Items>
-                </MenuItem>
-                <MenuItem Header="Open Location" Click="Location_Click"/>
-                <MenuItem Header="Properties"  Click="Properties_Click"/>
-            </StackPanel>
-        </Popup>
+        <controls:MaterialButton HorizontalAlignment="Right" Margin="0, 0, 5, 0" Icon="play_arrow" EllipseType="Rectular" x:Name="PlayButton" Click="Play_Click" />
+        <controls:MaterialButton HorizontalAlignment="Right" Margin="0, 0, 45, 0" Icon="cloud_download" EllipseType="Rectular" x:Name="DownloadButton" Click="DownloadButton_Click" />
+        <Grid.ContextMenu>
+            <ContextMenu>
+                <ContextMenu.Items>
+                    <MenuItem Header="Play After" Click="PlayAfter_Click"/>
+                    <MenuItem Header="Repeat" >
+                        <MenuItem.Items>
+                            <MenuItem Header="2 times" />
+                            <MenuItem Header="3 times" />
+                            <MenuItem Header="5 times" />
+                            <MenuItem Header="10 times" />
+                            <MenuItem Header="Forever" />
+                        </MenuItem.Items>
+                    </MenuItem>
+                    <MenuItem Header="Remove" Click="Remove_Click" />
+                    <MenuItem Header="Delete" Click="Delete_Click"/>
+                    <MenuItem Header="Move" >
+                        <MenuItem.Items>
+                            <MenuItem Header="Default" />
+                            <MenuItem Header="..." />
+                        </MenuItem.Items>
+                    </MenuItem>
+                    <MenuItem Header="Copy">
+                        <MenuItem.Items>
+                            <MenuItem Header="Default" />
+                            <MenuItem Header="..." />
+                        </MenuItem.Items>
+                    </MenuItem>
+                    <MenuItem Header="Open Location" Click="Location_Click"/>
+                    <MenuItem Header="Properties"  Click="Properties_Click"/>
+                </ContextMenu.Items>
+            </ContextMenu>
+        </Grid.ContextMenu>
     </Grid>
     <UserControl.Resources>
         <Style TargetType="MenuItem">
@@ -62,8 +62,6 @@
                     <DoubleAnimation From="{Binding ElementName=PlayButton, Path=Opacity}" To="1"
                                      Storyboard.TargetName="PlayButton" />
                     <DoubleAnimation From="{Binding ElementName=PlayButton, Path=Opacity}" To="1"
-                                     Storyboard.TargetName="OtherButton"  />
-                    <DoubleAnimation From="{Binding ElementName=PlayButton, Path=Opacity}" To="1"
                                      Storyboard.TargetName="DownloadButton"  />
                 </Storyboard>
             </BeginStoryboard>
@@ -73,8 +71,6 @@
                 <Storyboard  SpeedRatio="2" Storyboard.TargetProperty="Opacity">
                     <DoubleAnimation From="{Binding ElementName=PlayButton, Path=Opacity}" To="0"
                                      Storyboard.TargetName="PlayButton" />
-                    <DoubleAnimation From="{Binding ElementName=PlayButton, Path=Opacity}" To="0"
-                                     Storyboard.TargetName="OtherButton"/>
                     <DoubleAnimation From="{Binding ElementName=PlayButton, Path=Opacity}" To="0"
                                      Storyboard.TargetName="DownloadButton"/>
                 </Storyboard>

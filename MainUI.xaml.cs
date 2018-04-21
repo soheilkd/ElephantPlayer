@@ -45,10 +45,6 @@ namespace Player
             Pref_DoubleValid.IsChecked = P.LibraryValidation;
             Pref_LightWeight.IsChecked = P.LightWeight;
             Pref_GC.IsChecked = P.ManualGarbageCollector;
-            Pref_MediaRestr.IsChecked = P.Restrict;
-            
-            Pref_VisionOrient.IsChecked = P.VisionOrientation;
-            Pref_VolBal.IsChecked = P.VolumeSetter;
             Pref_WM.IsChecked = P.WMDebug;
 
         }
@@ -87,16 +83,22 @@ namespace Player
             {
                 case ManagementChange.NewMedia:
                    MediaViews.Add(new MediaView(e.Changes.Index, Manager[e.Changes.Index].Title, Manager[e.Changes.Index].Artist, Manager[e.Changes.Index].MediaType));
-                    QueueListView.Items.Add(MediaViews[MediaViews.Count - 1]);
-                    MediaViews[MediaViews.Count - 1].DoubleClicked += MainUI_DoubleClicked;
-                    MediaViews[MediaViews.Count - 1].PlayClicked += (n, f) => Play(Manager.Next(f.Index));
-                    MediaViews[MediaViews.Count - 1].DeleteRequested += (n, f) => Manager.RequestDelete(f.Index);
-                    MediaViews[MediaViews.Count - 1].LocationRequested += (n, f) => Manager.RequestLocation(f.Index);
-                    MediaViews[MediaViews.Count - 1].RemoveRequested += (n, f) => Manager.Remove(f.Index);
-                    MediaViews[MediaViews.Count - 1].PropertiesRequested += (n, f) => Manager.ShowProperties(f.Index);
-                    MediaViews[MediaViews.Count - 1].RepeatRequested += (n, f) => Manager.Repeat(f.Index, f.Para);
-                    MediaViews[MediaViews.Count - 1].DownloadRequested += (n, f) => f.Sender.Download(Manager[f.Index]);
-                    MediaViews[MediaViews.Count - 1].Downloaded += (n, f) => Manager[f.Index] = f.Media;
+                    var p = MediaViews.Count - 1;
+                    QueueListView.Items.Add(MediaViews[p]);
+                    MediaViews[p].DoubleClicked += MainUI_DoubleClicked;
+                    MediaViews[p].PlayClicked += (n, f) => Play(Manager.Next(f.Index));
+                    MediaViews[p].DeleteRequested += (n, f) => Manager.RequestDelete(f.Index);
+                    MediaViews[p].LocationRequested += (n, f) => Manager.RequestLocation(f.Index);
+                    MediaViews[p].RemoveRequested += (n, f) => Manager.Remove(f.Index);
+                    MediaViews[p].PropertiesRequested += (n, f) => Manager.ShowProperties(f.Index);
+                    MediaViews[p].RepeatRequested += (n, f) => Manager.Repeat(f.Index, f.Para);
+                    MediaViews[p].DownloadRequested += (n, f) => f.Sender.Download(Manager[f.Index]);
+                    MediaViews[p].Downloaded += (n, f) => Manager[f.Index] = f.Media;
+                    MediaViews[p].ZipDownloaded += (n, f) =>
+                    {
+                        Manager.Add((string[])f.ObjectArray);
+                        Manager.Remove(((MediaView)n).MediaIndex);
+                    };
                     Window_SizeChanged(this, null);
                     break;
                 case ManagementChange.EditingTag:
@@ -116,6 +118,7 @@ namespace Player
                 case ManagementChange.MediaRemoved:
                     int index = MediaViews.FindIndex(item => item.MediaIndex == e.Changes.Index);
                     MediaViews.RemoveAt(index);
+
                     QueueListView.Items.Clear();
                     for (int i = 0; i < MediaViews.Count; i++)
                     {
@@ -124,14 +127,18 @@ namespace Player
                     break;
                 case ManagementChange.MediaRequested:
                     Play(Manager.Next(e.Changes.Index));
-
                     break;
                 case ManagementChange.MediaUpdate:
                     for (int i = 0; i < MediaViews.Count; i++)
                         if (MediaViews[i].MediaIndex == e.Changes.Index)
                             MediaViews[i].Revoke(e.Changes.Index, e.Changes.Media.Title, e.Changes.Media.Artist);
                     MediaViews[MediaViews.FindIndex(item => item.MediaIndex == e.Changes.Index)].Revoke(e.Changes);
-
+                    if (e.Changes.Index == Manager.CurrentlyPlayingIndex)
+                    {
+                        var q = Player.Position;
+                        Play(e.Changes.Media);
+                        ForcePositionChange(q.TotalMilliseconds, true);
+                    }
                     break;
                 case ManagementChange.Crash:
                     break;
@@ -162,13 +169,11 @@ namespace Player
             Top = P.LastLoc.Y;
             Width = P.LastSize.Width;
             Height = P.LastSize.Height;
-            if (Environment.GetCommandLineArgs().Length != 0)
-                if (Manager.Add(Environment.GetCommandLineArgs()))
-                {
-                    Play(Manager.Next(Manager.Count - 1));
-                    if (Manager.CurrentlyPlaying.IsVideo)
-                        OrinateVideoUI(true);
-                }
+            var cml = Environment.GetCommandLineArgs();
+            if (cml.Length > 1)
+            {
+                Manager.Add(cml, true);
+            }
             DraggerTimer.Elapsed += DraggerTimer_Elapsed;
             TaskbarItemInfo = Thumb.Info;
             Thumb.NextPressed += (obj, f) => NextButton_Click(obj, f);
@@ -180,7 +185,13 @@ namespace Player
             User.Keyboard.KeyUp += Keyboard_KeyUp;
             UserExperience();
             PlayCountTimer.Elapsed += PlayCountTimer_Elapsed;
-            AddUrlButton.Click += (obj, f) => UrlPopup.IsOpen = true;
+            AddUrlButton.Click += delegate
+            {
+                UrlPopup.IsOpen = true;
+                UrlTextBox.Text = Clipboard.GetText() ?? "http://URL";
+                UrlTextBox.Focus();
+               
+            };
         }
 
         private void Downloader_DownloadingDone(object sender, MediaEventArgs e)
@@ -485,6 +496,7 @@ namespace Player
             if (e.Key == Key.Enter)
             {
                 Manager.Add(new Uri(UrlTextBox.Text, UriKind.Absolute));
+                QueueListView.ScrollIntoView(QueueListView.Items[QueueListView.Items.Count - 1]);
             }
         }
 
@@ -509,9 +521,6 @@ namespace Player
             P.LightWeight = Pref_LightWeight.IsChecked.Value;
             P.ManualGarbageCollector = Pref_GC.IsChecked.Value;
             P.MassiveLibrary = Pref_MassLib.IsChecked.Value;
-            P.Restrict = Pref_MediaRestr.IsChecked.Value;
-            P.VisionOrientation = Pref_VisionOrient.IsChecked.Value;
-            P.VolumeSetter = Pref_VolBal.IsChecked.Value;
             P.WMDebug = Pref_WM.IsChecked.Value;
             P.Save();
         }

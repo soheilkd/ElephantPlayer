@@ -24,6 +24,7 @@ namespace Player
         public event EventHandler<MediaEventArgs> LocationRequested;
         public event EventHandler<MediaEventArgs> DownloadRequested;
         public event EventHandler<MediaEventArgs> Downloaded;
+        public event EventHandler<Events.InfoExchangeArgs> ZipDownloaded;
 
         string[] Manip = new string[2];
 
@@ -50,7 +51,7 @@ namespace Player
         {
             InitializeComponent();
             MainLabel.Content = main;
-            SubLabel.Content = main;
+            SubLabel.Content = sub;
             MediaIndex = index;
             switch (type)
             {
@@ -62,9 +63,6 @@ namespace Player
                     break;
                 case MediaType.Online:
                     DefaultIcon = IconType.cloud;
-                    break;
-                case MediaType.NotMedia:
-                    DefaultIcon = IconType.none;
                     break;
                 default:
                     DefaultIcon = IconType.none;
@@ -80,7 +78,19 @@ namespace Player
             MediaIndex = index;
             MainLabel.Content = main;
             SubLabel.Content = sub;
-            MainIcon.Icon = type == MediaType.Music ? IconType.musnote : IconType.musvideo;
+            switch (type)
+            {
+                case MediaType.Music:
+                    MainIcon.Icon = IconType.musnote;
+                    break;
+                case MediaType.Video:
+                    MainIcon.Icon = IconType.ondemand_video;
+                    break;
+                case MediaType.Online:
+                    MainIcon.Icon = IconType.cloud;
+                    break;
+                default: break;
+            }
             DefaultIcon = MainIcon.Icon;
             Manip = new string[] { main, sub };
         }
@@ -98,54 +108,22 @@ namespace Player
         public void UserControl_Loaded(object sender, RoutedEventArgs e)
         {
             PlayButton.Opacity = 0;
-            OtherButton.Opacity = 0;
+            DownloadButton.Opacity = 0;
         }
 
-        private void OutputCanvas_MouseDoubleClick(object sender, MouseButtonEventArgs e)
-        {
-            DoubleClicked?.Invoke(this, new MediaEventArgs(MediaIndex));
-        }
+        private void OutputCanvas_MouseDoubleClick(object sender, MouseButtonEventArgs e) => DoubleClicked?.Invoke(this, new MediaEventArgs(MediaIndex));
 
-        private void Play_Click(object sender, EventArgs e)
-        {
-            
-            PlayClicked?.Invoke(this, new MediaEventArgs(MediaIndex));
-            OtherPopup.IsOpen = false;
-        }
-        private void PlayAfter_Click(object sender, RoutedEventArgs e)
-        {
-            PlayAfterRequested?.Invoke(this, new MediaEventArgs(MediaIndex));
-            OtherPopup.IsOpen = false;
-        }
-        private void Remove_Click(object sender, RoutedEventArgs e)
-        {
-            RemoveRequested?.Invoke(this, new MediaEventArgs(MediaIndex));
-            OtherPopup.IsOpen = false;
-        }
-        private void Delete_Click(object sender, RoutedEventArgs e)
-        {
-            DeleteRequested?.Invoke(this, new MediaEventArgs(MediaIndex));
-            OtherPopup.IsOpen = false;
-        }
-        private void Location_Click(object sender, RoutedEventArgs e)
-        {
-            LocationRequested?.Invoke(this, new MediaEventArgs(MediaIndex));
-            OtherPopup.IsOpen = false;
-        }
-        private void Properties_Click(object sender, RoutedEventArgs e)
-        {
-            PropertiesRequested?.Invoke(this, new MediaEventArgs(MediaIndex));
-            OtherPopup.IsOpen = false;
-        }
-        private void Other_Click(object sender, EventArgs e)
-        {
-            OtherPopup.IsOpen = true;
-        }
+        private void Play_Click(object sender, EventArgs e) => PlayClicked?.Invoke(this, new MediaEventArgs(MediaIndex));
+        private void PlayAfter_Click(object sender, RoutedEventArgs e) => PlayAfterRequested?.Invoke(this, new MediaEventArgs(MediaIndex));
+        private void Remove_Click(object sender, RoutedEventArgs e) => RemoveRequested?.Invoke(this, new MediaEventArgs(MediaIndex));
+        private void Delete_Click(object sender, RoutedEventArgs e) => DeleteRequested?.Invoke(this, new MediaEventArgs(MediaIndex));
+        private void Location_Click(object sender, RoutedEventArgs e) => LocationRequested?.Invoke(this, new MediaEventArgs(MediaIndex));
+        private void Properties_Click(object sender, RoutedEventArgs e) => PropertiesRequested?.Invoke(this, new MediaEventArgs(MediaIndex));
 
         WebClient Client = null;
         public void Download(Media media)
         {
-            var SavePath = $"{Environment.GetFolderPath(Environment.SpecialFolder.MyMusic)}\\{media.Title}";
+            var SavePath = $"{App.ExePath}Downloads\\{media.Title}";
             DownloadButton.Icon = IconType.cancel;
             Client = new WebClient();
             Client.DownloadProgressChanged += (o, f) =>
@@ -165,14 +143,32 @@ namespace Player
                 }
                 MainLabel.Content = "Downloaded, Processing...";
                 DownloadButton.Visibility = Visibility.Hidden;
-                Downloaded?.Invoke(this, new MediaEventArgs()
+                if (Manip[0].EndsWith(".zip"))
                 {
-                    Index = MediaIndex,
-                    Media = new Media(SavePath)
-                });
+                    MainLabel.Content = "Extracting...";
+                    SubLabel.Content = "";
+                    using (var zip = new Ionic.Zip.ZipFile(SavePath))
+                    {
+                        var folderToExtract = SavePath.Substring(0, SavePath.IndexOf(".zip")) + "\\";
+                        zip.ExtractAll(folderToExtract, Ionic.Zip.ExtractExistingFileAction.OverwriteSilently);
+                        ZipDownloaded?.Invoke(this, new InfoExchangeArgs(InfoExchangeType.Management)
+                        {
+                            ObjectArray = System.IO.Directory.GetFiles(folderToExtract, "*.*", System.IO.SearchOption.AllDirectories),
+                            Type = InfoExchangeType.StringArray
+                        });
+                    }
+                    System.IO.File.Delete(SavePath);
+                }
+                else
+                    Downloaded?.Invoke(this, new MediaEventArgs()
+                    {
+                        Index = MediaIndex,
+                        Media = new Media(SavePath)
+                    });
             };
             Client.DownloadFileAsync(new Uri(media.Path, UriKind.Absolute), SavePath);
         }
+
         private void DownloadButton_Click(object sender, EventArgs e)
         {
             if (Client == null)

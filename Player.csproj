@@ -122,6 +122,10 @@
     <LangVersion>default</LangVersion>
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <Optimize>false</Optimize>
+    <DefineConstants>
+    </DefineConstants>
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
     <DebugSymbols>true</DebugSymbols>
@@ -142,9 +146,12 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Gma, Version=5.4.0.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="Gma.System.MouseKeyHook">
+      <HintPath>Libraries\Gma.System.MouseKeyHook.dll</HintPath>
+    </Reference>
+    <Reference Include="Ionic.Zip, Version=1.9.1.8, Culture=neutral, PublicKeyToken=edbe51ad942a3f5c, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>Libraries\Gma.dll</HintPath>
+      <HintPath>Libraries\Ionic.Zip.dll</HintPath>
     </Reference>
     <Reference Include="System">
       <Private>False</Private>
@@ -170,8 +177,6 @@
     <Reference Include="PresentationFramework">
       <Private>False</Private>
     </Reference>
-    <Reference Include="System.Xml" />
-    <Reference Include="System.Xml.Serialization" />
     <Reference Include="taglib-sharp, Version=2.1.0.0, Culture=neutral, PublicKeyToken=db62eba44689b5b0, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>Libraries\taglib-sharp.dll</HintPath>
@@ -259,7 +264,8 @@
     <WCFMetadata Include="Connected Services\" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Libraries\Gma.dll" />
+    <Content Include="Libraries\Gma.System.MouseKeyHook.dll" />
+    <Content Include="Libraries\Ionic.Zip.dll" />
     <Content Include="Libraries\taglib-sharp.dll" />
     <Resource Include="Resources\MusicArt.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>

@@ -103,7 +103,7 @@ namespace Player.Events
     public enum InfoExchangeType
     {
         Integer, Double,
-        Media, Object,
+        Media, Object, StringArray,
         RequestNext, RequestPrev,
         Handling, UserInterface,
         Management, AppInterface,
@@ -132,10 +132,8 @@ namespace Player.Events
     public class InfoExchangeArgs
     {
         public InfoExchangeType Type { get; set; }
-        public int Integer { get; set; }
-        public double Double { get; set; }
-        public Media Media { get; set; }
         public object Object { get; set; }
+        public object[] ObjectArray { get; set; }
 
         public InfoExchangeArgs() { }
         public InfoExchangeArgs(InfoExchangeType type) => Type = type;
@@ -308,19 +306,28 @@ namespace Player.Management
         }
         private Random Shuffle = new Random(2);
         private int CurrentQueuePosition = 0;
-
+        
         public bool Add(Uri uri, bool requestPlay = false)
         {
             var request = (HttpWebRequest)WebRequest.Create(uri);
             request.AddRange(0, 10);
-            using (var response = request.GetResponse())
+            try
             {
-                if (!response.ContentType.EndsWith("octet-stream"))
+                request.Timeout = 5000;
+                var response = request.GetResponse();
+                
+                if (!response.ContentType.EndsWith("octet-stream") && !response.ContentType.StartsWith("video") && !response.ContentType.StartsWith("app"))
                 {
                     MessageBox.Show("Requested Uri is not a valid octet-stream", "NET", MessageBoxButton.OK, MessageBoxImage.Error);
                     return false;
                 }
             }
+            catch(Exception e)
+            {
+                MessageBox.Show(e.Message);
+                return false;
+            }
+            
 
                 Add(new Media(uri.AbsoluteUri));
             if (requestPlay)
@@ -383,8 +390,21 @@ namespace Player.Management
                     });
                 return true;
             }
-            else
-                return false;
+            var t = from item
+                    in paths
+                    where AllMedias.FindIndex(subItem => subItem.Path == item) != -1
+                    select Find(item);
+            var p = t.ElementAt(0);
+            if (requestPlay && t.Count() != 0)
+            {
+                Change?.Invoke(this, new ManagementChangeEventArgs()
+                {
+                    Change = ManagementChange.MediaRequested,
+                    Changes = new Events.MediaEventArgs(t.First())
+                });
+
+            }
+            return false;
         }
         public bool Add(Media media)
         {

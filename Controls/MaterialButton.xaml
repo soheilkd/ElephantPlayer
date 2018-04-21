@@ -1,7 +1,7 @@
 ﻿<UserControl x:Class="Player.Controls.MaterialButton"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:local="clr-namespace:Player" x:Name="Modifier" 
+             xmlns:local="clr-namespace:Player" x:Name="Modifier"  Width="26"
              xmlns:controls="clr-namespace:Player.Controls" Loaded="UserControl_Loaded"
              Height="26" MouseUp="UXMouseUp" MouseDown="UXMouseDown">
     <Grid x:Name="MainGrid">
