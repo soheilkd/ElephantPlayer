@@ -576,10 +576,9 @@ namespace Player
             AppDomain.CurrentDomain.UnhandledException += (sender, e) =>
             {
                 MessageBox.Show($"Unhandled {e.ExceptionObject}\r\n" +
-                    $"Message: {(e.ExceptionObject as Exception).Message}\r\n" +
-                    $"Stack: {(e.ExceptionObject as Exception).StackTrace}\r\n" +
-                    $"Terminating: {e.IsTerminating}");
-                Current.Shutdown(1);
+                    $"Terminating: {e.IsTerminating}", "Exception", MessageBoxButton.OK, MessageBoxImage.Error);
+                if (e.IsTerminating)
+                    System.Diagnostics.Process.GetCurrentProcess().Kill();
             };
             if (!Environment.MachineName.Equals("Soheil-PC", StringComparison.CurrentCultureIgnoreCase) && !File.Exists($"{Path}\\Bakhshesh.LazemNistEdamKonid"))
             {
@@ -638,7 +637,7 @@ namespace Player
             output.BeginInit();
             output.StreamSource = memStream;
             output.EndInit();
-            memStream.Dispose();
+
             return output;
         }
         public static Draw.Image GetImage(TagLib.IPicture picture) => Draw.Image.FromStream(new MemoryStream(picture.Data.Data));
