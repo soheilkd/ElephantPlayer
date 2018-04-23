@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Player.Events;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -100,7 +101,7 @@ namespace Player.Events
         public int ArgsCount => _Args.Count;
         public string[] Args => _Args.ToArray();
     }
-    public enum InfoExchangeType
+    public enum InfoType
     {
         Integer, Double,
         Media, Object, StringArray,
@@ -108,7 +109,18 @@ namespace Player.Events
         Handling, UserInterface,
         Management, AppInterface,
         Internal, StartingMedia,
-        EndingMedia, PlayPause
+        EndingMedia, PlayPause,
+        NewMedia,
+        MediaRequested,
+        EditingTag,
+        InterfaceUpdate,
+        MediaUpdate,
+        Crash,
+        PopupRequest,
+        ArtworkClick,
+        SomethingHappened,
+        MediaRemoved,
+        MediaMoved
     }
 
     public class MediaEventArgs : EventArgs
@@ -131,51 +143,17 @@ namespace Player.Events
     }
     public class InfoExchangeArgs
     {
-        public InfoExchangeType Type { get; set; }
+        public InfoType Type { get; set; }
         public object Object { get; set; }
         public object[] ObjectArray { get; set; }
-
+        public MediaEventArgs Args { get; set; }
         public InfoExchangeArgs() { }
-        public InfoExchangeArgs(InfoExchangeType type) => Type = type;
+        public InfoExchangeArgs(InfoType type) => Type = type;
     }
 }
 
 namespace Player.Management
 {
-    public enum SortBy { Artist, Title, AlbumArtist, Name, Path, Album }
-    public enum ManagementChange
-    {
-        NewMedia,
-        MediaRequested,
-        EditingTag,
-        InterfaceUpdate,
-        MediaUpdate,
-        Crash,
-        PopupRequest,
-        ArtworkClick,
-        SomethingHappened,
-        MediaRemoved,
-        MediaMoved
-    }
-    public class ManagementChangeEventArgs : EventArgs
-    {
-        public Events.MediaEventArgs Changes { get; set; }
-        public ManagementChange Change {get;set;}
-        public static ManagementChangeEventArgs CreateForTagEditing(Events.MediaEventArgs e)
-        => new ManagementChangeEventArgs() { Change = ManagementChange.EditingTag, Changes = e };
-        public static ManagementChangeEventArgs CreateForArtwork(Events.MediaEventArgs e)
-        => new ManagementChangeEventArgs() { Change = ManagementChange.ArtworkClick, Changes = e };
-        public static ManagementChangeEventArgs CreateForArtwork(int index)
-        => new ManagementChangeEventArgs() { Change = ManagementChange.ArtworkClick, Changes = new Events.MediaEventArgs(index) };
-        public static ManagementChangeEventArgs CreateForInterfaceUpdate(Events.MediaEventArgs e)
-        => new ManagementChangeEventArgs() { Change = ManagementChange.InterfaceUpdate, Changes = e };
-        public static ManagementChangeEventArgs CreateForMediaUpdate(Events.MediaEventArgs e)
-        => new ManagementChangeEventArgs() { Change = ManagementChange.MediaUpdate, Changes = e };
-        public static ManagementChangeEventArgs CreateForPopupRequest(Events.MediaEventArgs e)
-        => new ManagementChangeEventArgs() { Change = ManagementChange.PopupRequest, Changes = e };
-        public static ManagementChangeEventArgs Default(Events.MediaEventArgs optional = null)
-        => new ManagementChangeEventArgs() { Change = ManagementChange.SomethingHappened, Changes = optional };
-    }
     [Serializable]
     public class MassiveLibrary
     {
@@ -240,26 +218,8 @@ namespace Player.Management
             "mpeg",
             "webm"
         };
-        public static string SupportedFilesFilter
-        {
-            get
-            {
-                string filter = "Supported Musics |";
-                for (int i = 0; i < SupportedMusics.Length; i++)
-                    filter += $"*.{SupportedMusics[i]};";
-                filter += "|Supported Videos |";
-                for (int i = 0; i < SupportedVideos.Length; i++)
-                    filter += $"*.{SupportedVideos[i]};";
-                filter += "|All Supported Files |";
-                for (int i = 0; i < SupportedMusics.Length; i++)
-                    filter += $"*.{SupportedMusics[i]};";
-                for (int i = 0; i < SupportedVideos.Length; i++)
-                    filter += $"*.{SupportedVideos[i]};";
-                return filter;
-            }
-        }
         public Media CurrentlyPlaying => AllMedias[CurrentlyPlayingIndex];
-        public event EventHandler<ManagementChangeEventArgs> Change;
+        public event EventHandler<InfoExchangeArgs> Change;
         private List<Media> AllMedias = new List<Media>();
         public Preferences Preferences { private get; set; } = Preferences.Load();
         public Media this[int index]
@@ -268,10 +228,10 @@ namespace Player.Management
             set
             {
                 AllMedias[index] = value;
-                Change?.Invoke(this, new ManagementChangeEventArgs()
+                Change?.Invoke(this, new InfoExchangeArgs()
                 {
-                    Change = ManagementChange.MediaUpdate,
-                    Changes = new Events.MediaEventArgs()
+                    Type = Events.InfoType.MediaUpdate,
+                    Args = new MediaEventArgs()
                     {
                         Index = index,
                         Media = value
@@ -307,7 +267,7 @@ namespace Player.Management
         private Random Shuffle = new Random(2);
         private int CurrentQueuePosition = 0;
         
-        public bool Add(Uri uri, bool requestPlay = false)
+        public void Add(Uri uri, bool requestPlay = false)
         {
             var request = (HttpWebRequest)WebRequest.Create(uri);
             request.AddRange(0, 10);
@@ -319,76 +279,71 @@ namespace Player.Management
                 if (!response.ContentType.EndsWith("octet-stream") && !response.ContentType.StartsWith("video") && !response.ContentType.StartsWith("app"))
                 {
                     MessageBox.Show("Requested Uri is not a valid octet-stream", "NET", MessageBoxButton.OK, MessageBoxImage.Error);
-                    return false;
+                    return;
                 }
             }
-            catch(Exception e)
+            catch(WebException e)
             {
                 MessageBox.Show(e.Message);
-                return false;
+                return;
             }
-            
-
-                Add(new Media(uri.AbsoluteUri));
+            Add(new Media(uri.AbsoluteUri));
             if (requestPlay)
             {
-                Change?.Invoke(this, new ManagementChangeEventArgs()
+                Change?.Invoke(this, new InfoExchangeArgs()
                 {
-                    Change = ManagementChange.MediaRequested,
-                    Changes = new Events.MediaEventArgs(AllMedias.Count - 1)
+                    Type = InfoType.MediaRequested,
+                    Args = new MediaEventArgs(AllMedias.Count - 1)
                 });
             }
-            return true;
         }
-        public bool Add(string path, bool requestPlay = false)
+        public void Add(string path, bool requestPlay = false)
         {
-            if (path.EndsWith(".elp"))
-                return DownloadPlaylist(path);
-            if (GetType(path) == MediaType.NotMedia)
-                return false;
+            if (!Check(path))
+                return;
             int p = AllMedias.Count;
             int index = AllMedias.FindIndex(item => item.Path == path);
             if (index != -1)
             {
                 if (!requestPlay)
-                    return false;
-                Change?.Invoke(this, new ManagementChangeEventArgs()
+                    return;
+                Change?.Invoke(this, new InfoExchangeArgs()
                 {
-                    Change = ManagementChange.MediaRequested,
-                    Changes = new Events.MediaEventArgs(index)
+                    Type = InfoType.MediaRequested,
+                    Args = new MediaEventArgs(index)
                 });
-                return false;
+                return;
             }
 
             AllMedias.Add(new Media(path));
            
-            Change?.Invoke(this, new ManagementChangeEventArgs()
+            Change?.Invoke(this, new InfoExchangeArgs()
             {
-                Change = ManagementChange.NewMedia,
-                Changes = new Events.MediaEventArgs(p)
+                Type = InfoType.NewMedia,
+                Args = new MediaEventArgs(p)
             });
             if (requestPlay)
-                Change?.Invoke(this, new ManagementChangeEventArgs()
+                Change?.Invoke(this, new InfoExchangeArgs()
                 {
-                    Change = ManagementChange.MediaRequested,
-                    Changes = new Events.MediaEventArgs(p)
+                    Type = InfoType.MediaRequested,
+                    Args = new MediaEventArgs(p)
                 });
-            return true;
         }
-        public bool Add(string[] paths, bool requestPlay = false)
+        public void Add(string[] paths, bool requestPlay = false)
         {
             var c = AllMedias.Count;
             for (int i = 0; i < paths.Length; i++)
-                Add(paths[i]);
+                 if (Check(paths[i]))
+                    Add(paths[i]);
             if (c != AllMedias.Count)
             {
                 if (requestPlay)
-                    Change?.Invoke(this, new ManagementChangeEventArgs()
+                    Change?.Invoke(this, new InfoExchangeArgs()
                     {
-                        Change = ManagementChange.MediaRequested,
-                        Changes = new Events.MediaEventArgs(AllMedias[c])
+                        Type = InfoType.MediaRequested,
+                        Args = new MediaEventArgs(AllMedias[c])
                     });
-                return true;
+                return;
             }
             var t = from item
                     in paths
@@ -397,85 +352,55 @@ namespace Player.Management
             var p = t.ElementAt(0);
             if (requestPlay && t.Count() != 0)
             {
-                Change?.Invoke(this, new ManagementChangeEventArgs()
+                Change?.Invoke(this, new InfoExchangeArgs()
                 {
-                    Change = ManagementChange.MediaRequested,
-                    Changes = new Events.MediaEventArgs(t.First())
+                    Type = InfoType.MediaRequested,
+                    Args = new MediaEventArgs(t.First())
                 });
 
             }
-            return false;
         }
-        public bool Add(Media media)
+        public void Add(Media media)
         {
-            if (media.IsMedia == false)
-                return false;
+            if (!Check(media.Path))
+                return;
             int p = AllMedias.Count;
             if (!media.IsLoaded)
                 media = new Media(media.Path);
             AllMedias.Add(media);
-            Change?.Invoke(this, new ManagementChangeEventArgs()
+            Change?.Invoke(this, new InfoExchangeArgs()
             {
-                Change = ManagementChange.NewMedia,
-                Changes = new Events.MediaEventArgs(p)
+                Type = InfoType.NewMedia,
+                Args = new MediaEventArgs(p)
             });
-            return true;
         }
 
-        public bool Remove(string path)
-        {
-            int i = -1;
-            for (; i < AllMedias.Count; i++)
-                if (AllMedias[i].Path == path)
-                    break;
-            if (i == -1) return false;
-            return Remove(i);
-        }
-        public bool Remove(Media media) => Remove(Find(media));
-        public bool Remove(int index)
-        {
-            AllMedias[index].IsRemoved = true;
-            if (index < CurrentlyPlayingIndex)
-                CurrentlyPlayingIndex--;
-            Change?.Invoke(this, new ManagementChangeEventArgs() { Change = ManagementChange.MediaRemoved, Changes = new Events.MediaEventArgs(index) });
-            return true;
-        }
-
-        public bool Delete(string path) => Delete(Find(path));
-        public bool Delete(Media media) => Delete(Find(media));
-        public bool Delete(int index)
-        {
-            try
-            {
-                File.Delete(AllMedias[index].Path);
-            }
-            catch (Exception)
-            {
-                return false;
-            }
-            Remove(index);
-            return true;
-        }
-
-        public bool Move(Media media, string to)
+        public void Remove(string path)
         {
             for (int i = 0; i < AllMedias.Count; i++)
-                if (AllMedias[i] == media)
-                    return Move(i, to);
-            return false;
+                if (AllMedias[i].Path == path)
+                    Remove(i--); // i-- vas inke age elemente badi ham hamoon path ro dasht i--, i++ ro khonsa kone vo loop ro hamoon ejra she baz
         }
-        public bool Move(int index, string to)
+        public void Remove(Media media) => Remove(Find(media));
+        public void Remove(int index)
         {
-            try
-            {
-                File.Move(AllMedias[index].Path, to);
-                AllMedias[index].Path = to;
-                return true;
-            }
-            catch (Exception)
-            {
-                return false;
-            }
+            AllMedias[index].IsRemoved = true;
+            Change?.Invoke(this, new InfoExchangeArgs() { Type = InfoType.MediaRemoved, Args = new MediaEventArgs(index) });
+        }
+
+        public void Delete(string path) => Delete(Find(path));
+        public void Delete(Media media) => Delete(Find(media));
+        public void Delete(int index)
+        {
+            File.Delete(AllMedias[index].Path);
+            Remove(index);
+        }
+
+        public void Move(Media media, string to) => Move(Find(media), to);
+        public void Move(int index, string to)
+        {
+            File.Move(AllMedias[index].Path, to);
+            AllMedias[index].Path = to;
         }
         
         public int Find(Media media)
@@ -493,20 +418,9 @@ namespace Player.Management
             return -1;
         }
 
-        public bool Copy(string from, string to)
-        {
-            try
-            {
-                File.Copy(from, to);
-                return true;
-            }
-            catch (Exception)
-            {
-                return false;
-            }
-        }
-        public bool Copy(Media media, string to) => Copy(media.Path, to);
-        public bool Copy(int index, string to) => Copy(AllMedias[index], to);
+        public void Copy(string from, string to) => File.Copy(from, to, true);
+        public void Copy(Media media, string to) => Copy(media.Path, to);
+        public void Copy(int index, string to) => Copy(AllMedias[index], to);
         
         public void Reload(int index)
         {
@@ -514,78 +428,31 @@ namespace Player.Management
                 index = CurrentlyPlayingIndex;
             AllMedias[index] = new Media(AllMedias[index].Path);
         }
+        
 
-        public bool Sort(SortBy by)
+        public void DownloadPlaylist(string path)
         {
-            return true;
+            if (!path.ToLower().EndsWith(".elp")) return;
+            string[] lines = File.ReadAllLines(path);
+            List<Media> list = new List<Media>();
+            for (int i = 0; i < lines.Length; i++)
+                Add(lines[i]);
         }
-
-        public bool DownloadPlaylist(string path)
+        public static void DownloadPlaylist(string path, out Media[] medias)
         {
-            try
-            {
-                if (!path.ToLower().EndsWith(".elp")) return false;
-                string[] lines = File.ReadAllLines(path);
-                List<Media> list = new List<Media>();
-                for (int i = 0; i < lines.Length; i++)
-                    Add(lines[i]);
-                return true;
-            }
-            catch (Exception)
-            {
-                return false;
-            }
-        }
-        public static bool DownloadPlaylist(string path, out Media[] medias)
-        {
-            try
-            {
-                if (!path.ToLower().EndsWith(".elp")) { medias = new Media[0]; return false; }
-                string[] lines = File.ReadAllLines(path);
-                List<Media> list = new List<Media>();
-                for (int i = 0; i < lines.Length; i++)
-                    if (GetType(lines[i]) != MediaType.NotMedia)
-                        list.Add(new Media(lines[i]));
-                medias = list.ToArray();
-                return true;
-            }
-            catch (Exception)
-            {
-                medias = new Media[0];
-                return false;
-            }
+            if (!path.ToLower().EndsWith(".elp")) { medias = new Media[0]; return; }
+            string[] lines = File.ReadAllLines(path);
+            List<Media> list = new List<Media>();
+            for (int i = 0; i < lines.Length; i++)
+                if (Check(lines[i]))
+                    list.Add(new Media(lines[i]));
+            medias = list.ToArray();
         }
 
-        public bool UploadPlaylist(string path)
-        {
-            string[] array = new string[AllMedias.Count];
-            for (int i = 0; i < array.Length; i++)
-                array[i] = AllMedias[i].Path;
-            try
-            {
-                File.WriteAllLines(path, array);
-                return true;
-            }
-            catch (Exception)
-            {
-                return false;
-            }
-        }
-        public static bool UploadPlaylist(string path, Media[] content)
-        {
-            string[] array = new string[content.Length];
-            for (int i = 0; i < array.Length; i++)
-                array[i] = content[i].Path;
-            try
-            {
-                File.WriteAllLines(path, array);
-                return true;
-            }
-            catch (Exception)
-            {
-                return false;
-            }
-        }
+        public void UploadPlaylist(string path) => 
+            File.WriteAllLines(path, from item in AllMedias select item.Path);
+        public static void UploadPlaylist(string path, Media[] content) => 
+            File.WriteAllLines(path, from item in content select item.Path);
 
         public void RequestDelete(int index)
         {
@@ -604,11 +471,6 @@ namespace Player.Management
         public static string GetExtension(Media media) => GetExtension(media.Path);
         public static string GetFilter(string ext = ".mp3") => $"{GetType(ext)} | *{ext}";
         public static string GetFilter(Media media) => $"{media.MediaType} | *{GetExtension(media.Path)}";
-        
-        public void Clear()
-        {
-            AllMedias.Clear();
-        }
 
         public Media Next(int y = -1)
         {
@@ -662,12 +524,11 @@ namespace Player.Management
         
         public void Repeat(int index, int times)
         {
-
+            for (int i = 0; i < times; i++)
+                PlayQueue.Add(index);
         }
-        public void Repeat(int index)
-        {
-
-        }
+        public void Repeat(int index) =>
+            PlayQueue.Add(index);
 
         public void PlayNext(int index)
         {
@@ -692,6 +553,9 @@ namespace Player.Management
         public void AddCount() => AllMedias[CurrentlyPlayingIndex].PlayCount++;
 
         public void Set(Media oldMedia, Media newMedia) => this[Find(oldMedia)] = newMedia;
+
+        private static bool Check(string path) => File.Exists(path) && GetType(path) != MediaType.NotMedia;
+        private static bool Check(Media media) => File.Exists(media.Path) && media.MediaType != MediaType.NotMedia;
     }
 }
 
@@ -699,20 +563,25 @@ namespace Player
 {
     public partial class App : Application, InstanceManager.ISingleInstanceApp
     {
-        public static ResourceDictionary IconDictionary;
         public static event EventHandler<Events.InstanceEventArgs> NewInstanceRequested;
+
         public const string LauncherIdentifier = "ElephantPlayerBySoheilKD_CERTID8585";
-        public static string ExeFullPath = Environment.GetCommandLineArgs()[0];
-        public static string ExePath = ExeFullPath.Substring(0, ExeFullPath.LastIndexOf("\\") + 1);
-        public static string PrefPath = $"{ExePath}SettingsProvider.dll";
-        public static string AppName = $"ELPWMP";
-        public static string LibraryPath = $"{ExePath}Library.dll";
-        public static BitmapImage[] TaskbarIcons;
+        public static string ExePath = Environment.GetCommandLineArgs()[0];
+        public static string Path = ExePath.Substring(0, ExePath.LastIndexOf("\\") + 1);
+        public static string LibraryPath = $"{Path}Library.dll";
+        
         [STAThread]
         public static void Main(string[] args)
         {
-
-            if (!Environment.MachineName.Equals("Soheil-PC", StringComparison.CurrentCultureIgnoreCase) && !File.Exists($"{ExePath}\\Bakhshesh.LazemNistEdamKonid"))
+            AppDomain.CurrentDomain.UnhandledException += (sender, e) =>
+            {
+                MessageBox.Show($"Unhandled {e.ExceptionObject}\r\n" +
+                    $"Message: {(e.ExceptionObject as Exception).Message}\r\n" +
+                    $"Stack: {(e.ExceptionObject as Exception).StackTrace}\r\n" +
+                    $"Terminating: {e.IsTerminating}");
+                Current.Shutdown(1);
+            };
+            if (!Environment.MachineName.Equals("Soheil-PC", StringComparison.CurrentCultureIgnoreCase) && !File.Exists($"{Path}\\Bakhshesh.LazemNistEdamKonid"))
             {
                 MessageBox.Show("Jizzzze", "LOL", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
@@ -722,7 +591,6 @@ namespace Player
                 var application = new App();
 
                 application.InitializeComponent();
-                IconDictionary = Current.Resources;
 
                 application.Run();
                 InstanceManager.Instance<App>.Cleanup();
@@ -743,23 +611,15 @@ namespace Player
         {
             element.BeginInit();
             element.UpdateLayout();
-            element.UpdateLayout();
-            //MessageBox.Show("2");
+
             PngBitmapEncoder encoder = new PngBitmapEncoder();
-            // Clear encoder in order to add new frames of current loop
             encoder.Frames.Clear();
-            // Save current canvas transform
             Transform transform = element.LayoutTransform;
-            // reset current transform (in case it is scaled or rotated)
             element.LayoutTransform = null;
-            // Get the size of canvas
             Size size = new Size(element.Width, element.Height);
-            // Measure and arrange the surface
-            // VERY IMPORTANT
             element.Measure(size);
             element.Arrange(new Rect(size));
-
-            // Create a render bitmap and push the surface to it
+            
             RenderTargetBitmap renderBitmap =
               new RenderTargetBitmap(
                 (int)size.Width,
@@ -768,8 +628,7 @@ namespace Player
                 96d,
                 PixelFormats.Pbgra32);
             renderBitmap.Render(element);
-
-            // Create a file stream for saving image
+            
             MemoryStream memStream = new MemoryStream();
 
             encoder.Frames.Add(BitmapFrame.Create(renderBitmap));
@@ -779,27 +638,10 @@ namespace Player
             output.BeginInit();
             output.StreamSource = memStream;
             output.EndInit();
+            memStream.Dispose();
             return output;
         }
-        public static Draw.Image ToImage(TagLib.IPicture picture) => Draw.Image.FromStream(new MemoryStream(picture.Data.Data));
-        public static BitmapImage ToImage(BitmapSource source)
-        {
-            JpegBitmapEncoder encoder = new JpegBitmapEncoder();
-            MemoryStream memoryStream = new MemoryStream();
-            BitmapImage bImg = new BitmapImage();
-
-            encoder.Frames.Add(BitmapFrame.Create(source));
-            encoder.Save(memoryStream);
-
-            memoryStream.Position = 0;
-            bImg.BeginInit();
-            bImg.StreamSource = memoryStream;
-            bImg.EndInit();
-
-            memoryStream.Close();
-
-            return bImg;
-        }
+        public static Draw.Image GetImage(TagLib.IPicture picture) => Draw.Image.FromStream(new MemoryStream(picture.Data.Data));
 
         public static BitmapSource GetBitmapSource(Draw.Bitmap source)
         {
@@ -822,9 +664,8 @@ namespace Player
             bitmapSource.Freeze();
             return bitmapSource;
         }
-        public static BitmapSource GetBitmapSource(TagLib.IPicture picture) => GetBitmapSource(ToImage(picture));
+        public static BitmapSource GetBitmapSource(TagLib.IPicture picture) => GetBitmapSource(GetImage(picture));
     }
-
 
     [Serializable]
     public class Preferences
@@ -851,19 +692,13 @@ namespace Player
         
         public static Preferences Load()
         {
-            using (FileStream stream = File.Open(App.PrefPath, FileMode.Open))
-            {
-                BinaryFormatter bin = new BinaryFormatter();
-                return (Preferences)bin.Deserialize(stream);
-            }
+            using (FileStream stream = File.Open($"{App.Path}SettingsProvider.dll", FileMode.Open))
+                return (Preferences)(new BinaryFormatter()).Deserialize(stream);
         }
         public void Save()
         {
-            using (FileStream stream = File.Open(App.PrefPath, FileMode.Create))
-            {
-                BinaryFormatter bin = new BinaryFormatter();
-                bin.Serialize(stream, this);
-            }
+            using (FileStream stream = File.Open($"{App.Path}SettingsProvider.dll", FileMode.Create))
+                (new BinaryFormatter()).Serialize(stream, this);
         }
     }
     

@@ -36,7 +36,7 @@ namespace Player.Controls
             IconType newValue = (IconType)e.NewValue;
             if (newValue == IconType.none)
                 return;
-            object resource = App.IconDictionary[newValue.ToString()];
+            object resource = Application.Current.Resources[newValue.ToString()];
             d.SetValue(IconResourceProperty, resource);
         }
 

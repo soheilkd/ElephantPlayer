@@ -123,7 +123,7 @@ namespace Player
         WebClient Client = null;
         public void Download(Media media)
         {
-            var SavePath = $"{App.ExePath}Downloads\\{media.Title}";
+            var SavePath = $"{App.Path}Downloads\\{media.Title}";
             DownloadButton.Icon = IconType.cancel;
             Client = new WebClient();
             Client.DownloadProgressChanged += (o, f) =>
@@ -151,10 +151,10 @@ namespace Player
                     {
                         var folderToExtract = SavePath.Substring(0, SavePath.IndexOf(".zip")) + "\\";
                         zip.ExtractAll(folderToExtract, Ionic.Zip.ExtractExistingFileAction.OverwriteSilently);
-                        ZipDownloaded?.Invoke(this, new InfoExchangeArgs(InfoExchangeType.Management)
+                        ZipDownloaded?.Invoke(this, new InfoExchangeArgs(InfoType.Management)
                         {
                             ObjectArray = System.IO.Directory.GetFiles(folderToExtract, "*.*", System.IO.SearchOption.AllDirectories),
-                            Type = InfoExchangeType.StringArray
+                            Type = InfoType.StringArray
                         });
                     }
                     System.IO.File.Delete(SavePath);

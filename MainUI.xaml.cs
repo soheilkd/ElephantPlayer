@@ -16,9 +16,6 @@ using System.Timers;
 
 namespace Player
 {
-    /// <summary>
-    /// Interaction logic for MainUI.xaml
-    /// </summary>
     public partial class MainUI : Window
     {
         Preferences P = Preferences.Load();
@@ -77,12 +74,12 @@ namespace Player
             TimeLabel_Current.Content = ConvertTime(Player.Position);
             goto UX;
         }
-        private async void Manager_Change(object sender, ManagementChangeEventArgs e)
+        private async void Manager_Change(object sender, InfoExchangeArgs e)
         {
-            switch (e.Change)
+            switch (e.Type)
             {
-                case ManagementChange.NewMedia:
-                   MediaViews.Add(new MediaView(e.Changes.Index, Manager[e.Changes.Index].Title, Manager[e.Changes.Index].Artist, Manager[e.Changes.Index].MediaType));
+                case InfoType.NewMedia:
+                   MediaViews.Add(new MediaView(e.Args.Index, Manager[e.Args.Index].Title, Manager[e.Args.Index].Artist, Manager[e.Args.Index].MediaType));
                     var p = MediaViews.Count - 1;
                     QueueListView.Items.Add(MediaViews[p]);
                     MediaViews[p].DoubleClicked += MainUI_DoubleClicked;
@@ -101,22 +98,22 @@ namespace Player
                     };
                     Window_SizeChanged(this, null);
                     break;
-                case ManagementChange.EditingTag:
-                    if (e.Changes.File.Name == Manager.CurrentlyPlaying.Path)
+                case InfoType.EditingTag:
+                    if (e.Args.File.Name == Manager.CurrentlyPlaying.Path)
                     {
                         var pos = Player.Position;
                         Player.Stop();
                         Player.Source = null;
                         await Task.Delay(500);
-                        e.Changes.File.Save();
-                        Play(Manager[Manager.Find(e.Changes.File.Name)]);
+                        e.Args.File.Save();
+                        Play(Manager[Manager.Find(e.Args.File.Name)]);
                         Player.Position = pos;
                     }
                     else
-                        e.Changes.File.Save();
+                        e.Args.File.Save();
                     break;
-                case ManagementChange.MediaRemoved:
-                    int index = MediaViews.FindIndex(item => item.MediaIndex == e.Changes.Index);
+                case InfoType.MediaRemoved:
+                    int index = MediaViews.FindIndex(item => item.MediaIndex == e.Args.Index);
                     MediaViews.RemoveAt(index);
 
                     QueueListView.Items.Clear();
@@ -125,28 +122,28 @@ namespace Player
                         QueueListView.Items.Add(MediaViews[i]);
                     }
                     break;
-                case ManagementChange.MediaRequested:
-                    Play(Manager.Next(e.Changes.Index));
+                case InfoType.MediaRequested:
+                    Play(Manager.Next(e.Args.Index));
                     break;
-                case ManagementChange.MediaUpdate:
+                case InfoType.MediaUpdate:
                     for (int i = 0; i < MediaViews.Count; i++)
-                        if (MediaViews[i].MediaIndex == e.Changes.Index)
-                            MediaViews[i].Revoke(e.Changes.Index, e.Changes.Media.Title, e.Changes.Media.Artist);
-                    MediaViews[MediaViews.FindIndex(item => item.MediaIndex == e.Changes.Index)].Revoke(e.Changes);
-                    if (e.Changes.Index == Manager.CurrentlyPlayingIndex)
+                        if (MediaViews[i].MediaIndex == e.Args.Index)
+                            MediaViews[i].Revoke(e.Args.Index, e.Args.Media.Title, e.Args.Media.Artist);
+                    MediaViews[MediaViews.FindIndex(item => item.MediaIndex == e.Args.Index)].Revoke(e.Args);
+                    if (e.Args.Index == Manager.CurrentlyPlayingIndex)
                     {
                         var q = Player.Position;
-                        Play(e.Changes.Media);
+                        Play(e.Args.Media);
                         ForcePositionChange(q.TotalMilliseconds, true);
                     }
                     break;
-                case ManagementChange.Crash:
+                case InfoType.Crash:
                     break;
-                case ManagementChange.PopupRequest:
+                case InfoType.PopupRequest:
                     break;
-                case ManagementChange.ArtworkClick:
+                case InfoType.ArtworkClick:
                     break;
-                case ManagementChange.SomethingHappened:
+                case InfoType.SomethingHappened:
                     break;
                 default:
                     break;
