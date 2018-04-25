@@ -8,21 +8,43 @@
     x:Name="window"
     mc:Ignorable="d" Loaded="Window_Loaded" Closing="Window_Closing" Drop="Window_Drop" AllowDrop="True"
     Title="Elephant Player" Height="544" Width="432" SizeChanged="Window_SizeChanged">
-    <Grid Background="{DynamicResource KeyOfBackground}">
+    <Grid Background="{DynamicResource KeyOfBackground}" x:Name="ContentGrid">
+        <MediaElement x:Name="Player" UnloadedBehavior="Manual" LoadedBehavior="Manual" MouseUp="Player_MouseUp" 
+              MouseDown="Player_MouseDown" Volume="1" MediaEnded="Player_MediaEnded" VerticalAlignment="Stretch">
+            <MediaElement.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="Enter Full Screen" x:Name="PlayerC_FullScreen" Click="PlayerCFullScreen">
+                        <MenuItem.Icon>
+                            <player:MaterialIcon Icon="fullscreen" />
+                        </MenuItem.Icon>
+                    </MenuItem>
+                    <MenuItem Header="Use subtitle" Click="PlayerCSubtitle">
+                        <MenuItem.Icon>
+                            <player:MaterialIcon Icon="subtitle" />
+                        </MenuItem.Icon>
+                    </MenuItem>
+                </ContextMenu>
+            </MediaElement.ContextMenu>
+        </MediaElement>
+        <ListView x:Name="QueueListView" BorderThickness="0" Margin="0, 0, 0, 85" ScrollViewer.CanContentScroll="False" Background="{DynamicResource KeyOfBackground}">
+            <ListView.Resources>
+                <sys:Double x:Key="{x:Static SystemParameters.VerticalScrollBarWidthKey}">10</sys:Double>
+            </ListView.Resources>
+        </ListView>
         <player:MaterialButton x:Name="SettingsButton" Icon="settings" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="4"/>
         <Popup PlacementTarget="{Binding ElementName=SettingsButton}" Placement="Left">
             <Grid Background="#F333">
                 <Grid.Resources>
-                    <Style TargetType="CheckBox">
+                    <Style TargetType="{x:Type CheckBox}">
                         <Setter Property="Foreground" Value="White" />
-                        <EventSetter Event="Checked" Handler="AnySettingChanged" />
-                        <EventSetter Event="Unchecked" Handler="AnySettingChanged" />
+                        <EventSetter Event="ToggleButton.Checked" Handler="AnySettingChanged" />
+                        <EventSetter Event="ToggleButton.Unchecked" Handler="AnySettingChanged" />
                     </Style>
-                    <Style TargetType="GroupBox">
+                    <Style TargetType="{x:Type GroupBox}">
                         <Setter Property="BorderBrush" Value="#FF004080" />
                         <Setter Property="BorderThickness" Value="1,0,0,2" />
                     </Style>
-                    <Style TargetType="Label">
+                    <Style TargetType="{x:Type Label}">
                         <Setter Property="Foreground" Value="White" />
                     </Style>
                 </Grid.Resources>
@@ -35,9 +57,7 @@
                             <GroupBox.Header>
                                 <Label Content="Playback" Foreground="White" FontWeight="Light" FontSize="18"/>
                             </GroupBox.Header>
-                            <Canvas>
-
-                            </Canvas>
+                            <Canvas/>
                         </GroupBox>
                         <GroupBox Height="140">
                             <GroupBox.Header>
@@ -67,69 +87,20 @@
                 </ScrollViewer>
             </Grid>
         </Popup>
-        <ListView x:Name="QueueListView" BorderThickness="0" Margin="0, 0, 0, 85" Background="{DynamicResource KeyOfBackground}">
-            <ListView.Resources>
-                <sys:Double x:Key="{x:Static SystemParameters.VerticalScrollBarWidthKey}">10</sys:Double>
-            </ListView.Resources>
-        </ListView>
-        <Grid Height="80" Background="{DynamicResource KeyOfBackground}" VerticalAlignment="Bottom" x:Name="LowContentGrid">
-                    <Image x:Name="MiniArtworkImage" Height="55" Width="55" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="3,3,0,0"/>
-                    <Label Content="{DynamicResource Res_Title}" Foreground="White" Margin="60, 0, 0, 0" Height="30" VerticalAlignment="Top"/>
-            <player:MaterialButton Icon="skip_previous" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="80,0,0,25" Click="PreviousButton_Click" />
-            <player:MaterialButton Icon="skip_next" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="165,0,0,25" Click="NextButton_Click" />
+        <Grid Height="80"  VerticalAlignment="Bottom" x:Name="LowContentGrid">
+            <Image x:Name="MiniArtworkImage" Height="55" Width="55" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="3,3,0,0"/>
+            <Label x:Name="TitleLabel" Content="{DynamicResource Res_Title}" Foreground="White" Margin="60, 0, 0, 0" Height="30" VerticalAlignment="Top"/>
+            <player:MaterialButton x:Name="PreviousButton" Icon="skip_previous" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="80,0,0,25" Click="PreviousButton_Click" />
+            <player:MaterialButton x:Name="NextButton" Icon="skip_next" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="165,0,0,25" Click="NextButton_Click" />
             <player:MaterialButton x:Name="PlayPauseButton" Icon="play_arrow" Click="PlayPauseButtonClick" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="120,0,0,24" Height="28" Width="28"/>
             <player:MaterialButton x:Name="VisionButton" Icon="ondemand_video" Click="VisionButtonClick" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,5,34" Height="34" Width="34" EllipseType="Rectular"/>
             <player:MaterialButton x:Name="PlayModeButton" Icon="repeat" Click="PlayModeButton_Click" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,55,25" />
             <player:MaterialButton x:Name="AddUrlButton" Icon="add"  HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,100,25" />
-            <Popup x:Name="UrlPopup" AllowsTransparency="True" PlacementTarget="{Binding ElementName=AddUrlButton}" Placement="Right" StaysOpen="False" PopupAnimation="Slide" >
-                <StackPanel>
-                    <Grid>
-                        <TextBox x:Name="UrlTextBox" MinWidth="250" Text="http://URL" KeyDown="UrlTextBox_KeyDown" Height="28" FontSize="16"/>
-                    </Grid>
-                </StackPanel>
-            </Popup>
         </Grid>
-        <MediaElement Visibility="Visible" x:Name="Player" UnloadedBehavior="Manual" LoadedBehavior="Manual" MouseUp="Player_MouseUp" 
-              Width="0" Height="0" MouseDown="Player_MouseDown" Volume="1" MediaEnded="Player_MediaEnded">
-            <MediaElement.ContextMenu>
-                <ContextMenu>
-                    <MenuItem Header="Enter Full Screen" x:Name="PlayerC_FullScreen" Click="PlayerCFullScreen">
-                        <MenuItem.Icon>
-                            <player:MaterialIcon Icon="fullscreen" />
-                        </MenuItem.Icon>
-                    </MenuItem>
-                    <MenuItem Header="Use subtitle" Click="PlayerCSubtitle">
-                        <MenuItem.Icon>
-                            <player:MaterialIcon Icon="subtitle" />
-                        </MenuItem.Icon>
-                    </MenuItem>
-                </ContextMenu>
-            </MediaElement.ContextMenu>
-            <MediaElement.Resources>
-                <Storyboard x:Key="VisionOnBoard">
-                    <DoubleAnimation Storyboard.TargetName="Player" Storyboard.TargetProperty="Height"
-                        From="{Binding ElementName=Player, Path=Height}" To="{DynamicResource Height}" 
-                         AccelerationRatio="0.1" DecelerationRatio="0.8"           />
-                    <DoubleAnimation Storyboard.TargetName="Player" Storyboard.TargetProperty="Width"
-                        From="{Binding ElementName=Player, Path=Width}" To="{DynamicResource Width}" 
-                               AccelerationRatio="0.1" DecelerationRatio="0.8"           />
-                </Storyboard>
-                <Storyboard x:Key="VisionOffBoard">
-                    <DoubleAnimation Storyboard.TargetName="Player" Storyboard.TargetProperty="Height"
-                        From="{Binding ElementName=Player, Path=Height}" To="0" 
-                                AccelerationRatio="0.1" DecelerationRatio="0.8"          />
-                    <DoubleAnimation Storyboard.TargetName="Player" Storyboard.TargetProperty="Width"
-                        From="{Binding ElementName=Player, Path=Width}" To="0"
-                                AccelerationRatio="0.1" DecelerationRatio="0.8"          />
-                </Storyboard>
-            </MediaElement.Resources>
-                </MediaElement>
 
         <Slider x:Name="PositionSlider"  ValueChanged="PositionChanged" PreviewMouseDown="PositionMouseDown"  
                VerticalAlignment="Bottom" Maximum="1000"
                         Foreground="#FF575757" Margin="40, 0, 40, 5">
-            <Slider.Triggers>
-            </Slider.Triggers>
             <Slider.Template>
                 <ControlTemplate >
                     <Border x:Name="border" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Background="{TemplateBinding Background}" SnapsToDevicePixels="True">
@@ -163,7 +134,7 @@
                                                         <Setter Property="Fill" TargetName="grip" Value="DarkGray"/>
                                                         <Setter Property="StrokeThickness" TargetName="grip" Value="0" />
                                                     </Trigger>
-                                                    <EventTrigger RoutedEvent="MouseEnter">
+                                                    <EventTrigger RoutedEvent="UIElement.MouseEnter">
                                                         <BeginStoryboard>
                                                             <Storyboard >
                                                                 <DoubleAnimation SpeedRatio="4" AccelerationRatio="0" DecelerationRatio="1" From="15" To="20" Storyboard.TargetName="grip" Storyboard.TargetProperty="Width"/>
@@ -175,7 +146,7 @@
                                                             </Storyboard>
                                                         </BeginStoryboard>
                                                     </EventTrigger>
-                                                    <EventTrigger RoutedEvent="MouseLeave">
+                                                    <EventTrigger RoutedEvent="UIElement.MouseLeave">
                                                         <BeginStoryboard>
                                                             <Storyboard >
                                                                 <DoubleAnimation SpeedRatio="2" AccelerationRatio="0" DecelerationRatio="1"  From="20" To="15" Storyboard.TargetName="grip" Storyboard.TargetProperty="Width"/>
@@ -273,6 +244,66 @@
         <sys:Double x:Key="Height">400</sys:Double>
         <sys:Double x:Key="Width">400</sys:Double>
 
+        <Storyboard x:Key="VisionOnBoard" AccelerationRatio="0.1" DecelerationRatio="0.8" Storyboard.TargetProperty="Opacity">
+            <DoubleAnimation Storyboard.TargetName="Player"
+                                     From="{Binding Opacity, ElementName=Player}" To="1"/>
+            <DoubleAnimation Storyboard.TargetName="QueueListView"
+                                     From="{Binding Opacity, ElementName=QueueListView}" To="0"/>
+            <DoubleAnimation Storyboard.TargetName="MiniArtworkImage"
+                                     From="{Binding Opacity, ElementName=QueueListView}" To="0"/>
+            <DoubleAnimation Storyboard.TargetName="TitleLabel"
+                                     From="{Binding Opacity, ElementName=QueueListView}" To="0"/>
+            <DoubleAnimation Storyboard.TargetName="AddUrlButton"
+                                     From="{Binding Opacity, ElementName=QueueListView}" To="0"/>
+            <DoubleAnimation Storyboard.TargetName="PlayModeButton"
+                                     From="{Binding Opacity, ElementName=QueueListView}" To="0"/>
+        </Storyboard>
+        <Storyboard x:Key="VisionOffBoard" AccelerationRatio="0.1" DecelerationRatio="0.8" Storyboard.TargetProperty="Opacity">
+            <DoubleAnimation Storyboard.TargetName="Player"
+                                     From="{Binding Opacity, ElementName=Player}" To="0"/>
+            <DoubleAnimation Storyboard.TargetName="QueueListView"
+                                     From="{Binding Opacity, ElementName=QueueListView}" To="1"/>
+            <DoubleAnimation Storyboard.TargetName="MiniArtworkImage"
+                                     From="{Binding Opacity, ElementName=QueueListView}" To="1"/>
+            <DoubleAnimation Storyboard.TargetName="TitleLabel"
+                                     From="{Binding Opacity, ElementName=QueueListView}" To="1"/>
+            <DoubleAnimation Storyboard.TargetName="AddUrlButton" 
+                                     From="{Binding Opacity, ElementName=QueueListView}" To="1"/>
+            <DoubleAnimation Storyboard.TargetName="PlayModeButton"
+                                     From="{Binding Opacity, ElementName=QueueListView}" To="1"/>
+        </Storyboard>
+        <Storyboard x:Key="FullVisionOnBoard" AccelerationRatio="0.5" DecelerationRatio="0.5" Storyboard.TargetProperty="Opacity">
+            <DoubleAnimation Storyboard.TargetName="PlayPauseButton"
+                                     From="{Binding Opacity, ElementName=PlayPauseButton}" To="0"/>
+            <DoubleAnimation Storyboard.TargetName="NextButton" 
+                                     From="{Binding Opacity, ElementName=PlayPauseButton}" To="0"/>
+            <DoubleAnimation Storyboard.TargetName="PreviousButton" 
+                                     From="{Binding Opacity, ElementName=PlayPauseButton}" To="0"/>
+            <DoubleAnimation Storyboard.TargetName="PositionSlider"
+                                     From="{Binding Opacity, ElementName=PlayPauseButton}" To="0"/>
+            <DoubleAnimation Storyboard.TargetName="TimeLabel_Current" 
+                                     From="{Binding Opacity, ElementName=PlayPauseButton}" To="0"/>
+            <DoubleAnimation Storyboard.TargetName="TimeLabel_Full" 
+                                     From="{Binding Opacity, ElementName=PlayPauseButton}" To="0"/>
+            <DoubleAnimation Storyboard.TargetName="VisionButton" 
+                                     From="{Binding Opacity, ElementName=PlayPauseButton}" To="0"/>
+        </Storyboard>
+        <Storyboard x:Key="FullVisionOffBoard" AccelerationRatio="0.1" DecelerationRatio="0.8" Storyboard.TargetProperty="Opacity">
+            <DoubleAnimation Storyboard.TargetName="PlayPauseButton"
+                                     From="{Binding Opacity, ElementName=PlayPauseButton}" To="1"/>
+            <DoubleAnimation Storyboard.TargetName="NextButton"
+                                     From="{Binding Opacity, ElementName=PlayPauseButton}" To="1"/>
+            <DoubleAnimation Storyboard.TargetName="PreviousButton"
+                                     From="{Binding Opacity, ElementName=PlayPauseButton}" To="1"/>
+            <DoubleAnimation Storyboard.TargetName="PositionSlider" 
+                                     From="{Binding Opacity, ElementName=PlayPauseButton}" To="1"/>
+            <DoubleAnimation Storyboard.TargetName="TimeLabel_Current" 
+                                     From="{Binding Opacity, ElementName=PlayPauseButton}" To="1"/>
+            <DoubleAnimation Storyboard.TargetName="TimeLabel_Full" 
+                                     From="{Binding Opacity, ElementName=PlayPauseButton}" To="1"/>
+            <DoubleAnimation Storyboard.TargetName="VisionButton" 
+                                     From="{Binding Opacity, ElementName=PlayPauseButton}" To="1"/>
+        </Storyboard>
         <!--<SolidColorBrush x:Key="SliderThumb.Static.Foreground" Color="#FFE5E5E5"/>
         <SolidColorBrush x:Key="SliderThumb.MouseOver.Background" Color="#FFDCDCDC"/>-->
     </Window.Resources>

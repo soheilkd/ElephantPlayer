@@ -22,7 +22,7 @@ namespace Player
         MediaManager Manager = new MediaManager();
         List<MediaView> MediaViews = new List<MediaView>();
         Taskbar.Thumb Thumb = new Taskbar.Thumb();
-        Boolean IsVisionOn;
+        bool[] IsVisionOn = new bool[] { false, false };
         Timer PlayCountTimer = new Timer(100000) { AutoReset = false };
         new string Title
         {
@@ -79,18 +79,18 @@ namespace Player
             switch (e.Type)
             {
                 case InfoType.NewMedia:
-                   MediaViews.Add(new MediaView(e.Args.Index, Manager[e.Args.Index].Title, Manager[e.Args.Index].Artist, Manager[e.Args.Index].MediaType));
+                   MediaViews.Add(new MediaView(e.Integer, Manager[e.Integer].Title, Manager[e.Integer].Artist, Manager[e.Integer].MediaType));
                     var p = MediaViews.Count - 1;
                     QueueListView.Items.Add(MediaViews[p]);
                     MediaViews[p].DoubleClicked += MainUI_DoubleClicked;
-                    MediaViews[p].PlayClicked += (n, f) => Play(Manager.Next(f.Index));
-                    MediaViews[p].DeleteRequested += (n, f) => Manager.RequestDelete(f.Index);
-                    MediaViews[p].LocationRequested += (n, f) => Manager.RequestLocation(f.Index);
-                    MediaViews[p].RemoveRequested += (n, f) => Manager.Remove(f.Index);
-                    MediaViews[p].PropertiesRequested += (n, f) => Manager.ShowProperties(f.Index);
-                    MediaViews[p].RepeatRequested += (n, f) => Manager.Repeat(f.Index, f.Para);
-                    MediaViews[p].DownloadRequested += (n, f) => f.Sender.Download(Manager[f.Index]);
-                    MediaViews[p].Downloaded += (n, f) => Manager[f.Index] = f.Media;
+                    MediaViews[p].PlayClicked += (n, f) => Play(Manager.Next(f.Integer));
+                    MediaViews[p].DeleteRequested += (n, f) => Manager.RequestDelete(f.Integer);
+                    MediaViews[p].LocationRequested += (n, f) => Manager.RequestLocation(f.Integer);
+                    MediaViews[p].RemoveRequested += (n, f) => Manager.Remove(f.Integer);
+                    MediaViews[p].PropertiesRequested += (n, f) => Manager.ShowProperties(f.Integer);
+                    MediaViews[p].RepeatRequested += (n, f) => Manager.Repeat(f.Integer, (int)f.Object);
+                    MediaViews[p].DownloadRequested += (n, f) => (f.Object as MediaView).Download(Manager[f.Integer]);
+                    MediaViews[p].Downloaded += (n, f) => Manager[f.Integer] = f.Media;
                     MediaViews[p].ZipDownloaded += (n, f) =>
                     {
                         Manager.Add((string[])f.ObjectArray);
@@ -99,21 +99,21 @@ namespace Player
                     Window_SizeChanged(this, null);
                     break;
                 case InfoType.EditingTag:
-                    if (e.Args.File.Name == Manager.CurrentlyPlaying.Path)
+                    if ((e.Object as TagLib.File).Name == Manager.CurrentlyPlaying.Path)
                     {
                         var pos = Player.Position;
                         Player.Stop();
                         Player.Source = null;
                         await Task.Delay(500);
-                        e.Args.File.Save();
-                        Play(Manager[Manager.Find(e.Args.File.Name)]);
+                        (e.Object as TagLib.File).Save();
+                        Play(Manager[Manager.Find((e.Object as TagLib.File).Name)]);
                         Player.Position = pos;
                     }
                     else
-                        e.Args.File.Save();
+                        (e.Object as TagLib.File).Save();
                     break;
                 case InfoType.MediaRemoved:
-                    int index = MediaViews.FindIndex(item => item.MediaIndex == e.Args.Index);
+                    int index = MediaViews.FindIndex(item => item.MediaIndex == e.Integer);
                     MediaViews.RemoveAt(index);
 
                     QueueListView.Items.Clear();
@@ -123,17 +123,17 @@ namespace Player
                     }
                     break;
                 case InfoType.MediaRequested:
-                    Play(Manager.Next(e.Args.Index));
+                    Play(Manager.Next(e.Integer));
                     break;
                 case InfoType.MediaUpdate:
                     for (int i = 0; i < MediaViews.Count; i++)
-                        if (MediaViews[i].MediaIndex == e.Args.Index)
-                            MediaViews[i].Revoke(e.Args.Index, e.Args.Media.Title, e.Args.Media.Artist);
-                    MediaViews[MediaViews.FindIndex(item => item.MediaIndex == e.Args.Index)].Revoke(e.Args);
-                    if (e.Args.Index == Manager.CurrentlyPlayingIndex)
+                        if (MediaViews[i].MediaIndex == e.Integer)
+                            MediaViews[i].Revoke(e.Integer, e.Media.Title, e.Media.Artist);
+                    MediaViews[MediaViews.FindIndex(item => item.MediaIndex == e.Integer)].Revoke(e);
+                    if (e.Integer == Manager.CurrentlyPlayingIndex)
                     {
                         var q = Player.Position;
-                        Play(e.Args.Media);
+                        Play(e.Media);
                         ForcePositionChange(q.TotalMilliseconds, true);
                     }
                     break;
@@ -150,13 +150,21 @@ namespace Player
             }
         }
 
-        private void MainUI_DoubleClicked(object sender, MediaEventArgs e)
+        private void MainUI_DoubleClicked(object sender, InfoExchangeArgs e)
         {
-            Play(Manager.Next(e.Index));
+            Play(Manager.Next(e.Integer));
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
+            SizeChangeTimer.Elapsed += delegate
+            {
+                Dispatcher.Invoke(delegate {
+                    for (int i = 0; i < MediaViews.Count; i++)
+                        MediaViews[i].Width = QueueListView.ActualWidth > 25 ? QueueListView.ActualWidth - 25 : 25;
+                });
+                SizeChangeTimer.Stop();
+            };
             var lib = MassiveLibrary.Load();
             for (int i = 0; i < lib.Medias.Length; i++)
             {
@@ -164,8 +172,6 @@ namespace Player
             }
             Left = P.LastLoc.X;
             Top = P.LastLoc.Y;
-            Width = P.LastSize.Width;
-            Height = P.LastSize.Height;
             var cml = Environment.GetCommandLineArgs();
             if (cml.Length > 1)
             {
@@ -182,19 +188,24 @@ namespace Player
             User.Keyboard.KeyUp += Keyboard_KeyUp;
             UserExperience();
             PlayCountTimer.Elapsed += PlayCountTimer_Elapsed;
-            AddUrlButton.Click += delegate
+            AddUrlButton.Click += (_,p)=>
             {
-                UrlPopup.IsOpen = true;
-                UrlTextBox.Text = Clipboard.GetText() ?? "http://URL";
-                UrlTextBox.Focus();
-               
+                if (Clipboard.GetText() == null)
+                {
+                    MessageBox.Show("Text on clipboard is not a valid url");
+                    return;
+                }
+                Manager.Add(new Uri(Clipboard.GetText(), UriKind.Absolute));
+                QueueListView.ScrollIntoView(QueueListView.Items[QueueListView.Items.Count - 1]);
             };
+            (Resources["VisionOnBoard"] as Storyboard).Completed += delegate { QueueListView.Visibility = Visibility.Collapsed; };
+            (Resources["VisionOffBoard"] as Storyboard).CurrentStateInvalidated += delegate { QueueListView.Visibility = Visibility.Visible; };
         }
 
-        private void Downloader_DownloadingDone(object sender, MediaEventArgs e)
+        private void Downloader_DownloadingDone(object sender, InfoExchangeArgs e)
         {
-            Manager[e.Index] = e.Media;
-            if (Manager.CurrentlyPlayingIndex == e.Index)
+            Manager[e.Integer] = e.Media;
+            if (Manager.CurrentlyPlayingIndex == e.Integer)
             {
                 var pos = Player.Position;
                 Play(e.Media);
@@ -264,8 +275,8 @@ namespace Player
         {
             P.LastSize = new Size()
             {
-                Width = Width,
-                Height = Height
+                Width = ActualWidth,
+                Height = ActualHeight
             };
             P.LastLoc = new Point()
             {
@@ -293,18 +304,11 @@ namespace Player
         }
 
         private void Window_Drop(object sender, DragEventArgs e) => Manager.Add((string[])e.Data.GetData(DataFormats.FileDrop));
-
+        Timer SizeChangeTimer = new Timer(200) { AutoReset = true };
         private void Window_SizeChanged(object sender, SizeChangedEventArgs e)
         {
-            for (int i = 0; i < MediaViews.Count; i++)
-                MediaViews[i].Width = QueueListView.ActualWidth > 25 ? QueueListView.ActualWidth - 25 : 25;
-            Resources["Height"] = Height;
-            Resources["Width"] = Width;
-            if (IsVisionOn)
-            {
-                Player.Width = Width;
-                Player.Height = Height;
-            }
+            SizeChangeTimer.Stop();
+            SizeChangeTimer.Start();
         }
         
         private void PlayPauseButtonClick(object sender, EventArgs e)
@@ -377,7 +381,11 @@ namespace Player
 
         public void OrinateVideoUI(bool Enabled)
         {
-
+            IsVisionOn[1] = Enabled;
+            BeginStoryboard(Resources[Enabled ? "FullVisionOnBoard" : "FullVisionOffBoard"] as Storyboard);
+            if (Enabled && !IsVisionOn[0])
+                BeginStoryboard(Resources["VisionOnBoard"] as Storyboard);
+           
         }
         private void Player_MouseUp(object sender, MouseButtonEventArgs e) { }
         private void Player_MouseDown(object sender, MouseButtonEventArgs e)
@@ -389,15 +397,14 @@ namespace Player
                 if (!FullScreen) DragMove();
                 if (DraggerTimer.Enabled)
                 {
-                    VideoOriented = !VideoOriented;
-                    OrinateVideoUI(VideoOriented);
+                    IsVisionOn[1] = !IsVisionOn[1];
+                    OrinateVideoUI(IsVisionOn[1]);
                 }
             }
             catch (Exception)
             {
             }
         }
-        bool VideoOriented = false;
 
         private void PlayerCFullScreen(object sender, RoutedEventArgs e)
         {
@@ -452,9 +459,8 @@ namespace Player
 
         private void VisionButtonClick(object sender, EventArgs e)
         {
-            IsVisionOn = !IsVisionOn;
-            VisionButton.Icon = IsVisionOn ? IconType.expand_less : IconType.ondemand_video;
-            Player.BeginStoryboard(Player.Resources[IsVisionOn ? "VisionOnBoard": "VisionOffBoard"] as Storyboard);
+            IsVisionOn[0] = !IsVisionOn[0];
+            BeginStoryboard(Resources[IsVisionOn[0] ? "VisionOnBoard": "VisionOffBoard"] as Storyboard);
         }
 
         private void Player_MediaEnded(object sender, RoutedEventArgs e)
@@ -488,15 +494,6 @@ namespace Player
             P.PlayMode = (int)Manager.ActivePlayMode;
         }
         
-        private void UrlTextBox_KeyDown(object sender, KeyEventArgs e)
-        {
-            if (e.Key == Key.Enter)
-            {
-                Manager.Add(new Uri(UrlTextBox.Text, UriKind.Absolute));
-                QueueListView.ScrollIntoView(QueueListView.Items[QueueListView.Items.Count - 1]);
-            }
-        }
-
         private void window_KeyUp(object sender, KeyEventArgs e)
         {
             switch (e.Key)

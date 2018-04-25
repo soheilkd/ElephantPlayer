@@ -101,54 +101,32 @@ namespace Player.Events
         public int ArgsCount => _Args.Count;
         public string[] Args => _Args.ToArray();
     }
+
     public enum InfoType
     {
-        Integer, Double,
-        Media, Object, StringArray,
-        RequestNext, RequestPrev,
-        Handling, UserInterface,
-        Management, AppInterface,
-        Internal, StartingMedia,
-        EndingMedia, PlayPause,
-        NewMedia,
-        MediaRequested,
-        EditingTag,
-        InterfaceUpdate,
-        MediaUpdate,
-        Crash,
-        PopupRequest,
-        ArtworkClick,
-        SomethingHappened,
-        MediaRemoved,
-        MediaMoved
+        Integer, Double, Media, Object, StringArray,
+        RequestNext, RequestPrev, Handling, UserInterface,
+        Management, AppInterface, Internal, StartingMedia,
+        EndingMedia, PlayPause, NewMedia, MediaRequested, EditingTag,
+        InterfaceUpdate, MediaUpdate, Crash, PopupRequest,
+        ArtworkClick, SomethingHappened, MediaRemoved, MediaMoved
     }
-
-    public class MediaEventArgs : EventArgs
-    {
-        public TagLib.File File { get; set; }
-        public int Index { get; set; }
-        public Media Media { get; set; }
-        public MediaView Sender { get; set; }
-        public int Para { get; set; }
-
-        public MediaEventArgs(int index) => Index = index;
-        public MediaEventArgs(TagLib.File f) => File = f;
-        public MediaEventArgs(Media media) => Media = media;
-        public MediaEventArgs(MediaView sender) => Sender = sender;
-        public MediaEventArgs() { }
-    }
-    public class SettingsEventArgs
-    {
-        public Preferences NewSettings { get; set; }
-    }
+    
     public class InfoExchangeArgs
     {
         public InfoType Type { get; set; }
         public object Object { get; set; }
         public object[] ObjectArray { get; set; }
-        public MediaEventArgs Args { get; set; }
+        public int Integer { get; set; }
+        public Media Media { get; set; }
+        
         public InfoExchangeArgs() { }
         public InfoExchangeArgs(InfoType type) => Type = type;
+        public InfoExchangeArgs(int integer)
+        {
+            Type = InfoType.Integer;
+            Integer = integer;
+        }
     }
 }
 
@@ -192,32 +170,10 @@ namespace Player.Management
 
     public class MediaManager
     {
-        public MediaManager()
-        {
-
-        }
+        public MediaManager() { }
         public int Count => AllMedias.Count;
-        private static string[] SupportedMusics = new string[]
-        {
-            "mp3",
-            "wma",
-            "aac",
-            "m4a"
-        };
-        private static string[] SupportedVideos = new string[]
-        {
-            "mp4",
-            "mpg",
-            "mkv",
-            "wmv",
-            "mov",
-            "avi",
-            "m4v",
-            "ts",
-            "wav",
-            "mpeg",
-            "webm"
-        };
+        private static string[] SupportedMusics = "mp3;wma;aac;m4a".Split(';');
+        private static string[] SupportedVideos = "mp4;mpg;mkv;wmv;mov;avi;m4v;ts;wav;mpeg;webm".Split(';');
         public Media CurrentlyPlaying => AllMedias[CurrentlyPlayingIndex];
         public event EventHandler<InfoExchangeArgs> Change;
         private List<Media> AllMedias = new List<Media>();
@@ -230,12 +186,9 @@ namespace Player.Management
                 AllMedias[index] = value;
                 Change?.Invoke(this, new InfoExchangeArgs()
                 {
-                    Type = Events.InfoType.MediaUpdate,
-                    Args = new MediaEventArgs()
-                    {
-                        Index = index,
-                        Media = value
-                    }
+                    Type = InfoType.MediaUpdate,
+                    Integer = index,
+                    Media = value
                 });
             }
         }
@@ -243,12 +196,10 @@ namespace Player.Management
         private Random Randomness = new Random(2);
         public static MediaType GetType(string FileName)
         {
-            if (!File.Exists(FileName)) return MediaType.NotMedia;
+            if (FileName.StartsWith("http")) return MediaType.Online;
             string ext = GetExtension(FileName);
-            for (int i = 0; i < SupportedMusics.Length; i++)
-                if (ext == SupportedMusics[i]) return MediaType.Music;
-            for (int i = 0; i < SupportedVideos.Length; i++)
-                if (ext == SupportedVideos[i]) return MediaType.Video;
+            if (SupportedMusics.Contains(ext)) return MediaType.Music;
+            else if (SupportedVideos.Contains(ext)) return MediaType.Video;
             return MediaType.NotMedia;
         }
         public PlayMode ActivePlayMode { get; set; } = PlayMode.RepeatAll;
@@ -281,6 +232,8 @@ namespace Player.Management
                     MessageBox.Show("Requested Uri is not a valid octet-stream", "NET", MessageBoxButton.OK, MessageBoxImage.Error);
                     return;
                 }
+                response.Dispose();
+                response = null;
             }
             catch(WebException e)
             {
@@ -293,7 +246,7 @@ namespace Player.Management
                 Change?.Invoke(this, new InfoExchangeArgs()
                 {
                     Type = InfoType.MediaRequested,
-                    Args = new MediaEventArgs(AllMedias.Count - 1)
+                    Integer = AllMedias.Count - 1
                 });
             }
         }
@@ -310,7 +263,7 @@ namespace Player.Management
                 Change?.Invoke(this, new InfoExchangeArgs()
                 {
                     Type = InfoType.MediaRequested,
-                    Args = new MediaEventArgs(index)
+                    Integer = index
                 });
                 return;
             }
@@ -320,13 +273,13 @@ namespace Player.Management
             Change?.Invoke(this, new InfoExchangeArgs()
             {
                 Type = InfoType.NewMedia,
-                Args = new MediaEventArgs(p)
+                Integer = p
             });
             if (requestPlay)
                 Change?.Invoke(this, new InfoExchangeArgs()
                 {
                     Type = InfoType.MediaRequested,
-                    Args = new MediaEventArgs(p)
+                    Integer = p
                 });
         }
         public void Add(string[] paths, bool requestPlay = false)
@@ -341,7 +294,7 @@ namespace Player.Management
                     Change?.Invoke(this, new InfoExchangeArgs()
                     {
                         Type = InfoType.MediaRequested,
-                        Args = new MediaEventArgs(AllMedias[c])
+                        Media = AllMedias[c]
                     });
                 return;
             }
@@ -349,21 +302,19 @@ namespace Player.Management
                     in paths
                     where AllMedias.FindIndex(subItem => subItem.Path == item) != -1
                     select Find(item);
+            if (t.Count() < 1) return;
             var p = t.ElementAt(0);
             if (requestPlay && t.Count() != 0)
             {
                 Change?.Invoke(this, new InfoExchangeArgs()
                 {
                     Type = InfoType.MediaRequested,
-                    Args = new MediaEventArgs(t.First())
+                    Integer = t.First()
                 });
-
             }
         }
         public void Add(Media media)
         {
-            if (!Check(media.Path))
-                return;
             int p = AllMedias.Count;
             if (!media.IsLoaded)
                 media = new Media(media.Path);
@@ -371,7 +322,7 @@ namespace Player.Management
             Change?.Invoke(this, new InfoExchangeArgs()
             {
                 Type = InfoType.NewMedia,
-                Args = new MediaEventArgs(p)
+                Integer = p
             });
         }
 
@@ -385,7 +336,7 @@ namespace Player.Management
         public void Remove(int index)
         {
             AllMedias[index].IsRemoved = true;
-            Change?.Invoke(this, new InfoExchangeArgs() { Type = InfoType.MediaRemoved, Args = new MediaEventArgs(index) });
+            Change?.Invoke(this, new InfoExchangeArgs() { Type = InfoType.MediaRemoved, Integer = index });
         }
 
         public void Delete(string path) => Delete(Find(path));
