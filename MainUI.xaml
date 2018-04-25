@@ -31,7 +31,6 @@
                 <sys:Double x:Key="{x:Static SystemParameters.VerticalScrollBarWidthKey}">10</sys:Double>
             </ListView.Resources>
         </ListView>
-        <player:MaterialButton x:Name="SettingsButton" Icon="settings" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="4"/>
         <Popup PlacementTarget="{Binding ElementName=SettingsButton}" Placement="Left">
             <Grid Background="#F333">
                 <Grid.Resources>
