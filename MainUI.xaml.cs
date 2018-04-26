@@ -15,19 +15,20 @@ namespace Player
 {
     public partial class MainUI : Window
     {
-        Preferences P = Preferences.Load();
-        MediaManager Manager = new MediaManager();
-        List<MediaView> MediaViews = new List<MediaView>();
-        MassiveLibrary Library = new MassiveLibrary();
-        Timer PlayCountTimer = new Timer(100000) { AutoReset = false };
-        Timer DraggerTimer = new Timer(250) { AutoReset = false };
-        Timer MouseMoveTimer = new Timer(5000);
-        Timer SizeChangeTimer = new Timer(200) { AutoReset = true };
-        TimeSpan TimeSpan;
-        Taskbar.Thumb Thumb = new Taskbar.Thumb();
-        bool IsUserSeeking = false;
-        bool[] IsVisionOn = new bool[] { false, false };
-        new string Title
+        private Preferences P = Preferences.Load();
+        private MediaManager Manager = new MediaManager();
+        private List<MediaView> MediaViews = new List<MediaView>();
+        private MassiveLibrary Library = new MassiveLibrary();
+        private Timer PlayCountTimer = new Timer(100000) { AutoReset = false };
+        private Timer DraggerTimer = new Timer(250) { AutoReset = false };
+        private Timer MouseMoveTimer = new Timer(5000);
+        private Timer SizeChangeTimer = new Timer(200) { AutoReset = true };
+        private TimeSpan TimeSpan;
+        private Taskbar.Thumb Thumb = new Taskbar.Thumb();
+        private bool IsUserSeeking = false;
+        private bool[] IsVisionOn = new bool[] { false, false };
+
+        private new string Title
         {
             get => (string)Resources["Res_Title"];
             set => Resources["Res_Title"] = value;
@@ -50,8 +51,8 @@ namespace Player
             Left = P.LastLoc.X;
             Top = P.LastLoc.Y;
         }
-        
-        void Window_Loaded(object sender, RoutedEventArgs e)
+
+        private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             SizeChangeTimer.Elapsed += delegate
             {
@@ -102,7 +103,7 @@ namespace Player
             }
             SizeChanged += (_, __) => SizeChangeTimer.Start();
         }
-        void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             P.LastSize = new Size()
             {
@@ -118,7 +119,7 @@ namespace Player
             Manager.Close();
             Application.Current.Shutdown();
         }
-        void Window_KeyUp(object sender, KeyEventArgs e)
+        private void Window_KeyUp(object sender, KeyEventArgs e)
         {
             switch (e.Key)
             {
@@ -128,9 +129,9 @@ namespace Player
                 default: break;
             }
         }
-        void Window_Drop(object sender, DragEventArgs e) => Manager.Add((string[])e.Data.GetData(DataFormats.FileDrop));
-        
-        async void Manager_Change(object sender, InfoExchangeArgs e)
+        private void Window_Drop(object sender, DragEventArgs e) => Manager.Add((string[])e.Data.GetData(DataFormats.FileDrop));
+
+        private async void Manager_Change(object sender, InfoExchangeArgs e)
         {
             switch (e.Type)
             {
@@ -209,7 +210,7 @@ namespace Player
                     break;
             }
         }
-        async void Keyboard_KeyDown(object sender, Forms::KeyEventArgs e)
+        private async void Keyboard_KeyDown(object sender, Forms::KeyEventArgs e)
         {
             if (IsActive || e.Alt)
             {
@@ -256,8 +257,7 @@ namespace Player
             }
         }
 
-
-        void Player_MouseDown(object sender, MouseButtonEventArgs e)
+        private void Player_MouseDown(object sender, MouseButtonEventArgs e)
         {
             DraggerTimer.Start();
             try
@@ -272,7 +272,7 @@ namespace Player
             }
             catch (Exception) { }
         }
-        void Player_ContextFullScreen(object sender, RoutedEventArgs e)
+        private void Player_ContextFullScreen(object sender, RoutedEventArgs e)
         {
             if (ResizeMode != ResizeMode.NoResize)
             {
@@ -287,14 +287,14 @@ namespace Player
                 WindowState = WindowState.Normal;
             }
         }
-        void Player_MouseMove(object sender, MouseEventArgs e)
+        private void Player_MouseMove(object sender, MouseEventArgs e)
         {
             OrinateFullVision(false);
             Player.Cursor = Cursors.Arrow;
             MouseMoveTimer.Start();
         }
 
-        void PlayPauseButton_Click(object sender, EventArgs e)
+        private void PlayPauseButton_Click(object sender, EventArgs e)
         {
             if (PlayPauseButton.Icon == IconType.pause)
             {
@@ -309,21 +309,21 @@ namespace Player
                 Thumb.Refresh(true);
             }
         }
-        void NextButton_Click(object sender, EventArgs e) => Play(Manager.Next());
-        void PreviousButton_Click(object sender, EventArgs e)
+        private void NextButton_Click(object sender, EventArgs e) => Play(Manager.Next());
+        private void PreviousButton_Click(object sender, EventArgs e)
         {
             if (PositionSlider.Value > PositionSlider.Maximum / 100 * 10)
                 ChangePosition(0, true);
             else
                 Play(Manager.Previous());
         }
-        void VisionButton_Click(object sender, EventArgs e)
+        private void VisionButton_Click(object sender, EventArgs e)
         {
             IsVisionOn[0] = !IsVisionOn[0];
             BeginStoryboard(Resources[IsVisionOn[0] ? "VisionOnBoard" : "VisionOffBoard"] as Storyboard);
             if (!IsVisionOn[0]) { Height--; Width++; }
         }
-        void PlayModeButton_Click(object sender, EventArgs e)
+        private void PlayModeButton_Click(object sender, EventArgs e)
         {
             switch (Manager.ActivePlayMode)
             {
@@ -349,21 +349,20 @@ namespace Player
             P.PlayMode = (int)Manager.ActivePlayMode;
         }
 
-        void AnySettingChanged(object sender, RoutedEventArgs e)
+        private string CastTime(TimeSpan time)
+        {
+            //Absolutely unreadable, btw just works...
+            return $"{(time.TotalSeconds - (time.TotalSeconds % 60)).ToInt() / 60}:" +
+                $"{((time.TotalSeconds.ToInt() % 60).ToString().Length == 1 ? $"0{time.TotalSeconds.ToInt() % 60}" : (time.TotalSeconds.ToInt() % 60).ToString())}";
+        }
+        private void AnySettingChanged(object sender, RoutedEventArgs e)
         {
             if (!IsLoaded)
                 return;
             P.LibraryValidation = Pref_DoubleValid.IsChecked.Value;
             P.Save();
         }
-        
-        string CastTime(TimeSpan time)
-        {
-            //Kheili nakhana, vali khob kar mikone dige...
-            return $"{(time.TotalSeconds - (time.TotalSeconds % 60)).ToInt() / 60}:" +
-                $"{((time.TotalSeconds.ToInt() % 60).ToString().Length == 1 ? $"0{time.TotalSeconds.ToInt() % 60}" : (time.TotalSeconds.ToInt() % 60).ToString())}";
-        }
-        void Play(Media media)
+        private void Play(Media media)
         {
             PositionSlider.Value = 0;
             PlayPauseButton.Icon = IconType.pause;
@@ -377,21 +376,21 @@ namespace Player
             MediaViews[index].IsPlaying = true;
             VisionButton.Visibility = MediaManager.GetType(media.Path) == MediaType.Video ? Visibility.Visible : Visibility.Collapsed;
         }
-        void OrinateFullVision(bool Enabled)
+        private void OrinateFullVision(bool Enabled)
         {
             IsVisionOn[1] = Enabled;
             BeginStoryboard(Resources[Enabled ? "FullVisionOnBoard" : "FullVisionOffBoard"] as Storyboard);
             if (Enabled && !IsVisionOn[0])
                 BeginStoryboard(Resources["VisionOnBoard"] as Storyboard);
         }
-        void ChangePosition(double ms, bool Seek = false)
+        private void ChangePosition(double ms, bool Seek = false)
         {
             IsUserSeeking = true;
             if (Seek) PositionSlider.Value = ms;
             else PositionSlider.Value += ms;
             IsUserSeeking = false;
         }
-        async void RunUX()
+        private async void RunUX()
         {
             UX:
             await Task.Delay(250);
@@ -413,7 +412,7 @@ namespace Player
             goto UX;
         }
 
-        void Position_Changed(object sender, Routed e)
+        private void Position_Changed(object sender, Routed e)
         {
             if (IsUserSeeking)
             {
@@ -421,7 +420,7 @@ namespace Player
                 PositionSlider.Value = ((Slider)sender).Value;
             }
         }
-        async void Position_MouseDown(object sender, MouseButtonEventArgs e)
+        private async void Position_MouseDown(object sender, MouseButtonEventArgs e)
         {
             IsUserSeeking = true;
             while (e.ButtonState == MouseButtonState.Pressed)
@@ -435,7 +434,7 @@ namespace Player
             Player.Play();
             IsUserSeeking = false;
         }
-        void Position_RepeatBackwardClick(object sender, RoutedEventArgs e) => PositionSlider.Value -= PositionSlider.LargeChange;
-        void Position_RepeatForwardClick(object sender, RoutedEventArgs e) => PositionSlider.Value += PositionSlider.LargeChange;
+        private void Position_RepeatBackwardClick(object sender, RoutedEventArgs e) => PositionSlider.Value -= PositionSlider.LargeChange;
+        private void Position_RepeatForwardClick(object sender, RoutedEventArgs e) => PositionSlider.Value += PositionSlider.LargeChange;
     }
 }
