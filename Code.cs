@@ -130,44 +130,54 @@ namespace Player.Events
     }
 }
 
-namespace Player.Management
+namespace Player
 {
-    [Serializable]
-    public class MassiveLibrary
+    public enum PlayPara { None, Next, Prev }
+    public enum PlayMode { Shuffle, RepeatOne, RepeatAll, Queue }
+    public enum MediaType { Music, Video, Online, NotMedia }
+
+    public partial class App : Application, InstanceManager.ISingleInstanceApp
     {
-        public Media[] Medias { get; set; } = new Media[0];
-        public MassiveLibrary(Media[] medias) => Medias = medias;
-        public MassiveLibrary() { }
-        public void Save()
+        public static event EventHandler<InstanceEventArgs> NewInstanceRequested;
+
+        public const string LauncherIdentifier = "ElephantPlayerBySoheilKD_CERTID8585";
+        public static string ExePath = Environment.GetCommandLineArgs()[0];
+        public static string Path = ExePath.Substring(0, ExePath.LastIndexOf("\\") + 1);
+        public static string LibraryPath = $"{Path}Library.dll";
+        
+        [STAThread]
+        public static void Main(string[] args)
         {
-            using (FileStream stream = new FileStream(App.LibraryPath, FileMode.Create))
-                (new BinaryFormatter()).Serialize(stream, this);
-        }
-        public static void Save(Media[] medias)
-        {
-            var newMedias = 
-                from item in medias
-                where !item.IsRemoved
-                select item;
-            int c = newMedias.Count();
-            medias = new Media[c];
-            int i = 0;
-            foreach (var item in newMedias)
+            AppDomain.CurrentDomain.UnhandledException += (sender, e) =>
             {
-                medias[i++] = item;
+                MessageBox.Show($"Unhandled {e.ExceptionObject}\r\n" +
+                    $"Terminating: {e.IsTerminating}", "Exception", MessageBoxButton.OK, MessageBoxImage.Error);
+                if (e.IsTerminating)
+                    System.Diagnostics.Process.GetCurrentProcess().Kill();
+            };
+            if (!Environment.MachineName.Equals("Soheil-PC", StringComparison.CurrentCultureIgnoreCase) && !File.Exists($"{Path}\\Bakhshesh.LazemNistEdamKonid"))
+            {
+                MessageBox.Show("Jizzzze", "LOL", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
             }
-            using (FileStream stream = new FileStream(App.LibraryPath, FileMode.Create))
-                (new BinaryFormatter()).Serialize(stream, new MassiveLibrary(medias));
+            if (InstanceManager.Instance<App>.InitializeAsFirstInstance(LauncherIdentifier))
+            {
+                var application = new App();
+
+                application.InitializeComponent();
+
+                application.Run();
+                InstanceManager.Instance<App>.Cleanup();
+            }
         }
-        public static MassiveLibrary Load()
+
+        public bool SignalExternalCommandLineArgs(IList<string> args)
         {
-            if (!File.Exists(App.LibraryPath))
-                return new MassiveLibrary();
-            using (FileStream stream = new FileStream(App.LibraryPath, FileMode.Open))
-                return (new BinaryFormatter()).Deserialize(stream) as MassiveLibrary;
+            NewInstanceRequested?.Invoke(this, new InstanceEventArgs(args));
+            return true;
         }
     }
-
+    
     public class MediaManager
     {
         public MediaManager() { }
@@ -217,7 +227,7 @@ namespace Player.Management
         }
         private Random Shuffle = new Random(2);
         private int CurrentQueuePosition = 0;
-        
+
         public void Add(Uri uri, bool requestPlay = false)
         {
             var request = (HttpWebRequest)WebRequest.Create(uri);
@@ -226,7 +236,7 @@ namespace Player.Management
             {
                 request.Timeout = 5000;
                 var response = request.GetResponse();
-                
+
                 if (!response.ContentType.EndsWith("octet-stream") && !response.ContentType.StartsWith("video") && !response.ContentType.StartsWith("app"))
                 {
                     MessageBox.Show("Requested Uri is not a valid octet-stream", "NET", MessageBoxButton.OK, MessageBoxImage.Error);
@@ -235,7 +245,7 @@ namespace Player.Management
                 response.Dispose();
                 response = null;
             }
-            catch(WebException e)
+            catch (WebException e)
             {
                 MessageBox.Show(e.Message);
                 return;
@@ -254,64 +264,36 @@ namespace Player.Management
         {
             if (!Check(path))
                 return;
-            int p = AllMedias.Count;
-            int index = AllMedias.FindIndex(item => item.Path == path);
-            if (index != -1)
+            if (Find(path) != -1)
             {
                 if (!requestPlay)
                     return;
                 Change?.Invoke(this, new InfoExchangeArgs()
                 {
                     Type = InfoType.MediaRequested,
-                    Integer = index
+                    Integer = Find(path)
                 });
                 return;
             }
 
             AllMedias.Add(new Media(path));
-           
             Change?.Invoke(this, new InfoExchangeArgs()
             {
                 Type = InfoType.NewMedia,
-                Integer = p
+                Integer = AllMedias.Count - 1
             });
             if (requestPlay)
                 Change?.Invoke(this, new InfoExchangeArgs()
                 {
                     Type = InfoType.MediaRequested,
-                    Integer = p
+                    Integer = AllMedias.Count - 1
                 });
         }
         public void Add(string[] paths, bool requestPlay = false)
         {
-            var c = AllMedias.Count;
             for (int i = 0; i < paths.Length; i++)
-                 if (Check(paths[i]))
+                if (Check(paths[i]))
                     Add(paths[i]);
-            if (c != AllMedias.Count)
-            {
-                if (requestPlay)
-                    Change?.Invoke(this, new InfoExchangeArgs()
-                    {
-                        Type = InfoType.MediaRequested,
-                        Media = AllMedias[c]
-                    });
-                return;
-            }
-            var t = from item
-                    in paths
-                    where AllMedias.FindIndex(subItem => subItem.Path == item) != -1
-                    select Find(item);
-            if (t.Count() < 1) return;
-            var p = t.ElementAt(0);
-            if (requestPlay && t.Count() != 0)
-            {
-                Change?.Invoke(this, new InfoExchangeArgs()
-                {
-                    Type = InfoType.MediaRequested,
-                    Integer = t.First()
-                });
-            }
         }
         public void Add(Media media)
         {
@@ -353,7 +335,7 @@ namespace Player.Management
             File.Move(AllMedias[index].Path, to);
             AllMedias[index].Path = to;
         }
-        
+
         public int Find(Media media)
         {
             for (int i = 0; i < AllMedias.Count; i++)
@@ -372,14 +354,14 @@ namespace Player.Management
         public void Copy(string from, string to) => File.Copy(from, to, true);
         public void Copy(Media media, string to) => Copy(media.Path, to);
         public void Copy(int index, string to) => Copy(AllMedias[index], to);
-        
+
         public void Reload(int index)
         {
             if (index == -1)
                 index = CurrentlyPlayingIndex;
             AllMedias[index] = new Media(AllMedias[index].Path);
         }
-        
+
 
         public void DownloadPlaylist(string path)
         {
@@ -400,9 +382,9 @@ namespace Player.Management
             medias = list.ToArray();
         }
 
-        public void UploadPlaylist(string path) => 
+        public void UploadPlaylist(string path) =>
             File.WriteAllLines(path, from item in AllMedias select item.Path);
-        public static void UploadPlaylist(string path, Media[] content) => 
+        public static void UploadPlaylist(string path, Media[] content) =>
             File.WriteAllLines(path, from item in content select item.Path);
 
         public void RequestDelete(int index)
@@ -413,7 +395,7 @@ namespace Player.Management
         }
         public void RequestDelete(Media view) => RequestDelete(Find(view));
         public void RequestDelete() => RequestDelete(CurrentlyPlayingIndex);
-        
+
         public void RequestLocation(int index) => System.Diagnostics.Process.Start("explorer.exe", "/select," + AllMedias[index].Path);
         public void RequestLocation(Media view) => RequestLocation(Find(view));
         public void RequestLocation() => RequestLocation(CurrentlyPlayingIndex);
@@ -472,7 +454,7 @@ namespace Player.Management
             }
             return CurrentlyPlaying;
         }
-        
+
         public void Repeat(int index, int times)
         {
             for (int i = 0; i < times; i++)
@@ -485,7 +467,7 @@ namespace Player.Management
         {
 
         }
-        
+
         public void ShowProperties(int index)
         {
 
@@ -499,7 +481,7 @@ namespace Player.Management
         public void Play(Media media) => Next(Find(media));
         public void ChangeSettings(Preferences newSettings)
         {
-            Preferences = newSettings; 
+            Preferences = newSettings;
         }
         public void AddCount() => AllMedias[CurrentlyPlayingIndex].PlayCount++;
 
@@ -508,138 +490,22 @@ namespace Player.Management
         private static bool Check(string path) => File.Exists(path) && GetType(path) != MediaType.NotMedia;
         private static bool Check(Media media) => File.Exists(media.Path) && media.MediaType != MediaType.NotMedia;
     }
-}
 
-namespace Player
-{
-    public partial class App : Application, InstanceManager.ISingleInstanceApp
-    {
-        public static event EventHandler<Events.InstanceEventArgs> NewInstanceRequested;
-
-        public const string LauncherIdentifier = "ElephantPlayerBySoheilKD_CERTID8585";
-        public static string ExePath = Environment.GetCommandLineArgs()[0];
-        public static string Path = ExePath.Substring(0, ExePath.LastIndexOf("\\") + 1);
-        public static string LibraryPath = $"{Path}Library.dll";
-        
-        [STAThread]
-        public static void Main(string[] args)
-        {
-            AppDomain.CurrentDomain.UnhandledException += (sender, e) =>
-            {
-                MessageBox.Show($"Unhandled {e.ExceptionObject}\r\n" +
-                    $"Terminating: {e.IsTerminating}", "Exception", MessageBoxButton.OK, MessageBoxImage.Error);
-                if (e.IsTerminating)
-                    System.Diagnostics.Process.GetCurrentProcess().Kill();
-            };
-            if (!Environment.MachineName.Equals("Soheil-PC", StringComparison.CurrentCultureIgnoreCase) && !File.Exists($"{Path}\\Bakhshesh.LazemNistEdamKonid"))
-            {
-                MessageBox.Show("Jizzzze", "LOL", MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
-            }
-            if (InstanceManager.Instance<App>.InitializeAsFirstInstance(LauncherIdentifier))
-            {
-                var application = new App();
-
-                application.InitializeComponent();
-
-                application.Run();
-                InstanceManager.Instance<App>.Cleanup();
-            }
-        }
-
-        public bool SignalExternalCommandLineArgs(IList<string> args)
-        {
-            NewInstanceRequested?.Invoke(this, new Events.InstanceEventArgs(args));
-            return true;
-        }
-    }
-    
-
-    public static class Converters
-    {
-        public static BitmapImage GetBitmap<T>(T element) where T : System.Windows.Controls.Control
-        {
-            element.BeginInit();
-            element.UpdateLayout();
-
-            PngBitmapEncoder encoder = new PngBitmapEncoder();
-            encoder.Frames.Clear();
-            Transform transform = element.LayoutTransform;
-            element.LayoutTransform = null;
-            Size size = new Size(element.Width, element.Height);
-            element.Measure(size);
-            element.Arrange(new Rect(size));
-            
-            RenderTargetBitmap renderBitmap =
-              new RenderTargetBitmap(
-                (int)size.Width,
-                (int)size.Height,
-                96d,
-                96d,
-                PixelFormats.Pbgra32);
-            renderBitmap.Render(element);
-            
-            MemoryStream memStream = new MemoryStream();
-
-            encoder.Frames.Add(BitmapFrame.Create(renderBitmap));
-            encoder.Save(memStream);
-            memStream.Flush();
-            var output = new BitmapImage();
-            output.BeginInit();
-            output.StreamSource = memStream;
-            output.EndInit();
-
-            return output;
-        }
-        public static Draw.Image GetImage(TagLib.IPicture picture) => Draw.Image.FromStream(new MemoryStream(picture.Data.Data));
-
-        public static BitmapSource GetBitmapSource(Draw.Bitmap source)
-        {
-            return System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap(
-                          source.GetHbitmap(),
-                          IntPtr.Zero,
-                          Int32Rect.Empty,
-                          BitmapSizeOptions.FromEmptyOptions());
-        }
-        public static BitmapSource GetBitmapSource(Draw::Image myImage)
-        {
-            var bitmap = new Draw.Bitmap(myImage);
-            IntPtr bmpPt = bitmap.GetHbitmap();
-            BitmapSource bitmapSource =
-             System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap(
-                   bmpPt,
-                   IntPtr.Zero,
-                   Int32Rect.Empty,
-                   BitmapSizeOptions.FromEmptyOptions());
-            bitmapSource.Freeze();
-            return bitmapSource;
-        }
-        public static BitmapSource GetBitmapSource(TagLib.IPicture picture) => GetBitmapSource(GetImage(picture));
-    }
 
     [Serializable]
     public class Preferences
     {
         public int PlayMode { get; set; } = 0;
         public int MainKey { get; set; } = 0;
-        public int TileFontIndex { get; set; } = 0;
-        public int ViewMode { get; set; } = 0;
 
         public Size LastSize { get; set; } = new Size(400, 400);
         public Point LastLoc { get; set; } = new Point(20, 20);
 
         public bool VisionOrientation { get; set; } = true;
-        public bool Restrict { get; set; } = false;
         public bool VolumeSetter { get; set; } = false;
-        public bool MassiveLibrary { get; set; } = false;
         public bool LibraryValidation { get; set; } = false;
-        public bool LightWeight { get; set; } = false;
-        public bool HighLatency { get; set; } = false;
-        public bool WMDebug { get; set; } = false;
-        public bool IPC { get; set; } = true;
         public bool ManualGarbageCollector { get; set; } = false;
-        public double ExpanderHeight { get; set; } = 200;
-        
+        public int MouseOverTimeout { get; set; } = 5000;
         public static Preferences Load()
         {
             using (FileStream stream = File.Open($"{App.Path}SettingsProvider.dll", FileMode.Open))
@@ -652,11 +518,6 @@ namespace Player
         }
     }
     
-    public enum PlayPara { None, Next, Prev }
-
-    public enum PlayMode { Shuffle, RepeatOne, RepeatAll, Queue }
-    public enum MediaType { Music, Video, Online, NotMedia }
-
     [Serializable]
     public class Media : IDisposable
     {
@@ -703,7 +564,7 @@ namespace Player
             Uri uri = new Uri(path);
             if (uri.IsFile)
             {
-                switch (Management.MediaManager.GetType(path))
+                switch (MediaManager.GetType(path))
                 {
                     case MediaType.Music:
                         using (var t = TagLib.File.Create(path))
@@ -714,7 +575,7 @@ namespace Player
                             Title = t.Tag.Title ?? Name.Substring(0, Name.LastIndexOf("."));
                             Album = t.Tag.Album;
                             Duration = t.Length;
-                            Artwork = t.Tag.Pictures.Length >= 1 ? Converters.GetBitmapSource(t.Tag.Pictures[0]) : Converters.GetBitmapSource(Properties.Resources.MusicArt);
+                            Artwork = t.Tag.Pictures.Length >= 1 ? ConvertTo.BitmapSource(t.Tag.Pictures[0]) : ConvertTo.BitmapSource(Properties.Resources.MusicArt);
                             MediaType = MediaType.Music;
                             Lyrics = t.Tag.Lyrics ?? " ";
                             IsLoaded = true;
@@ -727,7 +588,7 @@ namespace Player
                         Artist = path.Substring(0, path.LastIndexOf("\\"));
                         Album = "Video";
                         Duration = 1;
-                        Artwork = Converters.GetBitmapSource(Properties.Resources.VideoArt);
+                        Artwork = ConvertTo.BitmapSource(Properties.Resources.VideoArt);
                         MediaType = MediaType.Video;
                         IsLoaded = true;
                         break;
@@ -744,7 +605,7 @@ namespace Player
                 Artist = uri.Host;
                 Album = "Cloud";
                 Duration = 1;
-                Artwork = Converters.GetBitmapSource(Properties.Resources.NetArt);
+                Artwork = ConvertTo.BitmapSource(Properties.Resources.NetArt);
                 MediaType = MediaType.Online;
                 IsLoaded = true;
             }
@@ -786,11 +647,117 @@ namespace Player
         #endregion 
     }
 
+    [Serializable]
+    public class MassiveLibrary
+    {
+        public Media[] Medias { get; set; } = new Media[0];
+        public MassiveLibrary(Media[] medias) => Medias = medias;
+        public MassiveLibrary() { }
+        public void Save()
+        {
+            using (FileStream stream = new FileStream(App.LibraryPath, FileMode.Create))
+                (new BinaryFormatter()).Serialize(stream, this);
+        }
+        public static void Save(Media[] medias)
+        {
+            var newMedias =
+                from item in medias
+                where !item.IsRemoved
+                select item;
+            int c = newMedias.Count();
+            medias = new Media[c];
+            int i = 0;
+            foreach (var item in newMedias)
+            {
+                medias[i++] = item;
+            }
+            using (FileStream stream = new FileStream(App.LibraryPath, FileMode.Create))
+                (new BinaryFormatter()).Serialize(stream, new MassiveLibrary(medias));
+        }
+        public static MassiveLibrary Load()
+        {
+            if (!File.Exists(App.LibraryPath))
+                return new MassiveLibrary();
+            using (FileStream stream = new FileStream(App.LibraryPath, FileMode.Open))
+                return (new BinaryFormatter()).Deserialize(stream) as MassiveLibrary;
+        }
+    }
+
     public static class Debug
     {
         public static void Print<T>(T obj) => Console.WriteLine(obj.ToString());
         public static void ThrowFakeException(string Message = "") => throw new Exception(Message);
         public static void Display<T>(T message, string caption = "Debug") => MessageBox.Show(message.ToString(), caption);
+    }
+    public static class ConvertTo
+    {
+        public static BitmapImage Bitmap<T>(T element) where T : System.Windows.Controls.Control
+        {
+            element.BeginInit();
+            element.UpdateLayout();
+
+            PngBitmapEncoder encoder = new PngBitmapEncoder();
+            encoder.Frames.Clear();
+            Transform transform = element.LayoutTransform;
+            element.LayoutTransform = null;
+            Size size = new Size(element.Width, element.Height);
+            element.Measure(size);
+            element.Arrange(new Rect(size));
+
+            RenderTargetBitmap renderBitmap =
+              new RenderTargetBitmap(
+                (int)size.Width,
+                (int)size.Height,
+                96d,
+                96d,
+                PixelFormats.Pbgra32);
+            renderBitmap.Render(element);
+
+            MemoryStream memStream = new MemoryStream();
+
+            encoder.Frames.Add(BitmapFrame.Create(renderBitmap));
+            encoder.Save(memStream);
+            memStream.Flush();
+            var output = new BitmapImage();
+            output.BeginInit();
+            output.StreamSource = memStream;
+            output.EndInit();
+
+            return output;
+        }
+        public static Draw.Image Image(TagLib.IPicture picture) => Draw.Image.FromStream(new MemoryStream(picture.Data.Data));
+
+        public static BitmapSource BitmapSource(Draw.Bitmap source)
+        {
+            return System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap(
+                          source.GetHbitmap(),
+                          IntPtr.Zero,
+                          Int32Rect.Empty,
+                          BitmapSizeOptions.FromEmptyOptions());
+        }
+        public static BitmapSource BitmapSource(TagLib.IPicture picture)
+        {
+            var bitmap = new Draw.Bitmap(Image(picture));
+            IntPtr bmpPt = bitmap.GetHbitmap();
+            BitmapSource bitmapSource =
+             System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap(
+                   bmpPt,
+                   IntPtr.Zero,
+                   Int32Rect.Empty,
+                   BitmapSizeOptions.FromEmptyOptions());
+            bitmapSource.Freeze();
+            return bitmapSource;
+        }
+    }
+    public static class Extensions
+    {
+        public static bool IsDigitsOnly(this string str)
+        {
+            for (int i = 0; i < str.Length; i++)
+                if (str[i] < '0' || str[i] > '9') return false;
+            return true;
+        }
+        public static int ToInt(this double e) => Convert.ToInt32(e);
     }
 }
 
@@ -844,7 +811,7 @@ namespace Player.Taskbar
             CommandParameter = "",
             Visibility = Visibility.Visible,
             Description = "Play",
-            ImageSource = Converters.GetBitmap(new Controls.MaterialIcon() { Icon = Controls.IconType.play_arrow, Foreground = Brushes.White })
+            ImageSource = ConvertTo.Bitmap(new Controls.MaterialIcon() { Icon = Controls.IconType.play_arrow, Foreground = Brushes.White })
         };
         public ThumbButtonInfo PauseThumb = new ThumbButtonInfo()
         {
@@ -855,7 +822,7 @@ namespace Player.Taskbar
             CommandParameter = "",
             Visibility = Visibility.Visible,
             Description = "Pause",
-            ImageSource = Converters.GetBitmap(new Controls.MaterialIcon() { Icon = Controls.IconType.pause, Foreground = Brushes.White })
+            ImageSource = ConvertTo.Bitmap(new Controls.MaterialIcon() { Icon = Controls.IconType.pause, Foreground = Brushes.White })
         };
         public ThumbButtonInfo PrevThumb = new ThumbButtonInfo()
         {
@@ -866,7 +833,7 @@ namespace Player.Taskbar
             CommandParameter = "",
             Visibility = Visibility.Visible,
             Description = "Previous",
-            ImageSource = Converters.GetBitmap(new Controls.MaterialIcon() { Icon = Controls.IconType.skip_previous, Foreground = Brushes.White })
+            ImageSource = ConvertTo.Bitmap(new Controls.MaterialIcon() { Icon = Controls.IconType.skip_previous, Foreground = Brushes.White })
         };
         public ThumbButtonInfo NextThumb = new ThumbButtonInfo()
         {
@@ -877,7 +844,7 @@ namespace Player.Taskbar
             CommandParameter = "",
             Visibility = Visibility.Visible,
             Description = "Next",
-            ImageSource = Converters.GetBitmap(new Controls.MaterialIcon() { Icon = Controls.IconType.skip_next, Foreground = Brushes.White })
+            ImageSource = ConvertTo.Bitmap(new Controls.MaterialIcon() { Icon = Controls.IconType.skip_next, Foreground = Brushes.White })
         };
         private TaskbarItemInfo TaskbarItem = new TaskbarItemInfo();
         private Commands.Play PlayHandler = new Commands.Play();
@@ -906,19 +873,6 @@ namespace Player.Taskbar
     }
 }
 
-namespace Player.Extensions
-{
-    public static class Ext
-    {
-        public static bool IsDigitsOnly(this string str)
-        {
-            for (int i = 0; i < str.Length; i++)
-                if (str[i] < '0' || str[i] > '9') return false;
-            return true;
-        }
-        public static int ToInt(this double e) => Convert.ToInt32(e);
-    }
-}
 
 namespace Player.InstanceManager
 {
@@ -975,7 +929,6 @@ namespace Player.InstanceManager
                 IntPtr p = _LocalFree(argv);
             }
         }
-
     }
 
     public interface ISingleInstanceApp
@@ -1036,7 +989,6 @@ namespace Player.InstanceManager
                     {
                         using (TextReader reader = new StreamReader(cmdLinePath, System.Text.Encoding.Unicode))
                             args = NativeMethods.CommandLineToArgvW(reader.ReadToEnd());
-
                         File.Delete(cmdLinePath);
                     }
                     catch (IOException) { }
@@ -1070,8 +1022,7 @@ namespace Player.InstanceManager
             ChannelServices.RegisterChannel(secondInstanceChannel, true);
             string remotingServiceUrl = IpcProtocol + channelName + "/" + RemoteServiceName;
             IPCRemoteService firstInstanceRemoteServiceReference = (IPCRemoteService)RemotingServices.Connect(typeof(IPCRemoteService), remotingServiceUrl);
-            if (firstInstanceRemoteServiceReference != null)
-                firstInstanceRemoteServiceReference.InvokeFirstInstance(args);
+            firstInstanceRemoteServiceReference?.InvokeFirstInstance(args);
         }
         private static object ActivateFirstInstanceCallback(object arg)
         {
