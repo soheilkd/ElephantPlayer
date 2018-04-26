@@ -292,8 +292,7 @@ namespace Player
         public void Add(string[] paths, bool requestPlay = false)
         {
             for (int i = 0; i < paths.Length; i++)
-                if (Check(paths[i]))
-                    Add(paths[i]);
+                    Add(paths[i], true);
         }
         public void Add(Media media)
         {

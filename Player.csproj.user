@@ -29,7 +29,7 @@
     <StartArguments>debug.mp3</StartArguments>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
-    <StartArguments>
-    </StartArguments>
+    <StartArguments>"D:\Users\Soheil\Downloads\Music\Erfan - Mano Natarsoon %28Ft Ho3ein%29.mp3"</StartArguments>
+    <RemoteDebugEnabled>false</RemoteDebugEnabled>
   </PropertyGroup>
 </Project>

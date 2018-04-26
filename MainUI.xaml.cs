@@ -3,13 +3,13 @@ using Player.Events;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.Timers;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media.Animation;
-using Routed = System.Windows.RoutedPropertyChangedEventArgs<double>;
 using Forms = System.Windows.Forms;
-using System.Timers;
+using Routed = System.Windows.RoutedPropertyChangedEventArgs<double>;
 
 namespace Player
 {
@@ -33,7 +33,7 @@ namespace Player
             get => (string)Resources["Res_Title"];
             set => Resources["Res_Title"] = value;
         }
-
+        
         public MainUI()
         {
             InitializeComponent();
@@ -102,6 +102,7 @@ namespace Player
                 default: PlayModeButton.Icon = IconType.repeat; break;
             }
             SizeChanged += (_, __) => SizeChangeTimer.Start();
+            Width--; Width++; //For invoking SizeChanged
         }
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
@@ -375,6 +376,7 @@ namespace Player
             int index = MediaViews.FindIndex(item => item.MediaIndex == Manager.CurrentlyPlayingIndex);
             MediaViews[index].IsPlaying = true;
             VisionButton.Visibility = MediaManager.GetType(media.Path) == MediaType.Video ? Visibility.Visible : Visibility.Collapsed;
+            if (IsVisionOn[0] && media.MediaType == MediaType.Music) VisionButton_Click(this, null);
         }
         private void OrinateFullVision(bool Enabled)
         {
