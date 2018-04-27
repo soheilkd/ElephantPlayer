@@ -155,11 +155,6 @@ namespace Player
                 if (e.IsTerminating)
                     System.Diagnostics.Process.GetCurrentProcess().Kill();
             };
-            if (!Environment.MachineName.Equals("Soheil-PC", StringComparison.CurrentCultureIgnoreCase) && !File.Exists($"{Path}\\Bakhshesh.LazemNistEdamKonid"))
-            {
-                MessageBox.Show("Jizzzze", "LOL", MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
-            }
             if (InstanceManager.Instance<App>.InitializeAsFirstInstance(LauncherIdentifier))
             {
                 var application = new App();
