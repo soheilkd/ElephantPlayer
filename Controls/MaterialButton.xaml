@@ -3,7 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:Player" x:Name="Modifier"  Width="26"
              xmlns:controls="clr-namespace:Player.Controls" Loaded="UserControl_Loaded"
-             Height="26" MouseUp="UXMouseUp" MouseDown="UXMouseDown">
+             Height="26" MouseUp="UXMouseUp">
     <Grid x:Name="MainGrid">
         <Border x:Name="MainEllipse" BorderThickness="0" Margin="-5" BorderBrush="#FBBB" CornerRadius="20">
           

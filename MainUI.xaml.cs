@@ -20,12 +20,13 @@ namespace Player
         private Timer PlayCountTimer = new Timer(100000) { AutoReset = false };
         private Timer DraggerTimer = new Timer(250) { AutoReset = false };
         private Timer MouseMoveTimer = new Timer(5000);
-        private Timer SizeChangeTimer = new Timer(200) { AutoReset = true };
+        private Timer SizeChangeTimer = new Timer(50) { AutoReset = true };
         private TimeSpan TimeSpan;
         private Taskbar.Thumb Thumb = new Taskbar.Thumb();
         private bool IsUserSeeking = false;
         private bool[] IsVisionOn = new bool[] { false, false };
-        
+        private Size[] WindowSizes = new Size[2];
+        private Storyboard WindowWidthBoard => Resources["WindowWidthBoard"] as Storyboard;
         public MainUI()
         {
             InitializeComponent();
@@ -36,11 +37,13 @@ namespace Player
             var lib = MassiveLibrary.Load();
             for (int i = 0; i < lib.Medias.Length; i++)
                 Manager.Add(lib.Medias[i]);
-            Width = App.Preferences.LastSize.Width;
-            Height = App.Preferences.LastSize.Height;
+            WindowSizes = App.Preferences.LastSize;
+            Width = WindowSizes[0].Width;
+            Height = WindowSizes[0].Height;
             Left = App.Preferences.LastLoc.X;
             Top = App.Preferences.LastLoc.Y;
             Player.Volume = 1;
+            ProcessVolume();
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -86,19 +89,20 @@ namespace Player
             };
             switch ((PlayMode)App.Preferences.PlayMode)
             {
-                case PlayMode.Shuffle: PlayModeButton.Icon = IconType.shuffle; break;
-                case PlayMode.RepeatOne: PlayModeButton.Icon = IconType.repeat_one; break;
-                case PlayMode.RepeatAll: PlayModeButton.Icon = IconType.repeat; break;
-                case PlayMode.Queue: PlayModeButton.Icon = IconType.queue_music; break;
-                default: PlayModeButton.Icon = IconType.repeat; break;
+                case PlayMode.Shuffle: PlayModeButton.Icon = IconType.Shuffle; break;
+                case PlayMode.RepeatOne: PlayModeButton.Icon = IconType.RepeatOne; break;
+                case PlayMode.RepeatAll: PlayModeButton.Icon = IconType.Repeat; break;
+                case PlayMode.Queue: PlayModeButton.Icon = IconType.MusicQueue; break;
+                default: PlayModeButton.Icon = IconType.Repeat; break;
             }
-            SizeChanged += (_, __) => SizeChangeTimer.Start();
-            Width--; Width++; //For invoking SizeChanged
+            Player.MediaEnded += (_, __) => Play(Manager.Next());
         }
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            App.Preferences.LastSize = new Size(Width, Height);
+            WindowSizes[IsVisionOn[0] ? 1: 0].Width = ActualWidth;
+            App.Preferences.LastSize = WindowSizes;
             App.Preferences.LastLoc = new Point(Left, Top);
+            App.Preferences.Volume = Player.Volume;
             App.Preferences.Save();
             Manager.Close();
             Application.Current.Shutdown();
@@ -114,6 +118,11 @@ namespace Player
             }
         }
         private void Window_Drop(object sender, DragEventArgs e) => Manager.Add((string[])e.Data.GetData(DataFormats.FileDrop));
+        private void Window_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            WindowSizes[IsVisionOn[0] ? 1 : 0].Height = Height;
+            SizeChangeTimer.Start();
+        }
 
         private async void Manager_Change(object sender, InfoExchangeArgs e)
         {
@@ -205,30 +214,15 @@ namespace Player
                         ChangePosition(PositionSlider.SmallChange);
                         await Task.Delay(200);
                         break;
-                    case Forms::Keys.Up:
-                        VolumeButton_MouseDown(this, new MouseButtonEventArgs(Mouse.PrimaryDevice, 1, MouseButton.Left));
-                        break;
-                    case Forms::Keys.Down:
-                        VolumeButton_MouseDown(this, new MouseButtonEventArgs(Mouse.PrimaryDevice, 1, MouseButton.Right));
-                        break;
                     default: break;
                 }
             }
             switch (e.KeyCode)
             {
-                case Forms::Keys.MediaNextTrack:
-                    NextButton_Click(this, null);
-                    break;
-                case Forms::Keys.MediaPreviousTrack:
-                    PreviousButton_Click(this, null);
-                    break;
-                case Forms::Keys.MediaPlayPause:
-                    PlayPauseButton_Click(this, null);
-                    break;
-                case Forms::Keys.MediaStop:
-                    break;
-                default:
-                    break;
+                case Forms::Keys.MediaNextTrack: NextButton_Click(this, null); break;
+                case Forms::Keys.MediaPreviousTrack: PreviousButton_Click(this, null); break;
+                case Forms::Keys.MediaPlayPause: PlayPauseButton_Click(this, null); break; 
+                default: break;
             }
         }
 
@@ -239,7 +233,7 @@ namespace Player
             {
                 if (WindowState != WindowState.Maximized)
                     DragMove();
-                if (DraggerTimer.Enabled)
+                if (DraggerTimer.Enabled && !IsVisionOn[1])
                 {
                     Topmost = !Topmost;
                     WindowStyle = Topmost ? WindowStyle.None : WindowStyle.SingleBorderWindow;
@@ -271,16 +265,16 @@ namespace Player
 
         private void PlayPauseButton_Click(object sender, EventArgs e)
         {
-            if (PlayPauseButton.Icon == IconType.pause)
+            if (PlayPauseButton.Icon == IconType.Pause)
             {
                 Player.Pause();
-                PlayPauseButton.Icon = IconType.play_arrow;
+                PlayPauseButton.Icon = IconType.Play;
                 Thumb.Refresh(false);
             }
             else
             {
                 Player.Play();
-                PlayPauseButton.Icon = IconType.pause;
+                PlayPauseButton.Icon = IconType.Pause;
                 Thumb.Refresh(true);
             }
         }
@@ -294,28 +288,37 @@ namespace Player
         }
         private void VisionButton_Click(object sender, EventArgs e)
         {
+            WindowSizes[IsVisionOn[0] ? 1 : 0].Width = ActualWidth;
             IsVisionOn[0] = !IsVisionOn[0];
             BeginStoryboard(Resources[IsVisionOn[0] ? "VisionOnBoard" : "VisionOffBoard"] as Storyboard);
-            if (!IsVisionOn[0]) { Height--; Width++; }
+            if (!IsVisionOn[0]) { Height--; Height++; }
+            (WindowWidthBoard.Children[0] as DoubleAnimation).From = ActualWidth;
+            (WindowWidthBoard.Children[0] as DoubleAnimation).To = WindowSizes[IsVisionOn[0] ? 1: 0].Width;
+          
+            foreach (var item in WindowSizes)
+            {
+                Debug.Print($"\r\nValue: {item.Width}");
+            }
+            WindowWidthBoard.Begin();
         }
         private void PlayModeButton_Click(object sender, EventArgs e)
         {
             switch (Manager.ActivePlayMode)
             {
                 case PlayMode.Shuffle:
-                    PlayModeButton.Icon = IconType.repeat_one;
+                    PlayModeButton.Icon = IconType.RepeatOne;
                     Manager.ActivePlayMode = PlayMode.RepeatOne;
                     break;
                 case PlayMode.RepeatOne:
-                    PlayModeButton.Icon = IconType.repeat;
+                    PlayModeButton.Icon = IconType.Repeat;
                     Manager.ActivePlayMode = PlayMode.RepeatAll;
                     break;
                 case PlayMode.RepeatAll:
-                    PlayModeButton.Icon = IconType.queue_music;
+                    PlayModeButton.Icon = IconType.MusicQueue;
                     Manager.ActivePlayMode = PlayMode.Queue;
                     break;
                 case PlayMode.Queue:
-                    PlayModeButton.Icon = IconType.shuffle;
+                    PlayModeButton.Icon = IconType.Shuffle;
                     Manager.ActivePlayMode = PlayMode.Shuffle;
                     break;
                 default:
@@ -342,13 +345,11 @@ namespace Player
         {
             if (!media.Exists)
             {
-                var res = MessageBox.Show("Couldn't reach target, remove?", "IOException", MessageBoxButton.YesNo, MessageBoxImage.Error);
-                if (res == MessageBoxResult.Yes)
-                    Manager.Remove(media);
+                Manager.Remove(media);
                 return;
             }
             PositionSlider.Value = 0;
-            PlayPauseButton.Icon = IconType.pause;
+            PlayPauseButton.Icon = IconType.Pause;
             Player.Source = new Uri(media.Path);
             Player.Play();
             MiniArtworkImage.Source = media.Artwork;
@@ -363,8 +364,8 @@ namespace Player
             {
                 VisionButton_Click(this, null);
                 OrinateFullVision(false);
-                Topmost = false;
                 WindowStyle = WindowStyle.SingleBorderWindow;
+                Topmost = false;
             }
         }
         private void OrinateFullVision(bool Enabled)
@@ -424,7 +425,7 @@ namespace Player
                 Player.Play();
                 await Task.Delay(50);
             }
-            PlayPauseButton.Icon = IconType.pause;
+            PlayPauseButton.Icon = IconType.Pause;
             Player.Play();
             IsUserSeeking = false;
         }
@@ -438,31 +439,28 @@ namespace Player
             {
                 if (Player.Volume < 1)
                     Player.Volume += 0.01;
-                VolumeLabel.Content = (Player.Volume * 100).ToInt();
-                switch (Player.Volume)
-                {
-                    case double n when (n < 0.1): VolumeButton.Icon = IconType.volume_0; break;
-                    case double n when (n < 0.4): VolumeButton.Icon = IconType.volume_1; break;
-                    case double n when (n < 0.8): VolumeButton.Icon = IconType.volume_2; break;
-                    default: VolumeButton.Icon = IconType.volume_3; break;
-                }
+                ProcessVolume();
                 await Task.Delay(50);
             }
             while(e.RightButton == MouseButtonState.Pressed)
             {
                 if (Player.Volume > 0)
                     Player.Volume -= 0.01;
-                VolumeLabel.Content = (Player.Volume * 100).ToInt();
-                switch (Player.Volume)
-                {
-                    case double n when (n < 0.1): VolumeButton.Icon = IconType.volume_0; break;
-                    case double n when (n < 0.4): VolumeButton.Icon = IconType.volume_1; break;
-                    case double n when (n < 0.8): VolumeButton.Icon = IconType.volume_2; break;
-                    default: VolumeButton.Icon = IconType.volume_3; break;
-                }
+                ProcessVolume();
                 await Task.Delay(50);
             }
             VolumePopup.IsOpen = false;
+        }
+        private void ProcessVolume()
+        {
+            VolumeLabel.Content = (Player.Volume * 100).ToInt();
+            switch (Player.Volume)
+            {
+                case double n when (n < 0.1): VolumeButton.Icon = IconType.Volume0; break;
+                case double n when (n < 0.4): VolumeButton.Icon = IconType.Volume1; break;
+                case double n when (n < 0.8): VolumeButton.Icon = IconType.Volume2; break;
+                default: VolumeButton.Icon = IconType.Volume3; break;
+            }
         }
     }
 }

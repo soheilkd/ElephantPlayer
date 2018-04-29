@@ -23,96 +23,6 @@ using System.Windows.Threading;
 using Draw = System.Drawing;
 using Forms = System.Windows.Forms;
 
-namespace Player.User
-{
-    public static class Screen
-    {
-        public static double Width => SystemParameters.PrimaryScreenWidth;
-        public static double FullWidth => SystemParameters.FullPrimaryScreenWidth;
-        public static double FullHeight => SystemParameters.PrimaryScreenHeight;
-        public static double Height => SystemParameters.PrimaryScreenHeight;
-    }
-    public static class Mouse
-    {
-        public static double Y => Position.Y;
-        public static double X => Position.X;
-        public static MouseDevice PrimaryDevice => System.Windows.Input.Mouse.PrimaryDevice;
-        [StructLayout(LayoutKind.Sequential)]
-        internal struct Win32Point { public int X; public int Y; }
-        static Draw.Point Position
-        {
-            get
-            {
-                Win32Point w32 = new Win32Point();
-                InstanceManager.NativeMethods.GetCursorPos(ref w32);
-                return new Draw.Point(w32.X, w32.Y);
-            }
-        }
-    }
-    public class Keyboard
-    {
-        private static Gma.System.MouseKeyHook.IKeyboardMouseEvents _events = Gma.System.MouseKeyHook.Hook.GlobalEvents();
-        public static event Forms::KeyPressEventHandler KeyPress
-        {
-            add => _events.KeyPress += value;
-            remove => _events.KeyPress -= value;
-        }
-        public static event Forms::KeyEventHandler KeyDown
-        {
-            add => _events.KeyDown += value;
-            remove => _events.KeyDown -= value;
-        }
-        public static event Forms::KeyEventHandler KeyUp
-        {
-            add => _events.KeyDown += value;
-            remove => _events.KeyDown -= value;
-        }
-        public Keyboard() { }
-        ~Keyboard() => _events.Dispose();
-
-    }
-}
-
-namespace Player.Events
-{
-    public class InstanceEventArgs : EventArgs
-    {
-        private InstanceEventArgs() { }
-        public InstanceEventArgs(IList<string> args) { _Args = args; }
-        private IList<string> _Args { get; set; }
-        public string this[int index] => Args[index];
-        public int ArgsCount => _Args.Count;
-        public string[] Args => _Args.ToArray();
-    }
-
-    public enum InfoType
-    {
-        Integer, Double, Media, Object, StringArray,
-        RequestNext, RequestPrev, Handling, UserInterface,
-        Management, AppInterface, Internal, StartingMedia,
-        EndingMedia, PlayPause, NewMedia, MediaRequested, EditingTag,
-        InterfaceUpdate, MediaUpdate, Crash, PopupRequest,
-        ArtworkClick, SomethingHappened, MediaRemoved, MediaMoved
-    }
-
-    public class InfoExchangeArgs
-    {
-        public InfoType Type { get; set; }
-        public object Object { get; set; }
-        public object[] ObjectArray { get; set; }
-        public int Integer { get; set; }
-        public Media Media { get; set; }
-
-        public InfoExchangeArgs() { }
-        public InfoExchangeArgs(InfoType type) => Type = type;
-        public InfoExchangeArgs(int integer)
-        {
-            Type = InfoType.Integer;
-            Integer = integer;
-        }
-    }
-}
-
 namespace Player
 {
     public enum PlayPara { None, Next, Prev }
@@ -134,7 +44,8 @@ namespace Player
         [STAThread]
         public static void Main(string[] args)
         {
-        ServicePointManager.DefaultConnectionLimit = 10;
+            Preferences.Save();
+            ServicePointManager.DefaultConnectionLimit = 10;
             AppDomain.CurrentDomain.UnhandledException += (sender, e) =>
             {
                 MessageBox.Show($"Unhandled {e.ExceptionObject}\r\n" +
@@ -146,9 +57,9 @@ namespace Player
                 var application = new App();
                 application.InitializeComponent();
 
-                MusicArt = ConvertTo.Bitmap(new Controls.MaterialIcon() { Icon = Controls.IconType.musnote, Foreground = Brushes.White, Width = 60, Height = 60 });
-                VideoArt = ConvertTo.Bitmap(new Controls.MaterialIcon() { Icon = Controls.IconType.ondemand_video, Foreground = Brushes.White, Width = 60, Height = 60 });
-                NetArt = ConvertTo.Bitmap(new Controls.MaterialIcon() { Icon = Controls.IconType.cloud, Foreground = Brushes.White, Width = 60, Height = 60 });
+                MusicArt = ConvertTo.Bitmap(new Controls.MaterialIcon() { Icon = Controls.IconType.MusicNote, Foreground = Brushes.White, Width = 60, Height = 60 });
+                VideoArt = ConvertTo.Bitmap(new Controls.MaterialIcon() { Icon = Controls.IconType.OndemandVideo, Foreground = Brushes.White, Width = 60, Height = 60 });
+                NetArt = ConvertTo.Bitmap(new Controls.MaterialIcon() { Icon = Controls.IconType.Cloud, Foreground = Brushes.White, Width = 60, Height = 60 });
 
                 application.Run();
                 InstanceManager.Instance<App>.Cleanup();
@@ -376,7 +287,7 @@ namespace Player
         public void RequestLocation(Media view) => RequestLocation(Find(view));
         public void RequestLocation() => RequestLocation(CurrentlyPlayingIndex);
 
-        public static string GetExtension(string full) => full.Substring(full.LastIndexOf(".") + 1).ToLower();
+        public static string GetExtension(string full) => full.Substring((full?? " . ").LastIndexOf(".") + 1).ToLower();
         public static string GetExtension(Media media) => GetExtension(media.Path);
         public static string GetFilter(string ext = ".mp3") => $"{GetType(ext)} | *{ext}";
         public static string GetFilter(Media media) => $"{media.MediaType} | *{GetExtension(media.Path)}";
@@ -496,8 +407,8 @@ namespace Player
     {
         public int PlayMode { get; set; } = 0;
         public int MainKey { get; set; } = 0;
-
-        public Size LastSize { get; set; } = new Size(400, 400);
+        public double Volume { get; set; } = 1;
+        public Size[] LastSize { get; set; }
         public Point LastLoc { get; set; } = new Point(20, 20);
 
         public bool VisionOrientation { get; set; } = true;
@@ -631,7 +542,7 @@ namespace Player
     public static class Debug
     {
         public static void Print<T>(T obj) => Console.WriteLine(obj.ToString());
-        public static void ThrowFakeException(string Message = "") => throw new Exception(Message);
+        public static void ThrowFakeException(string message = "") => throw new Exception(message);
         public static void Display<T>(T message, string caption = "Debug") => MessageBox.Show(message.ToString(), caption);
     }
     public static class ConvertTo
@@ -670,7 +581,7 @@ namespace Player
 
             return output;
         }
-        public static Draw.Image Image(TagLib.IPicture picture) => Draw.Image.FromStream(new MemoryStream(picture.Data.Data));
+        public static Draw.Image Image(TagLib.IPicture picture) => Draw.Image.FromStream(new MemoryStream(picture?.Data.Data));
 
         public static BitmapSource BitmapSource(Draw.Bitmap source)
         {
@@ -696,13 +607,97 @@ namespace Player
     }
     public static class Extensions
     {
-        public static bool IsDigitsOnly(this string str)
-        {
-            for (int i = 0; i < str.Length; i++)
-                if (str[i] < '0' || str[i] > '9') return false;
-            return true;
-        }
         public static int ToInt(this double e) => Convert.ToInt32(e);
+    }
+}
+
+namespace Player.User
+{
+    public static class Screen
+    {
+        public static double Width => SystemParameters.PrimaryScreenWidth;
+        public static double FullWidth => SystemParameters.FullPrimaryScreenWidth;
+        public static double FullHeight => SystemParameters.PrimaryScreenHeight;
+        public static double Height => SystemParameters.PrimaryScreenHeight;
+    }
+    public static class Mouse
+    {
+        public static double Y => Position.Y;
+        public static double X => Position.X;
+        public static MouseDevice PrimaryDevice => System.Windows.Input.Mouse.PrimaryDevice;
+        [StructLayout(LayoutKind.Sequential)]
+        internal struct Win32Point { public int X; public int Y; }
+        static Draw.Point Position
+        {
+            get
+            {
+                Win32Point w32 = new Win32Point();
+                InstanceManager.NativeMethods.GetCursorPos(ref w32);
+                return new Draw.Point(w32.X, w32.Y);
+            }
+        }
+    }
+    public class Keyboard
+    {
+        private static Gma.System.MouseKeyHook.IKeyboardMouseEvents _events = Gma.System.MouseKeyHook.Hook.GlobalEvents();
+        public static event Forms::KeyPressEventHandler KeyPress
+        {
+            add => _events.KeyPress += value;
+            remove => _events.KeyPress -= value;
+        }
+        public static event Forms::KeyEventHandler KeyDown
+        {
+            add => _events.KeyDown += value;
+            remove => _events.KeyDown -= value;
+        }
+        public static event Forms::KeyEventHandler KeyUp
+        {
+            add => _events.KeyDown += value;
+            remove => _events.KeyDown -= value;
+        }
+        public Keyboard() { }
+        ~Keyboard() => _events.Dispose();
+
+    }
+}
+
+namespace Player.Events
+{
+    public enum InfoType
+    {
+        Integer, Double, Media, Object, StringArray,
+        RequestNext, RequestPrev, Handling, UserInterface,
+        Management, AppInterface, Internal, StartingMedia,
+        EndingMedia, PlayPause, NewMedia, MediaRequested, EditingTag,
+        InterfaceUpdate, MediaUpdate, Crash, PopupRequest,
+        ArtworkClick, SomethingHappened, MediaRemoved, MediaMoved
+    }
+
+    public class InstanceEventArgs : EventArgs
+    {
+        private InstanceEventArgs() { }
+        public InstanceEventArgs(IList<string> args) { _Args = args; }
+        private IList<string> _Args { get; set; }
+        public string this[int index] => Args[index];
+        public int ArgsCount => _Args.Count;
+        public string[] Args => _Args.ToArray();
+    }
+
+    public class InfoExchangeArgs: EventArgs
+    {
+        public InfoType Type { get; set; }
+        public object Object { get; set; }
+        public object[] ObjectArray { get; set; }
+        public int Integer { get; set; }
+        public Media Media { get; set; }
+
+        public InfoExchangeArgs() { }
+        public InfoExchangeArgs(InfoType type) => Type = type;
+        public InfoExchangeArgs(int integer)
+        {
+            Type = InfoType.Integer;
+            Integer = integer;
+        }
     }
 }
 
@@ -726,24 +721,24 @@ namespace Player.Taskbar
         public ThumbButtonInfo PlayThumb = new ThumbButtonInfo()
         {
             Description = "Play",
-            ImageSource = ConvertTo.Bitmap(new Controls.MaterialIcon() { Icon = Controls.IconType.play_arrow, Foreground = Brushes.White })
+            ImageSource = ConvertTo.Bitmap(new Controls.MaterialIcon() { Icon = Controls.IconType.Play, Foreground = Brushes.White })
         };
         public ThumbButtonInfo PauseThumb = new ThumbButtonInfo()
         {
             Description = "Pause",
-            ImageSource = ConvertTo.Bitmap(new Controls.MaterialIcon() { Icon = Controls.IconType.pause, Foreground = Brushes.White })
+            ImageSource = ConvertTo.Bitmap(new Controls.MaterialIcon() { Icon = Controls.IconType.Pause, Foreground = Brushes.White })
         };
-        public ThumbButtonInfo PrevThumb = new ThumbButtonInfo()
+        public ThumbButtonInfo PreviiusThumb = new ThumbButtonInfo()
         {
             DismissWhenClicked = true,
             Description = "Previous",
-            ImageSource = ConvertTo.Bitmap(new Controls.MaterialIcon() { Icon = Controls.IconType.skip_previous, Foreground = Brushes.White })
+            ImageSource = ConvertTo.Bitmap(new Controls.MaterialIcon() { Icon = Controls.IconType.Previous, Foreground = Brushes.White })
         };
         public ThumbButtonInfo NextThumb = new ThumbButtonInfo()
         {
             DismissWhenClicked = true,
             Description = "Next",
-            ImageSource = ConvertTo.Bitmap(new Controls.MaterialIcon() { Icon = Controls.IconType.skip_next, Foreground = Brushes.White })
+            ImageSource = ConvertTo.Bitmap(new Controls.MaterialIcon() { Icon = Controls.IconType.Next, Foreground = Brushes.White })
         };
         private TaskbarItemInfo TaskbarItem = new TaskbarItemInfo();
         private Command PlayHandler = new Command();
@@ -753,7 +748,7 @@ namespace Player.Taskbar
         public TaskbarItemInfo Info => TaskbarItem;
         public Thumb()
         {
-            PrevThumb.Command = PrevHandler;
+            PreviiusThumb.Command = PrevHandler;
             NextThumb.Command = NextHandler;
             PlayThumb.Command = PlayHandler;
             PauseThumb.Command = PauseHandler;
@@ -762,8 +757,8 @@ namespace Player.Taskbar
             PrevHandler.Raised += (sender, e) => PrevPressed?.Invoke(sender, e);
             NextHandler.Raised += (sender, e) => NextPressed?.Invoke(sender, e);
             TaskbarItem.ThumbButtonInfos.Clear();
-            TaskbarItem.ThumbButtonInfos.Add(PrevThumb);
-            TaskbarItem.ThumbButtonInfos.Add(PlayThumb);
+            TaskbarItem.ThumbButtonInfos.Add(PreviiusThumb);
+            TaskbarItem.ThumbButtonInfos.Add(PauseThumb);
             TaskbarItem.ThumbButtonInfos.Add(NextThumb);
         }
         public void Refresh(bool IsPlaying = false) => TaskbarItem.ThumbButtonInfos[1] = IsPlaying ? PauseThumb : PlayThumb;

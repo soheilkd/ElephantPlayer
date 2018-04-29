@@ -11,15 +11,15 @@ namespace Player.Controls
 {
     public enum IconType
     {
-        none, musnote, musvideo, ondemand_video, pause, play_arrow,
-        warning, fullscreen, subtitle, settings, short_text, folder_open, skip_next, skip_previous, content_copy,
-        arrow_downward, arrow_upward, more_horiz, equalizer, expand_less, expand_more, repeat, repeat_one, shuffle,
-        volume_0, volume_1, volume_2, volume_3, queue_music, cloud, add, cloud_download, cloud_done, cancel
+        None, MusicNote, Video, OndemandVideo, Pause, Play,
+        Warning, FullScreen, Subtitle, Settings, Text, Folder, Next, Previous, Copy,
+        DownArrow, UpArrow, HorizMore, Equalizer, ExpandLess, ExpandMore, Repeat, RepeatOne, Shuffle,
+        Volume0, Volume1, Volume2, Volume3, MusicQueue, Cloud, Add, CloudLoad, CloudDone, Cancel
     }
     public partial class MaterialIcon : UserControl, IComponentConnector
     {
         public static readonly DependencyProperty IconProperty = 
-            DependencyProperty.Register(nameof(Icon), typeof(IconType), typeof(MaterialIcon), new FrameworkPropertyMetadata(IconType.none, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, new PropertyChangedCallback(OnIconChanged)));
+            DependencyProperty.Register(nameof(Icon), typeof(IconType), typeof(MaterialIcon), new FrameworkPropertyMetadata(IconType.None, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, new PropertyChangedCallback(OnIconChanged)));
         public static readonly DependencyProperty IconResourceProperty =
             DependencyProperty.Register(nameof(IconResource), typeof(object), typeof(MaterialIcon), new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
         //internal ContentControl PART_ContentControl;
@@ -34,7 +34,7 @@ namespace Player.Controls
         private static void OnIconChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             IconType newValue = (IconType)e.NewValue;
-            if (newValue == IconType.none)
+            if (newValue == IconType.None)
                 return;
             object resource = Application.Current.Resources[newValue.ToString()];
             d.SetValue(IconResourceProperty, resource);

@@ -30,34 +30,23 @@ namespace Player.Controls
                 MainIcon.Icon = value;
             }
         }
-        public bool AutoHandle
-        {
-            get => (bool)GetValue(HandleProperty);
-            set => SetValue(HandleProperty, value);
-        }
+
         public static readonly DependencyProperty EllipseProperty =
             DependencyProperty.Register(nameof(EllipseType), typeof(EllipseTypes), typeof(MaterialButton), new PropertyMetadata(EllipseTypes.Circular));
         public static readonly DependencyProperty IconProperty =
-            DependencyProperty.Register(nameof(Icon), typeof(IconType), typeof(MaterialButton), new PropertyMetadata(IconType.arrow_upward));
-        public static readonly DependencyProperty HandleProperty =
-            DependencyProperty.Register(nameof(AutoHandle), typeof(bool), typeof(MaterialButton), new PropertyMetadata(true));
+            DependencyProperty.Register(nameof(Icon), typeof(IconType), typeof(MaterialButton), new PropertyMetadata(IconType.UpArrow));
         
         public MaterialButton()
         {
             InitializeComponent();
-        }
-         public void UXMouseDown(object sender, MouseButtonEventArgs e)
-        {
-            //MainEllipse.Background = MainIcon.Foreground;
         }
         public void UXMouseUp(object sender, MouseButtonEventArgs e)
         {
             Click?.Invoke(this, null);
             //MainEllipse.Background = System.Windows.Media.Brushes.Transparent;
         }
-        async void UserControl_Loaded(object sender, RoutedEventArgs e)
+        void UserControl_Loaded(object sender, RoutedEventArgs e)
         {
-            await Task.Delay(500);
             MainEllipse.CornerRadius = new CornerRadius(EllipseType == 0 ? 2 : 20);
             MainIcon.Icon = Icon;
         }

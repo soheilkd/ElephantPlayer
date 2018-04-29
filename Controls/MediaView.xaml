@@ -8,19 +8,22 @@
              Loaded="UserControl_Loaded" MouseDoubleClick="OutputCanvas_MouseDoubleClick"
              x:Name="OutputCanvas">
     <Grid>
-        <Label Content="MainLabel" x:Name="MainLabel" Margin="30,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" FontWeight="Medium" FontSize="14"  />
-        <Label Content="SubLabel" x:Name="SubLabel" Margin="30,20,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" FontWeight="Light"/>
+        <Label Content="MainLabel" x:Name="MainLabel" Margin="30,0,40,0" HorizontalContentAlignment="Left" VerticalAlignment="Top" FontWeight="Medium" FontSize="14"  />
+        <Label Content="SubLabel" x:Name="SubLabel" Margin="30,20,40,0" HorizontalContentAlignment="Left" VerticalAlignment="Top" FontWeight="Light"/>
         <Label Content="00:00" x:Name="TimeLabel" Margin="0,0,0,0" HorizontalAlignment="Right" VerticalAlignment="Center"/>
-        <controls:MaterialIcon  x:Name="MainIcon" HorizontalAlignment="Left" Width="30" Icon="musnote" Foreground="White"/>
-        <controls:MaterialButton HorizontalAlignment="Right" Margin="0, 0, 5, 0" Icon="play_arrow" EllipseType="Rectular" x:Name="PlayButton" Click="Play_Click" />
-        <controls:MaterialButton HorizontalAlignment="Right" Margin="0, 0, 45, 0" Icon="cloud_download" EllipseType="Rectular" x:Name="DownloadButton" Click="DownloadButton_Click" />
+        <controls:MaterialIcon  x:Name="MainIcon" HorizontalAlignment="Left" Width="30" Icon="MusicNote" Foreground="White"/>
+        <controls:MaterialButton HorizontalAlignment="Right" Margin="0, 0, 5, 0" Icon="Play" EllipseType="Rectular" x:Name="PlayButton" Click="Play_Click" />
+        <controls:MaterialButton HorizontalAlignment="Right" Margin="0, 0, 45, 0" Icon="CloudLoad" EllipseType="Rectular" x:Name="DownloadButton" Click="DownloadButton_Click" />
       
     </Grid>
     <UserControl.Resources>
         <Style TargetType="MenuItem">
             <Setter Property="Foreground" Value="White" />
             <Setter Property="HorizontalContentAlignment" Value="Left" />
-            <Setter Property="Background" Value="#F111"/>
+            <Setter Property="Background" Value="#F333"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Icon" Value=""/>
+            
         </Style>
         <Style TargetType="Label">
             <Setter Property="Foreground" Value="White" />
