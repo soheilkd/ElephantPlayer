@@ -37,7 +37,7 @@
         <EventTrigger RoutedEvent="MouseDown">
             <EventTrigger.Actions>
                 <BeginStoryboard>
-                    <Storyboard x:Name="Be2">
+                    <Storyboard>
                         <ThicknessAnimation Storyboard.TargetName="MainEllipse" Storyboard.TargetProperty="Margin" From="{Binding ElementName=MainEllipse, Path=Margin}" To="-1"
                                             AccelerationRatio="0.6" DecelerationRatio="0.4" SpeedRatio="6"/>
                     </Storyboard>

@@ -49,8 +49,6 @@ namespace Player.Controls
          public void UXMouseDown(object sender, MouseButtonEventArgs e)
         {
             //MainEllipse.Background = MainIcon.Foreground;
-            Be2.Begin();
-            e.Handled = AutoHandle;
         }
         public void UXMouseUp(object sender, MouseButtonEventArgs e)
         {

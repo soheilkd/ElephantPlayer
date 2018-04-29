@@ -61,42 +61,12 @@ namespace Player.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        public static System.Drawing.Bitmap MusicArt {
-            get {
-                object obj = ResourceManager.GetObject("MusicArt", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        public static System.Drawing.Bitmap NetArt {
-            get {
-                object obj = ResourceManager.GetObject("NetArt", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Icon similar to (Icon).
         /// </summary>
         public static System.Drawing.Icon PlayerIcon {
             get {
                 object obj = ResourceManager.GetObject("PlayerIcon", resourceCulture);
                 return ((System.Drawing.Icon)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        public static System.Drawing.Bitmap VideoArt {
-            get {
-                object obj = ResourceManager.GetObject("VideoArt", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
             }
         }
     }

@@ -54,13 +54,18 @@
         </Popup>
         <Grid Height="80"  VerticalAlignment="Bottom" x:Name="LowContentGrid">
             <Image x:Name="MiniArtworkImage" Height="55" Width="55" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="3,3,0,0"/>
-            <Label x:Name="TitleLabel" Content="{DynamicResource Res_Title}" Foreground="White" Margin="60, 0, 0, 0" Height="30" VerticalAlignment="Top"/>
+            <Label x:Name="TitleLabel" Content="Title" Foreground="White" Margin="60, 0, 0, 0" Height="30" VerticalAlignment="Top"/>
             <player:MaterialButton x:Name="PreviousButton" Icon="skip_previous" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="80,0,0,25" Click="PreviousButton_Click" />
             <player:MaterialButton x:Name="NextButton" Icon="skip_next" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="165,0,0,25" Click="NextButton_Click" />
             <player:MaterialButton x:Name="PlayPauseButton" Icon="play_arrow" Click="PlayPauseButton_Click" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="120,0,0,24" Height="28" Width="28"/>
             <player:MaterialButton x:Name="VisionButton" Icon="ondemand_video" Click="VisionButton_Click" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,5,34" Height="34" Width="34" EllipseType="Rectular"/>
-            <player:MaterialButton x:Name="PlayModeButton" Icon="repeat" Click="PlayModeButton_Click" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,55,25" />
-            <player:MaterialButton x:Name="AddUrlButton" Icon="add"  HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,100,25" />
+
+            <player:MaterialButton x:Name="VolumeButton" Icon="volume_3" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0, 0, 55, 25" MouseDown="VolumeButton_MouseDown"/>
+            <Popup x:Name="VolumePopup" PlacementTarget="{Binding ElementName=VolumeButton}" Placement="Top" AllowsTransparency="True" PopupAnimation="Fade">
+                <Label x:Name="VolumeLabel" Content="100" HorizontalAlignment="Right" Foreground="White"/>
+            </Popup>
+            <player:MaterialButton x:Name="PlayModeButton" Icon="repeat" Click="PlayModeButton_Click" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,100,25" />
+            <player:MaterialButton x:Name="AddUrlButton" Icon="add"  HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,145,25" />
         </Grid>
 
         <Slider x:Name="PositionSlider"  ValueChanged="Position_Changed" PreviewMouseDown="Position_MouseDown"  
@@ -204,7 +209,6 @@
             <Setter Property="VerticalAlignment" Value="Bottom"/>
             <Setter Property="Width" Value="40" />
         </Style>
-        <sys:String x:Key="Res_Title">Player</sys:String>
         <player:IconType x:Key="Button_PlayIcon">play_arrow</player:IconType>
         <sys:Double x:Key="Height">400</sys:Double>
         <sys:Double x:Key="Width">400</sys:Double>

@@ -25,23 +25,6 @@ using Forms = System.Windows.Forms;
 
 namespace Player.User
 {
-    public static class UI
-    {
-        public static IEnumerable<T> FindVisualChildren<T>(DependencyObject depObj) where T : DependencyObject
-        {
-            if (depObj != null)
-            {
-                for (int i = 0; i < VisualTreeHelper.GetChildrenCount(depObj); i++)
-                {
-                    DependencyObject child = VisualTreeHelper.GetChild(depObj, i);
-                    if (child != null && child is T)
-                        yield return (T)child;
-                    foreach (T childOfChild in FindVisualChildren<T>(child))
-                        yield return childOfChild;
-                }
-            }
-        }
-    }
     public static class Screen
     {
         public static double Width => SystemParameters.PrimaryScreenWidth;
@@ -86,7 +69,7 @@ namespace Player.User
         }
         public Keyboard() { }
         ~Keyboard() => _events.Dispose();
-        
+
     }
 }
 
@@ -111,7 +94,7 @@ namespace Player.Events
         InterfaceUpdate, MediaUpdate, Crash, PopupRequest,
         ArtworkClick, SomethingHappened, MediaRemoved, MediaMoved
     }
-    
+
     public class InfoExchangeArgs
     {
         public InfoType Type { get; set; }
@@ -119,7 +102,7 @@ namespace Player.Events
         public object[] ObjectArray { get; set; }
         public int Integer { get; set; }
         public Media Media { get; set; }
-        
+
         public InfoExchangeArgs() { }
         public InfoExchangeArgs(InfoType type) => Type = type;
         public InfoExchangeArgs(int integer)
@@ -134,32 +117,38 @@ namespace Player
 {
     public enum PlayPara { None, Next, Prev }
     public enum PlayMode { Shuffle, RepeatOne, RepeatAll, Queue }
-    public enum MediaType { Music, Video, Online, NotMedia }
+    public enum MediaType { Music, Video, File, OnlineMusic, OnlineVideo, OnlineFile, None }
 
     public partial class App : Application, InstanceManager.ISingleInstanceApp
     {
         public static event EventHandler<InstanceEventArgs> NewInstanceRequested;
 
-        public const string LauncherIdentifier = "ElephantPlayerBySoheilKD_CERTID8585";
         public static string ExePath = Environment.GetCommandLineArgs()[0];
         public static string Path = ExePath.Substring(0, ExePath.LastIndexOf("\\") + 1);
         public static string LibraryPath = $"{Path}Library.dll";
-        
+
+        public static Preferences Preferences = Preferences.Load();
+        public static BitmapImage MusicArt;
+        public static BitmapImage VideoArt;
+        public static BitmapImage NetArt;
         [STAThread]
         public static void Main(string[] args)
         {
+        ServicePointManager.DefaultConnectionLimit = 10;
             AppDomain.CurrentDomain.UnhandledException += (sender, e) =>
             {
                 MessageBox.Show($"Unhandled {e.ExceptionObject}\r\n" +
                     $"Terminating: {e.IsTerminating}", "Exception", MessageBoxButton.OK, MessageBoxImage.Error);
-                if (e.IsTerminating)
-                    System.Diagnostics.Process.GetCurrentProcess().Kill();
+                System.Diagnostics.Process.GetCurrentProcess().Kill();
             };
-            if (InstanceManager.Instance<App>.InitializeAsFirstInstance(LauncherIdentifier))
+            if (InstanceManager.Instance<App>.InitializeAsFirstInstance("ElepPlayer_CRsoheilkd"))
             {
                 var application = new App();
-
                 application.InitializeComponent();
+
+                MusicArt = ConvertTo.Bitmap(new Controls.MaterialIcon() { Icon = Controls.IconType.musnote, Foreground = Brushes.White, Width = 60, Height = 60 });
+                VideoArt = ConvertTo.Bitmap(new Controls.MaterialIcon() { Icon = Controls.IconType.ondemand_video, Foreground = Brushes.White, Width = 60, Height = 60 });
+                NetArt = ConvertTo.Bitmap(new Controls.MaterialIcon() { Icon = Controls.IconType.cloud, Foreground = Brushes.White, Width = 60, Height = 60 });
 
                 application.Run();
                 InstanceManager.Instance<App>.Cleanup();
@@ -172,16 +161,21 @@ namespace Player
             return true;
         }
     }
-    
+
     public class MediaManager
     {
         public MediaManager() { }
-        public int Count => AllMedias.Count;
+        private int currentlyPlayingIndex;
+        private int CurrentQueuePosition = -1;
         private static string[] SupportedMusics = "mp3;wma;aac;m4a".Split(';');
         private static string[] SupportedVideos = "mp4;mpg;mkv;wmv;mov;avi;m4v;ts;wav;mpeg;webm".Split(';');
+        private static string[] SupportedFiles = "zip;rar;bin;dat".Split(';');
+        private List<Media> AllMedias = new List<Media>();
+        private List<int> PlayQueue = new List<int>();
+        private Random Shuffle = new Random(2);
+        public int Count => AllMedias.Count;
         public Media CurrentlyPlaying => AllMedias[CurrentlyPlayingIndex];
         public event EventHandler<InfoExchangeArgs> Change;
-        private List<Media> AllMedias = new List<Media>();
         public Preferences Preferences { private get; set; } = Preferences.Load();
         public Media this[int index]
         {
@@ -197,18 +191,7 @@ namespace Player
                 });
             }
         }
-        private List<int> PlayQueue = new List<int>();
-        private Random Randomness = new Random(2);
-        public static MediaType GetType(string FileName)
-        {
-            if (FileName.StartsWith("http")) return MediaType.Online;
-            string ext = GetExtension(FileName);
-            if (SupportedMusics.Contains(ext)) return MediaType.Music;
-            else if (SupportedVideos.Contains(ext)) return MediaType.Video;
-            return MediaType.NotMedia;
-        }
         public PlayMode ActivePlayMode { get; set; } = PlayMode.RepeatAll;
-        private int currentlyPlayingIndex;
         public int CurrentlyPlayingIndex
         {
             get => currentlyPlayingIndex;
@@ -220,31 +203,30 @@ namespace Player
                 currentlyPlayingIndex = value;
             }
         }
-        private Random Shuffle = new Random(2);
-        private int CurrentQueuePosition = 0;
+
+        public static MediaType GetType(string FileName, bool checkOnline = false)
+        {
+            if (checkOnline && FileName.StartsWith("http"))
+            {
+                switch (GetType(FileName))
+                {
+                    case MediaType.Music: return MediaType.OnlineMusic;
+                    case MediaType.Video: return MediaType.OnlineVideo;
+                    case MediaType.File: return MediaType.OnlineFile;
+                    default: return MediaType.None;
+                }
+            }
+            string ext = GetExtension(FileName);
+            if (SupportedMusics.Contains(ext)) return MediaType.Music;
+            else if (SupportedVideos.Contains(ext)) return MediaType.Video;
+            else if (SupportedFiles.Contains(ext)) return MediaType.File;
+            return MediaType.None;
+        }
 
         public void Add(Uri uri, bool requestPlay = false)
         {
-            var request = (HttpWebRequest)WebRequest.Create(uri);
-            request.AddRange(0, 10);
-            try
-            {
-                request.Timeout = 5000;
-                var response = request.GetResponse();
-
-                if (!response.ContentType.EndsWith("octet-stream") && !response.ContentType.StartsWith("video") && !response.ContentType.StartsWith("app"))
-                {
-                    MessageBox.Show("Requested Uri is not a valid octet-stream", "NET", MessageBoxButton.OK, MessageBoxImage.Error);
-                    return;
-                }
-                response.Dispose();
-                response = null;
-            }
-            catch (WebException e)
-            {
-                MessageBox.Show(e.Message);
+            if (!Check(uri))
                 return;
-            }
             Add(new Media(uri.AbsoluteUri));
             if (requestPlay)
             {
@@ -287,7 +269,7 @@ namespace Player
         public void Add(string[] paths, bool requestPlay = false)
         {
             for (int i = 0; i < paths.Length; i++)
-                    Add(paths[i], true);
+                Add(paths[i], true);
         }
         public void Add(Media media)
         {
@@ -481,8 +463,31 @@ namespace Player
 
         public void Set(Media oldMedia, Media newMedia) => this[Find(oldMedia)] = newMedia;
 
-        private static bool Check(string path) => File.Exists(path) && GetType(path) != MediaType.NotMedia;
-        private static bool Check(Media media) => File.Exists(media.Path) && media.MediaType != MediaType.NotMedia;
+        private static bool Check(string path) => File.Exists(path) && GetType(path) != MediaType.None;
+        private static bool Check(Media media) => File.Exists(media.Path) && media.MediaType != MediaType.None;
+        private static bool Check(Uri uri)
+        {
+            var request = (HttpWebRequest)WebRequest.Create(uri);
+            request.AddRange(0, 10);
+            try
+            {
+                request.Timeout = 5000;
+                var response = request.GetResponse();
+                if (!response.ContentType.EndsWith("octet-stream") && !response.ContentType.StartsWith("video") && !response.ContentType.StartsWith("app"))
+                {
+                    MessageBox.Show("Requested Uri is not a valid octet-stream", ".NET", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return false;
+                }
+                response.Dispose();
+                response = null;
+            }
+            catch (WebException e)
+            {
+                MessageBox.Show(e.Message);
+                return false;
+            }
+            return true;
+        }
     }
 
 
@@ -496,9 +501,7 @@ namespace Player
         public Point LastLoc { get; set; } = new Point(20, 20);
 
         public bool VisionOrientation { get; set; } = true;
-        public bool VolumeSetter { get; set; } = false;
         public bool LibraryValidation { get; set; } = false;
-        public bool ManualGarbageCollector { get; set; } = false;
         public int MouseOverTimeout { get; set; } = 5000;
         public static Preferences Load()
         {
@@ -511,13 +514,11 @@ namespace Player
                 (new BinaryFormatter()).Serialize(stream, this);
         }
     }
-    
+
     [Serializable]
-    public class Media : IDisposable
+    public class Media
     {
         public Media() { }
-        public bool IsMedia => MediaType != MediaType.NotMedia;
-        public bool IsVideo => MediaType == MediaType.Video;
         public string Name { get; set; }
         public string Artist { get; set; }
         public string Title { get; set; }
@@ -525,34 +526,17 @@ namespace Player
         public string Path { get; set; }
         public int PlayCount;
         public bool IsOffline;
+        public MediaType MediaType;
         [NonSerialized] public bool IsPlaying;
         [NonSerialized] public string Lyrics;
         [NonSerialized] public bool IsLoaded;
         [NonSerialized] public long Duration;
         [NonSerialized] public BitmapSource Artwork;
         [NonSerialized] public bool IsRemoved;
-        
-        public MediaType MediaType;
-        
-        public bool Contains(string para)
-        {
-            return Name.ToLower().Contains(para.ToLower())
-                || Title.ToLower().Contains(para.ToLower())
-                || Album.ToLower().Contains(para.ToLower())
-                || Artist.ToLower().Contains(para.ToLower());
-        }
-        public override string ToString() => Path;
-        public static readonly Media Empty = new Media()
-        {
-            Artist = "",
-            Album = "",
-            Artwork = null,
-            disposedValue = false,
-            MediaType = MediaType.NotMedia,
-            Name = "",
-            Path = "",
-            Title = ""
-        };
+        public bool IsMedia => MediaType != MediaType.None;
+        public bool IsVideo => MediaType == MediaType.Video || MediaType == MediaType.OnlineVideo;
+        public bool Exists => File.Exists(Path);
+
         public Media(string path)
         {
             Uri uri = new Uri(path);
@@ -565,11 +549,11 @@ namespace Player
                         {
                             Name = path.Substring(path.LastIndexOf("\\") + 1);
                             Path = path;
-                            Artist = t.Tag.FirstPerformer;
+                            Artist = t.Tag.FirstPerformer ?? path.Substring(0, path.LastIndexOf("\\"));
                             Title = t.Tag.Title ?? Name.Substring(0, Name.LastIndexOf("."));
-                            Album = t.Tag.Album;
+                            Album = t.Tag.Album ?? " ";
                             Duration = t.Length;
-                            Artwork = t.Tag.Pictures.Length >= 1 ? ConvertTo.BitmapSource(t.Tag.Pictures[0]) : ConvertTo.BitmapSource(Properties.Resources.MusicArt);
+                            Artwork = t.Tag.Pictures.Length >= 1 ? ConvertTo.BitmapSource(t.Tag.Pictures[0]) : App.MusicArt;
                             MediaType = MediaType.Music;
                             Lyrics = t.Tag.Lyrics ?? " ";
                             IsLoaded = true;
@@ -580,13 +564,14 @@ namespace Player
                         Title = Name;
                         Path = path;
                         Artist = path.Substring(0, path.LastIndexOf("\\"));
+                        Artist = Artist.Substring(0, Artist.LastIndexOf("\\") + 1);
                         Album = "Video";
                         Duration = 1;
-                        Artwork = ConvertTo.BitmapSource(Properties.Resources.VideoArt);
+                        Artwork = App.VideoArt;
                         MediaType = MediaType.Video;
                         IsLoaded = true;
                         break;
-                    case MediaType.NotMedia:
+                    case MediaType.None:
                         throw new IOException($"Given path is not valid media\r\nPath:{path}");
                     default: break;
                 }
@@ -599,46 +584,11 @@ namespace Player
                 Artist = uri.Host;
                 Album = "Cloud";
                 Duration = 1;
-                Artwork = ConvertTo.BitmapSource(Properties.Resources.NetArt);
-                MediaType = MediaType.Online;
+                Artwork = App.NetArt;
+                MediaType = MediaManager.GetType(path, true);
                 IsLoaded = true;
             }
         }
-        public override bool Equals(object obj) => Path == (obj as Media).Path;
-        public bool Equals(Media obj) => Path == obj.Path;
-        public override int GetHashCode() => base.GetHashCode();
-        #region IDisposable Support
-        private bool disposedValue = false; // To detect redundant calls
-        
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!disposedValue)
-            {
-                if (disposing)
-                {
-                    // TODO: dispose managed state (managed objects).
-                    Album = String.Empty;
-                    Artist = String.Empty;
-                    Name = String.Empty;
-                    Path = String.Empty;
-                    Title = String.Empty;
-                    Lyrics = String.Empty;
-                    Artwork = null;
-                    MediaType = 0;
-                }
-                disposedValue = true;
-            }
-        }
-        
-        ~Media() => Dispose(false);
-        
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        #endregion 
     }
 
     [Serializable]
@@ -687,7 +637,7 @@ namespace Player
     {
         public static BitmapImage Bitmap<T>(T element) where T : System.Windows.Controls.Control
         {
-            element.BeginInit();
+            //element.BeginInit();
             element.UpdateLayout();
 
             PngBitmapEncoder encoder = new PngBitmapEncoder();
@@ -757,94 +707,48 @@ namespace Player
 
 namespace Player.Taskbar
 {
+    public class Command : ICommand
+    {
+        #pragma warning disable CS0067
+        public event EventHandler CanExecuteChanged;
+        #pragma warning restore CS0067
+        public event EventHandler Raised;
+        public bool CanExecute(object parameter) => true;
+        public void Execute(object parameter) => Raised?.Invoke(this, null);
+    }
     public class Thumb
     {
-        public static class Commands
-        {
-#pragma warning disable CS0067
-            public class Play : ICommand
-            {
-                public event EventHandler CanExecuteChanged;
-                public event EventHandler Raised;
-                public bool CanExecute(object parameter) => true;
-                public void Execute(object parameter) => Raised?.Invoke(this, null);
-            }
-            public class Pause : ICommand
-            {
-                public event EventHandler CanExecuteChanged;
-                public event EventHandler Raised;
-                public bool CanExecute(object parameter) => true;
-                public void Execute(object parameter) => Raised?.Invoke(this, null);
-            }
-            public class Previous : ICommand
-            {
-                public event EventHandler CanExecuteChanged;
-                public event EventHandler Raised;
-                public bool CanExecute(object parameter) => true;
-                public void Execute(object parameter) => Raised?.Invoke(this, null);
-            }
-            public class Next : ICommand
-            {
-                public event EventHandler CanExecuteChanged;
-                public event EventHandler Raised;
-                public bool CanExecute(object parameter) => true;
-                public void Execute(object parameter) => Raised?.Invoke(this, null);
-            }
-#pragma warning restore CS0067
-        }
         public event EventHandler PlayPressed;
         public event EventHandler PausePressed;
         public event EventHandler PrevPressed;
         public event EventHandler NextPressed;
         public ThumbButtonInfo PlayThumb = new ThumbButtonInfo()
         {
-            IsInteractive = true,
-            IsEnabled = true,
-            IsBackgroundVisible = true,
-            DismissWhenClicked = false,
-            CommandParameter = "",
-            Visibility = Visibility.Visible,
             Description = "Play",
             ImageSource = ConvertTo.Bitmap(new Controls.MaterialIcon() { Icon = Controls.IconType.play_arrow, Foreground = Brushes.White })
         };
         public ThumbButtonInfo PauseThumb = new ThumbButtonInfo()
         {
-            IsInteractive = true,
-            IsEnabled = true,
-            IsBackgroundVisible = true,
-            DismissWhenClicked = false,
-            CommandParameter = "",
-            Visibility = Visibility.Visible,
             Description = "Pause",
             ImageSource = ConvertTo.Bitmap(new Controls.MaterialIcon() { Icon = Controls.IconType.pause, Foreground = Brushes.White })
         };
         public ThumbButtonInfo PrevThumb = new ThumbButtonInfo()
         {
-            IsInteractive = true,
-            IsEnabled = true,
-            IsBackgroundVisible = true,
             DismissWhenClicked = true,
-            CommandParameter = "",
-            Visibility = Visibility.Visible,
             Description = "Previous",
             ImageSource = ConvertTo.Bitmap(new Controls.MaterialIcon() { Icon = Controls.IconType.skip_previous, Foreground = Brushes.White })
         };
         public ThumbButtonInfo NextThumb = new ThumbButtonInfo()
         {
-            IsInteractive = true,
-            IsEnabled = true,
-            IsBackgroundVisible = true,
             DismissWhenClicked = true,
-            CommandParameter = "",
-            Visibility = Visibility.Visible,
             Description = "Next",
             ImageSource = ConvertTo.Bitmap(new Controls.MaterialIcon() { Icon = Controls.IconType.skip_next, Foreground = Brushes.White })
         };
         private TaskbarItemInfo TaskbarItem = new TaskbarItemInfo();
-        private Commands.Play PlayHandler = new Commands.Play();
-        private Commands.Pause PauseHandler = new Commands.Pause();
-        private Commands.Previous PrevHandler = new Commands.Previous();
-        private Commands.Next NextHandler = new Commands.Next();
+        private Command PlayHandler = new Command();
+        private Command PauseHandler = new Command();
+        private Command PrevHandler = new Command();
+        private Command NextHandler = new Command();
         public TaskbarItemInfo Info => TaskbarItem;
         public Thumb()
         {
@@ -858,7 +762,7 @@ namespace Player.Taskbar
             NextHandler.Raised += (sender, e) => NextPressed?.Invoke(sender, e);
             TaskbarItem.ThumbButtonInfos.Clear();
             TaskbarItem.ThumbButtonInfos.Add(PrevThumb);
-            TaskbarItem.ThumbButtonInfos.Add(PauseThumb);
+            TaskbarItem.ThumbButtonInfos.Add(PlayThumb);
             TaskbarItem.ThumbButtonInfos.Add(NextThumb);
         }
         public void Refresh(bool IsPlaying = false) => TaskbarItem.ThumbButtonInfos[1] = IsPlaying ? PauseThumb : PlayThumb;
@@ -866,7 +770,6 @@ namespace Player.Taskbar
         public void SetProgressValue(double value) => TaskbarItem.ProgressValue = value;
     }
 }
-
 
 namespace Player.InstanceManager
 {

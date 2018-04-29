@@ -10,12 +10,10 @@ using System.Windows.Input;
 using System.Windows.Media.Animation;
 using Forms = System.Windows.Forms;
 using Routed = System.Windows.RoutedPropertyChangedEventArgs<double>;
-
 namespace Player
 {
     public partial class MainUI : Window
     {
-        private Preferences P = Preferences.Load();
         private MediaManager Manager = new MediaManager();
         private List<MediaView> MediaViews = new List<MediaView>();
         private MassiveLibrary Library = new MassiveLibrary();
@@ -27,29 +25,22 @@ namespace Player
         private Taskbar.Thumb Thumb = new Taskbar.Thumb();
         private bool IsUserSeeking = false;
         private bool[] IsVisionOn = new bool[] { false, false };
-
-        private new string Title
-        {
-            get => (string)Resources["Res_Title"];
-            set => Resources["Res_Title"] = value;
-        }
         
         public MainUI()
         {
             InitializeComponent();
-            System.Net.ServicePointManager.DefaultConnectionLimit = 10;
             Manager.Change += Manager_Change;
-            App.NewInstanceRequested += (f, e) => Manager.Add(e.Args);
+            App.NewInstanceRequested += (_, e) => Manager.Add(e.Args);
 
-            Pref_DoubleValid.IsChecked = P.LibraryValidation;
-
+            Pref_DoubleValid.IsChecked = App.Preferences.LibraryValidation;
             var lib = MassiveLibrary.Load();
             for (int i = 0; i < lib.Medias.Length; i++)
                 Manager.Add(lib.Medias[i]);
-            Width = P.LastSize.Width;
-            Height = P.LastSize.Height;
-            Left = P.LastLoc.X;
-            Top = P.LastLoc.Y;
+            Width = App.Preferences.LastSize.Width;
+            Height = App.Preferences.LastSize.Height;
+            Left = App.Preferences.LastLoc.X;
+            Top = App.Preferences.LastLoc.Y;
+            Player.Volume = 1;
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -93,7 +84,7 @@ namespace Player
                     Player.Cursor = Cursors.None;
                 });
             };
-            switch ((PlayMode)P.PlayMode)
+            switch ((PlayMode)App.Preferences.PlayMode)
             {
                 case PlayMode.Shuffle: PlayModeButton.Icon = IconType.shuffle; break;
                 case PlayMode.RepeatOne: PlayModeButton.Icon = IconType.repeat_one; break;
@@ -106,17 +97,9 @@ namespace Player
         }
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            P.LastSize = new Size()
-            {
-                Width = Width,
-                Height = Height
-            };
-            P.LastLoc = new Point()
-            {
-                X = Left,
-                Y = Top
-            };
-            P.Save();
+            App.Preferences.LastSize = new Size(Width, Height);
+            App.Preferences.LastLoc = new Point(Left, Top);
+            App.Preferences.Save();
             Manager.Close();
             Application.Current.Shutdown();
         }
@@ -177,12 +160,9 @@ namespace Player
                 case InfoType.MediaRemoved:
                     int index = MediaViews.FindIndex(item => item.MediaIndex == e.Integer);
                     MediaViews.RemoveAt(index);
-
                     QueueListView.Items.Clear();
                     for (int i = 0; i < MediaViews.Count; i++)
-                    {
                         QueueListView.Items.Add(MediaViews[i]);
-                    }
                     break;
                 case InfoType.MediaRequested:
                     Play(Manager.Next(e.Integer));
@@ -226,16 +206,10 @@ namespace Player
                         await Task.Delay(200);
                         break;
                     case Forms::Keys.Up:
-                        if (Player.Volume >= 1)
-                            break;
-                        Player.Volume += 0.01;
-                        await Task.Delay(50);
+                        VolumeButton_MouseDown(this, new MouseButtonEventArgs(Mouse.PrimaryDevice, 1, MouseButton.Left));
                         break;
                     case Forms::Keys.Down:
-                        if (Player.Volume <= 0)
-                            break;
-                        Player.Volume -= 0.01;
-                        await Task.Delay(50);
+                        VolumeButton_MouseDown(this, new MouseButtonEventArgs(Mouse.PrimaryDevice, 1, MouseButton.Right));
                         break;
                     default: break;
                 }
@@ -347,7 +321,7 @@ namespace Player
                 default:
                     break;
             }
-            P.PlayMode = (int)Manager.ActivePlayMode;
+            App.Preferences.PlayMode = (int)Manager.ActivePlayMode;
         }
 
         private string CastTime(TimeSpan time)
@@ -360,23 +334,36 @@ namespace Player
         {
             if (!IsLoaded)
                 return;
-            P.LibraryValidation = Pref_DoubleValid.IsChecked.Value;
-            P.Save();
+            App.Preferences.LibraryValidation = Pref_DoubleValid.IsChecked.Value;
+            App.Preferences.Save();
         }
         private void Play(Media media)
         {
+            if (!media.Exists)
+            {
+                var res = MessageBox.Show("Couldn't reach target, remove?", "IOException", MessageBoxButton.YesNo, MessageBoxImage.Error);
+                if (res == MessageBoxResult.Yes)
+                    Manager.Remove(media);
+                return;
+            }
             PositionSlider.Value = 0;
             PlayPauseButton.Icon = IconType.pause;
             Player.Source = new Uri(media.Path);
             Player.Play();
             MiniArtworkImage.Source = media.Artwork;
-            Title = media.Title;
+            TitleLabel.Content = media.Title;
             for (int i = 0; i < MediaViews.Count; i++)
                 MediaViews[i].IsPlaying = false;
             int index = MediaViews.FindIndex(item => item.MediaIndex == Manager.CurrentlyPlayingIndex);
             MediaViews[index].IsPlaying = true;
             VisionButton.Visibility = MediaManager.GetType(media.Path) == MediaType.Video ? Visibility.Visible : Visibility.Collapsed;
-            if (IsVisionOn[0] && media.MediaType == MediaType.Music) VisionButton_Click(this, null);
+            if (IsVisionOn[0] && media.MediaType == MediaType.Music)
+            {
+                VisionButton_Click(this, null);
+                OrinateFullVision(false);
+                Topmost = false;
+                WindowStyle = WindowStyle.SingleBorderWindow;
+            }
         }
         private void OrinateFullVision(bool Enabled)
         {
@@ -385,6 +372,7 @@ namespace Player
             if (Enabled && !IsVisionOn[0])
                 BeginStoryboard(Resources["VisionOnBoard"] as Storyboard);
         }
+
         private void ChangePosition(double ms, bool Seek = false)
         {
             IsUserSeeking = true;
@@ -438,5 +426,39 @@ namespace Player
         }
         private void Position_RepeatBackwardClick(object sender, RoutedEventArgs e) => PositionSlider.Value -= PositionSlider.LargeChange;
         private void Position_RepeatForwardClick(object sender, RoutedEventArgs e) => PositionSlider.Value += PositionSlider.LargeChange;
+
+        private async void VolumeButton_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            VolumePopup.IsOpen = true;
+            while (e.LeftButton == MouseButtonState.Pressed)
+            {
+                if (Player.Volume < 1)
+                    Player.Volume += 0.01;
+                VolumeLabel.Content = (Player.Volume * 100).ToInt();
+                switch (Player.Volume)
+                {
+                    case double n when (n < 0.1): VolumeButton.Icon = IconType.volume_0; break;
+                    case double n when (n < 0.4): VolumeButton.Icon = IconType.volume_1; break;
+                    case double n when (n < 0.8): VolumeButton.Icon = IconType.volume_2; break;
+                    default: VolumeButton.Icon = IconType.volume_3; break;
+                }
+                await Task.Delay(50);
+            }
+            while(e.RightButton == MouseButtonState.Pressed)
+            {
+                if (Player.Volume > 0)
+                    Player.Volume -= 0.01;
+                VolumeLabel.Content = (Player.Volume * 100).ToInt();
+                switch (Player.Volume)
+                {
+                    case double n when (n < 0.1): VolumeButton.Icon = IconType.volume_0; break;
+                    case double n when (n < 0.4): VolumeButton.Icon = IconType.volume_1; break;
+                    case double n when (n < 0.8): VolumeButton.Icon = IconType.volume_2; break;
+                    default: VolumeButton.Icon = IconType.volume_3; break;
+                }
+                await Task.Delay(50);
+            }
+            VolumePopup.IsOpen = false;
+        }
     }
 }

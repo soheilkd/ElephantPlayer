@@ -13,6 +13,26 @@ namespace Player
 {
     public partial class MediaView : UserControl
     {
+        static MenuItem[] OnlineMenuItems = new MenuItem[]
+        {
+                    GetMenu("Download"),
+                    GetMenu("Play After"),
+                    GetMenu("Repeat", "2 times", "3 times", "5 times", "10 times", "Forever"),
+                    GetMenu("Remove"),
+                    GetMenu("Properties")
+        };
+        static MenuItem[] OfflineMediaMenu = new MenuItem[]
+            {
+                     GetMenu("Play After"),
+                     GetMenu("Repeat", "2 times", "3 times", "5 times", "10 times", "Forever"),
+                     GetMenu("Remove"),
+                     GetMenu("Delete"),
+                     GetMenu("Move...", "To Default Loc", "Browse"),
+                     GetMenu("Copy...", "To Default Loc", "Browse"),
+                     GetMenu("Open Location"),
+                     GetMenu("Properties")
+            };
+
         public event EventHandler<InfoExchangeArgs> DoubleClicked;
         public event EventHandler<InfoExchangeArgs> PlayClicked;
 
@@ -50,6 +70,10 @@ namespace Player
         public MediaView(int index, string main, string sub, MediaType type = MediaType.Music)
         {
             InitializeComponent();
+            Revoke(index, main, sub, type);
+        }
+        public void Revoke(int index, string main, string sub, MediaType type = MediaType.Music)
+        {
             MainLabel.Content = main;
             SubLabel.Content = sub;
             MediaIndex = index;
@@ -61,7 +85,9 @@ namespace Player
                 case MediaType.Video:
                     DefaultIcon = IconType.ondemand_video;
                     break;
-                case MediaType.Online:
+                case MediaType.OnlineMusic:
+                case MediaType.OnlineVideo:
+                case MediaType.OnlineFile:
                     DefaultIcon = IconType.cloud;
                     break;
                 default:
@@ -70,41 +96,11 @@ namespace Player
             }
             MainIcon.Icon = DefaultIcon;
             Manip = new string[] { main, sub };
-            if (type != MediaType.Online)
+            if ((int)type < 3)
                 DownloadButton.Visibility = Visibility.Hidden;
         }
-        public void Revoke(int index, string main, string sub, MediaType type = MediaType.Music)
-        {
-            MediaIndex = index;
-            MainLabel.Content = main;
-            SubLabel.Content = sub;
-            switch (type)
-            {
-                case MediaType.Music:
-                    MainIcon.Icon = IconType.musnote;
-                    break;
-                case MediaType.Video:
-                    MainIcon.Icon = IconType.ondemand_video;
-                    break;
-                case MediaType.Online:
-                    MainIcon.Icon = IconType.cloud;
-                    break;
-                default: break;
-            }
-            DefaultIcon = MainIcon.Icon;
-            Manip = new string[] { main, sub };
-        }
-        public void Revoke(InfoExchangeArgs e)
-        {
-            Revoke(e.Integer, e.Media.Title, e.Media.Artist, e.Media.MediaType);
-        }
-        public long MediaLength { get; set; }
-        public MediaView(Preferences pref)
-        {
-            InitializeComponent();
-            IsPlaying = false;
-            Settings = pref;
-        }
+
+        public void Revoke(InfoExchangeArgs e) => Revoke(e.Integer, e.Media.Title, e.Media.Artist, e.Media.MediaType);
         public void UserControl_Loaded(object sender, RoutedEventArgs e)
         {
             PlayButton.Opacity = 0;
@@ -113,14 +109,6 @@ namespace Player
             //Load SubContextMenuItems
             if (DefaultIcon == IconType.cloud)
             {
-                MenuItem[] OnlineMenuItems = new MenuItem[]
-                {
-                    GetMenu("Download"),
-                    GetMenu("Play After"),
-                    GetMenu("Repeat", "2 times", "3 times", "5 times", "10 times", "Forever"),
-                    GetMenu("Remove"),
-                    GetMenu("Properties")
-                };
                 OnlineMenuItems[0].Click += delegate { DownloadButton_Click(this, null); };
                 OnlineMenuItems[1].Click += delegate { PlayAfterRequested?.Invoke(this, new InfoExchangeArgs(MediaIndex)); };
                 OnlineMenuItems[2].Click += delegate { };
@@ -130,17 +118,6 @@ namespace Player
             }
             else
             {
-                MenuItem[] OfflineMediaMenu = new MenuItem[]
-                    {
-                     GetMenu("Play After"),
-                     GetMenu("Repeat", "2 times", "3 times", "5 times", "10 times", "Forever"),
-                     GetMenu("Remove"),
-                     GetMenu("Delete"),
-                     GetMenu("Move...", "To Default Loc", "Browse"),
-                     GetMenu("Copy...", "To Default Loc", "Browse"),
-                     GetMenu("Open Location"),
-                     GetMenu("Properties")
-                    };
                 OfflineMediaMenu[0].Click += delegate { PlayAfterRequested?.Invoke(this, new InfoExchangeArgs(MediaIndex)); };
                 OfflineMediaMenu[1].Click += delegate { };
                 OfflineMediaMenu[2].Click += delegate { RemoveRequested?.Invoke(this, new InfoExchangeArgs(MediaIndex)); };
@@ -152,6 +129,7 @@ namespace Player
                 ContextMenu = new ContextMenu() { ItemsSource = OfflineMediaMenu };
             }
         }
+
         private static MenuItem GetMenu(string header) => new MenuItem() { Header = header };
         private static MenuItem GetMenu(string header, params string[] subitems)
         {
@@ -160,15 +138,8 @@ namespace Player
                 output.Items.Add(new MenuItem() { Header = item });
             return output;
         }
-        private void OutputCanvas_MouseDoubleClick(object sender, MouseButtonEventArgs e) => DoubleClicked?.Invoke(this, new InfoExchangeArgs(MediaIndex));
 
-        private void Play_Click(object sender, EventArgs e) => PlayClicked?.Invoke(this, new InfoExchangeArgs(MediaIndex));
-        private void PlayAfter_Click(object sender, RoutedEventArgs e) => PlayAfterRequested?.Invoke(this, new InfoExchangeArgs(MediaIndex));
-        private void Remove_Click(object sender, RoutedEventArgs e) => RemoveRequested?.Invoke(this, new InfoExchangeArgs(MediaIndex));
-        private void Delete_Click(object sender, RoutedEventArgs e) => DeleteRequested?.Invoke(this, new InfoExchangeArgs(MediaIndex));
-        private void Location_Click(object sender, RoutedEventArgs e) => LocationRequested?.Invoke(this, new InfoExchangeArgs(MediaIndex));
-        private void Properties_Click(object sender, RoutedEventArgs e) => PropertiesRequested?.Invoke(this, new InfoExchangeArgs(MediaIndex));
-
+        
         WebClient Client = null;
         public void Download(Media media)
         {
@@ -240,5 +211,8 @@ namespace Player
             }
         }
         bool downloadCanceled = true;
+
+        private void Play_Click(object sender, EventArgs e) => PlayClicked?.Invoke(this, new InfoExchangeArgs(MediaIndex));
+        private void OutputCanvas_MouseDoubleClick(object sender, MouseButtonEventArgs e) => DoubleClicked?.Invoke(this, new InfoExchangeArgs(MediaIndex));
     }
 }

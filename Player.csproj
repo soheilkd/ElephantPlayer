@@ -267,15 +267,6 @@
     <Content Include="Libraries\Gma.System.MouseKeyHook.dll" />
     <Content Include="Libraries\Ionic.Zip.dll" />
     <Content Include="Libraries\taglib-sharp.dll" />
-    <Resource Include="Resources\MusicArt.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="Resources\NetArt.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="Resources\VideoArt.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Resource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
