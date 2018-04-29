@@ -275,7 +275,7 @@ namespace Player
         {
             int p = AllMedias.Count;
             if (!media.IsLoaded)
-                media = new Media(media.Path);
+                media = new Media(media.Path) { Length = media.Length };
             AllMedias.Add(media);
             Change?.Invoke(this, new InfoExchangeArgs()
             {
@@ -524,6 +524,7 @@ namespace Player
         public string Title { get; set; }
         public string Album { get; set; }
         public string Path { get; set; }
+        public int Length { get; set; }
         public int PlayCount;
         public bool IsOffline;
         public MediaType MediaType;
@@ -552,10 +553,10 @@ namespace Player
                             Artist = t.Tag.FirstPerformer ?? path.Substring(0, path.LastIndexOf("\\"));
                             Title = t.Tag.Title ?? Name.Substring(0, Name.LastIndexOf("."));
                             Album = t.Tag.Album ?? " ";
-                            Duration = t.Length;
                             Artwork = t.Tag.Pictures.Length >= 1 ? ConvertTo.BitmapSource(t.Tag.Pictures[0]) : App.MusicArt;
                             MediaType = MediaType.Music;
                             Lyrics = t.Tag.Lyrics ?? " ";
+                            Length = unchecked((int)t.Length);
                             IsLoaded = true;
                         }
                         break;
@@ -566,10 +567,10 @@ namespace Player
                         Artist = path.Substring(0, path.LastIndexOf("\\"));
                         Artist = Artist.Substring(0, Artist.LastIndexOf("\\") + 1);
                         Album = "Video";
-                        Duration = 1;
                         Artwork = App.VideoArt;
                         MediaType = MediaType.Video;
                         IsLoaded = true;
+                        Length = 1;
                         break;
                     case MediaType.None:
                         throw new IOException($"Given path is not valid media\r\nPath:{path}");

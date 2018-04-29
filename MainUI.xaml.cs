@@ -120,7 +120,7 @@ namespace Player
             switch (e.Type)
             {
                 case InfoType.NewMedia:
-                    MediaViews.Add(new MediaView(e.Integer, Manager[e.Integer].Title, Manager[e.Integer].Artist, Manager[e.Integer].MediaType));
+                    MediaViews.Add(new MediaView(e.Integer, Manager[e.Integer]));
                     var p = MediaViews.Count - 1;
                     QueueListView.Items.Add(MediaViews[p]);
                     MediaViews[p].DoubleClicked += (n, f) => Play(Manager.Next(f.Integer));
@@ -170,7 +170,7 @@ namespace Player
                 case InfoType.MediaUpdate:
                     for (int i = 0; i < MediaViews.Count; i++)
                         if (MediaViews[i].MediaIndex == e.Integer)
-                            MediaViews[i].Revoke(e.Integer, e.Media.Title, e.Media.Artist);
+                            MediaViews[i].Revoke(e.Integer, e.Media);
                     MediaViews[MediaViews.FindIndex(item => item.MediaIndex == e.Integer)].Revoke(e);
                     if (e.Integer == Manager.CurrentlyPlayingIndex)
                     {
@@ -324,12 +324,13 @@ namespace Player
             App.Preferences.PlayMode = (int)Manager.ActivePlayMode;
         }
 
-        private string CastTime(TimeSpan time)
+        public static string CastTime(TimeSpan time)
         {
             //Absolutely unreadable, btw just works...
             return $"{(time.TotalSeconds - (time.TotalSeconds % 60)).ToInt() / 60}:" +
                 $"{((time.TotalSeconds.ToInt() % 60).ToString().Length == 1 ? $"0{time.TotalSeconds.ToInt() % 60}" : (time.TotalSeconds.ToInt() % 60).ToString())}";
         }
+        public static string CastTime(int ms) => CastTime(new TimeSpan(0, 0, 0, 0, ms));
         private void AnySettingChanged(object sender, RoutedEventArgs e)
         {
             if (!IsLoaded)
@@ -354,8 +355,9 @@ namespace Player
             TitleLabel.Content = media.Title;
             for (int i = 0; i < MediaViews.Count; i++)
                 MediaViews[i].IsPlaying = false;
-            int index = MediaViews.FindIndex(item => item.MediaIndex == Manager.CurrentlyPlayingIndex);
-            MediaViews[index].IsPlaying = true;
+            //int index = MediaViews.FindIndex(item => item.MediaIndex == Manager.CurrentlyPlayingIndex);
+            //MediaViews[index].IsPlaying = true;
+            MediaViews.Find(item => item.MediaIndex == Manager.CurrentlyPlayingIndex).IsPlaying = true;
             VisionButton.Visibility = MediaManager.GetType(media.Path) == MediaType.Video ? Visibility.Visible : Visibility.Collapsed;
             if (IsVisionOn[0] && media.MediaType == MediaType.Music)
             {
@@ -396,6 +398,8 @@ namespace Player
                     PlayCountTimer.Stop();
                     PlayCountTimer.Interval = PositionSlider.Maximum / 3;
                     PlayCountTimer.Start();
+                    Manager.CurrentlyPlaying.Length = TimeSpan.TotalMilliseconds.ToInt();
+                    MediaViews.Find(item => item.MediaIndex == Manager.CurrentlyPlayingIndex).TimeLabel.Content = TimeLabel_Full.Content;
                 }
             PositionSlider.Value = Player.Position.TotalMilliseconds;
             TimeLabel_Current.Content = CastTime(Player.Position);

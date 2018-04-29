@@ -256,6 +256,8 @@
                                      From="{Binding Opacity, ElementName=PlayPauseButton}" To="0"/>
             <DoubleAnimation Storyboard.TargetName="VisionButton" 
                                      From="{Binding Opacity, ElementName=PlayPauseButton}" To="0"/>
+            <DoubleAnimation Storyboard.TargetName="VolumeButton" 
+                                     From="{Binding Opacity, ElementName=PlayPauseButton}" To="0"/>
         </Storyboard>
         <Storyboard x:Key="FullVisionOffBoard" FillBehavior="HoldEnd" AccelerationRatio="0.1" DecelerationRatio="0.8" Storyboard.TargetProperty="Opacity">
             <DoubleAnimation Storyboard.TargetName="PlayPauseButton"
@@ -271,6 +273,8 @@
             <DoubleAnimation Storyboard.TargetName="TimeLabel_Full" 
                                      From="{Binding Opacity, ElementName=PlayPauseButton}" To="1"/>
             <DoubleAnimation Storyboard.TargetName="VisionButton" 
+                                     From="{Binding Opacity, ElementName=PlayPauseButton}" To="1"/>
+            <DoubleAnimation Storyboard.TargetName="VolumeButton" 
                                      From="{Binding Opacity, ElementName=PlayPauseButton}" To="1"/>
         </Storyboard>
         <!--<SolidColorBrush x:Key="SliderThumb.Static.Foreground" Color="#FFE5E5E5"/>

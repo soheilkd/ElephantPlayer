@@ -67,12 +67,14 @@ namespace Player
         {
             InitializeComponent();
         }
-        public MediaView(int index, string main, string sub, MediaType type = MediaType.Music)
+        public MediaView(int index, string main, string sub, string time, MediaType type = MediaType.Music)
         {
             InitializeComponent();
-            Revoke(index, main, sub, type);
+            Revoke(index, main, sub,time, type);
         }
-        public void Revoke(int index, string main, string sub, MediaType type = MediaType.Music)
+        public MediaView(int index, Media media) : this(index, media.Title, media.Artist, MainUI.CastTime(media.Length), media.MediaType) { }
+
+        public void Revoke(int index, string main, string sub, string time, MediaType type = MediaType.Music)
         {
             MainLabel.Content = main;
             SubLabel.Content = sub;
@@ -96,11 +98,12 @@ namespace Player
             }
             MainIcon.Icon = DefaultIcon;
             Manip = new string[] { main, sub };
+            TimeLabel.Content = time;
             if ((int)type < 3)
                 DownloadButton.Visibility = Visibility.Hidden;
         }
-
-        public void Revoke(InfoExchangeArgs e) => Revoke(e.Integer, e.Media.Title, e.Media.Artist, e.Media.MediaType);
+        public void Revoke(int index, Media media) => Revoke(index, media.Title, media.Artist, MainUI.CastTime(media.Length), media.MediaType);
+        public void Revoke(InfoExchangeArgs e) => Revoke(e.Integer, e.Media.Title, e.Media.Artist, MainUI.CastTime(e.Media.Length), e.Media.MediaType);
         public void UserControl_Loaded(object sender, RoutedEventArgs e)
         {
             PlayButton.Opacity = 0;
