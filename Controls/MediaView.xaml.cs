@@ -106,6 +106,46 @@ namespace Player
                 OnlineMediaMenu[2].Click += delegate { };
                 OnlineMediaMenu[3].Click += delegate { RemoveRequested?.Invoke(this, new InfoExchangeArgs(MediaIndex)); };
                 OnlineMediaMenu[4].Click += delegate { PropertiesRequested?.Invoke(this, new InfoExchangeArgs(MediaIndex)); };
+                (OnlineMediaMenu[2].Items[0] as MenuItem).Click += delegate
+                {
+                    RepeatRequested?.Invoke(this, new InfoExchangeArgs()
+                    {
+                        Integer = MediaIndex,
+                        Object = 2
+                    });
+                };
+                (OnlineMediaMenu[2].Items[1] as MenuItem).Click += delegate
+                {
+                    RepeatRequested?.Invoke(this, new InfoExchangeArgs()
+                    {
+                        Integer = MediaIndex,
+                        Object = 3
+                    });
+                };
+                (OnlineMediaMenu[2].Items[2] as MenuItem).Click += delegate
+                {
+                    RepeatRequested?.Invoke(this, new InfoExchangeArgs()
+                    {
+                        Integer = MediaIndex,
+                        Object = 5
+                    });
+                };
+                (OnlineMediaMenu[2].Items[3] as MenuItem).Click += delegate
+                {
+                    RepeatRequested?.Invoke(this, new InfoExchangeArgs()
+                    {
+                        Integer = MediaIndex,
+                        Object = 10
+                    });
+                };
+                (OnlineMediaMenu[2].Items[4] as MenuItem).Click += delegate
+                {
+                    RepeatRequested?.Invoke(this, new InfoExchangeArgs()
+                    {
+                        Integer = MediaIndex,
+                        Object = 999
+                    });
+                };
                 ContextMenu = new ContextMenu() { ItemsSource = OnlineMediaMenu };
             }
             else
@@ -129,6 +169,46 @@ namespace Player
                 OfflineMediaMenu[5].Click += delegate { };
                 OfflineMediaMenu[6].Click += delegate { LocationRequested?.Invoke(this, new InfoExchangeArgs(MediaIndex)); };
                 OfflineMediaMenu[7].Click += delegate { PropertiesRequested?.Invoke(this, new InfoExchangeArgs(MediaIndex)); };
+                (OfflineMediaMenu[1].Items[0] as MenuItem).Click += delegate
+                {
+                    RepeatRequested?.Invoke(this, new InfoExchangeArgs()
+                    {
+                        Integer = MediaIndex,
+                        Object = 2
+                    });
+                };
+                (OfflineMediaMenu[1].Items[1] as MenuItem).Click += delegate
+                {
+                    RepeatRequested?.Invoke(this, new InfoExchangeArgs()
+                    {
+                        Integer = MediaIndex,
+                        Object = 3
+                    });
+                };
+                (OfflineMediaMenu[1].Items[2] as MenuItem).Click += delegate
+                {
+                    RepeatRequested?.Invoke(this, new InfoExchangeArgs()
+                    {
+                        Integer = MediaIndex,
+                        Object = 5
+                    });
+                };
+                (OfflineMediaMenu[1].Items[3] as MenuItem).Click += delegate
+                {
+                    RepeatRequested?.Invoke(this, new InfoExchangeArgs()
+                    {
+                        Integer = MediaIndex,
+                        Object = 10
+                    });
+                };
+                (OfflineMediaMenu[1].Items[4] as MenuItem).Click += delegate
+                {
+                    RepeatRequested?.Invoke(this, new InfoExchangeArgs()
+                    {
+                        Integer = MediaIndex,
+                        Object = 999
+                    });
+                };
                 ContextMenu = new ContextMenu() { ItemsSource = OfflineMediaMenu };
             }
         }

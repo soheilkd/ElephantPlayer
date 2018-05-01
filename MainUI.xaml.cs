@@ -8,6 +8,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media.Animation;
+using System.Linq;
 using Forms = System.Windows.Forms;
 using Routed = System.Windows.RoutedPropertyChangedEventArgs<double>;
 namespace Player
@@ -27,6 +28,17 @@ namespace Player
         private bool[] IsVisionOn = new bool[] { false, false };
         private Size[] WindowSizes = new Size[2];
         private Storyboard WindowWidthBoard => Resources["WindowWidthBoard"] as Storyboard;
+        private bool IsMouseOnControls
+        {
+            get
+            {
+                return PreviousButton.IsMouseOver
+                    || PlayPauseButton.IsMouseOver
+                    || NextButton.IsMouseOver
+                    || PositionSlider.IsMouseOver
+                    || VisionButton.IsMouseOver;
+            }
+        }
         public MainUI()
         {
             InitializeComponent();
@@ -81,7 +93,7 @@ namespace Player
             {
                 Dispatcher.Invoke(() =>
                 {
-                    if (!IsVisionOn[0])
+                    if (!IsVisionOn[0] || IsMouseOnControls)
                         return;
                     OrinateFullVision(true);
                     Player.Cursor = Cursors.None;
@@ -260,6 +272,7 @@ namespace Player
         {
             OrinateFullVision(false);
             Player.Cursor = Cursors.Arrow;
+            MouseMoveTimer.Stop();
             MouseMoveTimer.Start();
         }
 
@@ -294,11 +307,6 @@ namespace Player
             if (!IsVisionOn[0]) { Height--; Height++; }
             (WindowWidthBoard.Children[0] as DoubleAnimation).From = ActualWidth;
             (WindowWidthBoard.Children[0] as DoubleAnimation).To = WindowSizes[IsVisionOn[0] ? 1: 0].Width;
-          
-            foreach (var item in WindowSizes)
-            {
-                Debug.Print($"\r\nValue: {item.Width}");
-            }
             WindowWidthBoard.Begin();
         }
         private void PlayModeButton_Click(object sender, EventArgs e)
@@ -429,8 +437,6 @@ namespace Player
             Player.Play();
             IsUserSeeking = false;
         }
-        private void Position_RepeatBackwardClick(object sender, RoutedEventArgs e) => PositionSlider.Value -= PositionSlider.LargeChange;
-        private void Position_RepeatForwardClick(object sender, RoutedEventArgs e) => PositionSlider.Value += PositionSlider.LargeChange;
 
         private async void VolumeButton_MouseDown(object sender, MouseButtonEventArgs e)
         {

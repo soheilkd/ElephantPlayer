@@ -79,10 +79,10 @@
                             </Border>
                             <Track x:Name="PART_Track" Grid.Row="1">
                                 <Track.DecreaseRepeatButton>
-                                    <RepeatButton Height="9" Click="Position_RepeatBackwardClick"  Background="{TemplateBinding Foreground}" BorderBrush="Transparent"/>
+                                    <RepeatButton Height="9" Command="{x:Static Slider.DecreaseLarge}" Background="{TemplateBinding Foreground}" BorderBrush="Transparent"/>
                                 </Track.DecreaseRepeatButton>
                                 <Track.IncreaseRepeatButton>
-                                    <RepeatButton Height="5" Click="Position_RepeatForwardClick" Background="Transparent" />
+                                    <RepeatButton Height="5" Command="{x:Static Slider.IncreaseLarge}" />
                                 </Track.IncreaseRepeatButton>
                                 <Track.Thumb>
                                     <Thumb x:Name="Thumb" Focusable="False" OverridesDefaultStyle="True" >

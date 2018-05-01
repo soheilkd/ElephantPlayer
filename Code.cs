@@ -14,6 +14,7 @@ using System.Runtime.Serialization.Formatters;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Security;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -56,7 +57,7 @@ namespace Player
             {
                 var application = new App();
                 application.InitializeComponent();
-
+                ConvertTo.Bitmap(new Controls.MaterialIcon());
                 MusicArt = ConvertTo.Bitmap(new Controls.MaterialIcon() { Icon = Controls.IconType.MusicNote, Foreground = Brushes.White, Width = 60, Height = 60 });
                 VideoArt = ConvertTo.Bitmap(new Controls.MaterialIcon() { Icon = Controls.IconType.OndemandVideo, Foreground = Brushes.White, Width = 60, Height = 60 });
                 NetArt = ConvertTo.Bitmap(new Controls.MaterialIcon() { Icon = Controls.IconType.Cloud, Foreground = Brushes.White, Width = 60, Height = 60 });
@@ -181,9 +182,10 @@ namespace Player
         {
             for (int i = 0; i < paths.Length; i++)
             {
-                if ((new DirectoryInfo(paths[i])).Exists)
+                if (Directory.Exists(paths[i]))
                     Add(Directory.GetFiles(paths[i], "*", SearchOption.AllDirectories), requestPlay);
-                Add(paths[i], true);
+                else
+                    Add(paths[i], true);
             }
         }
         public void Add(Media media)
@@ -216,7 +218,7 @@ namespace Player
         public void Delete(Media media) => Delete(Find(media));
         public void Delete(int index)
         {
-            File.Delete(AllMedias[index].Path);
+            (new Thread(() => File.Delete(AllMedias[index].Path))).Start();
             Remove(index);
         }
 
@@ -252,8 +254,7 @@ namespace Player
                 index = CurrentlyPlayingIndex;
             AllMedias[index] = new Media(AllMedias[index].Path);
         }
-
-
+        
         public void DownloadPlaylist(string path)
         {
             if (!path.ToLower().EndsWith(".elp")) return;
@@ -346,18 +347,9 @@ namespace Player
             return CurrentlyPlaying;
         }
 
-        public void Repeat(int index, int times)
-        {
-            for (int i = 0; i < times; i++)
-                PlayQueue.Add(index);
-        }
-        public void Repeat(int index) =>
-            PlayQueue.Add(index);
+        public void Repeat(int index, int times = 1) => Parallel.For(0, times, (i) => PlayNext(index));
 
-        public void PlayNext(int index)
-        {
-
-        }
+        public void PlayNext(int index) => PlayQueue.Insert(CurrentQueuePosition + 1, index);
 
         public void ShowProperties(int index)
         {
@@ -370,13 +362,8 @@ namespace Player
         }
 
         public void Play(Media media) => Next(Find(media));
-        public void ChangeSettings(Preferences newSettings)
-        {
-            Preferences = newSettings;
-        }
-        public void AddCount() => AllMedias[CurrentlyPlayingIndex].PlayCount++;
 
-        public void Set(Media oldMedia, Media newMedia) => this[Find(oldMedia)] = newMedia;
+        public void AddCount() => AllMedias[CurrentlyPlayingIndex].PlayCount++;
 
         private static bool Check(string path) => File.Exists(path) && GetType(path) != MediaType.None;
         private static bool Check(Media media) => File.Exists(media.Path) && media.MediaType != MediaType.None;
