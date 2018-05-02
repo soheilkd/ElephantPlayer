@@ -255,7 +255,7 @@ namespace Player
                     {
                         var folderToExtract = SavePath.Substring(0, SavePath.IndexOf(".zip")) + "\\";
                         zip.ExtractAll(folderToExtract, Ionic.Zip.ExtractExistingFileAction.OverwriteSilently);
-                        ZipDownloaded?.Invoke(this, new InfoExchangeArgs(InfoType.Management)
+                        ZipDownloaded?.Invoke(this, new InfoExchangeArgs(InfoType.MediaUpdate)
                         {
                             Object = System.IO.Directory.GetFiles(folderToExtract, "*.*", System.IO.SearchOption.AllDirectories),
                             Type = InfoType.StringArray
