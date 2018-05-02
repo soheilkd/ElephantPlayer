@@ -8,26 +8,23 @@
              Loaded="UserControl_Loaded" MouseDoubleClick="OutputCanvas_MouseDoubleClick"
              x:Name="OutputCanvas">
     <Grid>
-        <Label Content="MainLabel" x:Name="MainLabel" Margin="30,0,40,0" HorizontalContentAlignment="Left" VerticalAlignment="Top" FontWeight="Medium" FontSize="14"  />
-        <Label Content="SubLabel" x:Name="SubLabel" Margin="30,20,40,0" HorizontalContentAlignment="Left" VerticalAlignment="Top" FontWeight="Light"/>
-        <Label Content="00:00" x:Name="TimeLabel" Margin="0,0,0,0" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+        <Label Content="MainLabel" x:Name="MainLabel" Margin="30,0,40,0" VerticalAlignment="Top" FontWeight="Medium" FontSize="14"  />
+        <Label Content="SubLabel" x:Name="SubLabel" Margin="30,20,40,0" VerticalAlignment="Top" FontWeight="Light"/>
+        <Label Content="00:00" x:Name="TimeLabel" HorizontalAlignment="Right" VerticalAlignment="Center"/>
         <controls:MaterialIcon  x:Name="MainIcon" HorizontalAlignment="Left" Width="30" Icon="MusicNote" Foreground="White"/>
         <controls:MaterialButton HorizontalAlignment="Right" Margin="0, 0, 5, 0" Icon="Play" EllipseType="Rectular" x:Name="PlayButton" Click="Play_Click" />
         <controls:MaterialButton HorizontalAlignment="Right" Margin="0, 0, 45, 0" Icon="CloudLoad" EllipseType="Rectular" x:Name="DownloadButton" Click="DownloadButton_Click" />
-      
     </Grid>
     <UserControl.Resources>
         <Style TargetType="MenuItem">
             <Setter Property="Foreground" Value="White" />
-            <Setter Property="HorizontalContentAlignment" Value="Left" />
             <Setter Property="Background" Value="#F333"/>
             <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="Icon" Value=""/>
-            
         </Style>
         <Style TargetType="Label">
             <Setter Property="Foreground" Value="White" />
         </Style>
+        <Thickness x:Key="TimeLabelTargetMargin">0,0,35,0</Thickness>
     </UserControl.Resources>
     <UserControl.Triggers>
         <EventTrigger RoutedEvent="MouseEnter" SourceName="OutputCanvas">
@@ -37,7 +34,7 @@
                                      Storyboard.TargetName="PlayButton" SpeedRatio="3" Storyboard.TargetProperty="Opacity" />
                     <DoubleAnimation From="{Binding ElementName=PlayButton, Path=Opacity}" To="1"
                                      Storyboard.TargetName="DownloadButton" SpeedRatio="3" Storyboard.TargetProperty="Opacity"  />
-                    <ThicknessAnimation From="{Binding ElementName=TimeLabel, Path=Margin}" To="0,0,35,0"
+                    <ThicknessAnimation From="{Binding ElementName=TimeLabel, Path=Margin}" To="{DynamicResource TimeLabelTargetMargin}"
                       AccelerationRatio="0.1" DecelerationRatio="0.9" Storyboard.TargetName="TimeLabel" SpeedRatio="4" Storyboard.TargetProperty="Margin"/>
                 </Storyboard>
             </BeginStoryboard>

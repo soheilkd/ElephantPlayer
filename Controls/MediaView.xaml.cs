@@ -84,7 +84,7 @@ namespace Player
                 DownloadButton.Visibility = Visibility.Hidden;
         }
         public void Revoke(int index, Media media) => Revoke(index, media.Title, media.Artist, MainUI.CastTime(media.Length), media.MediaType);
-        public void Revoke(InfoExchangeArgs e) => Revoke(e.Integer, e.Media.Title, e.Media.Artist, MainUI.CastTime(e.Media.Length), e.Media.MediaType);
+        public void Revoke(InfoExchangeArgs e) => Revoke(e.Integer, e.Object as Media);
         public void UserControl_Loaded(object sender, RoutedEventArgs e)
         {
             PlayButton.Opacity = 0;
@@ -147,6 +147,7 @@ namespace Player
                     });
                 };
                 ContextMenu = new ContextMenu() { ItemsSource = OnlineMediaMenu };
+                Resources["TimeLabelTargetMargin"] = new Thickness(0, 0, 75, 0);
             }
             else
             {
@@ -256,7 +257,7 @@ namespace Player
                         zip.ExtractAll(folderToExtract, Ionic.Zip.ExtractExistingFileAction.OverwriteSilently);
                         ZipDownloaded?.Invoke(this, new InfoExchangeArgs(InfoType.Management)
                         {
-                            ObjectArray = System.IO.Directory.GetFiles(folderToExtract, "*.*", System.IO.SearchOption.AllDirectories),
+                            Object = System.IO.Directory.GetFiles(folderToExtract, "*.*", System.IO.SearchOption.AllDirectories),
                             Type = InfoType.StringArray
                         });
                     }
@@ -266,7 +267,7 @@ namespace Player
                     Downloaded?.Invoke(this, new InfoExchangeArgs()
                     {
                         Integer = MediaIndex,
-                        Media = new Media(SavePath)
+                        Object = new Media(SavePath)
                     });
             };
             Client.DownloadFileAsync(new Uri(media.Path, UriKind.Absolute), SavePath);

@@ -63,7 +63,6 @@
             <Label x:Name="VolumeLabel" Content="100" HorizontalAlignment="Right" Foreground="White"/>
         </Popup>
         <player:MaterialButton x:Name="PlayModeButton" Icon="repeat" Click="PlayModeButton_Click" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,100,25" />
-        <player:MaterialButton x:Name="AddUrlButton" Icon="add"  HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,145,25" />
 
         <Slider x:Name="PositionSlider"  ValueChanged="Position_Changed" PreviewMouseDown="Position_MouseDown"  
                VerticalAlignment="Bottom" Maximum="1000"
@@ -158,6 +157,54 @@
                 </EventTrigger>
             </Image.Triggers>
         </Image>
+        <Grid x:Name="SettingsGrid" Background="Black" Visibility="Hidden" Opacity="0">
+            <Label Content="Preferences" FontSize="22" FontWeight="SemiBold"/>
+            <Label Content="Ancestor Key" Margin="0, 40, 0,0"/>
+            <ComboBox x:Name="Settings_AncestorCombo" Margin="80,43,0,0" Width="120">
+                <ComboBoxItem Content="Ctrl" />
+                <ComboBoxItem Content="Alt" />
+                <ComboBoxItem Content="Shift" />
+                <ComboBoxItem Content="Ctrl + Alt" />
+                <ComboBoxItem Content="Ctrl + Shift"/>
+                <ComboBoxItem Content="Shift + Alt" />
+                <ComboBoxItem Content="Ctrl +Alt + Shift" />
+            </ComboBox>
+            <CheckBox x:Name="Settings_OrinateCheck" Content="Auto Orinate Vision" Margin="5, 73,0,0" />
+            <Label Content="Vision Timeout" Margin="0, 96, 0, 0"/>
+            <ComboBox x:Name="Settings_TimeoutCombo" Margin="100, 99, 0, 0" Width="120">
+                <ComboBoxItem Content="0.5 s"/>
+                <ComboBoxItem Content="1 s"/>
+                <ComboBoxItem Content="2 s"/>
+                <ComboBoxItem Content="3 s"/>
+                <ComboBoxItem Content="4 s"/>
+                <ComboBoxItem Content="5 s"/>
+                <ComboBoxItem Content="10 s"/>
+                <ComboBoxItem Content="60 s"/>
+            </ComboBox>
+            <Button Content="Revalidate Library" Margin="5, 130, 0, 0" Height="24" Width="200"/>
+            <Grid.Resources>
+                <Style TargetType="Label" >
+                    <Setter Property="Foreground" Value="White"/>
+                    <Setter Property="HorizontalAlignment" Value="Left"/>
+                    <Setter Property="VerticalAlignment" Value="Top"/>
+                </Style>
+                <Style TargetType="CheckBox" >
+                    <Setter Property="Foreground" Value="White"/>
+                    <Setter Property="HorizontalAlignment" Value="Left"/>
+                    <Setter Property="VerticalAlignment" Value="Top"/>
+                </Style>
+                <Style TargetType="ComboBox">
+                    <Setter Property="HorizontalAlignment" Value="Left"/>
+                    <Setter Property="VerticalAlignment" Value="Top"/>
+                </Style>
+                <Style TargetType="Button">
+                    <Setter Property="HorizontalAlignment" Value="Left"/>
+                    <Setter Property="VerticalAlignment" Value="Top"/>
+                </Style>
+            </Grid.Resources>
+        </Grid>
+        <player:MaterialButton x:Name="SettingsButton" Icon="Settings"  HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,145,25" />
+
         <Grid.Resources>
             <Popup x:Key="MetaPopup">
                 <ScrollViewer Background="Transparent">
@@ -219,7 +266,7 @@
         </Grid.Resources>
     </Grid>
     <Window.Resources>
-        <SolidColorBrush x:Key="KeyOfBackground" Color="#FF202020" />
+        <SolidColorBrush x:Key="KeyOfBackground" Color="#FF303030" />
         <SolidColorBrush x:Key="KeyOfForeground" Color="#FEEE" />
         <Style TargetType="{x:Type Label}" x:Key="TimeLabel">
             <Setter Property="Foreground" Value="White" />
@@ -232,30 +279,26 @@
         <Storyboard x:Key="VisionOnBoard" AccelerationRatio="0.1" DecelerationRatio="0.8" Storyboard.TargetProperty="Opacity">
             <DoubleAnimation Storyboard.TargetName="Player"
                                      From="{Binding Opacity, ElementName=Player}" To="1"/>
-            <DoubleAnimation Storyboard.TargetName="QueueListView"
-                                     From="{Binding Opacity, ElementName=QueueListView}" To="0"/>
             <DoubleAnimation Storyboard.TargetName="MiniArtworkImage"
-                                     From="{Binding Opacity, ElementName=QueueListView}" To="0"/>
+                                     From="{Binding Opacity, ElementName=TitleLabel}" To="0"/>
             <DoubleAnimation Storyboard.TargetName="TitleLabel"
-                                     From="{Binding Opacity, ElementName=QueueListView}" To="0"/>
-            <DoubleAnimation Storyboard.TargetName="AddUrlButton"
-                                     From="{Binding Opacity, ElementName=QueueListView}" To="0"/>
+                                     From="{Binding Opacity, ElementName=TitleLabel}" To="0"/>
+            <DoubleAnimation Storyboard.TargetName="SettingsButton"
+                                     From="{Binding Opacity, ElementName=TitleLabel}" To="0"/>
             <DoubleAnimation Storyboard.TargetName="PlayModeButton"
-                                     From="{Binding Opacity, ElementName=QueueListView}" To="0"/>
+                                     From="{Binding Opacity, ElementName=TitleLabel}" To="0"/>
         </Storyboard>
         <Storyboard x:Key="VisionOffBoard" AccelerationRatio="0.1" DecelerationRatio="0.8" Storyboard.TargetProperty="Opacity">
             <DoubleAnimation Storyboard.TargetName="Player"
                                      From="{Binding Opacity, ElementName=Player}" To="0"/>
-            <DoubleAnimation Storyboard.TargetName="QueueListView"
-                                     From="{Binding Opacity, ElementName=QueueListView}" To="1"/>
             <DoubleAnimation Storyboard.TargetName="MiniArtworkImage"
-                                     From="{Binding Opacity, ElementName=QueueListView}" To="1"/>
+                                     From="{Binding Opacity, ElementName=TitleLabel}" To="1"/>
             <DoubleAnimation Storyboard.TargetName="TitleLabel"
-                                     From="{Binding Opacity, ElementName=QueueListView}" To="1"/>
-            <DoubleAnimation Storyboard.TargetName="AddUrlButton" 
-                                     From="{Binding Opacity, ElementName=QueueListView}" To="1"/>
+                                     From="{Binding Opacity, ElementName=TitleLabel}" To="1"/>
+            <DoubleAnimation Storyboard.TargetName="SettingsButton" 
+                                     From="{Binding Opacity, ElementName=TitleLabel}" To="1"/>
             <DoubleAnimation Storyboard.TargetName="PlayModeButton"
-                                     From="{Binding Opacity, ElementName=QueueListView}" To="1"/>
+                                     From="{Binding Opacity, ElementName=TitleLabel}" To="1"/>
         </Storyboard>
         <Storyboard x:Key="FullVisionOnBoard" FillBehavior="HoldEnd" AccelerationRatio="0.5" DecelerationRatio="0.5" Storyboard.TargetProperty="Opacity">
             <DoubleAnimation Storyboard.TargetName="PlayPauseButton"
@@ -293,10 +336,14 @@
             <DoubleAnimation Storyboard.TargetName="VolumeButton" 
                                      From="{Binding Opacity, ElementName=PlayPauseButton}" To="1"/>
         </Storyboard>
+        <Storyboard x:Key="SettingsOnBoard" AccelerationRatio="0.1" DecelerationRatio="0.9" Storyboard.TargetProperty="Opacity">
+            <DoubleAnimation From="{Binding ElementName=SettingsGrid, Path=Opacity}" To="1" Storyboard.TargetName="SettingsGrid"/>
+        </Storyboard>
+        <Storyboard x:Key="SettingsOffBoard" AccelerationRatio="0.1" DecelerationRatio="0.9" Storyboard.TargetProperty="Opacity">
+            <DoubleAnimation From="{Binding ElementName=SettingsGrid, Path=Opacity}" To="0" Storyboard.TargetName="SettingsGrid"/>
+        </Storyboard>
         <Storyboard x:Key="WindowWidthBoard" AccelerationRatio="0.3" DecelerationRatio="0.6" Storyboard.TargetName="window">
             <DoubleAnimation Storyboard.TargetProperty="Width" />
         </Storyboard>
-        <!--<SolidColorBrush x:Key="SliderThumb.Static.Foreground" Color="#FFE5E5E5"/>
-        <SolidColorBrush x:Key="SliderThumb.MouseOver.Background" Color="#FFDCDCDC"/>-->
     </Window.Resources>
 </Window>

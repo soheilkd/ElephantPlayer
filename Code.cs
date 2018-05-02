@@ -49,9 +49,12 @@ namespace Player
             ServicePointManager.DefaultConnectionLimit = 10;
             AppDomain.CurrentDomain.UnhandledException += (sender, e) =>
             {
+#if DEBUG
+                System.Diagnostics.Process.GetCurrentProcess().Kill();
+#else
                 MessageBox.Show($"Unhandled {e.ExceptionObject}\r\n" +
                     $"Terminating: {e.IsTerminating}", "Exception", MessageBoxButton.OK, MessageBoxImage.Error);
-                System.Diagnostics.Process.GetCurrentProcess().Kill();
+#endif
             };
             if (InstanceManager.Instance<App>.InitializeAsFirstInstance("ElepPlayer_CRsoheilkd"))
             {
@@ -99,7 +102,7 @@ namespace Player
                 {
                     Type = InfoType.MediaUpdate,
                     Integer = index,
-                    Media = value
+                    Object = value
                 });
             }
         }
@@ -124,8 +127,7 @@ namespace Player
                 {
                     case MediaType.Music: return MediaType.OnlineMusic;
                     case MediaType.Video: return MediaType.OnlineVideo;
-                    case MediaType.File: return MediaType.OnlineFile;
-                    default: return MediaType.None;
+                    default: return MediaType.OnlineFile;
                 }
             }
             string ext = GetExtension(FileName);
@@ -137,9 +139,10 @@ namespace Player
 
         public void Add(Uri uri, bool requestPlay = false)
         {
-            if (!Check(uri))
+            var media = new Media(uri.AbsoluteUri);
+            if (!media.IsValid)
                 return;
-            Add(new Media(uri.AbsoluteUri));
+            Add(media);
             if (requestPlay)
             {
                 Change?.Invoke(this, new InfoExchangeArgs()
@@ -151,9 +154,8 @@ namespace Player
         }
         public void Add(string path, bool requestPlay = false)
         {
-            if (!Check(path))
-                return;
-            if (Find(path) != -1)
+            var media = new Media(path);
+            if (Find(media) != -1)
             {
                 if (!requestPlay)
                     return;
@@ -164,8 +166,7 @@ namespace Player
                 });
                 return;
             }
-
-            AllMedias.Add(new Media(path));
+            AllMedias.Add(media);
             Change?.Invoke(this, new InfoExchangeArgs()
             {
                 Type = InfoType.NewMedia,
@@ -254,30 +255,6 @@ namespace Player
                 index = CurrentlyPlayingIndex;
             AllMedias[index] = new Media(AllMedias[index].Path);
         }
-        
-        public void DownloadPlaylist(string path)
-        {
-            if (!path.ToLower().EndsWith(".elp")) return;
-            string[] lines = File.ReadAllLines(path);
-            List<Media> list = new List<Media>();
-            for (int i = 0; i < lines.Length; i++)
-                Add(lines[i]);
-        }
-        public static void DownloadPlaylist(string path, out Media[] medias)
-        {
-            if (!path.ToLower().EndsWith(".elp")) { medias = new Media[0]; return; }
-            string[] lines = File.ReadAllLines(path);
-            List<Media> list = new List<Media>();
-            for (int i = 0; i < lines.Length; i++)
-                if (Check(lines[i]))
-                    list.Add(new Media(lines[i]));
-            medias = list.ToArray();
-        }
-
-        public void UploadPlaylist(string path) =>
-            File.WriteAllLines(path, from item in AllMedias select item.Path);
-        public static void UploadPlaylist(string path, Media[] content) =>
-            File.WriteAllLines(path, from item in content select item.Path);
 
         public void RequestDelete(int index)
         {
@@ -364,32 +341,7 @@ namespace Player
         public void Play(Media media) => Next(Find(media));
 
         public void AddCount() => AllMedias[CurrentlyPlayingIndex].PlayCount++;
-
-        private static bool Check(string path) => File.Exists(path) && GetType(path) != MediaType.None;
-        private static bool Check(Media media) => File.Exists(media.Path) && media.MediaType != MediaType.None;
-        private static bool Check(Uri uri)
-        {
-            var request = (HttpWebRequest)WebRequest.Create(uri);
-            request.AddRange(0, 10);
-            try
-            {
-                request.Timeout = 5000;
-                var response = request.GetResponse();
-                if (!response.ContentType.EndsWith("octet-stream") && !response.ContentType.StartsWith("video") && !response.ContentType.StartsWith("app"))
-                {
-                    MessageBox.Show("Requested Uri is not a valid octet-stream", ".NET", MessageBoxButton.OK, MessageBoxImage.Error);
-                    return false;
-                }
-                response.Dispose();
-                response = null;
-            }
-            catch (WebException e)
-            {
-                MessageBox.Show(e.Message);
-                return false;
-            }
-            return true;
-        }
+        
     }
 
 
@@ -438,10 +390,48 @@ namespace Player
         [NonSerialized] public bool IsRemoved;
         public bool IsMedia => MediaType != MediaType.None;
         public bool IsVideo => MediaType == MediaType.Video || MediaType == MediaType.OnlineVideo;
-        public bool Exists => File.Exists(Path);
+        public bool IsValid
+        {
+            get
+            {
+                switch (MediaType)
+                {
+                    case MediaType.Music:
+                    case MediaType.Video:
+                    case MediaType.File: return File.Exists(Path);
+                    case MediaType.OnlineMusic:
+                    case MediaType.OnlineVideo:
+                    case MediaType.OnlineFile:
+                        var request = (HttpWebRequest)WebRequest.Create(Path);
+                        request.AddRange(0, 10);
+                        try
+                        {
+                            request.Timeout = 5000;
+                            var response = request.GetResponse();
+                            Thread.Sleep(1);
+                            if (!response.ContentType.EndsWith("octet-stream") && !response.ContentType.StartsWith("video") && !response.ContentType.StartsWith("app"))
+                            {
+                                MessageBox.Show("Requested Uri is not a valid octet-stream", ".NET", MessageBoxButton.OK, MessageBoxImage.Error);
+                                return false;
+                            }
+                            response.Dispose();
+                            response = null;
+                        }
+                        catch (WebException e)
+                        {
+                            MessageBox.Show(e.Message);
+                            return false;
+                        }
+                        return true;
+                    default: return false;
+                }
+            }
+        }
 
         public Media(string path)
         {
+            if (path.StartsWith("https://"))
+                path = path.Replace("https://", "http://");
             Uri uri = new Uri(path);
             if (uri.IsFile)
             {
@@ -467,7 +457,7 @@ namespace Player
                         Title = Name;
                         Path = path;
                         Artist = path.Substring(0, path.LastIndexOf("\\"));
-                        Artist = Artist.Substring(0, Artist.LastIndexOf("\\") + 1);
+                        Artist = Artist.Substring(Artist.LastIndexOf("\\") + 1);
                         Album = "Video";
                         Artwork = App.VideoArt;
                         MediaType = MediaType.Video;
@@ -475,7 +465,16 @@ namespace Player
                         Length = 1;
                         break;
                     case MediaType.None:
-                        throw new IOException($"Given path is not valid media\r\nPath:{path}");
+                        Name = null;
+                        Title = null;
+                        Path = "NULL";
+                        Artist = null;
+                        Album = null;
+                        Artwork = null;
+                        Length = -1;
+                        IsLoaded = false;
+                        MediaType = MediaType.None;
+                        break;
                     default: break;
                 }
             }
@@ -492,6 +491,12 @@ namespace Player
                 IsLoaded = true;
             }
         }
+        public override bool Equals(object obj)
+        {
+            if (obj is Media e) return Path.Equals(e.Path ?? "NULL", StringComparison.CurrentCultureIgnoreCase);
+            else return false;
+        }
+        public override int GetHashCode() => base.GetHashCode();
     }
 
     [Serializable]
@@ -507,19 +512,8 @@ namespace Player
         }
         public static void Save(Media[] medias)
         {
-            var newMedias =
-                from item in medias
-                where !item.IsRemoved
-                select item;
-            int c = newMedias.Count();
-            medias = new Media[c];
-            int i = 0;
-            foreach (var item in newMedias)
-            {
-                medias[i++] = item;
-            }
             using (FileStream stream = new FileStream(App.LibraryPath, FileMode.Create))
-                (new BinaryFormatter()).Serialize(stream, new MassiveLibrary(medias));
+                (new BinaryFormatter()).Serialize(stream, new MassiveLibrary((from item in medias where !item.IsRemoved select item).ToArray()));
         }
         public static MassiveLibrary Load()
         {
@@ -529,13 +523,7 @@ namespace Player
                 return (new BinaryFormatter()).Deserialize(stream) as MassiveLibrary;
         }
     }
-
-    public static class Debug
-    {
-        public static void Print<T>(T obj) => Console.WriteLine(obj.ToString());
-        public static void ThrowFakeException(string message = "") => throw new Exception(message);
-        public static void Display<T>(T message, string caption = "Debug") => MessageBox.Show(message.ToString(), caption);
-    }
+    
     public static class ConvertTo
     {
         public static BitmapImage Bitmap<T>(T element) where T : System.Windows.Controls.Control
@@ -598,7 +586,7 @@ namespace Player
     }
     public static class Extensions
     {
-        public static int ToInt(this double e) => Convert.ToInt32(e);
+        public static int ToInt(this double e) => Convert.ToInt32(e); 
     }
 }
 
@@ -618,7 +606,7 @@ namespace Player.User
         public static MouseDevice PrimaryDevice => System.Windows.Input.Mouse.PrimaryDevice;
         [StructLayout(LayoutKind.Sequential)]
         internal struct Win32Point { public int X; public int Y; }
-        static Draw.Point Position
+        private static Draw.Point Position
         {
             get
             {
@@ -630,25 +618,7 @@ namespace Player.User
     }
     public class Keyboard
     {
-        private static Gma.System.MouseKeyHook.IKeyboardMouseEvents _events = Gma.System.MouseKeyHook.Hook.GlobalEvents();
-        public static event Forms::KeyPressEventHandler KeyPress
-        {
-            add => _events.KeyPress += value;
-            remove => _events.KeyPress -= value;
-        }
-        public static event Forms::KeyEventHandler KeyDown
-        {
-            add => _events.KeyDown += value;
-            remove => _events.KeyDown -= value;
-        }
-        public static event Forms::KeyEventHandler KeyUp
-        {
-            add => _events.KeyDown += value;
-            remove => _events.KeyDown -= value;
-        }
-        public Keyboard() { }
-        ~Keyboard() => _events.Dispose();
-
+        public static Gma.System.MouseKeyHook.IKeyboardMouseEvents Events = Gma.System.MouseKeyHook.Hook.GlobalEvents();
     }
 }
 
@@ -658,10 +628,9 @@ namespace Player.Events
     {
         Integer, Double, Media, Object, StringArray,
         RequestNext, RequestPrev, Handling, UserInterface,
-        Management, AppInterface, Internal, StartingMedia,
-        EndingMedia, PlayPause, NewMedia, MediaRequested, EditingTag,
-        InterfaceUpdate, MediaUpdate, Crash, PopupRequest,
-        ArtworkClick, SomethingHappened, MediaRemoved, MediaMoved
+        NewMedia, MediaRequested, EditingTag,
+        InterfaceUpdate, MediaUpdate, PopupRequest,
+        MediaRemoved, MediaMoved
     }
 
     public class InstanceEventArgs : EventArgs
@@ -678,9 +647,7 @@ namespace Player.Events
     {
         public InfoType Type { get; set; }
         public object Object { get; set; }
-        public object[] ObjectArray { get; set; }
         public int Integer { get; set; }
-        public Media Media { get; set; }
 
         public InfoExchangeArgs() { }
         public InfoExchangeArgs(InfoType type) => Type = type;
@@ -696,9 +663,9 @@ namespace Player.Taskbar
 {
     public class Command : ICommand
     {
-        #pragma warning disable CS0067
+#pragma warning disable CS0067
         public event EventHandler CanExecuteChanged;
-        #pragma warning restore CS0067
+#pragma warning restore CS0067
         public event EventHandler Raised;
         public bool CanExecute(object parameter) => true;
         public void Execute(object parameter) => Raised?.Invoke(this, null);
