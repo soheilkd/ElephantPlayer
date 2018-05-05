@@ -191,6 +191,8 @@ namespace Player
         }
         public void Add(Media media)
         {
+            if (!media.IsValid)
+                return;
             int p = AllMedias.Count;
             if (!media.IsLoaded)
                 media = new Media(media.Path) { Length = media.Length };
@@ -402,6 +404,8 @@ namespace Player
                     case MediaType.OnlineMusic:
                     case MediaType.OnlineVideo:
                     case MediaType.OnlineFile:
+                        if (!IsLoaded)
+                            return true;
                         var request = (HttpWebRequest)WebRequest.Create(Path);
                         request.AddRange(0, 10);
                         try

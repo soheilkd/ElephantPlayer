@@ -1,28 +1,24 @@
 ﻿<UserControl x:Class="Player.Controls.MaterialButton"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:local="clr-namespace:Player" x:Name="Modifier"  Width="26"
-             xmlns:controls="clr-namespace:Player.Controls" Loaded="UserControl_Loaded"
-             Height="26" MouseUp="UXMouseUp">
+             xmlns:local="clr-namespace:Player" Width="26" Height="26"
+             xmlns:controls="clr-namespace:Player.Controls" Loaded="UserControl_Loaded">
     <Grid x:Name="MainGrid">
-        <Border x:Name="MainEllipse" BorderThickness="0" Margin="-5" BorderBrush="#FBBB" CornerRadius="20">
-          
-        </Border>
-        <controls:MaterialIcon x:Name="MainIcon" Foreground="White" Background="#01FFFFFF" Icon="{DynamicResource Icon_Res}"/>
-        
+        <Border x:Name="MainEllipse" BorderThickness="0" Margin="-5" BorderBrush="#FBBB" CornerRadius="20"/>
+        <controls:MaterialIcon x:Name="MainIcon" Foreground="White" Background="#01FFFFFF" Icon="Cloud"/>
     </Grid>
     <UserControl.Triggers>
         <EventTrigger RoutedEvent="MouseEnter">
-                    <EventTrigger.Actions>
-                        <BeginStoryboard>
-                            <Storyboard>
-                                <ThicknessAnimation Storyboard.TargetName="MainEllipse" Storyboard.TargetProperty="BorderThickness" 
+            <EventTrigger.Actions>
+                <BeginStoryboard>
+                    <Storyboard>
+                        <ThicknessAnimation Storyboard.TargetName="MainEllipse" Storyboard.TargetProperty="BorderThickness" 
                                                     From="{Binding ElementName=MainEllipse, Path=BorderThickness}" To="3"
                                             AccelerationRatio="0.6" DecelerationRatio="0.4" SpeedRatio="5"/>
-                            </Storyboard>
-                        </BeginStoryboard>
-                    </EventTrigger.Actions>
-                </EventTrigger>
+                    </Storyboard>
+                </BeginStoryboard>
+            </EventTrigger.Actions>
+        </EventTrigger>
         <EventTrigger RoutedEvent="MouseLeave">
             <EventTrigger.Actions>
                 <BeginStoryboard>
@@ -45,17 +41,14 @@
             </EventTrigger.Actions>
         </EventTrigger>
         <EventTrigger RoutedEvent="MouseUp">
-                    <EventTrigger.Actions>
-                        <BeginStoryboard>
-                            <Storyboard>
-                                <ThicknessAnimation Storyboard.TargetName="MainEllipse" Storyboard.TargetProperty="Margin" From="{Binding ElementName=MainEllipse, Path=Margin}" To="-5"
+            <EventTrigger.Actions>
+                <BeginStoryboard>
+                    <Storyboard>
+                        <ThicknessAnimation Storyboard.TargetName="MainEllipse" Storyboard.TargetProperty="Margin" From="{Binding ElementName=MainEllipse, Path=Margin}" To="-5"
                                             AccelerationRatio="0.6" DecelerationRatio="0.4" SpeedRatio="6"/>
-                            </Storyboard>
-                        </BeginStoryboard>
-                    </EventTrigger.Actions>
-                </EventTrigger>
+                    </Storyboard>
+                </BeginStoryboard>
+            </EventTrigger.Actions>
+        </EventTrigger>
     </UserControl.Triggers>
-    <UserControl.Resources>
-        <controls:IconType x:Key="Icon_Res">settings</controls:IconType>
-    </UserControl.Resources>
 </UserControl>

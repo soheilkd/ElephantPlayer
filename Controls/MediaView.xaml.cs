@@ -82,6 +82,7 @@ namespace Player
             TimeLabel.Content = time;
             if ((int)type < 3)
                 DownloadButton.Visibility = Visibility.Hidden;
+            Resources["TimeLabelTargetMargin"] = new Thickness(0, 0, (int)type > 2 ? 75: 35, 0);
         }
         public void Revoke(int index, Media media) => Revoke(index, media.Title, media.Artist, MainUI.CastTime(media.Length), media.MediaType);
         public void Revoke(InfoExchangeArgs e) => Revoke(e.Integer, e.Object as Media);
@@ -147,7 +148,6 @@ namespace Player
                     });
                 };
                 ContextMenu = new ContextMenu() { ItemsSource = OnlineMediaMenu };
-                Resources["TimeLabelTargetMargin"] = new Thickness(0, 0, 75, 0);
             }
             else
             {
@@ -222,7 +222,6 @@ namespace Player
                 output.Items.Add(new MenuItem() { Header = item });
             return output;
         }
-
         
         WebClient Client = null;
         public void Download(Media media)
@@ -273,7 +272,7 @@ namespace Player
             Client.DownloadFileAsync(new Uri(media.Path, UriKind.Absolute), SavePath);
         }
 
-        private void DownloadButton_Click(object sender, EventArgs e)
+        private void DownloadButton_Click(object sender, MouseButtonEventArgs e)
         {
             if (Client == null)
                 Client = new WebClient();
@@ -296,7 +295,23 @@ namespace Player
         }
         bool downloadCanceled = true;
 
-        private void Play_Click(object sender, EventArgs e) => PlayClicked?.Invoke(this, new InfoExchangeArgs(MediaIndex));
+        private void Play_Click(object sender, MouseButtonEventArgs e) => PlayClicked?.Invoke(this, new InfoExchangeArgs(MediaIndex));
         private void OutputCanvas_MouseDoubleClick(object sender, MouseButtonEventArgs e) => DoubleClicked?.Invoke(this, new InfoExchangeArgs(MediaIndex));
+
+        private new void SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            if (ActualWidth > 500)
+            {
+                SubLabel.Visibility = Visibility.Hidden;
+                SubLabel.Margin = new Thickness(30, 0, 40, 0);
+                MainLabel.Content = $"{Manip[1]} - {Manip[0]}";
+            }
+            else if (SubLabel.Visibility == Visibility.Hidden)
+            {
+                SubLabel.Visibility = Visibility.Visible;
+                SubLabel.Margin = new Thickness(30, 20, 40, 0);
+                MainLabel.Content = Manip[0];
+            }
+        }
     }
 }

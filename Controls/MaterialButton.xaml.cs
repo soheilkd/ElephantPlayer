@@ -4,13 +4,11 @@ using System.Windows.Input;
 using System.Windows.Media.Animation;
 using System;
 using System.Windows.Controls;
-#pragma warning disable 1591
 namespace Player.Controls
 {
     public partial class MaterialButton : UserControl
     {
         public enum EllipseTypes { Rectular, Circular }
-        public event EventHandler Click;
 
         public EllipseTypes EllipseType
         {
@@ -36,15 +34,8 @@ namespace Player.Controls
         public static readonly DependencyProperty IconProperty =
             DependencyProperty.Register(nameof(Icon), typeof(IconType), typeof(MaterialButton), new PropertyMetadata(IconType.UpArrow));
         
-        public MaterialButton()
-        {
-            InitializeComponent();
-        }
-        public void UXMouseUp(object sender, MouseButtonEventArgs e)
-        {
-            Click?.Invoke(this, null);
-            //MainEllipse.Background = System.Windows.Media.Brushes.Transparent;
-        }
+        public MaterialButton() => InitializeComponent();
+
         void UserControl_Loaded(object sender, RoutedEventArgs e)
         {
             MainEllipse.CornerRadius = new CornerRadius(EllipseType == 0 ? 2 : 20);

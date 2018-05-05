@@ -3,7 +3,7 @@
              BorderBrush="#50FFFFFF"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:controls="clr-namespace:Player.Controls"
+             xmlns:controls="clr-namespace:Player.Controls" SizeChanged="SizeChanged"
              Width="200" Background="#01000000"
              Loaded="UserControl_Loaded" MouseDoubleClick="OutputCanvas_MouseDoubleClick"
              x:Name="OutputCanvas">
@@ -12,8 +12,8 @@
         <Label Content="SubLabel" x:Name="SubLabel" Margin="30,20,40,0" VerticalAlignment="Top" FontWeight="Light"/>
         <Label Content="00:00" x:Name="TimeLabel" HorizontalAlignment="Right" VerticalAlignment="Center"/>
         <controls:MaterialIcon  x:Name="MainIcon" HorizontalAlignment="Left" Width="30" Icon="MusicNote" Foreground="White"/>
-        <controls:MaterialButton HorizontalAlignment="Right" Margin="0, 0, 5, 0" Icon="Play" EllipseType="Rectular" x:Name="PlayButton" Click="Play_Click" />
-        <controls:MaterialButton HorizontalAlignment="Right" Margin="0, 0, 45, 0" Icon="CloudLoad" EllipseType="Rectular" x:Name="DownloadButton" Click="DownloadButton_Click" />
+        <controls:MaterialButton HorizontalAlignment="Right" Margin="0, 0, 5, 0" Icon="Play" EllipseType="Rectular" x:Name="PlayButton" MouseUp="Play_Click" />
+        <controls:MaterialButton HorizontalAlignment="Right" Margin="0, 0, 45, 0" Icon="CloudLoad" EllipseType="Rectular" x:Name="DownloadButton" MouseUp="DownloadButton_Click" />
     </Grid>
     <UserControl.Resources>
         <Style TargetType="MenuItem">
@@ -25,6 +25,7 @@
             <Setter Property="Foreground" Value="White" />
         </Style>
         <Thickness x:Key="TimeLabelTargetMargin">0,0,35,0</Thickness>
+
     </UserControl.Resources>
     <UserControl.Triggers>
         <EventTrigger RoutedEvent="MouseEnter" SourceName="OutputCanvas">

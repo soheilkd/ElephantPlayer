@@ -60,10 +60,10 @@ namespace Player
         private void BindUI()
         {
             TaskbarItemInfo = Thumb.Info;
-            Thumb.NextPressed += (obj, f) => NextButton_Click(obj, f);
-            Thumb.PausePressed += (obj, f) => PlayPauseButton_Click(obj, f);
-            Thumb.PlayPressed += (obj, f) => PlayPauseButton_Click(obj, f);
-            Thumb.PrevPressed += (obj, f) => PreviousButton_Click(obj, f);
+            Thumb.NextPressed += (obj, f) => NextButton_Click(obj, null);
+            Thumb.PausePressed += (obj, f) => PlayPauseButton_Click(obj, null);
+            Thumb.PlayPressed += (obj, f) => PlayPauseButton_Click(obj, null);
+            Thumb.PrevPressed += (obj, f) => PreviousButton_Click(obj, null);
             PlayCountTimer.Elapsed += (_, __) => Manager.AddCount();
             (Resources["VisionOnBoard"] as Storyboard).CurrentStateInvalidated += (_, __) => QueueListView.Visibility = Visibility.Hidden;
             (Resources["VisionOffBoard"] as Storyboard).Completed += (_, __) => QueueListView.Visibility = Visibility.Visible;
@@ -137,7 +137,7 @@ namespace Player
                 case 7: MouseMoveTimer.Interval = 60000; break;
                 default: MouseMoveTimer.Interval = 5000; break;
             }
-            SettingsButton.Click += delegate
+            SettingsButton.MouseUp += delegate
             {
                 if (!IsVisionOn[2])
                 {
@@ -230,8 +230,7 @@ namespace Player
                     Player.Position = pos;
                     break;
                 case InfoType.MediaRemoved:
-                    int index = MediaViews.FindIndex(item => item.MediaIndex == e.Integer);
-                    MediaViews.RemoveAt(index);
+                    MediaViews.RemoveAll(item => item.MediaIndex == e.Integer);
                     QueueListView.Items.Clear();
                     for (int i = 0; i < MediaViews.Count; i++)
                         QueueListView.Items.Add(MediaViews[i]);
@@ -240,10 +239,7 @@ namespace Player
                     Play(Manager.Next(e.Integer));
                     break;
                 case InfoType.MediaUpdate:
-                    for (int i = 0; i < MediaViews.Count; i++)
-                        if (MediaViews[i].MediaIndex == e.Integer)
-                            MediaViews[i].Revoke(e.Integer, e.Object as Media);
-                    MediaViews[MediaViews.FindIndex(item => item.MediaIndex == e.Integer)].Revoke(e);
+                    MediaViews.Find(item => item.MediaIndex == e.Integer).Revoke(e);
                     if (e.Integer == Manager.CurrentlyPlayingIndex)
                     {
                         var q = Player.Position;
@@ -327,7 +323,7 @@ namespace Player
             MouseMoveTimer.Start();
         }
 
-        private void PlayPauseButton_Click(object sender, EventArgs e)
+        private void PlayPauseButton_Click(object sender, MouseButtonEventArgs e)
         {
             if (PlayPauseButton.Icon == IconType.Pause)
             {
@@ -342,15 +338,15 @@ namespace Player
                 Thumb.Refresh(true);
             }
         }
-        private void NextButton_Click(object sender, EventArgs e) => Play(Manager.Next());
-        private void PreviousButton_Click(object sender, EventArgs e)
+        private void NextButton_Click(object sender, MouseButtonEventArgs e) => Play(Manager.Next());
+        private void PreviousButton_Click(object sender, MouseButtonEventArgs e)
         {
             if (PositionSlider.Value > PositionSlider.Maximum / 100 * 10)
                 ChangePosition(0, true);
             else
                 Play(Manager.Previous());
         }
-        private void VisionButton_Click(object sender, EventArgs e)
+        private void VisionButton_Click(object sender, MouseButtonEventArgs e)
         {
             WindowSizes[IsVisionOn[0] ? 1 : 0].Width = ActualWidth;
             IsVisionOn[0] = !IsVisionOn[0];
@@ -360,7 +356,7 @@ namespace Player
             (WindowWidthBoard.Children[0] as DoubleAnimation).To = WindowSizes[IsVisionOn[0] ? 1: 0].Width;
             WindowWidthBoard.Begin();
         }
-        private void PlayModeButton_Click(object sender, EventArgs e)
+        private void PlayModeButton_Click(object sender, MouseButtonEventArgs e)
         {
             switch (Manager.ActivePlayMode)
             {
