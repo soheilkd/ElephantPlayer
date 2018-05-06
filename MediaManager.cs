@@ -178,13 +178,7 @@ namespace Player
         public int CurrentlyPlayingIndex
         {
             get => currentlyPlayingIndex;
-            set
-            {
-                for (int i = 0; i < AllMedias.Count; i++)
-                    AllMedias[i].IsPlaying = false;
-                AllMedias[value].IsPlaying = true;
-                currentlyPlayingIndex = value;
-            }
+            private set => currentlyPlayingIndex = value;
         }
 
         public static MediaType GetType(string FileName, bool checkOnline = false)

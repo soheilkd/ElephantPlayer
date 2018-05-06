@@ -408,8 +408,6 @@ namespace Player
             TitleLabel.Content = media.Title;
             for (int i = 0; i < MediaViews.Count; i++)
                 MediaViews[i].IsPlaying = false;
-            //int index = MediaViews.FindIndex(item => item.MediaIndex == Manager.CurrentlyPlayingIndex);
-            //MediaViews[index].IsPlaying = true;
             MediaViews.Find(item => item.MediaIndex == Manager.CurrentlyPlayingIndex).IsPlaying = true;
             VisionButton.Visibility = MediaManager.GetType(media.Path) == MediaType.Video ? Visibility.Visible : Visibility.Collapsed;
             if (IsVisionOn[0] && media.MediaType == MediaType.Music)
