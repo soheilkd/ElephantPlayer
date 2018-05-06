@@ -298,7 +298,7 @@ namespace Player
         private void Play_Click(object sender, MouseButtonEventArgs e) => PlayClicked?.Invoke(this, new InfoExchangeArgs(MediaIndex));
         private void OutputCanvas_MouseDoubleClick(object sender, MouseButtonEventArgs e) => DoubleClicked?.Invoke(this, new InfoExchangeArgs(MediaIndex));
 
-        private new void SizeChanged(object sender, SizeChangedEventArgs e)
+        private void Size_Changed(object sender, SizeChangedEventArgs e)
         {
             if (ActualWidth > 500)
             {

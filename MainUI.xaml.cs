@@ -44,8 +44,7 @@ namespace Player
             InitializeComponent();
             Manager.Change += Manager_Change;
             App.NewInstanceRequested += (_, e) => Manager.Add(e.Args);
-
-            Pref_DoubleValid.IsChecked = App.Preferences.LibraryValidation;
+            
             var lib = MassiveLibrary.Load();
             for (int i = 0; i < lib.Medias.Length; i++)
                 Manager.Add(lib.Medias[i]);
@@ -54,7 +53,6 @@ namespace Player
             Height = WindowSizes[0].Height;
             Left = App.Preferences.LastLoc.X;
             Top = App.Preferences.LastLoc.Y;
-            Player.Volume = 1;
             ProcessVolume();
         }
         private void BindUI()
@@ -215,8 +213,8 @@ namespace Player
                     };
                     MediaViews[p].ZipDownloaded += (n, f) =>
                     {
-                        Manager.Add((string[])f.Object);
                         Manager.Remove(((MediaView)n).MediaIndex);
+                        Manager.Add((string[])f.Object);
                     };
                     Height--; Height++;
                     break;
@@ -393,7 +391,6 @@ namespace Player
         {
             if (!IsLoaded)
                 return;
-            App.Preferences.LibraryValidation = Pref_DoubleValid.IsChecked.Value;
             App.Preferences.Save();
         }
         private void Play(Media media)

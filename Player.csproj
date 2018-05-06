@@ -185,6 +185,7 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="App.cs" />
     <Compile Include="Code.cs" />
     <Compile Include="Controls\MaterialIcon.xaml.cs">
       <DependentUpon>MaterialIcon.xaml</DependentUpon>
@@ -192,12 +193,15 @@
     <Compile Include="Controls\MediaView.xaml.cs">
       <DependentUpon>MediaView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="DeepBackEnd.cs" />
+    <Compile Include="Events.cs" />
     <Compile Include="MainUI.xaml.cs">
       <DependentUpon>MainUI.xaml</DependentUpon>
     </Compile>
     <Compile Include="Controls\MaterialButton.xaml.cs">
       <DependentUpon>MaterialButton.xaml</DependentUpon>
     </Compile>
+    <Compile Include="MediaManager.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>

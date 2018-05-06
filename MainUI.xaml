@@ -26,32 +26,6 @@
                 <sys:Double x:Key="{x:Static SystemParameters.VerticalScrollBarWidthKey}">10</sys:Double>
             </ListView.Resources>
         </ListView>
-        <Popup PlacementTarget="{Binding ElementName=SettingsButton}" Placement="Left">
-            <Grid Background="#F333">
-                <Grid.Resources>
-                    <Style TargetType="{x:Type CheckBox}">
-                        <Setter Property="Foreground" Value="White" />
-                        <EventSetter Event="ToggleButton.Checked" Handler="AnySettingChanged" />
-                        <EventSetter Event="ToggleButton.Unchecked" Handler="AnySettingChanged" />
-                    </Style>
-                    <Style TargetType="{x:Type GroupBox}">
-                        <Setter Property="BorderBrush" Value="#FF004080" />
-                        <Setter Property="BorderThickness" Value="1,0,0,2" />
-                    </Style>
-                    <Style TargetType="{x:Type Label}">
-                        <Setter Property="Foreground" Value="White" />
-                    </Style>
-                </Grid.Resources>
-                <ScrollViewer>
-                    <ScrollViewer.Resources>
-                        <sys:Double x:Key="{x:Static SystemParameters.VerticalScrollBarWidthKey}">10</sys:Double>
-                    </ScrollViewer.Resources>
-                    <StackPanel Width="500">
-                        <CheckBox Content="Library Double Validation" x:Name="Pref_DoubleValid" />
-                    </StackPanel>
-                </ScrollViewer>
-            </Grid>
-        </Popup>
         <Label x:Name="TitleLabel" Content="Title" Foreground="White" Margin="60, 0, 0, 50" Height="30" VerticalAlignment="Bottom"/>
         <player:MaterialButton x:Name="PreviousButton" Icon="Previous" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="80,0,0,25" MouseUp="PreviousButton_Click" />
         <player:MaterialButton x:Name="NextButton" Icon="Next" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="165,0,0,25" MouseUp="NextButton_Click" />

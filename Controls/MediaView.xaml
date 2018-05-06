@@ -3,7 +3,7 @@
              BorderBrush="#50FFFFFF"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:controls="clr-namespace:Player.Controls" SizeChanged="SizeChanged"
+             xmlns:controls="clr-namespace:Player.Controls" SizeChanged="Size_Changed"
              Width="200" Background="#01000000"
              Loaded="UserControl_Loaded" MouseDoubleClick="OutputCanvas_MouseDoubleClick"
              x:Name="OutputCanvas">

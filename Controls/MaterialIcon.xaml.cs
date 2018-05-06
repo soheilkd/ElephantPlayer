@@ -22,9 +22,7 @@ namespace Player.Controls
             DependencyProperty.Register(nameof(Icon), typeof(IconType), typeof(MaterialIcon), new FrameworkPropertyMetadata(IconType.None, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, new PropertyChangedCallback(OnIconChanged)));
         public static readonly DependencyProperty IconResourceProperty =
             DependencyProperty.Register(nameof(IconResource), typeof(object), typeof(MaterialIcon), new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
-        //internal ContentControl PART_ContentControl;
-        //private bool _contentLoaded;
-
+        
         public MaterialIcon()
         {
             InitializeComponent();
