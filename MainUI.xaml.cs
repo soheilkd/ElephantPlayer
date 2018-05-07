@@ -20,7 +20,7 @@ namespace Player
         private MassiveLibrary Library = new MassiveLibrary();
         private Timer PlayCountTimer = new Timer(100000) { AutoReset = false };
         private Timer DraggerTimer = new Timer(250) { AutoReset = false };
-        private Timer MouseMoveTimer = new Timer(5000);
+        private Timer MouseMoveTimer = new Timer(5000) { AutoReset = false };
         private Timer SizeChangeTimer = new Timer(50) { AutoReset = true };
         private TimeSpan TimeSpan;
         private Taskbar.Thumb Thumb = new Taskbar.Thumb();
@@ -64,7 +64,7 @@ namespace Player
             Thumb.PrevPressed += (obj, f) => PreviousButton_Click(obj, null);
             PlayCountTimer.Elapsed += (_, __) => Manager.AddCount();
             (Resources["VisionOnBoard"] as Storyboard).CurrentStateInvalidated += (_, __) => QueueListView.Visibility = Visibility.Hidden;
-            (Resources["VisionOffBoard"] as Storyboard).Completed += (_, __) => QueueListView.Visibility = Visibility.Visible;
+            (Resources["WindowWidthBoard"] as Storyboard).Completed += (_, __) => QueueListView.Visibility = IsVisionOn[0] ? Visibility.Hidden : Visibility.Visible;
             (Resources["SettingsOnBoard"] as Storyboard).CurrentStateInvalidated += (_, __) => SettingsGrid.Visibility = Visibility.Visible;
             (Resources["SettingsOffBoard"] as Storyboard).Completed += (_, __) => SettingsGrid.Visibility = Visibility.Hidden;
             SettingsGrid.Visibility = Visibility.Hidden;
@@ -195,9 +195,41 @@ namespace Player
                     QueueListView.Items.Add(MediaViews[p]);
                     MediaViews[p].DoubleClicked += (n, f) => Play(Manager.Next(f.Integer));
                     MediaViews[p].PlayClicked += (n, f) => Play(Manager.Next(f.Integer));
-                    MediaViews[p].DeleteRequested += (n, f) => Manager.RequestDelete(f.Integer);
+                    MediaViews[p].DeleteRequested += (n, f) =>
+                    {
+                        if (QueueListView.SelectedItems.Count > 1)
+                        {
+                            var arr = new int[QueueListView.SelectedItems.Count];
+                            for (int i = 0; i < arr.Length; i++)
+                            {
+                                arr[i] = (QueueListView.SelectedItems[i] as MediaView).MediaIndex;
+                            }
+                            string selectedFilesInString = "";
+                            foreach (var item in arr)
+                                selectedFilesInString += $"\r\n{Manager[item].Path}";
+                            var res = MessageBox.Show($"Sure? this files will be deleted:{selectedFilesInString}", " ", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
+                            if (res == MessageBoxResult.OK)
+                                foreach (var item in arr)
+                                    Manager.Remove(item);
+                        }
+                        else
+                            Manager.RequestDelete(f.Integer);
+                    };
                     MediaViews[p].LocationRequested += (n, f) => Manager.RequestLocation(f.Integer);
-                    MediaViews[p].RemoveRequested += (n, f) => Manager.Remove(f.Integer);
+                    MediaViews[p].RemoveRequested += (n, f) =>
+                    {
+                        if (QueueListView.SelectedItems.Count > 1)
+                        {
+                            object[] c = new object[QueueListView.SelectedItems.Count];
+                            QueueListView.SelectedItems.CopyTo(c, 0);
+                            for (int i = 0; i < c.Length; i++)
+                            {
+                                Manager.Remove((c[i] as MediaView).MediaIndex);
+                            }
+                        }
+                        else
+                            Manager.Remove(f.Integer);
+                    };
                     MediaViews[p].PropertiesRequested += (n, f) => Manager.ShowProperties(f.Integer);
                     MediaViews[p].RepeatRequested += (n, f) => Manager.Repeat(f.Integer, (int)f.Object);
                     MediaViews[p].DownloadRequested += (n, f) => (f.Object as MediaView).Download(Manager[f.Integer]);
@@ -232,6 +264,9 @@ namespace Player
                     QueueListView.Items.Clear();
                     for (int i = 0; i < MediaViews.Count; i++)
                         QueueListView.Items.Add(MediaViews[i]);
+                    for (int i = 0; i < MediaViews.Count; i++)
+                        if (MediaViews[i].MediaIndex >= e.Integer)
+                            MediaViews[i].MediaIndex--;
                     break;
                 case InfoType.MediaRequested:
                     Play(Manager.Next(e.Integer));
@@ -426,7 +461,10 @@ namespace Player
             else if (IsVisionOn[0])
                 BeginStoryboard(Resources[Enabled ? "FullVisionOnBoard" : "FullVisionOffBoard"] as Storyboard);
             else
+            {
+                BeginStoryboard(Resources["FullVisionOffBoard"] as Storyboard);
                 BeginStoryboard(Resources["VisionOffBoard"] as Storyboard);
+            }
             Player.Cursor = Cursors.None;
         }
         private bool IsAncestorKeyDown(Forms::KeyEventArgs e)

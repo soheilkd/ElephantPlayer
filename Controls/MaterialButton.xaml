@@ -5,7 +5,7 @@
              xmlns:controls="clr-namespace:Player.Controls" Loaded="UserControl_Loaded">
     <Grid x:Name="MainGrid">
         <Border x:Name="MainEllipse" BorderThickness="0" Margin="-5" BorderBrush="#FBBB" CornerRadius="20"/>
-        <controls:MaterialIcon x:Name="MainIcon" Foreground="White" Background="#01FFFFFF" Icon="Cloud"/>
+        <controls:MaterialIcon x:Name="MainIcon" Foreground="White" Background="#01FFFFFF" Width="{Binding Width, ElementName=MainGrid}" Height="{Binding Height, ElementName=MainGrid}"/>
     </Grid>
     <UserControl.Triggers>
         <EventTrigger RoutedEvent="MouseEnter">

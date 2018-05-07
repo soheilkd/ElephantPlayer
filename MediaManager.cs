@@ -30,7 +30,6 @@ namespace Player
         [NonSerialized] public bool IsLoaded;
         [NonSerialized] public long Duration;
         [NonSerialized] public System.Windows.Media.Imaging.BitmapSource Artwork;
-        [NonSerialized] public bool IsRemoved;
         public bool IsMedia => MediaType != MediaType.None;
         public bool IsVideo => MediaType == MediaType.Video || MediaType == MediaType.OnlineVideo;
         public bool IsValid
@@ -275,7 +274,7 @@ namespace Player
         public void Remove(Media media) => Remove(Find(media));
         public void Remove(int index)
         {
-            AllMedias[index].IsRemoved = true;
+            AllMedias.RemoveAt(index);
             Change?.Invoke(this, new InfoExchangeArgs() { Type = InfoType.MediaRemoved, Integer = index });
         }
 
@@ -423,7 +422,7 @@ namespace Player
         public static void Save(Media[] medias)
         {
             using (FileStream stream = new FileStream(LibraryPath, FileMode.Create))
-                (new BinaryFormatter()).Serialize(stream, new MassiveLibrary((from item in medias where !item.IsRemoved select item).ToArray()));
+                (new BinaryFormatter()).Serialize(stream, new MassiveLibrary(medias));
         }
         public static MassiveLibrary Load()
         {

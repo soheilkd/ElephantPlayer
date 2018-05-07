@@ -305,12 +305,20 @@ namespace Player
                 SubLabel.Visibility = Visibility.Hidden;
                 SubLabel.Margin = new Thickness(30, 0, 40, 0);
                 MainLabel.Content = $"{Manip[1]} - {Manip[0]}";
+                PlayButton.Width = 20;
+                PlayButton.Height = 20;
+                DownloadButton.Width = 20;
+                DownloadButton.Height = 20;
             }
             else if (SubLabel.Visibility == Visibility.Hidden)
             {
                 SubLabel.Visibility = Visibility.Visible;
                 SubLabel.Margin = new Thickness(30, 20, 40, 0);
                 MainLabel.Content = Manip[0];
+                PlayButton.Width = 26;
+                PlayButton.Height = 26;
+                DownloadButton.Width = 26;
+                DownloadButton.Height = 26;
             }
         }
     }
