@@ -42,6 +42,7 @@ namespace Player
             YearBox.Text = tag.Year.ToString() ?? String.Empty;
             CopyrightBox.Text = tag.Copyright ?? String.Empty;
             LyricsBox.Text = tag.Lyrics ?? String.Empty;
+            ArtworkImage.Source = media.Artwork;
             ChangeRequested += onSave;
         }
 
@@ -74,6 +75,7 @@ namespace Player
             File.Tag.Copyright = CopyrightBox.Text ?? String.Empty;
             File.Tag.Lyrics = LyricsBox.Text ?? String.Empty;
             ChangeRequested?.Invoke(this, new InfoExchangeArgs() { Object = File });
+            Close();
         }
     }
 }

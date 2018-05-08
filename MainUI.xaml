@@ -27,16 +27,16 @@
             </ListView.Resources>
         </ListView>
         <Label x:Name="TitleLabel" Content="Title" Foreground="White" Margin="60, 0, 0, 50" Height="30" VerticalAlignment="Bottom"/>
-        <player:MaterialButton x:Name="PreviousButton" Icon="Previous" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="80,0,0,25" MouseUp="PreviousButton_Click" />
-        <player:MaterialButton x:Name="NextButton" Icon="Next" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="165,0,0,25" MouseUp="NextButton_Click" />
-        <player:MaterialButton x:Name="PlayPauseButton" Icon="Play" MouseUp="PlayPauseButton_Click" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="120,0,0,24" Height="28" Width="28"/>
-        <player:MaterialButton x:Name="VisionButton" Icon="OndemandVideo" MouseUp="VisionButton_Click" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,5,34" Height="34" Width="34" EllipseType="Rectular"/>
+        <player:MaterialButton x:Name="PreviousButton" Icon="Previous" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="80,0,0,25" MouseUp="UI_PreviousButton_Click" />
+        <player:MaterialButton x:Name="NextButton" Icon="Next" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="165,0,0,25" MouseUp="UI_NextButton_Click" />
+        <player:MaterialButton x:Name="PlayPauseButton" Icon="Play" MouseUp="UI_PlayPauseButton_Click" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="120,0,0,24" Height="28" Width="28"/>
+        <player:MaterialButton x:Name="VisionButton" Icon="OndemandVideo" MouseUp="UI_VisionButton_Click" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,5,34" Height="34" Width="34" EllipseType="Rectular"/>
 
         <player:MaterialButton x:Name="VolumeButton" Icon="Volume3" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0, 0, 55, 25" MouseDown="VolumeButton_MouseDown"/>
         <Popup x:Name="VolumePopup" PlacementTarget="{Binding ElementName=VolumeButton}" Placement="Top" AllowsTransparency="True" PopupAnimation="Fade">
             <Label x:Name="VolumeLabel" Content="100" HorizontalAlignment="Right" Foreground="White"/>
         </Popup>
-        <player:MaterialButton x:Name="PlayModeButton" Icon="repeat" MouseUp="PlayModeButton_Click" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,100,25" />
+        <player:MaterialButton x:Name="PlayModeButton" Icon="repeat" MouseUp="UI_PlayModeButton_Click" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,100,25" />
 
         <Slider x:Name="PositionSlider"  ValueChanged="Position_Changed" PreviewMouseDown="Position_MouseDown"  
                VerticalAlignment="Bottom" Maximum="1000"

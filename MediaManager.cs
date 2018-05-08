@@ -320,9 +320,12 @@ namespace Player
         {
             var index = Find(file.Name);
             if (index != CurrentlyPlayingIndex)
+            {
+                file.Save();
                 Update(index);
+            }
             else
-                Change?.Invoke(this, new InfoExchangeArgs() { Type = InfoType.EditingTag, Integer = index });
+                Change?.Invoke(this, new InfoExchangeArgs() { Type = InfoType.EditingTag, Integer = index, Object = file });
         }
 
         public void RequestDelete(int index)

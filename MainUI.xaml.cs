@@ -235,7 +235,8 @@ namespace Player
             }
             else
                 (new PropertiesUI(Manager[e.Integer],
-                    (n, f) => Manager.Update(f.Object as TagLib.File)
+                    (n, f) => 
+                    Manager.Update(f.Object as TagLib.File)
                     )).Show();
 
         }
