@@ -179,65 +179,6 @@
         </Grid>
         <player:MaterialButton x:Name="SettingsButton" Icon="Settings"  HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,145,25" />
 
-        <Grid.Resources>
-            <Popup x:Key="MetaPopup">
-                <ScrollViewer Background="Transparent">
-                    <StackPanel >
-                        <Grid >
-                            <Grid.Resources>
-                                <Style TargetType="{x:Type TextBox}">
-                                    <Setter Property="HorizontalAlignment" Value="Stretch" />
-                                    <Setter Property="Height" Value="22" />
-                                    <Setter Property="VerticalAlignment" Value="Top" />
-                                    <Setter Property="MaxLines" Value="1" />
-                                    <Setter Property="Text" Value="Sample" />
-                                    <Setter Property="Background" Value="Transparent" />
-                                    <Setter Property="Foreground" Value="White" />
-
-                                    <Style.Triggers>
-                                        <Trigger Property="IsEnabled" Value="true">
-                                            <Setter Property="Text" Value="NotSupported" />
-
-                                        </Trigger>
-                                    </Style.Triggers>
-                                </Style>
-                                <Style TargetType="{x:Type Label}">
-                                    <Setter Property="HorizontalAlignment" Value="Left" />
-                                    <Setter Property="VerticalAlignment" Value="Top" />
-                                    <Setter Property="Foreground" Value="White" />
-                                </Style>
-                            </Grid.Resources>
-                            <Label Content="Title" Margin="154,30,0,0" />
-                            <TextBox x:Name="Meta_TitleBox" Margin="232,30,5,0"/>
-                            <Label Content="Artist" Margin="154,55,0,0"/>
-                            <TextBox x:Name="Meta_ArtistBox" Margin="232,55,5,0" />
-                            <Label Content="Album" Margin="154,80,0,0"/>
-                            <TextBox x:Name="Meta_AlbumBox" Margin="232,80,5,0" />
-                            <Label Content="Album Artist" Margin="151,105,0,0" />
-                            <TextBox x:Name="Meta_AlbumArtistBox" Margin="232,105,5,0" />
-                            <Label Content="Composer" Margin="151,130,0,0" />
-                            <TextBox x:Name="Meta_ComposerBox" Margin="232,130,5,0" />
-                            <Label Content="Conductor" Margin="151,155,0,0" />
-                            <TextBox x:Name="Meta_ConductorBox" Margin="232,155,5,0" />
-                            <Label Content="Genre" Margin="151,180,0,0" />
-                            <TextBox x:Name="Meta_GenreBox" Margin="232,180,5,0"  />
-                            <Label Content="Track" Margin="151,205,0,0"/>
-                            <TextBox x:Name="Meta_TrackBox" Margin="232,205,5,0" />
-                            <Label Content="Comment" Margin="151,230,0,0" />
-                            <TextBox x:Name="Meta_YearBox" Margin="232,230,5,0" />
-                            <Label Content="Year" Margin="151,255,0,0"/>
-                            <TextBox x:Name="Meta_CommentBox" Margin="232,255,5,0" />
-                            <Label Content="Copyright" Margin="151,280,0,0" />
-                            <TextBox x:Name="Meta_CopyrightBox" Margin="232,280,5,0" />
-                            <Label Content="Lyrics" Margin="0, 305, 5, 0" />
-                            <TextBox x:Name="Meta_LyricsBox" Margin="0, 325, 0, 0" Height="250"/>
-
-                            <Image x:Name="Meta_ArtworkImage" Height="150" Width="150"  VerticalAlignment="Top" HorizontalAlignment="Left"/>
-                        </Grid>
-                    </StackPanel>
-                </ScrollViewer>
-            </Popup>
-        </Grid.Resources>
     </Grid>
     <Window.Resources>
         <SolidColorBrush x:Key="KeyOfBackground" Color="#FF303030" />

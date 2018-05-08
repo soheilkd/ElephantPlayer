@@ -88,10 +88,10 @@ namespace Player
                             Path = path;
                             Artist = t.Tag.FirstPerformer ?? path.Substring(0, path.LastIndexOf("\\"));
                             Title = t.Tag.Title ?? Name.Substring(0, Name.LastIndexOf("."));
-                            Album = t.Tag.Album ?? " ";
+                            Album = t.Tag.Album ?? String.Empty;
                             Artwork = t.Tag.Pictures.Length >= 1 ? Imaging.Get.BitmapSource(t.Tag.Pictures[0]) : Imaging.Images.MusicArt;
                             MediaType = MediaType.Music;
-                            Lyrics = t.Tag.Lyrics ?? " ";
+                            Lyrics = t.Tag.Lyrics ?? String.Empty;
                             Length = unchecked((int)t.Length);
                             IsLoaded = true;
                         }
@@ -312,11 +312,17 @@ namespace Player
         public void Copy(Media media, string to) => Copy(media.Path, to);
         public void Copy(int index, string to) => Copy(AllMedias[index], to);
 
-        public void Reload(int index)
+        public void Update(int index)
         {
-            if (index == -1)
-                index = CurrentlyPlayingIndex;
-            AllMedias[index] = new Media(AllMedias[index].Path);
+            this[index] = new Media(AllMedias[index].Path);
+        }
+        public void Update(TagLib.File file)
+        {
+            var index = Find(file.Name);
+            if (index != CurrentlyPlayingIndex)
+                Update(index);
+            else
+                Change?.Invoke(this, new InfoExchangeArgs() { Type = InfoType.EditingTag, Integer = index });
         }
 
         public void RequestDelete(int index)

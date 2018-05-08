@@ -58,10 +58,10 @@ namespace Player
         private void BindUI()
         {
             TaskbarItemInfo = Thumb.Info;
-            Thumb.NextPressed += (obj, f) => NextButton_Click(obj, null);
-            Thumb.PausePressed += (obj, f) => PlayPauseButton_Click(obj, null);
-            Thumb.PlayPressed += (obj, f) => PlayPauseButton_Click(obj, null);
-            Thumb.PrevPressed += (obj, f) => PreviousButton_Click(obj, null);
+            Thumb.NextPressed += (obj, f) => UI_NextButton_Click(obj, null);
+            Thumb.PausePressed += (obj, f) => UI_PlayPauseButton_Click(obj, null);
+            Thumb.PlayPressed += (obj, f) => UI_PlayPauseButton_Click(obj, null);
+            Thumb.PrevPressed += (obj, f) => UI_PreviousButton_Click(obj, null);
             PlayCountTimer.Elapsed += (_, __) => Manager.AddCount();
             (Resources["VisionOnBoard"] as Storyboard).CurrentStateInvalidated += (_, __) => QueueListView.Visibility = Visibility.Hidden;
             (Resources["WindowWidthBoard"] as Storyboard).Completed += (_, __) => QueueListView.Visibility = IsVisionOn[0] ? Visibility.Hidden : Visibility.Visible;
@@ -173,7 +173,7 @@ namespace Player
             switch (e.Key)
             {
                 case Key.Space:
-                    PlayPauseButton_Click(this, null);
+                    UI_PlayPauseButton_Click(this, null);
                     break;
                 default: break;
             }
@@ -185,6 +185,92 @@ namespace Player
             SizeChangeTimer.Start();
         }
 
+        private void Media_DeleteRequested(object sender, InfoExchangeArgs e)
+        {
+            if (QueueListView.SelectedItems.Count > 1)
+            {
+                var arr = GetSelectedMediaIndexes();
+                string selectedFilesInString = "";
+                foreach (var item in arr)
+                    selectedFilesInString += $"\r\n{Manager[item].Path}";
+                var res = MessageBox.Show($"Sure? this files will be deleted:{selectedFilesInString}", " ", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
+                if (res == MessageBoxResult.OK)
+                    foreach (var item in arr)
+                        Manager.Remove(item);
+            }
+            else
+                Manager.RequestDelete(e.Integer);
+        }
+        private void Media_LocationRequested(object sender, InfoExchangeArgs e)
+        {
+            if (QueueListView.SelectedItems.Count > 1)
+            {
+                var arr = GetSelectedMediaIndexes();
+                foreach (var item in arr)
+                    Manager.RequestLocation(item);
+            }
+            else
+                Manager.RequestLocation(e.Integer);
+        }
+        private void Media_RemoveRequested(object sender, InfoExchangeArgs e)
+        {
+            if (QueueListView.SelectedItems.Count > 1)
+            {
+                var arr = GetSelectedMediaIndexes();
+                foreach (var item in arr)
+                    Manager.Remove(item);
+            }
+            else
+                Manager.Remove(e.Integer);
+        }
+        private void Media_PropertiesRequested(object sender, InfoExchangeArgs e)
+        {
+            if (QueueListView.SelectedItems.Count > 1)
+            {
+                var arr = GetSelectedMediaIndexes();
+                foreach (var item in arr)
+                    (new PropertiesUI(Manager[item], 
+                        (n, f) => Manager.Update(f.Object as TagLib.File)
+                        )).Show();
+            }
+            else
+                (new PropertiesUI(Manager[e.Integer],
+                    (n, f) => Manager.Update(f.Object as TagLib.File)
+                    )).Show();
+
+        }
+        private void Media_RepeatRequested(object sender, InfoExchangeArgs e)
+        {
+            if (QueueListView.SelectedItems.Count > 1)
+            {
+                var arr = GetSelectedMediaIndexes();
+                for (int i = 0; i < (int)e.Object; i++)
+                    foreach (var item in arr)
+                        Manager.Repeat(item);
+            }
+            else
+                Manager.Repeat(e.Integer, (int)e.Object);
+        }
+        private void Media_DownloadRequested(object sender, InfoExchangeArgs e)
+        {
+            (sender as MediaView).Download(Manager[e.Integer]);
+        }
+        private void Media_DownloadCompleted(object sender, InfoExchangeArgs e)
+        {
+            Manager[e.Integer] = e.Object as Media;
+            if (Manager.CurrentlyPlayingIndex == e.Integer)
+            {
+                var posit = Player.Position;
+                Play(Manager[e.Integer]);
+                ChangePosition(posit.TotalMilliseconds, true);
+            }
+        }
+        private void Media_ZipDownloaded(object sender, InfoExchangeArgs e)
+        {
+            Manager.Remove((sender as MediaView).MediaIndex);
+            Manager.Add((string[])e.Object);
+        }
+       
         private async void Manager_Change(object sender, InfoExchangeArgs e)
         {
             switch (e.Type)
@@ -195,59 +281,14 @@ namespace Player
                     QueueListView.Items.Add(MediaViews[p]);
                     MediaViews[p].DoubleClicked += (n, f) => Play(Manager.Next(f.Integer));
                     MediaViews[p].PlayClicked += (n, f) => Play(Manager.Next(f.Integer));
-                    MediaViews[p].DeleteRequested += (n, f) =>
-                    {
-                        if (QueueListView.SelectedItems.Count > 1)
-                        {
-                            var arr = new int[QueueListView.SelectedItems.Count];
-                            for (int i = 0; i < arr.Length; i++)
-                            {
-                                arr[i] = (QueueListView.SelectedItems[i] as MediaView).MediaIndex;
-                            }
-                            string selectedFilesInString = "";
-                            foreach (var item in arr)
-                                selectedFilesInString += $"\r\n{Manager[item].Path}";
-                            var res = MessageBox.Show($"Sure? this files will be deleted:{selectedFilesInString}", " ", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
-                            if (res == MessageBoxResult.OK)
-                                foreach (var item in arr)
-                                    Manager.Remove(item);
-                        }
-                        else
-                            Manager.RequestDelete(f.Integer);
-                    };
-                    MediaViews[p].LocationRequested += (n, f) => Manager.RequestLocation(f.Integer);
-                    MediaViews[p].RemoveRequested += (n, f) =>
-                    {
-                        if (QueueListView.SelectedItems.Count > 1)
-                        {
-                            object[] c = new object[QueueListView.SelectedItems.Count];
-                            QueueListView.SelectedItems.CopyTo(c, 0);
-                            for (int i = 0; i < c.Length; i++)
-                            {
-                                Manager.Remove((c[i] as MediaView).MediaIndex);
-                            }
-                        }
-                        else
-                            Manager.Remove(f.Integer);
-                    };
-                    MediaViews[p].PropertiesRequested += (n, f) => Manager.ShowProperties(f.Integer);
-                    MediaViews[p].RepeatRequested += (n, f) => Manager.Repeat(f.Integer, (int)f.Object);
-                    MediaViews[p].DownloadRequested += (n, f) => (f.Object as MediaView).Download(Manager[f.Integer]);
-                    MediaViews[p].Downloaded += (n, f) =>
-                    {
-                        Manager[f.Integer] = f.Object as Media;
-                        if (Manager.CurrentlyPlayingIndex == e.Integer)
-                        {
-                            var posit = Player.Position;
-                            Play(Manager[f.Integer]);
-                            ChangePosition(posit.TotalMilliseconds, true);
-                        }
-                    };
-                    MediaViews[p].ZipDownloaded += (n, f) =>
-                    {
-                        Manager.Remove(((MediaView)n).MediaIndex);
-                        Manager.Add((string[])f.Object);
-                    };
+                    MediaViews[p].DeleteRequested += Media_DeleteRequested;
+                    MediaViews[p].LocationRequested += Media_LocationRequested;
+                    MediaViews[p].RemoveRequested += Media_RemoveRequested;
+                    MediaViews[p].PropertiesRequested += Media_PropertiesRequested;
+                    MediaViews[p].RepeatRequested += Media_RepeatRequested;
+                    MediaViews[p].DownloadRequested += Media_DownloadRequested;
+                    MediaViews[p].Downloaded += Media_DownloadCompleted;
+                    MediaViews[p].ZipDownloaded += Media_ZipDownloaded;
                     Height--; Height++;
                     break;
                 case InfoType.EditingTag:
@@ -311,9 +352,9 @@ namespace Player
             }
             switch (e.KeyCode)
             {
-                case Forms::Keys.MediaNextTrack: NextButton_Click(this, null); break;
-                case Forms::Keys.MediaPreviousTrack: PreviousButton_Click(this, null); break;
-                case Forms::Keys.MediaPlayPause: PlayPauseButton_Click(this, null); break; 
+                case Forms::Keys.MediaNextTrack: UI_NextButton_Click(this, null); break;
+                case Forms::Keys.MediaPreviousTrack: UI_PreviousButton_Click(this, null); break;
+                case Forms::Keys.MediaPlayPause: UI_PlayPauseButton_Click(this, null); break; 
                 default: break;
             }
         }
@@ -356,7 +397,7 @@ namespace Player
             MouseMoveTimer.Start();
         }
 
-        private void PlayPauseButton_Click(object sender, MouseButtonEventArgs e)
+        private void UI_PlayPauseButton_Click(object sender, MouseButtonEventArgs e)
         {
             if (PlayPauseButton.Icon == IconType.Pause)
             {
@@ -371,15 +412,15 @@ namespace Player
                 Thumb.Refresh(true);
             }
         }
-        private void NextButton_Click(object sender, MouseButtonEventArgs e) => Play(Manager.Next());
-        private void PreviousButton_Click(object sender, MouseButtonEventArgs e)
+        private void UI_NextButton_Click(object sender, MouseButtonEventArgs e) => Play(Manager.Next());
+        private void UI_PreviousButton_Click(object sender, MouseButtonEventArgs e)
         {
             if (PositionSlider.Value > PositionSlider.Maximum / 100 * 10)
                 ChangePosition(0, true);
             else
                 Play(Manager.Previous());
         }
-        private void VisionButton_Click(object sender, MouseButtonEventArgs e)
+        private void UI_VisionButton_Click(object sender, MouseButtonEventArgs e)
         {
             WindowSizes[IsVisionOn[0] ? 1 : 0].Width = ActualWidth;
             IsVisionOn[0] = !IsVisionOn[0];
@@ -389,7 +430,7 @@ namespace Player
             (WindowWidthBoard.Children[0] as DoubleAnimation).To = WindowSizes[IsVisionOn[0] ? 1: 0].Width;
             WindowWidthBoard.Begin();
         }
-        private void PlayModeButton_Click(object sender, MouseButtonEventArgs e)
+        private void UI_PlayModeButton_Click(object sender, MouseButtonEventArgs e)
         {
             switch (Manager.ActivePlayMode)
             {
@@ -447,7 +488,7 @@ namespace Player
             VisionButton.Visibility = MediaManager.GetType(media.Path) == MediaType.Video ? Visibility.Visible : Visibility.Collapsed;
             if (IsVisionOn[0] && media.MediaType == MediaType.Music)
             {
-                VisionButton_Click(this, null);
+                UI_VisionButton_Click(this, null);
                 OrinateFullVision(false);
                 WindowStyle = WindowStyle.SingleBorderWindow;
                 Topmost = false;
@@ -480,6 +521,13 @@ namespace Player
                 case 6: return e.Control && e.Shift && e.Alt;
                 default: return false;
             }
+        }
+        private int[] GetSelectedMediaIndexes()
+        {
+            int[] arr = new int[QueueListView.SelectedItems.Count];
+            for (int i = 0; i < arr.Length; i++)
+                arr[i] = (QueueListView.SelectedItems[i] as MediaView).MediaIndex;
+            return arr;
         }
 
         private void ChangePosition(double ms, bool Seek = false)

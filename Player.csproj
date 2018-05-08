@@ -150,6 +150,9 @@
       <DependentUpon>MaterialButton.xaml</DependentUpon>
     </Compile>
     <Compile Include="MediaManager.cs" />
+    <Compile Include="PropertiesUI.xaml.cs">
+      <DependentUpon>PropertiesUI.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -172,6 +175,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Controls\MaterialButton.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="PropertiesUI.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

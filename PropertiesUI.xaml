@@ -1,0 +1,64 @@
+﻿<Window x:Class="Player.PropertiesUI"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Player" Background="#F222"
+        mc:Ignorable="d"
+        Title="PropertiesUI" Height="450" Width="436.029">
+    <Grid >
+        <Label Content="Title" Margin="154,30,0,0" />
+        <TextBox x:Name="TitleBox" Margin="232,30,5,0"/>
+        <Label Content="Artist" Margin="154,55,0,0"/>
+        <TextBox x:Name="ArtistBox" Margin="232,55,5,0" />
+        <Label Content="Album" Margin="154,80,0,0"/>
+        <TextBox x:Name="AlbumBox" Margin="232,80,5,0" />
+        <Label Content="Album Artist" Margin="151,105,0,0" />
+        <TextBox x:Name="AlbumArtistBox" Margin="232,105,5,0" />
+        <Label Content="Composer" Margin="151,130,0,0" />
+        <TextBox x:Name="ComposerBox" Margin="232,130,5,0" />
+        <Label Content="Conductor" Margin="151,155,0,0" />
+        <TextBox x:Name="ConductorBox" Margin="232,155,5,0" />
+        <Label Content="Genre" Margin="151,180,0,0" />
+        <TextBox x:Name="GenreBox" Margin="232,180,5,0"  />
+        <Label Content="Track" Margin="151,205,0,0"/>
+        <TextBox x:Name="TrackBox" Margin="232,205,5,0" />
+        <Label Content="Comment" Margin="151,230,0,0" />
+        <TextBox x:Name="YearBox" Margin="232,230,5,0" />
+        <Label Content="Year" Margin="151,255,0,0"/>
+        <TextBox x:Name="CommentBox" Margin="232,255,5,0" />
+        <Label Content="Copyright" Margin="151,280,0,0" />
+        <TextBox x:Name="CopyrightBox" Margin="232,280,5,0" />
+        <Label Content="Lyrics" Margin="0, 305, 5, 0" />
+        <TextBox x:Name="LyricsBox" Margin="0, 325, 0, 0" Height="250"/>
+
+        <Image x:Name="ArtworkImage" Height="150" Width="150"  VerticalAlignment="Top" HorizontalAlignment="Left"/>
+        <Button Content="Browse..." Margin="10,160,0,0" Click="BrowseArtworkClick" />
+        <Button Content="Remove" Margin="10,190,0,0" Click="RemoveArtworkClick" />
+        <Button Content="Save" Margin="0,2,5,0" HorizontalAlignment="Right" Click="SaveButtonClick" />
+        <Grid.Resources>
+            <Style TargetType="{x:Type Button}">
+                <Setter Property="HorizontalAlignment" Value="Left"/>
+                <Setter Property="VerticalAlignment" Value="Top" />
+                <Setter Property="Background" Value="#F333" />
+                <Setter Property="Foreground" Value="#FFFF" />
+                <Setter Property="FontSize" Value="14" />
+                <Setter Property="Width" Value="90" />
+            </Style>
+            <Style TargetType="{x:Type TextBox}">
+                <Setter Property="HorizontalAlignment" Value="Stretch" />
+                <Setter Property="Height" Value="22" />
+                <Setter Property="VerticalAlignment" Value="Top" />
+                <Setter Property="MaxLines" Value="1" />
+                <Setter Property="Text" Value="Sample" />
+                <Setter Property="Background" Value="Transparent" />
+                <Setter Property="Foreground" Value="White" />
+            </Style>
+            <Style TargetType="{x:Type Label}">
+                <Setter Property="HorizontalAlignment" Value="Left" />
+                <Setter Property="VerticalAlignment" Value="Top" />
+                <Setter Property="Foreground" Value="White" />
+            </Style>
+        </Grid.Resources>
+    </Grid>
+</Window>
