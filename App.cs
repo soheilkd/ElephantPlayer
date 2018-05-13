@@ -27,6 +27,7 @@ namespace Player
             {
                 var application = new App();
                 application.InitializeComponent();
+                Imaging.Images.Initialize();
 
                 application.Run();
                 InstanceManager.Instance<App>.Cleanup();

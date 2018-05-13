@@ -19,8 +19,6 @@ namespace Player
         private List<MediaView> MediaViews = new List<MediaView>();
         private MassiveLibrary Library = new MassiveLibrary();
         private Timer PlayCountTimer = new Timer(100000) { AutoReset = false };
-        private Timer DraggerTimer = new Timer(250) { AutoReset = false };
-        private Timer MouseMoveTimer = new Timer(5000) { AutoReset = false };
         private Timer SizeChangeTimer = new Timer(50) { AutoReset = true };
         private TimeSpan TimeSpan;
         private Taskbar.Thumb Thumb = new Taskbar.Thumb();
@@ -93,11 +91,11 @@ namespace Player
             Player.MediaEnded += (_, __) => Play(Manager.Next());
             switch ((PlayMode)App.Preferences.PlayMode)
             {
-                case PlayMode.Shuffle: PlayModeButton.Icon = IconType.Shuffle; break;
-                case PlayMode.RepeatOne: PlayModeButton.Icon = IconType.RepeatOne; break;
-                case PlayMode.RepeatAll: PlayModeButton.Icon = IconType.Repeat; break;
-                case PlayMode.Queue: PlayModeButton.Icon = IconType.MusicQueue; break;
-                default: PlayModeButton.Icon = IconType.Repeat; break;
+                case PlayMode.Shuffle: PlayModeButton.Icon = Glyph.Shuffle; break;
+                case PlayMode.RepeatOne: PlayModeButton.Icon = Glyph.RepeatOne; break;
+                case PlayMode.RepeatAll: PlayModeButton.Icon = Glyph.RepeatAll; break;
+                case PlayMode.Queue: PlayModeButton.Icon = Glyph.GroupList; break;
+                default: PlayModeButton.Icon = Glyph.RepeatAll; break;
             }
 
             Settings_AncestorCombo.SelectedIndex = App.Preferences.MainKey;
@@ -360,103 +358,6 @@ namespace Player
             }
         }
 
-        private void Player_MouseDown(object sender, MouseButtonEventArgs e)
-        {
-            DraggerTimer.Start();
-            try
-            {
-                if (WindowState != WindowState.Maximized)
-                    DragMove();
-                if (DraggerTimer.Enabled && !IsVisionOn[1])
-                {
-                    Topmost = !Topmost;
-                    WindowStyle = Topmost ? WindowStyle.None : WindowStyle.SingleBorderWindow;
-                }
-            }
-            catch (Exception) { }
-        }
-        private void Player_ContextFullScreen(object sender, RoutedEventArgs e)
-        {
-            if (ResizeMode != ResizeMode.NoResize)
-            {
-                WindowStyle = WindowStyle.None;
-                ResizeMode = ResizeMode.NoResize;
-                WindowState = WindowState.Maximized;
-            }
-            else
-            {
-                ResizeMode = ResizeMode.CanResize;
-                WindowStyle = WindowStyle.ThreeDBorderWindow;
-                WindowState = WindowState.Normal;
-            }
-        }
-        private void Player_MouseMove(object sender, MouseEventArgs e)
-        {
-            OrinateFullVision(false);
-            Player.Cursor = Cursors.Arrow;
-            MouseMoveTimer.Stop();
-            MouseMoveTimer.Start();
-        }
-
-        private void UI_PlayPauseButton_Click(object sender, MouseButtonEventArgs e)
-        {
-            if (PlayPauseButton.Icon == IconType.Pause)
-            {
-                Player.Pause();
-                PlayPauseButton.Icon = IconType.Play;
-                Thumb.Refresh(false);
-            }
-            else
-            {
-                Player.Play();
-                PlayPauseButton.Icon = IconType.Pause;
-                Thumb.Refresh(true);
-            }
-        }
-        private void UI_NextButton_Click(object sender, MouseButtonEventArgs e) => Play(Manager.Next());
-        private void UI_PreviousButton_Click(object sender, MouseButtonEventArgs e)
-        {
-            if (PositionSlider.Value > PositionSlider.Maximum / 100 * 10)
-                ChangePosition(0, true);
-            else
-                Play(Manager.Previous());
-        }
-        private void UI_VisionButton_Click(object sender, MouseButtonEventArgs e)
-        {
-            WindowSizes[IsVisionOn[0] ? 1 : 0].Width = ActualWidth;
-            IsVisionOn[0] = !IsVisionOn[0];
-            BeginStoryboard(Resources[IsVisionOn[0] ? "VisionOnBoard" : "VisionOffBoard"] as Storyboard);
-            if (!IsVisionOn[0]) { Height--; Height++; }
-            (WindowWidthBoard.Children[0] as DoubleAnimation).From = ActualWidth;
-            (WindowWidthBoard.Children[0] as DoubleAnimation).To = WindowSizes[IsVisionOn[0] ? 1: 0].Width;
-            WindowWidthBoard.Begin();
-        }
-        private void UI_PlayModeButton_Click(object sender, MouseButtonEventArgs e)
-        {
-            switch (Manager.ActivePlayMode)
-            {
-                case PlayMode.Shuffle:
-                    PlayModeButton.Icon = IconType.RepeatOne;
-                    Manager.ActivePlayMode = PlayMode.RepeatOne;
-                    break;
-                case PlayMode.RepeatOne:
-                    PlayModeButton.Icon = IconType.Repeat;
-                    Manager.ActivePlayMode = PlayMode.RepeatAll;
-                    break;
-                case PlayMode.RepeatAll:
-                    PlayModeButton.Icon = IconType.MusicQueue;
-                    Manager.ActivePlayMode = PlayMode.Queue;
-                    break;
-                case PlayMode.Queue:
-                    PlayModeButton.Icon = IconType.Shuffle;
-                    Manager.ActivePlayMode = PlayMode.Shuffle;
-                    break;
-                default:
-                    break;
-            }
-            App.Preferences.PlayMode = (int)Manager.ActivePlayMode;
-        }
-
         public static string CastTime(TimeSpan time)
         {
             //Absolutely unreadable, btw just works...
@@ -478,7 +379,7 @@ namespace Player
                 return;
             }
             PositionSlider.Value = 0;
-            PlayPauseButton.Icon = IconType.Pause;
+            PlayPauseButton.Icon = Glyph.Pause;
             Player.Source = new Uri(media.Path);
             Player.Play();
             MiniArtworkImage.Source = media.Artwork;
@@ -585,37 +486,6 @@ namespace Player
             PlayPauseButton.Icon = IconType.Pause;
             Player.Play();
             IsUserSeeking = false;
-        }
-
-        private async void VolumeButton_MouseDown(object sender, MouseButtonEventArgs e)
-        {
-            VolumePopup.IsOpen = true;
-            while (e.LeftButton == MouseButtonState.Pressed)
-            {
-                if (Player.Volume < 1)
-                    Player.Volume += 0.01;
-                ProcessVolume();
-                await Task.Delay(50);
-            }
-            while(e.RightButton == MouseButtonState.Pressed)
-            {
-                if (Player.Volume > 0)
-                    Player.Volume -= 0.01;
-                ProcessVolume();
-                await Task.Delay(50);
-            }
-            VolumePopup.IsOpen = false;
-        }
-        private void ProcessVolume()
-        {
-            VolumeLabel.Content = (Player.Volume * 100).ToInt();
-            switch (Player.Volume)
-            {
-                case double n when (n < 0.1): VolumeButton.Icon = IconType.Volume0; break;
-                case double n when (n < 0.4): VolumeButton.Icon = IconType.Volume1; break;
-                case double n when (n < 0.8): VolumeButton.Icon = IconType.Volume2; break;
-                default: VolumeButton.Icon = IconType.Volume3; break;
-            }
         }
     }
 }

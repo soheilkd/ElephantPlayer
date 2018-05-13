@@ -322,7 +322,7 @@ namespace Player
             if (index != CurrentlyPlayingIndex)
             {
                 file.Save();
-                Update(index);
+                Update(index); 
             }
             else
                 Change?.Invoke(this, new InfoExchangeArgs() { Type = InfoType.EditingTag, Integer = index, Object = file });

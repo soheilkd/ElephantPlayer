@@ -135,19 +135,22 @@
   <ItemGroup>
     <Compile Include="App.cs" />
     <Compile Include="Code.cs" />
-    <Compile Include="Controls\MaterialIcon.xaml.cs">
-      <DependentUpon>MaterialIcon.xaml</DependentUpon>
+    <Compile Include="Controls\MediaPlayer.xaml.cs">
+      <DependentUpon>MediaPlayer.xaml</DependentUpon>
     </Compile>
     <Compile Include="Controls\MediaView.xaml.cs">
       <DependentUpon>MediaView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\SegoeButton.xaml.cs">
+      <DependentUpon>SegoeButton.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\SegoeIcon.xaml.cs">
+      <DependentUpon>SegoeIcon.xaml</DependentUpon>
     </Compile>
     <Compile Include="DeepBackEnd.cs" />
     <Compile Include="Events.cs" />
     <Compile Include="MainUI.xaml.cs">
       <DependentUpon>MainUI.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Controls\MaterialButton.xaml.cs">
-      <DependentUpon>MaterialButton.xaml</DependentUpon>
     </Compile>
     <Compile Include="MediaManager.cs" />
     <Compile Include="PropertiesUI.xaml.cs">
@@ -162,7 +165,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Controls\MaterialIcon.xaml">
+    <Page Include="Controls\MediaPlayer.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -170,11 +173,15 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="MainUI.xaml">
-      <SubType>Designer</SubType>
+    <Page Include="Controls\SegoeButton.xaml">
       <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
-    <Page Include="Controls\MaterialButton.xaml">
+    <Page Include="Controls\SegoeIcon.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="MainUI.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
