@@ -8,6 +8,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media.Animation;
 using System.ComponentModel;
+using static Player.Global;
 #pragma warning disable 1591
 namespace Player
 {
@@ -37,13 +38,13 @@ namespace Player
             get => isPlaying; set
             {
                 isPlaying = value;
-                MainIcon.Icon = value ? IconType.Equalizer : DefaultIcon;
+                MainIcon.Glyph = value ? Glyph.MusicAlbum : DefaultIcon;
                 MainIcon.Foreground = value ? Brushes.DeepSkyBlue : Brushes.White;
                 MainLabel.Foreground = value ? Brushes.DeepSkyBlue : Brushes.White;
                 SubLabel.Foreground = value ? Brushes.DeepSkyBlue : Brushes.White;
             }
         }
-        public IconType DefaultIcon { get; set; }
+        public Glyph DefaultIcon { get; set; }
         public MediaView()
         {
             InitializeComponent();
@@ -53,7 +54,7 @@ namespace Player
             InitializeComponent();
             Revoke(index, main, sub,time, type);
         }
-        public MediaView(int index, Media media) : this(index, media.Title, media.Artist, MainUI.CastTime(media.Length), media.MediaType) { }
+        public MediaView(int index, Media media) : this(index, media.Title, media.Artist, CastTime(media.Length), media.MediaType) { }
 
         public void Revoke(int index, string main, string sub, string time, MediaType type = MediaType.Music)
         {
@@ -63,28 +64,28 @@ namespace Player
             switch (type)
             {
                 case MediaType.Music:
-                    DefaultIcon = IconType.MusicNote;
+                    DefaultIcon = Glyph.MusicNote;
                     break;
                 case MediaType.Video:
-                    DefaultIcon = IconType.OndemandVideo;
+                    DefaultIcon = Glyph.Video;
                     break;
                 case MediaType.OnlineMusic:
                 case MediaType.OnlineVideo:
                 case MediaType.OnlineFile:
-                    DefaultIcon = IconType.Cloud;
+                    DefaultIcon = Glyph.Cloud;
                     break;
                 default:
-                    DefaultIcon = IconType.None;
+                    DefaultIcon = default;
                     break;
             }
-            MainIcon.Icon = DefaultIcon;
+            MainIcon.Glyph = DefaultIcon;
             Manip = new string[] { main, sub };
             TimeLabel.Content = time;
             if ((int)type < 3)
                 DownloadButton.Visibility = Visibility.Hidden;
             Resources["TimeLabelTargetMargin"] = new Thickness(0, 0, (int)type > 2 ? 75: 35, 0);
         }
-        public void Revoke(int index, Media media) => Revoke(index, media.Title, media.Artist, MainUI.CastTime(media.Length), media.MediaType);
+        public void Revoke(int index, Media media) => Revoke(index, media.Title, media.Artist, CastTime(media.Length), media.MediaType);
         public void Revoke(InfoExchangeArgs e) => Revoke(e.Integer, e.Object as Media);
         public void UserControl_Loaded(object sender, RoutedEventArgs e)
         {
@@ -92,7 +93,7 @@ namespace Player
             DownloadButton.Opacity = 0;
 
             //Load SubContextMenuItems
-            if (DefaultIcon == IconType.Cloud)
+            if (DefaultIcon == Glyph.Cloud)
             {
                 MenuItem[] OnlineMediaMenu = new MenuItem[]
                 {
@@ -227,7 +228,7 @@ namespace Player
         public void Download(Media media)
         {
             var SavePath = $"{App.Path}Downloads\\{media.Title}";
-            DownloadButton.Icon = IconType.Cancel;
+            DownloadButton.Glyph = Glyph.Cancel;
             Client = new WebClient();
             Client.DownloadProgressChanged += (o, f) =>
             {
@@ -238,7 +239,7 @@ namespace Player
             {
                 if (downloadCanceled)
                 {
-                    DownloadButton.Icon = IconType.CloudLoad;
+                    DownloadButton.Glyph = Glyph.Cloud;
                     MainLabel.Content = Manip[0];
                     SubLabel.Content = Manip[1];
                     System.IO.File.Delete(SavePath);

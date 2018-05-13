@@ -10,8 +10,9 @@ namespace Player.Controls
     {
         public static readonly DependencyProperty EllipseProperty =
             DependencyProperty.Register(nameof(EllipseType), typeof(EllipseTypes), typeof(SegoeButton), new PropertyMetadata(EllipseTypes.Circular));
-        public static readonly DependencyProperty IconProperty =
+        public static readonly DependencyProperty GlyphProperty =
             DependencyProperty.Register(nameof(Glyph), typeof(Glyph), typeof(SegoeButton), new PropertyMetadata(Glyph.GlobalNavigationButton, new PropertyChangedCallback(OnGlyphChange)));
+        
         public enum EllipseTypes { Rectular, Circular }
 
         public EllipseTypes EllipseType
@@ -25,11 +26,11 @@ namespace Player.Controls
         }
         public Glyph Glyph
         {
-            get => (Glyph)GetValue(IconProperty);
+            get => (Glyph)GetValue(GlyphProperty);
             set
             {
-                SetValue(IconProperty, value);
-                MainIcon.Icon = value;
+                SetValue(GlyphProperty, value);
+                MainIcon.Glyph = value;
             }
         }
 
@@ -38,7 +39,7 @@ namespace Player.Controls
         void UserControl_Loaded(object sender, RoutedEventArgs e)
         {
             MainEllipse.CornerRadius = new CornerRadius(EllipseType == 0 ? 2 : 20);
-            MainIcon.Icon = Icon;
+            MainIcon.Glyph = Glyph;
         }
         private static void OnGlyphChange(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {

@@ -11,16 +11,16 @@
         <Label Content="MainLabel" x:Name="MainLabel" Margin="30,0,40,0" VerticalAlignment="Top" FontWeight="Medium" FontSize="14"  />
         <Label Content="SubLabel" x:Name="SubLabel" Margin="30,20,40,0" VerticalAlignment="Top" FontWeight="Light"/>
         <Label Content="00:00" x:Name="TimeLabel" HorizontalAlignment="Right" VerticalAlignment="Center"/>
-        <controls:MaterialIcon  x:Name="MainIcon" HorizontalAlignment="Left" Width="30" Icon="MusicNote" Foreground="White"/>
-        <controls:MaterialButton HorizontalAlignment="Right" Margin="0, 0, 5, 0" Icon="Play" EllipseType="Rectular" x:Name="PlayButton" MouseUp="Play_Click" />
-        <controls:MaterialButton HorizontalAlignment="Right" Margin="0, 0, 45, 0" Icon="CloudLoad" EllipseType="Rectular" x:Name="DownloadButton" MouseUp="DownloadButton_Click" />
+        <controls:SegoeIcon  x:Name="MainIcon" HorizontalAlignment="Left" Width="30" Glyph="MusicInfo" Foreground="White"/>
+        <controls:SegoeButton HorizontalAlignment="Right" Margin="0, 0, 5, 0" Glyph="Play" EllipseType="Rectular" x:Name="PlayButton" MouseUp="Play_Click" />
+        <controls:SegoeButton HorizontalAlignment="Right" Margin="0, 0, 45, 0" Glyph="Cloud" EllipseType="Rectular" x:Name="DownloadButton" MouseUp="DownloadButton_Click" />
     </Grid>
     <UserControl.Resources>
-        <Style TargetType="MenuItem">
+       <!-- <Style TargetType="MenuItem">
             <Setter Property="Foreground" Value="White" />
             <Setter Property="Background" Value="#F333"/>
             <Setter Property="BorderThickness" Value="0"/>
-        </Style>
+        </Style>-->
         <Style TargetType="Label">
             <Setter Property="Foreground" Value="White" />
         </Style>

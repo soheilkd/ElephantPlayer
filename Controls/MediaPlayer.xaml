@@ -4,20 +4,19 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:Player.Controls"
-             mc:Ignorable="d" 
+             mc:Ignorable="d" Loaded="UserControl_Loaded"
              d:DesignHeight="450" d:DesignWidth="800">
     <Grid>
-        <MediaElement x:Name="element" />
-        <local:SegoeButton x:Name="PreviousButton" Glyph="Previous" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="80,0,0,25" MouseUp="UI_PreviousButton_Click" />
-        <local:SegoeButton x:Name="NextButton" Glyph="Next" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="165,0,0,25" MouseUp="UI_NextButton_Click" />
-        <local:SegoeButton x:Name="PlayPauseButton" Glyph="Play" MouseUp="UI_PlayPauseButton_Click" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="120,0,0,24" Height="28" Width="28"/>
-        <local:SegoeButton x:Name="VisionButton" Glyph="OndemandVideo" MouseUp="UI_VisionButton_Click" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,5,34" Height="34" Width="34" EllipseType="Rectular"/>
-
+        <MediaElement x:Name="element" LoadedBehavior="Manual" UnloadedBehavior="Manual"/>
+        <local:SegoeButton x:Name="PreviousButton" Glyph="Previous" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="80,0,0,25" MouseUp="PreviousButton_Click" />
+        <local:SegoeButton x:Name="NextButton" Glyph="Next" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="165,0,0,25" MouseUp="NextButton_Click" />
+        <local:SegoeButton x:Name="PlayPauseButton" Glyph="Play" MouseUp="PlayPauseButton_Click" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="120,0,0,24" Height="28" Width="28"/>
+  
         <local:SegoeButton x:Name="VolumeButton" Glyph="Volume3" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0, 0, 55, 25" MouseDown="VolumeButton_MouseDown"/>
         <Popup x:Name="VolumePopup" PlacementTarget="{Binding ElementName=VolumeButton}" Placement="Top" AllowsTransparency="True" PopupAnimation="Fade">
             <Label x:Name="VolumeLabel" Content="100" HorizontalAlignment="Right" Foreground="White"/>
         </Popup>
-        <local:SegoeButton x:Name="PlayModeButton" Glyph="RepeatAll"  MouseUp="UI_PlayModeButton_Click" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,100,25" />
+        <local:SegoeButton x:Name="PlayModeButton" Glyph="RepeatAll"  MouseUp="PlayModeButton_Click" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,100,25" />
 
         <Slider x:Name="PositionSlider"  ValueChanged="Position_Changed" PreviewMouseDown="Position_MouseDown"  
                VerticalAlignment="Bottom" Maximum="1000"
@@ -93,4 +92,11 @@
         <Label Content="00:00" Style="{DynamicResource TimeLabel}" HorizontalAlignment="Left" x:Name="TimeLabel_Current"/>
         <Label Content="00:00" Style="{DynamicResource TimeLabel}" HorizontalAlignment="Right" x:Name="TimeLabel_Full" Width="38"/>
     </Grid>
+    <UserControl.Resources>
+        <Style TargetType="{x:Type Label}" x:Key="TimeLabel">
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="VerticalAlignment" Value="Bottom"/>
+            <Setter Property="Width" Value="40" />
+        </Style>
+    </UserControl.Resources>
 </UserControl>

@@ -10,7 +10,6 @@ using System.Windows.Input;
 using System.Windows.Media.Animation;
 using System.Linq;
 using Forms = System.Windows.Forms;
-using Routed = System.Windows.RoutedPropertyChangedEventArgs<double>;
 namespace Player
 {
     public partial class MainUI : Window
@@ -20,23 +19,8 @@ namespace Player
         private MassiveLibrary Library = new MassiveLibrary();
         private Timer PlayCountTimer = new Timer(100000) { AutoReset = false };
         private Timer SizeChangeTimer = new Timer(50) { AutoReset = true };
-        private TimeSpan TimeSpan;
-        private Taskbar.Thumb Thumb = new Taskbar.Thumb();
-        private bool IsUserSeeking = false;
         private bool[] IsVisionOn = new bool[] { false, false, false };
         private Size[] WindowSizes = new Size[2];
-        private Storyboard WindowWidthBoard => Resources["WindowWidthBoard"] as Storyboard;
-        private bool IsMouseOnControls
-        {
-            get
-            {
-                return PreviousButton.IsMouseOver
-                    || PlayPauseButton.IsMouseOver
-                    || NextButton.IsMouseOver
-                    || PositionSlider.IsMouseOver
-                    || VisionButton.IsMouseOver;
-            }
-        }
         public MainUI()
         {
             InitializeComponent();
@@ -51,30 +35,13 @@ namespace Player
             Height = WindowSizes[0].Height;
             Left = App.Preferences.LastLoc.X;
             Top = App.Preferences.LastLoc.Y;
-            ProcessVolume();
         }
         private void BindUI()
         {
-            TaskbarItemInfo = Thumb.Info;
-            Thumb.NextPressed += (obj, f) => UI_NextButton_Click(obj, null);
-            Thumb.PausePressed += (obj, f) => UI_PlayPauseButton_Click(obj, null);
-            Thumb.PlayPressed += (obj, f) => UI_PlayPauseButton_Click(obj, null);
-            Thumb.PrevPressed += (obj, f) => UI_PreviousButton_Click(obj, null);
             PlayCountTimer.Elapsed += (_, __) => Manager.AddCount();
-            (Resources["VisionOnBoard"] as Storyboard).CurrentStateInvalidated += (_, __) => QueueListView.Visibility = Visibility.Hidden;
-            (Resources["WindowWidthBoard"] as Storyboard).Completed += (_, __) => QueueListView.Visibility = IsVisionOn[0] ? Visibility.Hidden : Visibility.Visible;
             (Resources["SettingsOnBoard"] as Storyboard).CurrentStateInvalidated += (_, __) => SettingsGrid.Visibility = Visibility.Visible;
             (Resources["SettingsOffBoard"] as Storyboard).Completed += (_, __) => SettingsGrid.Visibility = Visibility.Hidden;
             SettingsGrid.Visibility = Visibility.Hidden;
-            MouseMoveTimer.Elapsed += delegate
-            {
-                Dispatcher.Invoke(() =>
-                {
-                    if (IsMouseOnControls || !IsVisionOn[0])
-                        return;
-                    OrinateFullVision(true);
-                });
-            };
             SizeChangeTimer.Elapsed += delegate
             {
                 Dispatcher.Invoke(
@@ -88,16 +55,6 @@ namespace Player
                 SizeChangeTimer.Stop();
             };
             User.Keyboard.Events.KeyDown += Keyboard_KeyDown;
-            Player.MediaEnded += (_, __) => Play(Manager.Next());
-            switch ((PlayMode)App.Preferences.PlayMode)
-            {
-                case PlayMode.Shuffle: PlayModeButton.Icon = Glyph.Shuffle; break;
-                case PlayMode.RepeatOne: PlayModeButton.Icon = Glyph.RepeatOne; break;
-                case PlayMode.RepeatAll: PlayModeButton.Icon = Glyph.RepeatAll; break;
-                case PlayMode.Queue: PlayModeButton.Icon = Glyph.GroupList; break;
-                default: PlayModeButton.Icon = Glyph.RepeatAll; break;
-            }
-
             Settings_AncestorCombo.SelectedIndex = App.Preferences.MainKey;
             Settings_OrinateCheck.IsChecked = App.Preferences.VisionOrientation;
             Settings_TimeoutCombo.SelectedIndex = App.Preferences.MouseOverTimeout;
@@ -105,34 +62,21 @@ namespace Player
             Settings_TimeoutCombo.SelectionChanged += delegate
             {
                 App.Preferences.MouseOverTimeout = Settings_TimeoutCombo.SelectedIndex;
-                switch (App.Preferences.MouseOverTimeout)
+                switch (Settings_TimeoutCombo.SelectedIndex)
                 {
-                    case 0: MouseMoveTimer.Interval = 500; break;
-                    case 1: MouseMoveTimer.Interval = 1000; break;
-                    case 2: MouseMoveTimer.Interval = 2000; break;
-                    case 3: MouseMoveTimer.Interval = 3000; break;
-                    case 4: MouseMoveTimer.Interval = 4000; break;
-                    case 5: MouseMoveTimer.Interval = 5000; break;
-                    case 6: MouseMoveTimer.Interval = 10000; break;
-                    case 7: MouseMoveTimer.Interval = 60000; break;
-                    default: MouseMoveTimer.Interval = 5000; break;
+                    case 0: App.Preferences.MouseOverTimeout = 500; break;
+                    case 1: App.Preferences.MouseOverTimeout = 1000; break;
+                    case 2: App.Preferences.MouseOverTimeout = 2000; break;
+                    case 3: App.Preferences.MouseOverTimeout = 3000; break;
+                    case 4: App.Preferences.MouseOverTimeout = 4000; break;
+                    case 5: App.Preferences.MouseOverTimeout = 5000; break;
+                    case 6: App.Preferences.MouseOverTimeout = 10000; break;
+                    case 7: App.Preferences.MouseOverTimeout = 60000; break;
+                    default: App.Preferences.MouseOverTimeout = 5000; break;
                 }
-
             };
             Settings_OrinateCheck.Checked += (_, __) => App.Preferences.VisionOrientation = Settings_OrinateCheck.IsChecked.Value;
             Settings_OrinateCheck.Unchecked += (_, __) => App.Preferences.VisionOrientation = Settings_OrinateCheck.IsChecked.Value;
-            switch (App.Preferences.MouseOverTimeout)
-            {
-                case 0: MouseMoveTimer.Interval = 500; break;
-                case 1: MouseMoveTimer.Interval = 1000; break;
-                case 2: MouseMoveTimer.Interval = 2000; break;
-                case 3: MouseMoveTimer.Interval = 3000; break;
-                case 4: MouseMoveTimer.Interval = 4000; break;
-                case 5: MouseMoveTimer.Interval = 5000; break;
-                case 6: MouseMoveTimer.Interval = 10000; break;
-                case 7: MouseMoveTimer.Interval = 60000; break;
-                default: MouseMoveTimer.Interval = 5000; break;
-            }
             SettingsButton.MouseUp += delegate
             {
                 if (!IsVisionOn[2])
@@ -145,7 +89,6 @@ namespace Player
                 }
                 IsVisionOn[2] = !IsVisionOn[2];
             };
-            RunUX();
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -171,7 +114,7 @@ namespace Player
             switch (e.Key)
             {
                 case Key.Space:
-                    UI_PlayPauseButton_Click(this, null);
+                    Player.PlayPause();
                     break;
                 default: break;
             }
@@ -261,7 +204,7 @@ namespace Player
             {
                 var posit = Player.Position;
                 Play(Manager[e.Integer]);
-                ChangePosition(posit.TotalMilliseconds, true);
+                Player.Seek(posit);
             }
         }
         private void Media_ZipDownloaded(object sender, InfoExchangeArgs e)
@@ -292,8 +235,7 @@ namespace Player
                     break;
                 case InfoType.EditingTag:
                     var pos = Player.Position;
-                    Player.Stop();
-                    Player.Source = null;
+                    Player.FullStop();
                     await Task.Delay(500);
                     (e.Object as TagLib.File).Save();
                     Play(Manager[Manager.Find((e.Object as TagLib.File).Name)]);
@@ -317,7 +259,7 @@ namespace Player
                     {
                         var q = Player.Position;
                         Play(e.Object as Media);
-                        ChangePosition(q.TotalMilliseconds, true);
+                        Player.Seek(q);
                     }
                     break;
                 default:
@@ -331,11 +273,11 @@ namespace Player
                 switch (e.KeyCode)
                 {
                     case Forms::Keys.Left:
-                        ChangePosition(PositionSlider.SmallChange * -1);
+                        Player.SmallSlideLeft();
                         await Task.Delay(200);
                         break;
                     case Forms::Keys.Right:
-                        ChangePosition(PositionSlider.SmallChange);
+                        Player.SmallSlideRight();
                         await Task.Delay(200);
                         break;
                     case Forms::Keys.A:
@@ -351,26 +293,20 @@ namespace Player
             }
             switch (e.KeyCode)
             {
-                case Forms::Keys.MediaNextTrack: UI_NextButton_Click(this, null); break;
-                case Forms::Keys.MediaPreviousTrack: UI_PreviousButton_Click(this, null); break;
-                case Forms::Keys.MediaPlayPause: UI_PlayPauseButton_Click(this, null); break; 
+                case Forms::Keys.MediaNextTrack: Player.PlayNext(); break;
+                case Forms::Keys.MediaPreviousTrack: Player.PlayPrevious(); break;
+                case Forms::Keys.MediaPlayPause: Player.PlayPause(); break; 
                 default: break;
             }
         }
 
-        public static string CastTime(TimeSpan time)
-        {
-            //Absolutely unreadable, btw just works...
-            return $"{(time.TotalSeconds - (time.TotalSeconds % 60)).ToInt() / 60}:" +
-                $"{((time.TotalSeconds.ToInt() % 60).ToString().Length == 1 ? $"0{time.TotalSeconds.ToInt() % 60}" : (time.TotalSeconds.ToInt() % 60).ToString())}";
-        }
-        public static string CastTime(int ms) => CastTime(new TimeSpan(0, 0, 0, 0, ms));
         private void AnySettingChanged(object sender, RoutedEventArgs e)
         {
             if (!IsLoaded)
                 return;
             App.Preferences.Save();
         }
+
         private void Play(Media media)
         {
             if (!media.IsValid)
@@ -378,37 +314,11 @@ namespace Player
                 Manager.Remove(media);
                 return;
             }
-            PositionSlider.Value = 0;
-            PlayPauseButton.Icon = Glyph.Pause;
-            Player.Source = new Uri(media.Path);
-            Player.Play();
+            Player.Play(media);
             MiniArtworkImage.Source = media.Artwork;
-            TitleLabel.Content = media.Title;
             for (int i = 0; i < MediaViews.Count; i++)
                 MediaViews[i].IsPlaying = false;
             MediaViews.Find(item => item.MediaIndex == Manager.CurrentlyPlayingIndex).IsPlaying = true;
-            VisionButton.Visibility = MediaManager.GetType(media.Path) == MediaType.Video ? Visibility.Visible : Visibility.Collapsed;
-            if (IsVisionOn[0] && media.MediaType == MediaType.Music)
-            {
-                UI_VisionButton_Click(this, null);
-                OrinateFullVision(false);
-                WindowStyle = WindowStyle.SingleBorderWindow;
-                Topmost = false;
-            }
-        }
-        private void OrinateFullVision(bool Enabled)
-        {
-            IsVisionOn[1] = Enabled;
-            if (!IsVisionOn[0] && Enabled)
-                BeginStoryboard(Resources["VisionOnBoard"] as Storyboard);
-            else if (IsVisionOn[0])
-                BeginStoryboard(Resources[Enabled ? "FullVisionOnBoard" : "FullVisionOffBoard"] as Storyboard);
-            else
-            {
-                BeginStoryboard(Resources["FullVisionOffBoard"] as Storyboard);
-                BeginStoryboard(Resources["VisionOffBoard"] as Storyboard);
-            }
-            Player.Cursor = Cursors.None;
         }
         private bool IsAncestorKeyDown(Forms::KeyEventArgs e)
         {
@@ -430,62 +340,6 @@ namespace Player
             for (int i = 0; i < arr.Length; i++)
                 arr[i] = (QueueListView.SelectedItems[i] as MediaView).MediaIndex;
             return arr;
-        }
-
-        private void ChangePosition(double ms, bool Seek = false)
-        {
-            IsUserSeeking = true;
-            if (Seek) PositionSlider.Value = ms;
-            else PositionSlider.Value += ms;
-            IsUserSeeking = false;
-        }
-        private async void RunUX()
-        {
-            UX:
-            await Task.Delay(250);
-            if (Player.NaturalDuration.HasTimeSpan)
-                if (Player.NaturalDuration.TimeSpan != TimeSpan)
-                {
-                    //Update TimeSpan
-                    TimeSpan = Player.NaturalDuration.TimeSpan;
-                    PositionSlider.Maximum = TimeSpan.TotalMilliseconds;
-                    PositionSlider.SmallChange = 1 * PositionSlider.Maximum / 100;
-                    PositionSlider.LargeChange = 5 * PositionSlider.Maximum / 100;
-                    TimeLabel_Full.Content = CastTime(TimeSpan);
-                    PlayCountTimer.Stop();
-                    PlayCountTimer.Interval = PositionSlider.Maximum / 3;
-                    PlayCountTimer.Start();
-                    Manager.CurrentlyPlaying.Length = TimeSpan.TotalMilliseconds.ToInt();
-                    MediaViews.Find(item => item.MediaIndex == Manager.CurrentlyPlayingIndex).TimeLabel.Content = TimeLabel_Full.Content;
-                }
-            PositionSlider.Value = Player.Position.TotalMilliseconds;
-            TimeLabel_Current.Content = CastTime(Player.Position);
-            if (!IsVisionOn[0] && PlayModeButton.Opacity <= 0.5)
-                BeginStoryboard(Resources["VisionOffBoard"] as Storyboard);
-            goto UX;
-        }
-
-        private void Position_Changed(object sender, Routed e)
-        {
-            if (IsUserSeeking)
-            {
-                Player.Position = new TimeSpan(0, 0, 0, 0, PositionSlider.Value.ToInt());
-                PositionSlider.Value = ((Slider)sender).Value;
-            }
-        }
-        private async void Position_MouseDown(object sender, MouseButtonEventArgs e)
-        {
-            IsUserSeeking = true;
-            while (e.ButtonState == MouseButtonState.Pressed)
-            {
-                Player.Pause();
-                await Task.Delay(50);
-                Player.Play();
-                await Task.Delay(50);
-            }
-            PlayPauseButton.Icon = IconType.Pause;
-            Player.Play();
-            IsUserSeeking = false;
         }
     }
 }

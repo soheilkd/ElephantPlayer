@@ -3,7 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:local="clr-namespace:MaterialUI" FontSize="26"
+             FontSize="26"
              mc:Ignorable="d"  Foreground="White">
     <TextBlock x:Name="textBlock" FontFamily="Segoe MDL2 Assets" Text="&#xE128;"/>
 </UserControl>

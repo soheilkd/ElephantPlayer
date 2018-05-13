@@ -212,24 +212,24 @@ namespace Player.Taskbar
         public ThumbButtonInfo PlayThumb = new ThumbButtonInfo()
         {
             Description = "Play",
-            ImageSource = Imaging.Get.Bitmap(new Controls.MaterialIcon() { Icon = Controls.IconType.Play, Foreground = Brushes.White })
+            ImageSource = Imaging.Get.Bitmap(new Controls.SegoeIcon() { Glyph = Controls.Glyph.Play, Foreground = Brushes.White })
         };
         public ThumbButtonInfo PauseThumb = new ThumbButtonInfo()
         {
             Description = "Pause",
-            ImageSource = Imaging.Get.Bitmap(new Controls.MaterialIcon() { Icon = Controls.IconType.Pause, Foreground = Brushes.White })
+            ImageSource = Imaging.Get.Bitmap(new Controls.SegoeIcon() { Glyph = Controls.Glyph.Pause, Foreground = Brushes.White })
         };
         public ThumbButtonInfo PreviousThumb = new ThumbButtonInfo()
         {
             DismissWhenClicked = true,
             Description = "Previous",
-            ImageSource = Imaging.Get.Bitmap(new Controls.MaterialIcon() { Icon = Controls.IconType.Previous, Foreground = Brushes.White })
+            ImageSource = Imaging.Get.Bitmap(new Controls.SegoeIcon() { Glyph = Controls.Glyph.Previous, Foreground = Brushes.White })
         };
         public ThumbButtonInfo NextThumb = new ThumbButtonInfo()
         {
             DismissWhenClicked = true,
             Description = "Next",
-            ImageSource = Imaging.Get.Bitmap(new Controls.MaterialIcon() { Icon = Controls.IconType.Next, Foreground = Brushes.White })
+            ImageSource = Imaging.Get.Bitmap(new Controls.SegoeIcon() { Glyph = Controls.Glyph.Next, Foreground = Brushes.White })
         };
         private TaskbarItemInfo TaskbarItem = new TaskbarItemInfo();
         private Command PlayHandler = new Command();

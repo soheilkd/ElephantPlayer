@@ -16,8 +16,12 @@ namespace Player.Events
 
     public enum InfoType
     {
+        //Variable exchange
         Integer, Double, Media, Object, StringArray,
-        RequestNext, RequestPrev, Handling, UserInterface,
+        //Media Control
+        DragMoveRequest, FullScreenRequest, NextRequest, PrevRequest, Handling, UserInterface, LengthFound, PlayModeChange,
+        OrinateToVision, OrinateToDefault,
+        //Media Manager
         NewMedia, MediaRequested, EditingTag,
         InterfaceUpdate, MediaUpdate, PopupRequest,
         MediaRemoved, MediaMoved

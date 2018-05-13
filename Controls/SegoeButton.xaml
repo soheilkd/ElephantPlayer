@@ -3,10 +3,11 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:Player" Width="26" Height="26"
              xmlns:controls="clr-namespace:Player.Controls"
-             xmlns:materialui="clr-namespace:MaterialUI" Loaded="UserControl_Loaded">
+             Loaded="UserControl_Loaded">
     <Grid x:Name="MainGrid">
         <Border x:Name="MainEllipse" BorderThickness="0" Margin="-5" BorderBrush="#FBBB" CornerRadius="20"/>
-        <materialui:SegoeIcon x:Name="MainIcon" Foreground="White" Background="#01FFFFFF" Width="{Binding Width, ElementName=MainGrid}" Height="{Binding Height, ElementName=MainGrid}"/>
+        <controls:SegoeIcon x:Name="MainIcon" Foreground="White" Background="#01FFFFFF" Glyph="Accept"
+                            Width="{Binding Width, ElementName=MainGrid}" Height="{Binding Height, ElementName=MainGrid}" HorizontalAlignment="Left"/>
     </Grid>
     <UserControl.Triggers>
         <EventTrigger RoutedEvent="MouseEnter">

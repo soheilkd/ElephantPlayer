@@ -1095,7 +1095,7 @@ namespace Player.Controls
 
         private static void OnGlyphChange(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            d.SetValue(GlyphStringProperty, "");
+            d.SetValue(GlyphStringProperty, Char.ConvertFromUtf32((int)d.GetValue(GlyphProperty)));
         }
     }
 }
