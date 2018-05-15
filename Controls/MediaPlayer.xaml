@@ -91,6 +91,7 @@
         </Slider>
         <Label Content="00:00" Style="{DynamicResource TimeLabel}" HorizontalAlignment="Left" x:Name="TimeLabel_Current"/>
         <Label Content="00:00" Style="{DynamicResource TimeLabel}" HorizontalAlignment="Right" x:Name="TimeLabel_Full" Width="38"/>
+        <Button Content="Button" HorizontalAlignment="Left" Margin="507,346,0,0" VerticalAlignment="Top" Width="75" Click="Button_Click"/>
     </Grid>
     <UserControl.Resources>
         <Style TargetType="{x:Type Label}" x:Key="TimeLabel">
@@ -98,5 +99,13 @@
             <Setter Property="VerticalAlignment" Value="Bottom"/>
             <Setter Property="Width" Value="40" />
         </Style>
+        <Storyboard x:Key="MagnifyBoard" Storyboard.TargetName="element">
+            <DoubleAnimation Storyboard.TargetProperty="Width" From="50" />
+            <DoubleAnimation Storyboard.TargetProperty="Height" From="50" />
+        </Storyboard>
+        <Storyboard x:Key="MinifyBoard" Storyboard.TargetName="element">
+            <DoubleAnimation Storyboard.TargetProperty="Width" To="50"/>
+            <DoubleAnimation Storyboard.TargetProperty="Height" To="50" />
+        </Storyboard>
     </UserControl.Resources>
 </UserControl>

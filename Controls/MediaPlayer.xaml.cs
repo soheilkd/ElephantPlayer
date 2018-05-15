@@ -26,9 +26,27 @@ namespace Player.Controls
         bool IsUserSeeking;
         private Window ParentWindow;
         private Taskbar.Thumb Thumb = new Taskbar.Thumb();
+        private Storyboard MagnifyBoard, MinifyBoard;
+        private DoubleAnimation[] MagnifyAnimations, MinifyAnimations;
         public MediaPlayer()
         {
             InitializeComponent();
+            MagnifyBoard = Resources["MagnifyBoard"] as Storyboard;
+            MinifyBoard = Resources["MinifyBoard"] as Storyboard;
+            MagnifyAnimations = new DoubleAnimation[]
+            {
+                MagnifyBoard.Children[0] as DoubleAnimation,
+                MagnifyBoard.Children[1] as DoubleAnimation
+            };
+            MinifyAnimations = new DoubleAnimation[]
+            {
+                MinifyBoard.Children[0] as DoubleAnimation,
+                MinifyBoard.Children[1] as DoubleAnimation
+            };
+            MagnifyBoard.CurrentStateInvalidated += MagnifyBoard_CurrentStateInvalidated;
+            MagnifyBoard.Completed += MagnifyBoard_Completed;
+            MinifyBoard.CurrentStateInvalidated += MinifyBoard_CurrentStateInvalidated;
+
             Thumb.NextPressed += (obj, f) => PlayNext();
             Thumb.PausePressed += (obj, f) => PlayPause();
             Thumb.PlayPressed += (obj, f) => PlayPause();
@@ -53,6 +71,20 @@ namespace Player.Controls
                 case PlayMode.Queue: PlayModeButton.Glyph = Glyph.GroupList; break;
                 default: PlayModeButton.Glyph = Glyph.RepeatAll; break;
             }
+        }
+
+        private void MagnifyBoard_CurrentStateInvalidated(object sender, EventArgs e)
+        {
+        }
+
+        private void MinifyBoard_CurrentStateInvalidated(object sender, EventArgs e)
+        {
+        }
+
+        private void MagnifyBoard_Completed(object sender, EventArgs e)
+        {
+            element.HorizontalAlignment = HorizontalAlignment.Stretch;
+            element.VerticalAlignment = VerticalAlignment.Stretch;
         }
 
         private void Element_MouseDown(object sender, MouseButtonEventArgs e)
@@ -87,38 +119,29 @@ namespace Player.Controls
         }
         private void Element_MouseMove(object sender, MouseEventArgs e)
         {
-            OrinateFullVision(false);
             element.Cursor = Cursors.Arrow;
             MouseMoveTimer.Stop();
             MouseMoveTimer.Start();
         }
 
-        private void OrinateFullVision(bool Enabled)
+        bool IsVisionMinified = false;
+        private void ChangeVisionState(bool magnified)
         {
             element.Cursor = Cursors.None;
-        }
-        private void PlayPauseButton_Click(object sender, MouseButtonEventArgs e)
-        {
-            if (PlayPauseButton.Glyph == Glyph.Pause)
+            if (magnified)
             {
-                element.Pause();
-                PlayPauseButton.Glyph = Glyph.Play;
-                Thumb.Refresh(false);
+                MagnifyAnimations[0].To = ParentWindow.ActualWidth;
+                MagnifyAnimations[1].To = ParentWindow.ActualHeight;
+                MagnifyBoard.Begin();
             }
             else
             {
-                element.Play();
-                PlayPauseButton.Glyph = Glyph.Pause;
-                Thumb.Refresh(true);
+                element.HorizontalAlignment = HorizontalAlignment.Left;
+                element.VerticalAlignment = VerticalAlignment.Bottom;
+                MinifyAnimations[0].From = ParentWindow.ActualWidth;
+                MinifyAnimations[1].From = ParentWindow.ActualHeight;
+                MinifyBoard.Begin();
             }
-        }
-        private void NextButton_Click(object sender, MouseButtonEventArgs e) => Invoke(InfoType.NextRequest);
-        private void PreviousButton_Click(object sender, MouseButtonEventArgs e)
-        {
-            if (PositionSlider.Value > PositionSlider.Maximum / 100 * 10)
-                Seek(TimeSpan.Zero);
-            else
-                Invoke(InfoType.PrevRequest);
         }
 
         private void Invoke(InfoType type, object obj = null) => EventHappened?.Invoke(this, new InfoExchangeArgs() { Type = type, Object = obj });
@@ -167,7 +190,6 @@ namespace Player.Controls
             element.Play();
             IsUserSeeking = false;
         }
-
         private void PlayModeButton_Click(object sender, MouseButtonEventArgs e)
         {
             switch (PlayModeButton.Glyph)
@@ -211,6 +233,30 @@ namespace Player.Controls
             }
             VolumePopup.IsOpen = false;
         }
+        private void PlayPauseButton_Click(object sender, MouseButtonEventArgs e)
+        {
+            if (PlayPauseButton.Glyph == Glyph.Pause)
+            {
+                element.Pause();
+                PlayPauseButton.Glyph = Glyph.Play;
+                Thumb.Refresh(false);
+            }
+            else
+            {
+                element.Play();
+                PlayPauseButton.Glyph = Glyph.Pause;
+                Thumb.Refresh(true);
+            }
+        }
+        private void NextButton_Click(object sender, MouseButtonEventArgs e) => Invoke(InfoType.NextRequest);
+        private void PreviousButton_Click(object sender, MouseButtonEventArgs e)
+        {
+            if (PositionSlider.Value > PositionSlider.Maximum / 100 * 10)
+                Seek(TimeSpan.Zero);
+            else
+                Invoke(InfoType.PrevRequest);
+        }
+
         private void ProcessVolume()
         {
             VolumeLabel.Content = (element.Volume * 100).ToInt();
@@ -239,6 +285,11 @@ namespace Player.Controls
             else element.Position.Add(timeSpan);
         }
         public void Seek(int ms, bool sliding = false) => Seek(new TimeSpan(0, 0, 0, 0, ms), sliding);
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            ChangeVisionState(IsVisionMinified = !IsVisionMinified);
+        }
 
         public void Play(Media media)
         {
