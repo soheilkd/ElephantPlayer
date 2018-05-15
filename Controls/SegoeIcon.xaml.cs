@@ -1,5 +1,4 @@
-﻿using System;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
 
 namespace Player.Controls
@@ -1081,21 +1080,15 @@ namespace Player.Controls
     }
     public partial class SegoeIcon : UserControl
     {
-        
         public static readonly DependencyProperty GlyphProperty =
             DependencyProperty.Register(nameof(Glyph), typeof(Glyph), typeof(SegoeIcon), new PropertyMetadata(Glyph.GlobalNavigationButton, new PropertyChangedCallback(OnGlyphChange)));
         public static readonly DependencyProperty GlyphStringProperty =
             DependencyProperty.Register(nameof(GlyphString), typeof(string), typeof(SegoeIcon), new PropertyMetadata("\uE700"));
          public Glyph Glyph { get => (Glyph)GetValue(GlyphProperty); set => SetValue(GlyphProperty, value); }
         public string GlyphString { get => (string)GetValue(GlyphStringProperty); set => SetValue(GlyphStringProperty, value); }
-        public SegoeIcon()
-        {
-            InitializeComponent();
-        }
+        public SegoeIcon() => InitializeComponent();
 
-        private static void OnGlyphChange(DependencyObject d, DependencyPropertyChangedEventArgs e)
-        {
-            d.SetValue(GlyphStringProperty, Char.ConvertFromUtf32((int)d.GetValue(GlyphProperty)));
-        }
+        private static void OnGlyphChange(DependencyObject d, DependencyPropertyChangedEventArgs e) =>
+            d.SetValue(GlyphStringProperty, System.Char.ConvertFromUtf32((int)d.GetValue(GlyphProperty)));
     }
 }
