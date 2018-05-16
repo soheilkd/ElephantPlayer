@@ -5,7 +5,7 @@
              xmlns:controls="clr-namespace:Player.Controls"
              Loaded="UserControl_Loaded">
     <Grid x:Name="MainGrid">
-        <Border x:Name="MainEllipse" BorderThickness="0" Margin="-5" BorderBrush="#FBBB" CornerRadius="20"/>
+        <Border x:Name="MainEllipse" BorderThickness="0" Margin="-7" BorderBrush="#FBBB" CornerRadius="20"/>
         <controls:SegoeIcon x:Name="MainIcon" Foreground="White" Background="#01FFFFFF" Glyph="Accept"
                             Width="{Binding Width, ElementName=MainGrid}" Height="{Binding Height, ElementName=MainGrid}" />
     </Grid>
@@ -36,7 +36,7 @@
             <EventTrigger.Actions>
                 <BeginStoryboard>
                     <Storyboard>
-                        <ThicknessAnimation Storyboard.TargetName="MainEllipse" Storyboard.TargetProperty="Margin" From="{Binding ElementName=MainEllipse, Path=Margin}" To="-1"
+                        <ThicknessAnimation Storyboard.TargetName="MainEllipse" Storyboard.TargetProperty="Margin" From="{Binding ElementName=MainEllipse, Path=Margin}" To="-3"
                                             AccelerationRatio="0.6" DecelerationRatio="0.4" SpeedRatio="6"/>
                     </Storyboard>
                 </BeginStoryboard>
@@ -46,7 +46,7 @@
             <EventTrigger.Actions>
                 <BeginStoryboard>
                     <Storyboard>
-                        <ThicknessAnimation Storyboard.TargetName="MainEllipse" Storyboard.TargetProperty="Margin" From="{Binding ElementName=MainEllipse, Path=Margin}" To="-5"
+                        <ThicknessAnimation Storyboard.TargetName="MainEllipse" Storyboard.TargetProperty="Margin" From="{Binding ElementName=MainEllipse, Path=Margin}" To="-7"
                                             AccelerationRatio="0.6" DecelerationRatio="0.4" SpeedRatio="6"/>
                     </Storyboard>
                 </BeginStoryboard>

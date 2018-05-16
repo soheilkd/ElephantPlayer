@@ -9,13 +9,12 @@
     mc:Ignorable="d" Loaded="Window_Loaded" Closing="Window_Closing" Drop="Window_Drop" AllowDrop="True"
     Title="Elephant Player" Height="544" Width="432" >
     <Grid Background="{DynamicResource KeyOfBackground}" x:Name="ContentGrid">
-        <player:MediaPlayer x:Name="Player" />
         <ListView x:Name="QueueListView" BorderThickness="0" Margin="0, 0, 0, 85" ScrollViewer.CanContentScroll="False" Background="{DynamicResource KeyOfBackground}">
             <ListView.Resources>
                 <sys:Double x:Key="{x:Static SystemParameters.VerticalScrollBarWidthKey}">10</sys:Double>
             </ListView.Resources>
         </ListView>
-        
+
         <Image x:Name="MiniArtworkImage" Height="55" Width="55" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="0,0,0,25">
             <Image.Triggers>
                 <EventTrigger RoutedEvent="UIElement.MouseDown">
@@ -83,6 +82,7 @@
             </Grid.Resources>
         </Grid>
         <player:SegoeButton x:Name="SettingsButton" Glyph="Settings"  HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,145,25" />
+        <player:MediaPlayer x:Name="Player" />
 
     </Grid>
     <Window.Resources>

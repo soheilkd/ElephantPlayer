@@ -124,6 +124,7 @@ namespace Player
         {
             WindowSizes[IsVisionOn[0] ? 1 : 0].Height = Height;
             SizeChangeTimer.Start();
+            Player.UserControl_SizeChanged(this, null);
         }
 
         private void Media_DeleteRequested(object sender, InfoExchangeArgs e)

@@ -23,29 +23,52 @@ namespace Player.Controls
         public event EventHandler<InfoExchangeArgs> EventHappened;
         private Timer DraggerTimer = new Timer(250) { AutoReset = false };
         private Timer MouseMoveTimer = new Timer(5000) { AutoReset = false };
-        bool IsUserSeeking;
+        private Timer PlayCountTimer;
+        private TimeSpan TimeSpan;
+        private bool IsVisionMinified = false, IsUserSeeking;
         private Window ParentWindow;
         private Taskbar.Thumb Thumb = new Taskbar.Thumb();
-        private Storyboard MagnifyBoard, MinifyBoard;
-        private DoubleAnimation[] MagnifyAnimations, MinifyAnimations;
+        private Storyboard MagnifyBoard, MinifyBoard, FullOnBoard, FullOffBoard;
+        private ThicknessAnimation MagnifyAnimation, MinifyAnimation;
+        private bool controlsVisibile;
+        private bool ControlsVisible
+        {
+            get => controlsVisibile;
+            set
+            {
+                controlsVisibile = value;
+                FullOnBoard.Stop();
+                FullOffBoard.Stop();
+                if (value)
+                    FullOffBoard.Begin();
+                else
+                    FullOnBoard.Begin();
+            }
+        }
+        private bool magnified;
+        private bool Magnified
+        {
+            get => magnified;
+            set
+            {
+                magnified = value;
+                MinifyAnimation.To = new Thickness(ActualWidth / 2, ActualHeight, ActualWidth / 2, 0);
+                if (value)
+                    MagnifyBoard.Begin();
+                else
+                    MinifyBoard.Begin();
+                MouseMoveTimer.Start();
+            }
+        }
         public MediaPlayer()
         {
             InitializeComponent();
             MagnifyBoard = Resources["MagnifyBoard"] as Storyboard;
             MinifyBoard = Resources["MinifyBoard"] as Storyboard;
-            MagnifyAnimations = new DoubleAnimation[]
-            {
-                MagnifyBoard.Children[0] as DoubleAnimation,
-                MagnifyBoard.Children[1] as DoubleAnimation
-            };
-            MinifyAnimations = new DoubleAnimation[]
-            {
-                MinifyBoard.Children[0] as DoubleAnimation,
-                MinifyBoard.Children[1] as DoubleAnimation
-            };
-            MagnifyBoard.CurrentStateInvalidated += MagnifyBoard_CurrentStateInvalidated;
-            MagnifyBoard.Completed += MagnifyBoard_Completed;
-            MinifyBoard.CurrentStateInvalidated += MinifyBoard_CurrentStateInvalidated;
+            FullOnBoard = Resources["FullOnBoard"] as Storyboard;
+            FullOffBoard = Resources["FullOffBoard"] as Storyboard;
+            MagnifyAnimation = MagnifyBoard.Children[0] as ThicknessAnimation;
+            MinifyAnimation = MinifyBoard.Children[0] as ThicknessAnimation;
 
             Thumb.NextPressed += (obj, f) => PlayNext();
             Thumb.PausePressed += (obj, f) => PlayPause();
@@ -71,20 +94,7 @@ namespace Player.Controls
                 case PlayMode.Queue: PlayModeButton.Glyph = Glyph.GroupList; break;
                 default: PlayModeButton.Glyph = Glyph.RepeatAll; break;
             }
-        }
-
-        private void MagnifyBoard_CurrentStateInvalidated(object sender, EventArgs e)
-        {
-        }
-
-        private void MinifyBoard_CurrentStateInvalidated(object sender, EventArgs e)
-        {
-        }
-
-        private void MagnifyBoard_Completed(object sender, EventArgs e)
-        {
-            element.HorizontalAlignment = HorizontalAlignment.Stretch;
-            element.VerticalAlignment = VerticalAlignment.Stretch;
+            MouseMoveTimer.Elapsed += (_, __) => ControlsVisible = false;
         }
 
         private void Element_MouseDown(object sender, MouseButtonEventArgs e)
@@ -120,34 +130,13 @@ namespace Player.Controls
         private void Element_MouseMove(object sender, MouseEventArgs e)
         {
             element.Cursor = Cursors.Arrow;
+            ControlsVisible = true;
             MouseMoveTimer.Stop();
             MouseMoveTimer.Start();
         }
-
-        bool IsVisionMinified = false;
-        private void ChangeVisionState(bool magnified)
-        {
-            element.Cursor = Cursors.None;
-            if (magnified)
-            {
-                MagnifyAnimations[0].To = ParentWindow.ActualWidth;
-                MagnifyAnimations[1].To = ParentWindow.ActualHeight;
-                MagnifyBoard.Begin();
-            }
-            else
-            {
-                element.HorizontalAlignment = HorizontalAlignment.Left;
-                element.VerticalAlignment = VerticalAlignment.Bottom;
-                MinifyAnimations[0].From = ParentWindow.ActualWidth;
-                MinifyAnimations[1].From = ParentWindow.ActualHeight;
-                MinifyBoard.Begin();
-            }
-        }
-
+        
         private void Invoke(InfoType type, object obj = null) => EventHappened?.Invoke(this, new InfoExchangeArgs() { Type = type, Object = obj });
         
-        TimeSpan TimeSpan;
-        Timer PlayCountTimer;
         private async void RunUX()
         {
             UX:
@@ -279,18 +268,32 @@ namespace Player.Controls
             element.Stop();
             element.Source = null;
         }
+
+        public void UserControl_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            if (!Magnified)
+            {
+                elementCanvas.SetValue(MarginProperty, new Thickness(ActualWidth / 2, ActualHeight, ActualWidth / 2, 0));
+            }
+        }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            ControlsVisible = !ControlsVisible;
+        }
+
+        private void VisionButton_MouseUp(object sender, MouseButtonEventArgs e)
+        {
+            Magnified = !Magnified;
+        }
+
         public void Seek(TimeSpan timeSpan, bool sliding = false)
         {
             if (!sliding) element.Position = timeSpan;
             else element.Position.Add(timeSpan);
         }
         public void Seek(int ms, bool sliding = false) => Seek(new TimeSpan(0, 0, 0, 0, ms), sliding);
-
-        private void Button_Click(object sender, RoutedEventArgs e)
-        {
-            ChangeVisionState(IsVisionMinified = !IsVisionMinified);
-        }
-
+      
         public void Play(Media media)
         {
             PositionSlider.Value = 0;

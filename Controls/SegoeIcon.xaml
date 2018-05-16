@@ -6,6 +6,6 @@
              FontSize="22" x:Name="Parent"
              mc:Ignorable="d"  Foreground="White">
     <Viewbox>
-        <TextBlock FontWeight="SemiBold" x:Name="textBlock" FontFamily="Segoe MDL2 Assets" Text="{Binding ElementName=Parent, Path=GlyphString}"/>
+        <TextBlock x:Name="textBlock" FontFamily="Segoe MDL2 Assets" Text="{Binding ElementName=Parent, Path=GlyphString}"/>
     </Viewbox>
 </UserControl>
