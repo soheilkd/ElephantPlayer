@@ -255,8 +255,6 @@ namespace Player
             if (!media.IsValid)
                 return;
             int p = AllMedias.Count;
-            if (!media.IsLoaded)
-                media = new Media(media.Path) { Length = media.Length };
             AllMedias.Add(media);
             Change?.Invoke(this, new InfoExchangeArgs()
             {
