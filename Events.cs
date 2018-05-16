@@ -40,5 +40,12 @@ namespace Player.Events
             Type = InfoType.Integer;
             Integer = integer;
         }
+        public InfoExchangeArgs(int integer, object obj)
+        {
+            Type = InfoType.Integer;
+            Integer = integer;
+            Object = obj;
+        }
+        public InfoExchangeArgs(object obj) => Object = obj;
     }
 }

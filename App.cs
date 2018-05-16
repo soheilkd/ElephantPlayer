@@ -14,6 +14,7 @@ namespace Player
         public static string Path = Environment.GetCommandLineArgs()[0].Substring(0, Environment.GetCommandLineArgs()[0].LastIndexOf("\\") + 1);
 
         public static Preferences Preferences = Preferences.Load();
+        public static string LastSelectedPath = Preferences.LastPath;
         [STAThread]
         public static void Main(string[] args)
         {

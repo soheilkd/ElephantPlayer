@@ -3,17 +3,16 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" MouseMove="Element_MouseMove"
-             xmlns:local="clr-namespace:Player.Controls" SizeChanged="UserControl_SizeChanged"
+             xmlns:local="clr-namespace:Player.Controls" SizeChanged="Size_Changed"
              mc:Ignorable="d" Loaded="UserControl_Loaded" x:Name="ParentControl"
              d:DesignHeight="300" d:DesignWidth="300">
     <Grid>
         <Grid Background="Black" x:Name="elementCanvas">
-            <MediaElement x:Name="element" LoadedBehavior="Manual" UnloadedBehavior="Manual" />
-            <Button Content="Button" HorizontalAlignment="Left" Margin="178,130,0,0" VerticalAlignment="Top" Width="75" Click="Button_Click"/>
+            <MediaElement x:Name="element" LoadedBehavior="Manual" UnloadedBehavior="Manual" MouseDown="Element_MouseDown" Volume="1"/>
         </Grid>
         <Grid Background="Transparent" VerticalAlignment="Bottom" Height="50">
 
-            <Slider x:Name="PositionSlider"  ValueChanged="Position_Changed" PreviewMouseDown="Position_MouseDown"  
+            <Slider x:Name="PositionSlider"  ValueChanged="Position_Changed" PreviewMouseDown="Position_Holding"  
                VerticalAlignment="Bottom" Maximum="1000" 
                         Foreground="#FF575757" Margin="40, 0, 40, 5">
                 <Slider.Template>
@@ -86,12 +85,13 @@
             </Slider>
             <Label Content="00:00" Style="{DynamicResource TimeLabel}" HorizontalAlignment="Left" x:Name="TimeLabel_Current"/>
             <Label Content="00:00" Style="{DynamicResource TimeLabel}" HorizontalAlignment="Right" x:Name="TimeLabel_Full" Width="38"/>
-            <local:SegoeButton x:Name="PreviousButton" Glyph="Previous" Margin="80,0,0,25" MouseUp="PreviousButton_Click" />
-            <local:SegoeButton x:Name="NextButton" Glyph="Next" Margin="165,0,0,25" MouseUp="NextButton_Click" />
-            <local:SegoeButton x:Name="PlayPauseButton" Glyph="Play" MouseUp="PlayPauseButton_Click" Margin="120,0,0,24" Height="28" Width="28"/>
-            <local:SegoeButton x:Name="PlayModeButton" Glyph="RepeatAll"  MouseUp="PlayModeButton_Click" HorizontalAlignment="Right" Margin="0,0,100,25" />
-            <local:SegoeButton x:Name="VisionButton" Glyph="TVMonitor" HorizontalAlignment="Center" Margin="0,0,0,25" MouseUp="VisionButton_MouseUp" />
-            <local:SegoeButton x:Name="VolumeButton" Glyph="Volume3" HorizontalAlignment="Right" Margin="0, 0, 55, 25" MouseDown="VolumeButton_MouseDown"/>
+            <local:SegoeButton x:Name="PreviousButton" Glyph="Previous" Margin="80,0,0,25" MouseUp="PreviousButton_Clicked" />
+            <local:SegoeButton x:Name="NextButton" Glyph="Next" Margin="165,0,0,25" MouseUp="NextButton_Clicked" />
+            <local:SegoeButton x:Name="PlayPauseButton" Glyph="Play" MouseUp="PlayPauseButton_Clicked" Margin="120,0,0,24" Height="28" Width="28"/>
+            <local:SegoeButton x:Name="PlayModeButton" Glyph="RepeatAll"  MouseUp="PlayModeButton_Clicked" HorizontalAlignment="Right" Margin="0,0,100,25" />
+            <local:SegoeButton x:Name="VisionButton" Glyph="TVMonitor" HorizontalAlignment="Center" Margin="0,0,0,25" MouseUp="VisionButton_Clicked" />
+            <local:SegoeButton x:Name="FullScreenButton" Glyph="FullScreen" HorizontalAlignment="Right" Margin="0,0,145, 25" MouseUp="FullScreenButton_Clicked" />
+            <local:SegoeButton x:Name="VolumeButton" Glyph="Volume3" HorizontalAlignment="Right" Margin="0, 0, 55, 25" MouseDown="VolumeButton_Holding"/>
             <Popup x:Name="VolumePopup" PlacementTarget="{Binding ElementName=VolumeButton}" Placement="Top" AllowsTransparency="True" PopupAnimation="Fade">
                 <Label x:Name="VolumeLabel" Content="100" HorizontalAlignment="Right" Foreground="White"/>
             </Popup>

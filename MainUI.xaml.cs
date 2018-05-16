@@ -94,7 +94,7 @@ namespace Player
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             BindUI();
-            var cml = Environment.GetCommandLineArgs();
+            var cml = Environment.GetCommandLineArgs().Where(name => !name.EndsWith(".exe")).ToArray();
             if (cml.Length > 1)
                 Manager.Add(cml, true);
 
@@ -124,7 +124,7 @@ namespace Player
         {
             WindowSizes[IsVisionOn[0] ? 1 : 0].Height = Height;
             SizeChangeTimer.Start();
-            Player.UserControl_SizeChanged(this, null);
+            Player.Size_Changed(this, null);
         }
 
         private void Media_DeleteRequested(object sender, InfoExchangeArgs e)

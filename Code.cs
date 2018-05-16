@@ -16,7 +16,7 @@ namespace Player
         public double Volume { get; set; } = 1;
         public Size[] LastSize { get; set; }
         public Point LastLoc { get; set; } = new Point(20, 20);
-
+        public string LastPath { get; set; }
         public bool VisionOrientation { get; set; } = true;
         public bool LibraryValidation { get; set; } = false;
         public int MouseOverTimeout { get; set; } = 5000;

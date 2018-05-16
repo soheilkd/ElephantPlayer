@@ -1,15 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using Player.Events;
+using System;
 using System.Threading.Tasks;
 using System.Timers;
 using System.Windows;
 using System.Windows.Controls;
-using static Player.Global;
 using System.Windows.Input;
-using Player.Events;
 using System.Windows.Media.Animation;
+using static Player.Global;
 
 namespace Player.Controls
 {
@@ -25,7 +22,7 @@ namespace Player.Controls
         private Timer MouseMoveTimer = new Timer(5000) { AutoReset = false };
         private Timer PlayCountTimer;
         private TimeSpan TimeSpan;
-        private bool IsVisionMinified = false, IsUserSeeking;
+        private bool IsUserSeeking, IsFullScreen, WasMaximized;
         private Window ParentWindow;
         private Taskbar.Thumb Thumb = new Taskbar.Thumb();
         private Storyboard MagnifyBoard, MinifyBoard, FullOnBoard, FullOffBoard;
@@ -36,13 +33,15 @@ namespace Player.Controls
             get => controlsVisibile;
             set
             {
+                if (!Magnified)
+                    value = true;
                 controlsVisibile = value;
                 FullOnBoard.Stop();
                 FullOffBoard.Stop();
                 if (value)
-                    FullOffBoard.Begin();
+                    Dispatcher.Invoke(() => FullOffBoard.Begin());
                 else
-                    FullOnBoard.Begin();
+                    Dispatcher.Invoke(() => FullOnBoard.Begin());
             }
         }
         private bool magnified;
@@ -112,21 +111,6 @@ namespace Player.Controls
             }
             catch (Exception) { }
         }
-        private void Element_ContextFullScreen(object sender, RoutedEventArgs e)
-        {
-            if (ParentWindow.ResizeMode != ResizeMode.NoResize)
-            {
-                ParentWindow.WindowStyle = WindowStyle.None;
-                ParentWindow.ResizeMode = ResizeMode.NoResize;
-                ParentWindow.WindowState = WindowState.Maximized;
-            }
-            else
-            {
-                ParentWindow.ResizeMode = ResizeMode.CanResize;
-                ParentWindow.WindowStyle = WindowStyle.ThreeDBorderWindow;
-                ParentWindow.WindowState = WindowState.Normal;
-            }
-        }
         private void Element_MouseMove(object sender, MouseEventArgs e)
         {
             element.Cursor = Cursors.Arrow;
@@ -165,7 +149,7 @@ namespace Player.Controls
                 PositionSlider.Value = ((Slider)sender).Value;
             }
         }
-        private async void Position_MouseDown(object sender, MouseButtonEventArgs e)
+        private async void Position_Holding(object sender, MouseButtonEventArgs e)
         {
             IsUserSeeking = true;
             while (e.ButtonState == MouseButtonState.Pressed)
@@ -179,7 +163,7 @@ namespace Player.Controls
             element.Play();
             IsUserSeeking = false;
         }
-        private void PlayModeButton_Click(object sender, MouseButtonEventArgs e)
+        private void PlayModeButton_Clicked(object sender, MouseButtonEventArgs e)
         {
             switch (PlayModeButton.Glyph)
             {
@@ -203,7 +187,7 @@ namespace Player.Controls
                     break;
             }
         }
-        private async void VolumeButton_MouseDown(object sender, MouseButtonEventArgs e)
+        private async void VolumeButton_Holding(object sender, MouseButtonEventArgs e)
         {
             VolumePopup.IsOpen = true;
             while (e.LeftButton == MouseButtonState.Pressed)
@@ -222,7 +206,7 @@ namespace Player.Controls
             }
             VolumePopup.IsOpen = false;
         }
-        private void PlayPauseButton_Click(object sender, MouseButtonEventArgs e)
+        private void PlayPauseButton_Clicked(object sender, MouseButtonEventArgs e)
         {
             if (PlayPauseButton.Glyph == Glyph.Pause)
             {
@@ -237,13 +221,38 @@ namespace Player.Controls
                 Thumb.Refresh(true);
             }
         }
-        private void NextButton_Click(object sender, MouseButtonEventArgs e) => Invoke(InfoType.NextRequest);
-        private void PreviousButton_Click(object sender, MouseButtonEventArgs e)
+        private void NextButton_Clicked(object sender, MouseButtonEventArgs e) => Invoke(InfoType.NextRequest);
+        private void PreviousButton_Clicked(object sender, MouseButtonEventArgs e)
         {
             if (PositionSlider.Value > PositionSlider.Maximum / 100 * 10)
                 Seek(TimeSpan.Zero);
             else
                 Invoke(InfoType.PrevRequest);
+        }
+        private void VisionButton_Clicked(object sender, MouseButtonEventArgs e)
+        {
+            Magnified = !Magnified;
+        }
+        private void FullScreenButton_Clicked(object sender, MouseButtonEventArgs e)
+        {
+            IsFullScreen = !IsFullScreen;
+            if (IsFullScreen)
+            {
+                WasMaximized = ParentWindow.WindowState == WindowState.Maximized;
+                if (WasMaximized)
+                    ParentWindow.WindowState = WindowState.Normal;
+                ParentWindow.WindowStyle = WindowStyle.None;
+                ParentWindow.ResizeMode = ResizeMode.NoResize;
+                ParentWindow.WindowState = WindowState.Maximized;
+                FullScreenButton.Glyph = Glyph.BackToWindow;
+            }
+            else
+            {
+                ParentWindow.ResizeMode = ResizeMode.CanResize;
+                ParentWindow.WindowStyle = WindowStyle.ThreeDBorderWindow;
+                ParentWindow.WindowState = WasMaximized ? WindowState.Maximized : WindowState.Normal;
+                FullScreenButton.Glyph = Glyph.FullScreen;
+            }
         }
 
         private void ProcessVolume()
@@ -258,18 +267,18 @@ namespace Player.Controls
             }
         }
 
-        public void PlayNext() => NextButton_Click(this, null);
-        public void PlayPrevious() => PreviousButton_Click(this, null);
-        public void PlayPause() => PlayPauseButton_Click(this, null);
-        public void SmallSlideLeft() => Seek((int)PositionSlider.SmallChange * -1);
-        public void SmallSlideRight() => Seek((int)PositionSlider.SmallChange);
+        public void PlayNext() => NextButton_Clicked(this, null);
+        public void PlayPrevious() => PreviousButton_Clicked(this, null);
+        public void PlayPause() => PlayPauseButton_Clicked(this, null);
+        public void SmallSlideLeft() => Seek((int)PositionSlider.SmallChange * -1, true);
+        public void SmallSlideRight() => Seek((int)PositionSlider.SmallChange, true);
         public void FullStop()
         {
             element.Stop();
             element.Source = null;
         }
 
-        public void UserControl_SizeChanged(object sender, SizeChangedEventArgs e)
+        public void Size_Changed(object sender, SizeChangedEventArgs e)
         {
             if (!Magnified)
             {
@@ -277,15 +286,6 @@ namespace Player.Controls
             }
         }
 
-        private void Button_Click(object sender, RoutedEventArgs e)
-        {
-            ControlsVisible = !ControlsVisible;
-        }
-
-        private void VisionButton_MouseUp(object sender, MouseButtonEventArgs e)
-        {
-            Magnified = !Magnified;
-        }
 
         public void Seek(TimeSpan timeSpan, bool sliding = false)
         {

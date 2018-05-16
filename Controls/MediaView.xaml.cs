@@ -6,147 +6,78 @@ using System.Net;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using System.Windows.Media.Animation;
-using System.ComponentModel;
 using static Player.Global;
+
 #pragma warning disable 1591
 namespace Player
 {
     public partial class MediaView : UserControl
     {
+        private InfoExchangeArgs DefaultExchangeArgs;
 
-        public event EventHandler<InfoExchangeArgs> DoubleClicked;
-        public event EventHandler<InfoExchangeArgs> PlayClicked;
+        public event EventHandler<InfoExchangeArgs> DoubleClicked, PlayClicked;
 
-        public event EventHandler<InfoExchangeArgs> DeleteRequested;
-        public event EventHandler<InfoExchangeArgs> RemoveRequested;
-        public event EventHandler<InfoExchangeArgs> PlayAfterRequested;
-        public event EventHandler<InfoExchangeArgs> PropertiesRequested;
-        public event EventHandler<InfoExchangeArgs> RepeatRequested;
-        public event EventHandler<InfoExchangeArgs> LocationRequested;
-        public event EventHandler<InfoExchangeArgs> DownloadRequested;
-        public event EventHandler<InfoExchangeArgs> Downloaded;
-        public event EventHandler<InfoExchangeArgs> ZipDownloaded;
+        public event EventHandler<InfoExchangeArgs>
+            MoveRequested,
+            CopyRequested,
+            DeleteRequested,
+            RemoveRequested,
+            PlayAfterRequested,
+            PropertiesRequested,
+            RepeatRequested,
+            LocationRequested,
+            DownloadRequested,
+            Downloaded, ZipDownloaded;
 
-        string[] Manip = new string[2];
+        string[] OriginalStringsOfLabels = new string[2];
 
         public int MediaIndex { get; set; }
-        public Preferences Settings;
+        public Glyph DefaultIcon { get; set; }
+        bool downloadCanceled = true;
         private bool isPlaying = false;
         public bool IsPlaying
         {
-            get => isPlaying; set
+            get => isPlaying;
+            set
             {
                 isPlaying = value;
-                MainIcon.Glyph = value ? Glyph.MusicAlbum : DefaultIcon;
+                MainIcon.Glyph = value ? Glyph.Speakers : DefaultIcon;
                 MainIcon.Foreground = value ? Brushes.DeepSkyBlue : Brushes.White;
                 MainLabel.Foreground = value ? Brushes.DeepSkyBlue : Brushes.White;
                 SubLabel.Foreground = value ? Brushes.DeepSkyBlue : Brushes.White;
             }
         }
-        public Glyph DefaultIcon { get; set; }
-        public MediaView()
-        {
-            InitializeComponent();
-        }
-        public MediaView(int index, string main, string sub, string time, MediaType type = MediaType.Music)
-        {
-            InitializeComponent();
-            Revoke(index, main, sub,time, type);
-        }
-        public MediaView(int index, Media media) : this(index, media.Title, media.Artist, CastTime(media.Length), media.MediaType) { }
 
-        public void Revoke(int index, string main, string sub, string time, MediaType type = MediaType.Music)
-        {
-            MainLabel.Content = main;
-            SubLabel.Content = sub;
-            MediaIndex = index;
-            switch (type)
-            {
-                case MediaType.Music:
-                    DefaultIcon = Glyph.MusicNote;
-                    break;
-                case MediaType.Video:
-                    DefaultIcon = Glyph.Video;
-                    break;
-                case MediaType.OnlineMusic:
-                case MediaType.OnlineVideo:
-                case MediaType.OnlineFile:
-                    DefaultIcon = Glyph.Cloud;
-                    break;
-                default:
-                    DefaultIcon = default;
-                    break;
-            }
-            MainIcon.Glyph = DefaultIcon;
-            Manip = new string[] { main, sub };
-            TimeLabel.Content = time;
-            if ((int)type < 3)
-                DownloadButton.Visibility = Visibility.Hidden;
-            Resources["TimeLabelTargetMargin"] = new Thickness(0, 0, (int)type > 2 ? 75: 35, 0);
-        }
-        public void Revoke(int index, Media media) => Revoke(index, media.Title, media.Artist, CastTime(media.Length), media.MediaType);
-        public void Revoke(InfoExchangeArgs e) => Revoke(e.Integer, e.Object as Media);
+        WebClient Client = null;
+
+        public MediaView() => InitializeComponent();
+        public MediaView(int index, Media media) : this() => Revoke(index, media);
+
+
         public void UserControl_Loaded(object sender, RoutedEventArgs e)
         {
             PlayButton.Opacity = 0;
             DownloadButton.Opacity = 0;
 
+            RoutedEventHandler RepeatInvokation(int count) => (_, __) => RepeatRequested?.Invoke(this, new InfoExchangeArgs(MediaIndex, count));
             //Load SubContextMenuItems
             if (DefaultIcon == Glyph.Cloud)
             {
                 MenuItem[] OnlineMediaMenu = new MenuItem[]
                 {
-                    GetMenu("Download"),
-                    GetMenu("Play After"),
-                    GetMenu("Repeat", "2 times", "3 times", "5 times", "10 times", "Forever"),
-                    GetMenu("Remove"),
-                    GetMenu("Properties")
-                };
-                OnlineMediaMenu[0].Click += delegate { DownloadButton_Click(this, null); };
-                OnlineMediaMenu[1].Click += delegate { PlayAfterRequested?.Invoke(this, new InfoExchangeArgs(MediaIndex)); };
-                OnlineMediaMenu[2].Click += delegate { };
-                OnlineMediaMenu[3].Click += delegate { RemoveRequested?.Invoke(this, new InfoExchangeArgs(MediaIndex)); };
-                OnlineMediaMenu[4].Click += delegate { PropertiesRequested?.Invoke(this, new InfoExchangeArgs(MediaIndex)); };
-                (OnlineMediaMenu[2].Items[0] as MenuItem).Click += delegate
-                {
-                    RepeatRequested?.Invoke(this, new InfoExchangeArgs()
+                    GetMenu("Download", (_,__) => DownloadButton_Clicked(this, null)),
+                    GetMenu("Play After", (_,__) => PlayAfterRequested?.Invoke(this, DefaultExchangeArgs)),
+                    GetMenu("Repeat",
+                    new (string, RoutedEventHandler)[]
                     {
-                        Integer = MediaIndex,
-                        Object = 2
-                    });
-                };
-                (OnlineMediaMenu[2].Items[1] as MenuItem).Click += delegate
-                {
-                    RepeatRequested?.Invoke(this, new InfoExchangeArgs()
-                    {
-                        Integer = MediaIndex,
-                        Object = 3
-                    });
-                };
-                (OnlineMediaMenu[2].Items[2] as MenuItem).Click += delegate
-                {
-                    RepeatRequested?.Invoke(this, new InfoExchangeArgs()
-                    {
-                        Integer = MediaIndex,
-                        Object = 5
-                    });
-                };
-                (OnlineMediaMenu[2].Items[3] as MenuItem).Click += delegate
-                {
-                    RepeatRequested?.Invoke(this, new InfoExchangeArgs()
-                    {
-                        Integer = MediaIndex,
-                        Object = 10
-                    });
-                };
-                (OnlineMediaMenu[2].Items[4] as MenuItem).Click += delegate
-                {
-                    RepeatRequested?.Invoke(this, new InfoExchangeArgs()
-                    {
-                        Integer = MediaIndex,
-                        Object = 999
-                    });
+                        ("2 times", (_,__) => RepeatInvokation(2)),
+                        ("3 times", (_,__) => RepeatInvokation(3)),
+                        ("5 times", (_,__) => RepeatInvokation(5)),
+                        ("10 times", (_,__) => RepeatInvokation(10)),
+                        ("50 times", (_,__) => RepeatInvokation(50))
+                    }),
+                    GetMenu("Remove", (_,__) => RemoveRequested?.Invoke(this, DefaultExchangeArgs)),
+                    GetMenu("Properties", (_,__) => PropertiesRequested?.Invoke(this, DefaultExchangeArgs))
                 };
                 ContextMenu = new ContextMenu() { ItemsSource = OnlineMediaMenu };
             }
@@ -154,77 +85,103 @@ namespace Player
             {
                 MenuItem[] OfflineMediaMenu = new MenuItem[]
                     {
-                     GetMenu("Play After"),
-                     GetMenu("Repeat", "2 times", "3 times", "5 times", "10 times", "Forever"),
-                     GetMenu("Remove"),
-                     GetMenu("Delete"),
-                     GetMenu("Move...", "To Default Loc", "Browse"),
-                     GetMenu("Copy...", "To Default Loc", "Browse"),
-                     GetMenu("Open Location"),
-                     GetMenu("Properties")
+                     GetMenu("Play After", (_,__) => PlayAfterRequested?.Invoke(this, DefaultExchangeArgs)),
+                     GetMenu("Repeat",
+                     new (string, RoutedEventHandler)[]
+                     {
+                         ("2 times", (_,__) => RepeatInvokation(2)),
+                         ("3 times", (_,__) => RepeatInvokation(3)),
+                         ("5 times", (_,__) => RepeatInvokation(5)),
+                         ("10 times", (_,__) => RepeatInvokation(10)),
+                         ("50 times", (_,__) => RepeatInvokation(50))
+                     }),
+                     GetMenu("Remove", (_,__) => RemoveRequested?.Invoke(this, DefaultExchangeArgs)),
+                     GetMenu("Delete", (_,__) => DeleteRequested?.Invoke(this, DefaultExchangeArgs)),
+                     GetMenu("Move...",
+                     new (string, RoutedEventHandler)[]
+                     {
+                         ("To Last Location", (_,__) => MoveRequested?.Invoke(this, new InfoExchangeArgs(MediaIndex, App.LastSelectedPath))),
+                         ("Browse...", (_,__) => 
+                         {
+
+                         })
+                     }),
+                     GetMenu("Copy...",
+                     new (string, RoutedEventHandler)[]
+                     {
+                         ("To Last Location", (_,__) => CopyRequested?.Invoke(this, new InfoExchangeArgs(MediaIndex, App.LastSelectedPath))),
+                         ("Browse...", (_,__) =>
+                         {
+
+                         })
+                     }),
+                     GetMenu("Open Location", (_,__) => LocationRequested?.Invoke(this, DefaultExchangeArgs)),
+                     GetMenu("Properties", (_,__) => PropertiesRequested?.Invoke(this, DefaultExchangeArgs))
                     };
-                OfflineMediaMenu[0].Click += delegate { PlayAfterRequested?.Invoke(this, new InfoExchangeArgs(MediaIndex)); };
-                OfflineMediaMenu[1].Click += delegate { };
-                OfflineMediaMenu[2].Click += delegate { RemoveRequested?.Invoke(this, new InfoExchangeArgs(MediaIndex)); };
-                OfflineMediaMenu[3].Click += delegate { DeleteRequested?.Invoke(this, new InfoExchangeArgs(MediaIndex)); };
-                OfflineMediaMenu[4].Click += delegate { };
-                OfflineMediaMenu[5].Click += delegate { };
-                OfflineMediaMenu[6].Click += delegate { LocationRequested?.Invoke(this, new InfoExchangeArgs(MediaIndex)); };
-                OfflineMediaMenu[7].Click += delegate { PropertiesRequested?.Invoke(this, new InfoExchangeArgs(MediaIndex)); };
-                (OfflineMediaMenu[1].Items[0] as MenuItem).Click += delegate
-                {
-                    RepeatRequested?.Invoke(this, new InfoExchangeArgs()
-                    {
-                        Integer = MediaIndex,
-                        Object = 2
-                    });
-                };
-                (OfflineMediaMenu[1].Items[1] as MenuItem).Click += delegate
-                {
-                    RepeatRequested?.Invoke(this, new InfoExchangeArgs()
-                    {
-                        Integer = MediaIndex,
-                        Object = 3
-                    });
-                };
-                (OfflineMediaMenu[1].Items[2] as MenuItem).Click += delegate
-                {
-                    RepeatRequested?.Invoke(this, new InfoExchangeArgs()
-                    {
-                        Integer = MediaIndex,
-                        Object = 5
-                    });
-                };
-                (OfflineMediaMenu[1].Items[3] as MenuItem).Click += delegate
-                {
-                    RepeatRequested?.Invoke(this, new InfoExchangeArgs()
-                    {
-                        Integer = MediaIndex,
-                        Object = 10
-                    });
-                };
-                (OfflineMediaMenu[1].Items[4] as MenuItem).Click += delegate
-                {
-                    RepeatRequested?.Invoke(this, new InfoExchangeArgs()
-                    {
-                        Integer = MediaIndex,
-                        Object = 999
-                    });
-                };
                 ContextMenu = new ContextMenu() { ItemsSource = OfflineMediaMenu };
             }
         }
+        
+        private void DownloadButton_Clicked(object sender, MouseButtonEventArgs e)
+        {
+            if (Client == null)
+                Client = new WebClient();
+            if (Client.IsBusy)
+            {
+                var res = MessageBox.Show("Sure to cancel?", "", MessageBoxButton.YesNo, MessageBoxImage.Question);
+                if (res == MessageBoxResult.Yes)
+                {
+                    downloadCanceled = true;
+                    Client.CancelAsync();
+                    return;
+                }
+            }
+            else
+            {
+                DownloadRequested?.Invoke(this, new InfoExchangeArgs() { Integer = MediaIndex, Object = this });
+                downloadCanceled = false;
+            }
+        }
+        private void Play_Clicked(object sender, MouseButtonEventArgs e) => PlayClicked?.Invoke(this, new InfoExchangeArgs(MediaIndex));
+        private void Canvas_DoubleClicked(object sender, MouseButtonEventArgs e) => DoubleClicked?.Invoke(this, new InfoExchangeArgs(MediaIndex));
 
-        private static MenuItem GetMenu(string header) => new MenuItem() { Header = header };
-        private static MenuItem GetMenu(string header, params string[] subitems)
+        private void Size_Changed(object sender, SizeChangedEventArgs e)
+        {
+            if (ActualWidth > 500)
+            {
+                SubLabel.Visibility = Visibility.Hidden;
+                SubLabel.Margin = new Thickness(30, 0, 40, 0);
+                MainLabel.Content = $"{OriginalStringsOfLabels[1]} - {OriginalStringsOfLabels[0]}";
+                PlayButton.Width = 20;
+                PlayButton.Height = 20;
+                DownloadButton.Width = 20;
+                DownloadButton.Height = 20;
+            }
+            else if (SubLabel.Visibility == Visibility.Hidden)
+            {
+                SubLabel.Visibility = Visibility.Visible;
+                SubLabel.Margin = new Thickness(30, 20, 40, 0);
+                MainLabel.Content = OriginalStringsOfLabels[0];
+                PlayButton.Width = 26;
+                PlayButton.Height = 26;
+                DownloadButton.Width = 26;
+                DownloadButton.Height = 26;
+            }
+        }
+
+        private static MenuItem GetMenu(string header, RoutedEventHandler onClick)
+        {
+            var menu = new MenuItem() { Header = header };
+            menu.Click += onClick;
+            return menu;
+        }
+        private static MenuItem GetMenu(string header, (string subItem, RoutedEventHandler onClick)[] subItems)
         {
             var output = new MenuItem() { Header = header };
-            foreach (var item in subitems)
-                output.Items.Add(new MenuItem() { Header = item });
+            for (int i = 0; i < subItems.Length; i++)
+                output.Items.Add(GetMenu(subItems[i].subItem, subItems[i].onClick));
             return output;
         }
-        
-        WebClient Client = null;
         public void Download(Media media)
         {
             var SavePath = $"{App.Path}Downloads\\{media.Title}";
@@ -240,14 +197,14 @@ namespace Player
                 if (downloadCanceled)
                 {
                     DownloadButton.Glyph = Glyph.Cloud;
-                    MainLabel.Content = Manip[0];
-                    SubLabel.Content = Manip[1];
+                    MainLabel.Content = OriginalStringsOfLabels[0];
+                    SubLabel.Content = OriginalStringsOfLabels[1];
                     System.IO.File.Delete(SavePath);
                     return;
                 }
                 MainLabel.Content = "Downloaded, Processing...";
                 DownloadButton.Visibility = Visibility.Hidden;
-                if (Manip[0].EndsWith(".zip"))
+                if (OriginalStringsOfLabels[0].EndsWith(".zip"))
                 {
                     MainLabel.Content = "Extracting...";
                     SubLabel.Content = "";
@@ -273,54 +230,30 @@ namespace Player
             Client.DownloadFileAsync(new Uri(media.Path, UriKind.Absolute), SavePath);
         }
 
-        private void DownloadButton_Click(object sender, MouseButtonEventArgs e)
+        public void Revoke(int index, string main, string sub, string time, MediaType type = MediaType.Music)
         {
-            if (Client == null)
-                Client = new WebClient();
-            if (Client.IsBusy)
+            MainLabel.Content = main;
+            SubLabel.Content = sub;
+            MediaIndex = index;
+            switch (type)
             {
-                var res = MessageBox.Show("Sure to cancel?", "", MessageBoxButton.YesNo, MessageBoxImage.Question);
-                if (res == MessageBoxResult.Yes)
-                {
-                    downloadCanceled = true;
-                    Client.CancelAsync();
-                    return;
-                }
+                case MediaType.Music: DefaultIcon = Glyph.MusicNote; break;
+                case MediaType.Video: DefaultIcon = Glyph.Video; break;
+                case MediaType.OnlineMusic:
+                case MediaType.OnlineVideo:
+                case MediaType.OnlineFile: DefaultIcon = Glyph.Cloud; break;
+                default: DefaultIcon = default; break;
             }
-            else
-            {
-
-                DownloadRequested?.Invoke(this, new InfoExchangeArgs() { Integer = MediaIndex, Object = this });
-                downloadCanceled = false;
-            }
+            MainIcon.Glyph = DefaultIcon;
+            OriginalStringsOfLabels = new string[] { main, sub };
+            TimeLabel.Content = time;
+            if ((int)type < 3)
+                DownloadButton.Visibility = Visibility.Hidden;
+            Resources["TimeLabelTargetMargin"] = new Thickness(0, 0, (int)type > 2 ? 75 : 35, 0);
+            Size_Changed(this, null);
+            DefaultExchangeArgs = new InfoExchangeArgs(index);
         }
-        bool downloadCanceled = true;
-
-        private void Play_Click(object sender, MouseButtonEventArgs e) => PlayClicked?.Invoke(this, new InfoExchangeArgs(MediaIndex));
-        private void OutputCanvas_MouseDoubleClick(object sender, MouseButtonEventArgs e) => DoubleClicked?.Invoke(this, new InfoExchangeArgs(MediaIndex));
-
-        private void Size_Changed(object sender, SizeChangedEventArgs e)
-        {
-            if (ActualWidth > 500)
-            {
-                SubLabel.Visibility = Visibility.Hidden;
-                SubLabel.Margin = new Thickness(30, 0, 40, 0);
-                MainLabel.Content = $"{Manip[1]} - {Manip[0]}";
-                PlayButton.Width = 20;
-                PlayButton.Height = 20;
-                DownloadButton.Width = 20;
-                DownloadButton.Height = 20;
-            }
-            else if (SubLabel.Visibility == Visibility.Hidden)
-            {
-                SubLabel.Visibility = Visibility.Visible;
-                SubLabel.Margin = new Thickness(30, 20, 40, 0);
-                MainLabel.Content = Manip[0];
-                PlayButton.Width = 26;
-                PlayButton.Height = 26;
-                DownloadButton.Width = 26;
-                DownloadButton.Height = 26;
-            }
-        }
+        public void Revoke(int index, Media media) => Revoke(index, media.Title, media.Artist, CastTime(media.Length), media.MediaType);
+        public void Revoke(InfoExchangeArgs e) => Revoke(e.Integer, e.Object as Media);
     }
 }

@@ -5,15 +5,15 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:controls="clr-namespace:Player.Controls" SizeChanged="Size_Changed"
              Width="200" Background="#01000000"
-             Loaded="UserControl_Loaded" MouseDoubleClick="OutputCanvas_MouseDoubleClick"
+             Loaded="UserControl_Loaded" MouseDoubleClick="Canvas_DoubleClicked"
              x:Name="OutputCanvas">
     <Grid>
         <Label Content="MainLabel" x:Name="MainLabel" Margin="30,0,40,0" VerticalAlignment="Top" FontWeight="Medium" FontSize="14"  />
         <Label Content="SubLabel" x:Name="SubLabel" Margin="30,20,40,0" VerticalAlignment="Top" FontWeight="Light"/>
         <Label Content="00:00" x:Name="TimeLabel" HorizontalAlignment="Right" VerticalAlignment="Center"/>
         <controls:SegoeIcon  x:Name="MainIcon" HorizontalAlignment="Left" Width="30" Glyph="MusicInfo" Foreground="White"/>
-        <controls:SegoeButton HorizontalAlignment="Right" Margin="0, 0, 5, 0" Glyph="Play" EllipseType="Rectular" x:Name="PlayButton" MouseUp="Play_Click" />
-        <controls:SegoeButton HorizontalAlignment="Right" Margin="0, 0, 45, 0" Glyph="Cloud" EllipseType="Rectular" x:Name="DownloadButton" MouseUp="DownloadButton_Click" />
+        <controls:SegoeButton HorizontalAlignment="Right" Margin="0, 0, 5, 0" Glyph="Play" EllipseType="Rectular" x:Name="PlayButton" MouseUp="Play_Clicked" />
+        <controls:SegoeButton HorizontalAlignment="Right" Margin="0, 0, 45, 0" Glyph="Cloud" EllipseType="Rectular" x:Name="DownloadButton" MouseUp="DownloadButton_Clicked" />
     </Grid>
     <UserControl.Resources>
        <!-- <Style TargetType="MenuItem">

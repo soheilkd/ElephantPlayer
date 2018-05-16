@@ -347,28 +347,28 @@ namespace Player
         public Media Next(int y = -1)
         {
             if (y != -1)
-            {
                 CurrentlyPlayingIndex = y;
-                return CurrentlyPlaying;
-            }
-            switch (ActivePlayMode)
-            {
-                case PlayMode.Shuffle: CurrentlyPlayingIndex = Shuffle.Next(0, AllMedias.Count); break;
-                case PlayMode.Queue:
-                    if (CurrentQueuePosition == PlayQueue.Count - 1)
-                    {
-                        CurrentlyPlayingIndex = PlayQueue[0];
-                        CurrentQueuePosition = 0;
-                    }
-                    else
-                        CurrentlyPlayingIndex = PlayQueue[CurrentQueuePosition++];
-                    break;
-                case PlayMode.RepeatAll:
-                    if (CurrentlyPlayingIndex != AllMedias.Count - 1) CurrentlyPlayingIndex++;
-                    else CurrentlyPlayingIndex = 0;
-                    break;
-                default: break;
-            }
+            else
+                switch (ActivePlayMode)
+                {
+                    case PlayMode.Shuffle: CurrentlyPlayingIndex = Shuffle.Next(0, AllMedias.Count); break;
+                    case PlayMode.Queue:
+                        if (CurrentQueuePosition == PlayQueue.Count - 1)
+                        {
+                            CurrentlyPlayingIndex = PlayQueue[0];
+                            CurrentQueuePosition = 0;
+                        }
+                        else
+                            CurrentlyPlayingIndex = PlayQueue[CurrentQueuePosition++];
+                        break;
+                    case PlayMode.RepeatAll:
+                        if (CurrentlyPlayingIndex != AllMedias.Count - 1) CurrentlyPlayingIndex++;
+                        else CurrentlyPlayingIndex = 0;
+                        break;
+                    default: break;
+                }
+            if (!CurrentlyPlaying.IsLoaded)
+                Update(CurrentlyPlayingIndex);
             return CurrentlyPlaying;
         }
         public Media Previous()
