@@ -14,7 +14,7 @@ namespace Player
         public int PlayMode { get; set; } = 0;
         public int MainKey { get; set; } = 0;
         public double Volume { get; set; } = 1;
-        public Size[] LastSize { get; set; }
+        public Size LastSize { get; set; }
         public Point LastLoc { get; set; } = new Point(20, 20);
         public string LastPath { get; set; }
         public bool VisionOrientation { get; set; } = true;
@@ -34,7 +34,8 @@ namespace Player
     
     public static class Extensions
     {
-        public static int ToInt(this double e) => Convert.ToInt32(e); 
+        public static int ToInt(this double e) => Convert.ToInt32(e);
+        public static T CastTo<T>(this object obj) => (T)obj;
     }
 
     public static class Global
@@ -45,7 +46,7 @@ namespace Player
             return $"{(time.TotalSeconds - (time.TotalSeconds % 60)).ToInt() / 60}:" +
                 $"{((time.TotalSeconds.ToInt() % 60).ToString().Length == 1 ? $"0{time.TotalSeconds.ToInt() % 60}" : (time.TotalSeconds.ToInt() % 60).ToString())}";
         }
-        public static string CastTime(int ms) => CastTime(new TimeSpan(0, 0, 0, 0, ms));
+        public static string CastTime(int ms) => CastTime(new TimeSpan(0, 0, 0, 0, ms));  
     }
 }
 

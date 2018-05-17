@@ -252,8 +252,10 @@ namespace Player
             Resources["TimeLabelTargetMargin"] = new Thickness(0, 0, (int)type > 2 ? 75 : 35, 0);
             Size_Changed(this, null);
             DefaultExchangeArgs = new InfoExchangeArgs(index);
+            IsPlaying = IsPlaying;
         }
         public void Revoke(int index, Media media) => Revoke(index, media.Title, media.Artist, CastTime(media.Length), media.MediaType);
+        public void Revoke(Media media) => Revoke(MediaIndex, media);
         public void Revoke(InfoExchangeArgs e) => Revoke(e.Integer, e.Object as Media);
     }
 }

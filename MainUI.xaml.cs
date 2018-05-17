@@ -14,13 +14,20 @@ namespace Player
 {
     public partial class MainUI : Window
     {
+        private IEnumerable<int> SelectedMediaIndexes
+        {
+            get =>
+                from item
+                in QueueListView.SelectedItems.Cast<MediaView>()
+                select item.MediaIndex;
+        }
         private MediaManager Manager = new MediaManager();
         private List<MediaView> MediaViews = new List<MediaView>();
         private MassiveLibrary Library = new MassiveLibrary();
         private Timer PlayCountTimer = new Timer(100000) { AutoReset = false };
         private Timer SizeChangeTimer = new Timer(50) { AutoReset = true };
         private bool[] IsVisionOn = new bool[] { false, false, false };
-        private Size[] WindowSizes = new Size[2];
+
         public MainUI()
         {
             InitializeComponent();
@@ -30,9 +37,8 @@ namespace Player
             var lib = MassiveLibrary.Load();
             for (int i = 0; i < lib.Medias.Length; i++)
                 Manager.Add(lib.Medias[i]);
-            WindowSizes = App.Preferences.LastSize;
-            Width = WindowSizes[0].Width;
-            Height = WindowSizes[0].Height;
+            Width = App.Preferences.LastSize.Width;
+            Height = App.Preferences.LastSize.Height;
             Left = App.Preferences.LastLoc.X;
             Top = App.Preferences.LastLoc.Y;
         }
@@ -47,7 +53,7 @@ namespace Player
                 Dispatcher.Invoke(
                     delegate
                     {
-                        if (!QueueListView.IsVisible)
+                        if (Player.Magnified)
                             return;
                         for (int i = 0; i < MediaViews.Count; i++)
                             MediaViews[i].Width = QueueListView.ActualWidth > 25 ? QueueListView.ActualWidth - 25 : 25;
@@ -97,12 +103,33 @@ namespace Player
             var cml = Environment.GetCommandLineArgs().Where(name => !name.EndsWith(".exe")).ToArray();
             if (cml.Length > 1)
                 Manager.Add(cml, true);
-
+            Player.EventHappened += Player_EventHappened;
         }
+
+        private void Player_EventHappened(object sender, InfoExchangeArgs e)
+        {
+            switch (e.Type)
+            {
+                case InfoType.DragMoveRequest: DragMove(); break;
+                case InfoType.NextRequest: Play(Manager.Next()); break;
+                case InfoType.PrevRequest: Play(Manager.Previous()); break;
+                case InfoType.Handling:
+                    break;
+                case InfoType.UserInterface:
+                    break;
+                case InfoType.LengthFound:
+                    Manager.CurrentlyPlaying.Length = (TimeSpan)e.Object;
+                    //Revoke Currently Playing Media Views with the new Length
+                    MediaViews.FindAll(item => item.MediaIndex == Manager.CurrentlyPlayingIndex).ForEach(eachView => eachView.Revoke(Manager.CurrentlyPlaying));
+                    break;
+                case InfoType.PlayModeChange: Manager.ActivePlayMode = (PlayMode)e.Object; break;
+                default: break;
+            }
+        }
+
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            WindowSizes[IsVisionOn[0] ? 1: 0].Width = ActualWidth;
-            App.Preferences.LastSize = WindowSizes;
+            App.Preferences.LastSize = new Size(Width, Height);
             App.Preferences.LastLoc = new Point(Left, Top);
             App.Preferences.Volume = Player.Volume;
             App.Preferences.Save();
@@ -122,7 +149,6 @@ namespace Player
         private void Window_Drop(object sender, DragEventArgs e) => Manager.Add((string[])e.Data.GetData(DataFormats.FileDrop));
         private void Window_SizeChanged(object sender, SizeChangedEventArgs e)
         {
-            WindowSizes[IsVisionOn[0] ? 1 : 0].Height = Height;
             SizeChangeTimer.Start();
             Player.Size_Changed(this, null);
         }
@@ -131,68 +157,30 @@ namespace Player
         {
             if (QueueListView.SelectedItems.Count > 1)
             {
-                var arr = GetSelectedMediaIndexes();
                 string selectedFilesInString = "";
-                foreach (var item in arr)
-                    selectedFilesInString += $"\r\n{Manager[item].Path}";
+                OnSelectedMedias(each => selectedFilesInString += $"\r\n{Manager[each].Path}");
                 var res = MessageBox.Show($"Sure? this files will be deleted:{selectedFilesInString}", " ", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
                 if (res == MessageBoxResult.OK)
-                    foreach (var item in arr)
-                        Manager.Remove(item);
+                    OnSelectedMedias(each => Manager.Remove(each));
             }
             else
                 Manager.RequestDelete(e.Integer);
         }
         private void Media_LocationRequested(object sender, InfoExchangeArgs e)
         {
-            if (QueueListView.SelectedItems.Count > 1)
-            {
-                var arr = GetSelectedMediaIndexes();
-                foreach (var item in arr)
-                    Manager.RequestLocation(item);
-            }
-            else
-                Manager.RequestLocation(e.Integer);
+            OnSelectedMedias(each => Manager.RequestLocation(each));
         }
         private void Media_RemoveRequested(object sender, InfoExchangeArgs e)
         {
-            if (QueueListView.SelectedItems.Count > 1)
-            {
-                var arr = GetSelectedMediaIndexes();
-                foreach (var item in arr)
-                    Manager.Remove(item);
-            }
-            else
-                Manager.Remove(e.Integer);
+            OnSelectedMedias(each => Manager.Remove(each));
         }
         private void Media_PropertiesRequested(object sender, InfoExchangeArgs e)
         {
-            if (QueueListView.SelectedItems.Count > 1)
-            {
-                var arr = GetSelectedMediaIndexes();
-                foreach (var item in arr)
-                    (new PropertiesUI(Manager[item], 
-                        (n, f) => Manager.Update(f.Object as TagLib.File)
-                        )).Show();
-            }
-            else
-                (new PropertiesUI(Manager[e.Integer],
-                    (n, f) => 
-                    Manager.Update(f.Object as TagLib.File)
-                    )).Show();
-
+            OnSelectedMedias(each => PropertiesUI.OpenFor(Manager[each], (_, f) => Manager.Update(f.Object as TagLib.File)));
         }
         private void Media_RepeatRequested(object sender, InfoExchangeArgs e)
         {
-            if (QueueListView.SelectedItems.Count > 1)
-            {
-                var arr = GetSelectedMediaIndexes();
-                for (int i = 0; i < (int)e.Object; i++)
-                    foreach (var item in arr)
-                        Manager.Repeat(item);
-            }
-            else
-                Manager.Repeat(e.Integer, (int)e.Object);
+            OnSelectedMedias(each => Manager.Repeat(each, (int)e.Object));
         }
         private void Media_DownloadRequested(object sender, InfoExchangeArgs e)
         {
@@ -255,7 +243,7 @@ namespace Player
                     Play(Manager.Next(e.Integer));
                     break;
                 case InfoType.MediaUpdate:
-                    MediaViews.Find(item => item.MediaIndex == e.Integer).Revoke(e);
+                    MediaViews.FindAll(item => item.MediaIndex == e.Integer).ForEach(eachView => eachView.Revoke(e));
                     if (e.Integer == Manager.CurrentlyPlayingIndex)
                     {
                         var q = Player.Position;
@@ -335,12 +323,9 @@ namespace Player
                 default: return false;
             }
         }
-        private int[] GetSelectedMediaIndexes()
-        {
-            int[] arr = new int[QueueListView.SelectedItems.Count];
-            for (int i = 0; i < arr.Length; i++)
-                arr[i] = (QueueListView.SelectedItems[i] as MediaView).MediaIndex;
-            return arr;
-        }
+
+        //private void Invoke<T>(Action<T> action, IEnumerable<T> on = null) => on.AsParallel().ForAll(action);
+        private void OnSelectedMedias(Action<int> action) => SelectedMediaIndexes.AsParallel().ForAll(action);
+        private void OnSelectedMediaViews(Action<MediaView> action) => QueueListView.SelectedItems.Cast<MediaView>().AsParallel().ForAll(action);
     }
 }

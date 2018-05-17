@@ -25,25 +25,28 @@ namespace Player
 
         public PropertiesUI() => InitializeComponent();
 
-        public PropertiesUI(Media media, EventHandler<InfoExchangeArgs> onSave)
+        public static void OpenFor(Media media, EventHandler<InfoExchangeArgs> onSave)
         {
-            InitializeComponent();
-            Media = media;
-            File = TagLib.File.Create(media.Path);
-            var tag = File.Tag;
-            TitleBox.Text = tag.Title ?? String.Empty;
-            ArtistBox.Text = tag.FirstPerformer ?? String.Empty;
-            AlbumArtistBox.Text = tag.FirstAlbumArtist ?? String.Empty;
-            ComposerBox.Text = tag.FirstComposer ?? String.Empty;
-            ConductorBox.Text = tag.Conductor ?? String.Empty;
-            GenreBox.Text = tag.FirstGenre ?? String.Empty;
-            TrackBox.Text = tag.Track.ToString() ?? String.Empty;
-            CommentBox.Text = tag.Comment ?? String.Empty;
-            YearBox.Text = tag.Year.ToString() ?? String.Empty;
-            CopyrightBox.Text = tag.Copyright ?? String.Empty;
-            LyricsBox.Text = tag.Lyrics ?? String.Empty;
-            ArtworkImage.Source = media.Artwork;
-            ChangeRequested += onSave;
+            var ui = new PropertiesUI
+            {
+                Media = media,
+                File = TagLib.File.Create(media.Path)
+            };
+            var tag = ui.File.Tag;
+            ui.TitleBox.Text = tag.Title ?? String.Empty;
+            ui.ArtistBox.Text = tag.FirstPerformer ?? String.Empty;
+            ui.AlbumArtistBox.Text = tag.FirstAlbumArtist ?? String.Empty;
+            ui.ComposerBox.Text = tag.FirstComposer ?? String.Empty;
+            ui.ConductorBox.Text = tag.Conductor ?? String.Empty;
+            ui.GenreBox.Text = tag.FirstGenre ?? String.Empty;
+            ui.TrackBox.Text = tag.Track.ToString() ?? String.Empty;
+            ui.CommentBox.Text = tag.Comment ?? String.Empty;
+            ui.YearBox.Text = tag.Year.ToString() ?? String.Empty;
+            ui.CopyrightBox.Text = tag.Copyright ?? String.Empty;
+            ui.LyricsBox.Text = tag.Lyrics ?? String.Empty;
+            ui.ArtworkImage.Source = media.Artwork;
+            ui.ChangeRequested += onSave;
+            ui.Show();
         }
 
         private void BrowseArtworkClick(object sender, RoutedEventArgs e)

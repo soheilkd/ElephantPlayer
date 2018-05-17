@@ -10,9 +10,6 @@ using static Player.Global;
 
 namespace Player.Controls
 {
-    /// <summary>
-    /// Interaction logic for MediaControl.xaml
-    /// </summary>
     public partial class MediaPlayer : UserControl
     {
         public TimeSpan Position { get => element.Position; set => element.Position = value; }
@@ -45,7 +42,7 @@ namespace Player.Controls
             }
         }
         private bool magnified;
-        private bool Magnified
+        public bool Magnified
         {
             get => magnified;
             set
@@ -57,6 +54,11 @@ namespace Player.Controls
                 else
                     MinifyBoard.Begin();
                 MouseMoveTimer.Start();
+                if (!Magnified)
+                {
+                    ParentWindow.Height--;
+                    ParentWindow.Height++;
+                }
             }
         }
         public MediaPlayer()
@@ -272,6 +274,12 @@ namespace Player.Controls
         public void PlayPause() => PlayPauseButton_Clicked(this, null);
         public void SmallSlideLeft() => Seek((int)PositionSlider.SmallChange * -1, true);
         public void SmallSlideRight() => Seek((int)PositionSlider.SmallChange, true);
+
+        private void element_MediaEnded(object sender, RoutedEventArgs e)
+        {
+            PlayNext();
+        }
+
         public void FullStop()
         {
             element.Stop();

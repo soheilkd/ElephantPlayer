@@ -21,7 +21,7 @@ namespace Player
         public string Title { get; set; }
         public string Album { get; set; }
         public string Path { get; set; }
-        public int Length { get; set; }
+        public TimeSpan Length { get; set; }
         public int PlayCount;
         public bool IsOffline;
         public MediaType MediaType;
@@ -92,7 +92,6 @@ namespace Player
                             Artwork = t.Tag.Pictures.Length >= 1 ? Imaging.Get.BitmapSource(t.Tag.Pictures[0]) : Imaging.Images.MusicArt;
                             MediaType = MediaType.Music;
                             Lyrics = t.Tag.Lyrics ?? String.Empty;
-                            Length = unchecked((int)t.Length);
                             IsLoaded = true;
                         }
                         break;
@@ -106,7 +105,7 @@ namespace Player
                         Artwork = Imaging.Images.VideoArt;
                         MediaType = MediaType.Video;
                         IsLoaded = true;
-                        Length = 1;
+                        Length = TimeSpan.Zero;
                         break;
                     case MediaType.None:
                         Name = null;
@@ -115,7 +114,7 @@ namespace Player
                         Artist = null;
                         Album = null;
                         Artwork = null;
-                        Length = -1;
+                        Length = TimeSpan.Zero;
                         IsLoaded = false;
                         MediaType = MediaType.None;
                         break;
@@ -412,12 +411,14 @@ namespace Player
 
         public void AddCount() => AllMedias[CurrentlyPlayingIndex].PlayCount++;
 
+        public bool IsPlaying(int index) => index == CurrentlyPlayingIndex;
+
     }
 
     [Serializable]
     public class MassiveLibrary
     {
-        private static string LibraryPath = $"{App.Path}Library.dll";
+        private static readonly string LibraryPath = $"{App.Path}Library.dll";
         public Media[] Medias { get; set; } = new Media[0];
         public MassiveLibrary(Media[] medias) => Medias = medias;
         public MassiveLibrary() { }
