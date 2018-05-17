@@ -105,7 +105,7 @@ namespace Player.Controls
             {
                 if (ParentWindow.WindowState != WindowState.Maximized)
                     ParentWindow.DragMove();
-                if (DraggerTimer.Enabled)
+                if (DraggerTimer.Enabled && !IsFullScreen)
                 {
                     ParentWindow.Topmost = !ParentWindow.Topmost;
                     ParentWindow.WindowStyle = ParentWindow.Topmost ? WindowStyle.None : WindowStyle.SingleBorderWindow;
@@ -113,10 +113,15 @@ namespace Player.Controls
             }
             catch (Exception) { }
         }
-        private void Element_MouseMove(object sender, MouseEventArgs e)
+        private async void Element_MouseMove(object sender, MouseEventArgs e)
         {
+            var y = ControlsTranslation.Y;
+            await Task.Delay(50);
+            if (ControlsTranslation.Y < y)
+                return;
             element.Cursor = Cursors.Arrow;
             ControlsVisible = true;
+            Time:
             MouseMoveTimer.Stop();
             MouseMoveTimer.Start();
         }
@@ -234,6 +239,7 @@ namespace Player.Controls
         private void VisionButton_Clicked(object sender, MouseButtonEventArgs e)
         {
             Magnified = !Magnified;
+  
         }
         private void FullScreenButton_Clicked(object sender, MouseButtonEventArgs e)
         {
@@ -247,6 +253,7 @@ namespace Player.Controls
                 ParentWindow.ResizeMode = ResizeMode.NoResize;
                 ParentWindow.WindowState = WindowState.Maximized;
                 FullScreenButton.Glyph = Glyph.BackToWindow;
+                VisionButton.Visibility = Visibility.Hidden;
             }
             else
             {
@@ -254,6 +261,7 @@ namespace Player.Controls
                 ParentWindow.WindowStyle = WindowStyle.ThreeDBorderWindow;
                 ParentWindow.WindowState = WasMaximized ? WindowState.Maximized : WindowState.Normal;
                 FullScreenButton.Glyph = Glyph.FullScreen;
+                VisionButton.Visibility = Visibility.Visible;
             }
         }
 
@@ -304,6 +312,11 @@ namespace Player.Controls
       
         public void Play(Media media)
         {
+            VisionButton.Visibility = media.IsVideo ? Visibility.Visible : Visibility.Hidden;
+            if (IsFullScreen && !media.IsVideo)
+                FullScreenButton_Clicked(this, null);
+            Magnified = media.IsVideo;
+            FullScreenButton.Visibility = VisionButton.Visibility;
             PositionSlider.Value = 0;
             PlayPauseButton.Glyph = Glyph.Pause;
             element.Source = new Uri(media.Path);
