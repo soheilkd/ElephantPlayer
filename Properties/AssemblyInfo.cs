@@ -8,10 +8,10 @@ using System.Windows;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("Elephant Player")]
-[assembly: AssemblyDescription("Factorizated Zune, Unofficial WMP Interopted")]
+[assembly: AssemblyDescription("Simple functional player based on .NET 4.7 + WPF")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("soheilkd")]
-[assembly: AssemblyProduct("Elephant Player, WMP Interopted")]
+[assembly: AssemblyProduct("Elephant Player, WPF Interopted")]
 [assembly: AssemblyCopyright("soheilkd ©  2018")]
 [assembly: AssemblyTrademark("soheilkd ©")]
 [assembly: AssemblyCulture("")]
@@ -51,7 +51,7 @@ using System.Windows;
 // You can specify all the values or you can default the Build and Revision Numbers
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("0.9.3.2")]
-[assembly: AssemblyFileVersion("0.9.3.2")]
+[assembly: AssemblyVersion("1.0.0.0")]
+[assembly: AssemblyFileVersion("1.0.0.0")]
 [assembly: NeutralResourcesLanguage("")]
 
