@@ -20,8 +20,8 @@ namespace Player.Controls
         private Timer PlayCountTimer;
         private TimeSpan TimeSpan;
         private bool IsUserSeeking, IsFullScreen, WasMaximized;
-        private Window ParentWindow;
-        private Taskbar.Thumb Thumb = new Taskbar.Thumb();
+        public Window ParentWindow;
+        public Taskbar.Thumb Thumb = new Taskbar.Thumb();
         private Storyboard MagnifyBoard, MinifyBoard, FullOnBoard, FullOffBoard;
         private ThicknessAnimation MagnifyAnimation, MinifyAnimation;
         private bool controlsVisibile;
@@ -326,8 +326,6 @@ namespace Player.Controls
 
         private void UserControl_Loaded(object sender, RoutedEventArgs e)
         {
-            ParentWindow = Window.GetWindow(this);
-            ParentWindow.TaskbarItemInfo = Thumb.Info;
             RunUX();
         }
     }

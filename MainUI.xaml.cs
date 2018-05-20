@@ -95,14 +95,16 @@ namespace Player
                 }
                 IsVisionOn[2] = !IsVisionOn[2];
             };
+
+            Player.ParentWindow = this;
+            TaskbarItemInfo = Player.Thumb.Info;
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             BindUI();
             var cml = Environment.GetCommandLineArgs().Where(name => !name.EndsWith(".exe")).ToArray();
-            if (cml.Length > 1)
-                Manager.Add(cml, true);
+            Manager.Add(cml, true);
             Player.EventHappened += Player_EventHappened;
         }
 

@@ -204,13 +204,7 @@ namespace Player
                 return;
             Add(media);
             if (requestPlay)
-            {
-                Change?.Invoke(this, new InfoExchangeArgs()
-                {
-                    Type = InfoType.MediaRequested,
-                    Integer = AllMedias.Count - 1
-                });
-            }
+                RequestPlay(AllMedias.Count - 1);
         }
         public void Add(string path, bool requestPlay = false)
         {
@@ -233,11 +227,7 @@ namespace Player
                 Integer = AllMedias.Count - 1
             });
             if (requestPlay)
-                Change?.Invoke(this, new InfoExchangeArgs()
-                {
-                    Type = InfoType.MediaRequested,
-                    Integer = AllMedias.Count - 1
-                });
+                RequestPlay(AllMedias.Count - 1);
         }
         public void Add(string[] paths, bool requestPlay = false)
         {
@@ -412,6 +402,15 @@ namespace Player
         public void AddCount() => AllMedias[CurrentlyPlayingIndex].PlayCount++;
 
         public bool IsPlaying(int index) => index == CurrentlyPlayingIndex;
+
+        private void RequestPlay(int index)
+        {
+            Change?.Invoke(this, new InfoExchangeArgs()
+            {
+                Type = InfoType.MediaRequested,
+                Integer = index
+            });
+        }
 
     }
 
