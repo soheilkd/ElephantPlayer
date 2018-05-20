@@ -146,38 +146,20 @@ namespace Player
     public class MediaManager
     {
         public MediaManager() { }
-        private int currentlyPlayingIndex;
-        private int CurrentQueuePosition = -1;
+        public MediaView this[int index] => MediaViews[index];
         private static string[] SupportedMusics = "mp3;wma;aac;m4a".Split(';');
         private static string[] SupportedVideos = "mp4;mpg;mkv;wmv;mov;avi;m4v;ts;wav;mpeg;webm".Split(';');
         private static string[] SupportedFiles = "zip;rar;bin;dat".Split(';');
-        private List<Media> AllMedias = new List<Media>();
+        private List<MediaView> MediaViews = new List<MediaView>();
+        private int CurrentQueuePosition = -1;
         private List<int> PlayQueue = new List<int>();
         private Random Shuffle = new Random(2);
-        public int Count => AllMedias.Count;
-        public Media CurrentlyPlaying => AllMedias[CurrentlyPlayingIndex];
+        public int Count => MediaViews.Count;
+        public MediaView CurrentlyPlaying => MediaViews[CurrentlyPlayingIndex];
         public event EventHandler<InfoExchangeArgs> Change;
         public Preferences Preferences { private get; set; } = Preferences.Load();
-        public Media this[int index]
-        {
-            get => AllMedias[index];
-            set
-            {
-                AllMedias[index] = value;
-                Change?.Invoke(this, new InfoExchangeArgs()
-                {
-                    Type = InfoType.MediaUpdate,
-                    Integer = index,
-                    Object = value
-                });
-            }
-        }
         public PlayMode ActivePlayMode { get; set; } = PlayMode.RepeatAll;
-        public int CurrentlyPlayingIndex
-        {
-            get => currentlyPlayingIndex;
-            private set => currentlyPlayingIndex = value;
-        }
+        public int CurrentlyPlayingIndex { get; private set; }
 
         public static MediaType GetType(string FileName, bool checkOnline = false)
         {
@@ -204,30 +186,25 @@ namespace Player
                 return;
             Add(media);
             if (requestPlay)
-                RequestPlay(AllMedias.Count - 1);
+                RequestPlay(Count - 1);
         }
         public void Add(string path, bool requestPlay = false)
         {
             var media = new Media(path);
-            if (Find(media) != -1)
+            if (Contains(media, out var view))
             {
-                if (!requestPlay)
-                    return;
-                Change?.Invoke(this, new InfoExchangeArgs()
-                {
-                    Type = InfoType.MediaRequested,
-                    Integer = Find(path)
-                });
+                if (requestPlay)
+                    RequestPlay(view);
                 return;
             }
-            AllMedias.Add(media);
+            MediaViews.Add(new MediaView(media));
             Change?.Invoke(this, new InfoExchangeArgs()
             {
                 Type = InfoType.NewMedia,
-                Integer = AllMedias.Count - 1
+                Object = MediaViews[Count - 1]
             });
             if (requestPlay)
-                RequestPlay(AllMedias.Count - 1);
+                RequestPlay(Count - 1);
         }
         public void Add(string[] paths, bool requestPlay = false)
         {
@@ -236,111 +213,45 @@ namespace Player
                 if (Directory.Exists(paths[i]))
                     Add(Directory.GetFiles(paths[i], "*", SearchOption.AllDirectories), requestPlay);
                 else
-                    Add(paths[i], true);
+                    Add(paths[i], requestPlay);
             }
         }
         public void Add(Media media)
         {
             if (!media.IsValid)
                 return;
-            int p = AllMedias.Count;
-            AllMedias.Add(media);
+            MediaViews.Add(new MediaView(media));
             Change?.Invoke(this, new InfoExchangeArgs()
             {
                 Type = InfoType.NewMedia,
-                Integer = p
+                Object = MediaViews[Count - 1]
             });
         }
 
         public void Remove(string path)
         {
-            for (int i = 0; i < AllMedias.Count; i++)
-                if (AllMedias[i].Path == path)
-                    Remove(i--); // i-- vas inke age elemente badi ham hamoon path ro dasht i--, i++ ro khonsa kone vo loop ro hamoon ejra she baz
+            MediaViews.AsParallel().Where(item => item.Media.Path == path).ForAll(item => Remove(item));
         }
-        public void Remove(Media media) => Remove(Find(media));
-        public void Remove(int index)
+        public void Remove(MediaView media)
         {
-            AllMedias.RemoveAt(index);
-            Change?.Invoke(this, new InfoExchangeArgs() { Type = InfoType.MediaRemoved, Integer = index });
+            MediaViews.Remove(media);
+            Change?.Invoke(this, new InfoExchangeArgs() { Type = InfoType.MediaRemoved, Object = media });
         }
-
-        public void Delete(string path) => Delete(Find(path));
-        public void Delete(Media media) => Delete(Find(media));
-        public void Delete(int index)
-        {
-            (new Thread(() => File.Delete(AllMedias[index].Path))).Start();
-            Remove(index);
-        }
-
-        public void Move(Media media, string to) => Move(Find(media), to);
-        public void Move(int index, string to)
-        {
-            File.Move(AllMedias[index].Path, to);
-            AllMedias[index].Path = to;
-        }
-
-        public int Find(Media media)
-        {
-            for (int i = 0; i < AllMedias.Count; i++)
-                if (AllMedias[i].Equals(media))
-                    return i;
-            return -1;
-        }
-        public int Find(string path)
-        {
-            for (int i = 0; i < AllMedias.Count; i++)
-                if (AllMedias[i].Path.Equals(path, StringComparison.CurrentCultureIgnoreCase))
-                    return i;
-            return -1;
-        }
-
-        public void Copy(string from, string to) => File.Copy(from, to, true);
-        public void Copy(Media media, string to) => Copy(media.Path, to);
-        public void Copy(int index, string to) => Copy(AllMedias[index], to);
-
-        public void Update(int index)
-        {
-            this[index] = new Media(AllMedias[index].Path);
-        }
-        public void Update(TagLib.File file)
-        {
-            var index = Find(file.Name);
-            if (index != CurrentlyPlayingIndex)
-            {
-                file.Save();
-                Update(index); 
-            }
-            else
-                Change?.Invoke(this, new InfoExchangeArgs() { Type = InfoType.EditingTag, Integer = index, Object = file });
-        }
-
-        public void RequestDelete(int index)
-        {
-            var res = MessageBox.Show($"Sure? this file will be deleted:\r\n{AllMedias[index]}", " ", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
-            if (res == MessageBoxResult.OK)
-                Delete(index);
-        }
-        public void RequestDelete(Media view) => RequestDelete(Find(view));
-        public void RequestDelete() => RequestDelete(CurrentlyPlayingIndex);
-
-        public void RequestLocation(int index) => System.Diagnostics.Process.Start("explorer.exe", "/select," + AllMedias[index].Path);
-        public void RequestLocation(Media view) => RequestLocation(Find(view));
-        public void RequestLocation() => RequestLocation(CurrentlyPlayingIndex);
+        public void Remove(int index) => Remove(MediaViews[index]);
 
         public static string GetExtension(string full) => full.Substring((full?? " . ").LastIndexOf(".") + 1).ToLower();
         public static string GetExtension(Media media) => GetExtension(media.Path);
         public static string GetFilter(string ext = ".mp3") => $"{GetType(ext)} | *{ext}";
         public static string GetFilter(Media media) => $"{media.MediaType} | *{GetExtension(media.Path)}";
 
-        public Media Next(int y = -1)
+        public MediaView Next(int y = -1)
         {
             if (y != -1)
                 CurrentlyPlayingIndex = y;
             else
                 switch (ActivePlayMode)
                 {
-                    case PlayMode.Shuffle: CurrentlyPlayingIndex = Shuffle.Next(0, AllMedias.Count); break;
+                    case PlayMode.Shuffle: CurrentlyPlayingIndex = Shuffle.Next(0, Count); break;
                     case PlayMode.Queue:
                         if (CurrentQueuePosition == PlayQueue.Count - 1)
                         {
@@ -351,20 +262,18 @@ namespace Player
                             CurrentlyPlayingIndex = PlayQueue[CurrentQueuePosition++];
                         break;
                     case PlayMode.RepeatAll:
-                        if (CurrentlyPlayingIndex != AllMedias.Count - 1) CurrentlyPlayingIndex++;
+                        if (CurrentlyPlayingIndex != Count - 1) CurrentlyPlayingIndex++;
                         else CurrentlyPlayingIndex = 0;
                         break;
                     default: break;
                 }
-            if (!CurrentlyPlaying.IsLoaded)
-                Update(CurrentlyPlayingIndex);
             return CurrentlyPlaying;
         }
-        public Media Previous()
+        public MediaView Previous()
         {
             switch (ActivePlayMode)
             {
-                case PlayMode.Shuffle: CurrentlyPlayingIndex = Shuffle.Next(0, AllMedias.Count); break;
+                case PlayMode.Shuffle: CurrentlyPlayingIndex = Shuffle.Next(0, Count); break;
                 case PlayMode.Queue:
                     if (CurrentQueuePosition == 0)
                     {
@@ -376,7 +285,7 @@ namespace Player
                     break;
                 case PlayMode.RepeatAll:
                     if (CurrentlyPlayingIndex != 0) CurrentlyPlayingIndex--;
-                    else CurrentlyPlayingIndex = AllMedias.Count - 1;
+                    else CurrentlyPlayingIndex = Count - 1;
                     break;
                 default: break;
             }
@@ -394,24 +303,40 @@ namespace Player
 
         public void Close()
         {
-            MassiveLibrary.Save(AllMedias.ToArray());
+            MassiveLibrary.Save(MediaViews.Select(item => item.Media).ToArray());
         }
 
-        public void Play(Media media) => Next(Find(media));
-
-        public void AddCount() => AllMedias[CurrentlyPlayingIndex].PlayCount++;
+        public void AddCount() => MediaViews[CurrentlyPlayingIndex].Media.PlayCount++;
 
         public bool IsPlaying(int index) => index == CurrentlyPlayingIndex;
 
-        private void RequestPlay(int index)
+        private void RequestPlay(int index) => RequestPlay(MediaViews[index]);
+        private void RequestPlay(MediaView view)
         {
-            Change?.Invoke(this, new InfoExchangeArgs()
+            Change?.Invoke(view, new InfoExchangeArgs()
             {
-                Type = InfoType.MediaRequested,
-                Integer = index
+                Type = InfoType.MediaRequested
             });
         }
 
+        public bool Contains(Media media, out MediaView view)
+        {
+            int temp = MediaViews.FindIndex(item => item.Media == media);
+            if (temp == -1)
+            {
+                view = null;
+                return false;
+            }
+            else
+            {
+                view = MediaViews[temp];
+                return true;
+            }
+        }
+
+        public void RenderWidth(double width) => MediaViews.AsParallel().ForAll(item => item.Width = width);
+
+        public void ResetIsPlayings() => MediaViews.ForEach(item => item.IsPlaying = false);
     }
 
     [Serializable]

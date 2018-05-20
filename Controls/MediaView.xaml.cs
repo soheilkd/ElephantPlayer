@@ -6,6 +6,7 @@ using System.Net;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.IO;
 using static Player.Global;
 
 #pragma warning disable 1591
@@ -13,25 +14,18 @@ namespace Player
 {
     public partial class MediaView : UserControl
     {
-        private InfoExchangeArgs DefaultExchangeArgs;
+        public Media Media;
 
         public event EventHandler<InfoExchangeArgs> DoubleClicked, PlayClicked;
 
         public event EventHandler<InfoExchangeArgs>
-            MoveRequested,
-            CopyRequested,
-            DeleteRequested,
             RemoveRequested,
             PlayAfterRequested,
-            PropertiesRequested,
             RepeatRequested,
-            LocationRequested,
-            DownloadRequested,
-            Downloaded, ZipDownloaded;
+            ZipDownloaded;
 
         string[] OriginalStringsOfLabels = new string[2];
 
-        public int MediaIndex { get; set; }
         public Glyph DefaultIcon { get; set; }
         bool downloadCanceled = true;
         private bool isPlaying = false;
@@ -51,7 +45,10 @@ namespace Player
         WebClient Client = null;
 
         public MediaView() => InitializeComponent();
-        public MediaView(int index, Media media) : this() => Revoke(index, media);
+        public MediaView(Media media) : this()
+        {
+            Revoke(media);
+        }
 
 
         public void UserControl_Loaded(object sender, RoutedEventArgs e)
@@ -59,14 +56,14 @@ namespace Player
             PlayButton.Opacity = 0;
             DownloadButton.Opacity = 0;
 
-            RoutedEventHandler RepeatInvokation(int count) => (_, __) => RepeatRequested?.Invoke(this, new InfoExchangeArgs(MediaIndex, count));
+            RoutedEventHandler RepeatInvokation(int count) => (_, __) => RepeatRequested?.Invoke(this, new InfoExchangeArgs(count));
             //Load SubContextMenuItems
             if (DefaultIcon == Glyph.Cloud)
             {
                 MenuItem[] OnlineMediaMenu = new MenuItem[]
                 {
                     GetMenu("Download", (_,__) => DownloadButton_Clicked(this, null)),
-                    GetMenu("Play After", (_,__) => PlayAfterRequested?.Invoke(this, DefaultExchangeArgs)),
+                    GetMenu("Play After", (_,__) => PlayAfterRequested?.Invoke(this, null)),
                     GetMenu("Repeat",
                     new (string, RoutedEventHandler)[]
                     {
@@ -76,8 +73,8 @@ namespace Player
                         ("10 times", (_,__) => RepeatInvokation(10)),
                         ("50 times", (_,__) => RepeatInvokation(50))
                     }),
-                    GetMenu("Remove", (_,__) => RemoveRequested?.Invoke(this, DefaultExchangeArgs)),
-                    GetMenu("Properties", (_,__) => PropertiesRequested?.Invoke(this, DefaultExchangeArgs))
+                    GetMenu("Remove", (_,__) => RemoveRequested?.Invoke(this, null)),
+                    GetMenu("Properties", new RoutedEventHandler(PropertiesRequest))
                 };
                 ContextMenu = new ContextMenu() { ItemsSource = OnlineMediaMenu };
             }
@@ -85,7 +82,7 @@ namespace Player
             {
                 MenuItem[] OfflineMediaMenu = new MenuItem[]
                     {
-                     GetMenu("Play After", (_,__) => PlayAfterRequested?.Invoke(this, DefaultExchangeArgs)),
+                     GetMenu("Play After", (_,__) => PlayAfterRequested?.Invoke(this, null)),
                      GetMenu("Repeat",
                      new (string, RoutedEventHandler)[]
                      {
@@ -95,13 +92,13 @@ namespace Player
                          ("10 times", (_,__) => RepeatInvokation(10)),
                          ("50 times", (_,__) => RepeatInvokation(50))
                      }),
-                     GetMenu("Remove", (_,__) => RemoveRequested?.Invoke(this, DefaultExchangeArgs)),
-                     GetMenu("Delete", (_,__) => DeleteRequested?.Invoke(this, DefaultExchangeArgs)),
+                     GetMenu("Remove", new RoutedEventHandler(RemoveRequest)),
+                     GetMenu("Delete", new RoutedEventHandler(DeleteRequest)),
                      GetMenu("Move...",
                      new (string, RoutedEventHandler)[]
                      {
-                         ("To Last Location", (_,__) => MoveRequested?.Invoke(this, new InfoExchangeArgs(MediaIndex, App.LastSelectedPath))),
-                         ("Browse...", (_,__) => 
+                         ("To Last Location", (_,__) => MoveTo(App.Preferences.LastPath + Media.Name)),
+                         ("Browse...", (_,__) =>
                          {
 
                          })
@@ -109,19 +106,19 @@ namespace Player
                      GetMenu("Copy...",
                      new (string, RoutedEventHandler)[]
                      {
-                         ("To Last Location", (_,__) => CopyRequested?.Invoke(this, new InfoExchangeArgs(MediaIndex, App.LastSelectedPath))),
+                         ("To Last Location", (_,__) => File.Copy(Media.Path, App.Preferences.LastPath + Media.Name)),
                          ("Browse...", (_,__) =>
                          {
 
                          })
                      }),
-                     GetMenu("Open Location", (_,__) => LocationRequested?.Invoke(this, DefaultExchangeArgs)),
-                     GetMenu("Properties", (_,__) => PropertiesRequested?.Invoke(this, DefaultExchangeArgs))
+                     GetMenu("Open Location", new RoutedEventHandler(LocationRequest)),
+                     GetMenu("Properties", new RoutedEventHandler(PropertiesRequest))
                     };
                 ContextMenu = new ContextMenu() { ItemsSource = OfflineMediaMenu };
             }
         }
-        
+
         private void DownloadButton_Clicked(object sender, MouseButtonEventArgs e)
         {
             if (Client == null)
@@ -138,12 +135,53 @@ namespace Player
             }
             else
             {
-                DownloadRequested?.Invoke(this, new InfoExchangeArgs() { Integer = MediaIndex, Object = this });
+                var SavePath = $"{App.Path}Downloads\\{Media.Title}";
+                DownloadButton.Glyph = Glyph.Cancel;
+                Client = new WebClient();
+                Client.DownloadProgressChanged += (o, f) =>
+                {
+                    MainLabel.Content = $"Downloading... - {f.ProgressPercentage}% ";
+                    SubLabel.Content = $"{f.BytesReceived / 1024} KB \\ {f.TotalBytesToReceive / 1024} KB";
+                };
+                Client.DownloadFileCompleted += (o, f) =>
+                {
+                    if (downloadCanceled)
+                    {
+                        DownloadButton.Glyph = Glyph.Cloud;
+                        MainLabel.Content = OriginalStringsOfLabels[0];
+                        SubLabel.Content = OriginalStringsOfLabels[1];
+                        System.IO.File.Delete(SavePath);
+                        return;
+                    }
+                    MainLabel.Content = "Downloaded, Processing...";
+                    DownloadButton.Visibility = Visibility.Hidden;
+                    if (OriginalStringsOfLabels[0].EndsWith(".zip"))
+                    {
+                        MainLabel.Content = "Extracting...";
+                        SubLabel.Content = "";
+                        using (var zip = new Ionic.Zip.ZipFile(SavePath))
+                        {
+                            var folderToExtract = SavePath.Substring(0, SavePath.IndexOf(".zip")) + "\\";
+                            zip.ExtractAll(folderToExtract, Ionic.Zip.ExtractExistingFileAction.OverwriteSilently);
+                            ZipDownloaded?.Invoke(this, new InfoExchangeArgs(InfoType.MediaUpdate)
+                            {
+                                Object = System.IO.Directory.GetFiles(folderToExtract, "*.*", System.IO.SearchOption.AllDirectories),
+                                Type = InfoType.StringArray
+                            });
+                        }
+                        System.IO.File.Delete(SavePath);
+                    }
+                    else
+                    {
+                        Revoke(new Media(SavePath));
+                    }
+                };
+                Client.DownloadFileAsync(new Uri(Media.Path, UriKind.Absolute), SavePath);
                 downloadCanceled = false;
             }
         }
-        private void Play_Clicked(object sender, MouseButtonEventArgs e) => PlayClicked?.Invoke(this, new InfoExchangeArgs(MediaIndex));
-        private void Canvas_DoubleClicked(object sender, MouseButtonEventArgs e) => DoubleClicked?.Invoke(this, new InfoExchangeArgs(MediaIndex));
+        private void Play_Clicked(object sender, MouseButtonEventArgs e) => PlayClicked?.Invoke(this, new InfoExchangeArgs(Media));
+        private void Canvas_DoubleClicked(object sender, MouseButtonEventArgs e) => DoubleClicked?.Invoke(this, new InfoExchangeArgs(Media));
 
         private void Size_Changed(object sender, SizeChangedEventArgs e)
         {
@@ -182,59 +220,11 @@ namespace Player
                 output.Items.Add(GetMenu(subItems[i].subItem, subItems[i].onClick));
             return output;
         }
-        public void Download(Media media)
-        {
-            var SavePath = $"{App.Path}Downloads\\{media.Title}";
-            DownloadButton.Glyph = Glyph.Cancel;
-            Client = new WebClient();
-            Client.DownloadProgressChanged += (o, f) =>
-            {
-                MainLabel.Content = $"Downloading... - {f.ProgressPercentage}% ";
-                SubLabel.Content = $"{f.BytesReceived / 1024} KB \\ {f.TotalBytesToReceive / 1024} KB";
-            };
-            Client.DownloadFileCompleted += (o, f) =>
-            {
-                if (downloadCanceled)
-                {
-                    DownloadButton.Glyph = Glyph.Cloud;
-                    MainLabel.Content = OriginalStringsOfLabels[0];
-                    SubLabel.Content = OriginalStringsOfLabels[1];
-                    System.IO.File.Delete(SavePath);
-                    return;
-                }
-                MainLabel.Content = "Downloaded, Processing...";
-                DownloadButton.Visibility = Visibility.Hidden;
-                if (OriginalStringsOfLabels[0].EndsWith(".zip"))
-                {
-                    MainLabel.Content = "Extracting...";
-                    SubLabel.Content = "";
-                    using (var zip = new Ionic.Zip.ZipFile(SavePath))
-                    {
-                        var folderToExtract = SavePath.Substring(0, SavePath.IndexOf(".zip")) + "\\";
-                        zip.ExtractAll(folderToExtract, Ionic.Zip.ExtractExistingFileAction.OverwriteSilently);
-                        ZipDownloaded?.Invoke(this, new InfoExchangeArgs(InfoType.MediaUpdate)
-                        {
-                            Object = System.IO.Directory.GetFiles(folderToExtract, "*.*", System.IO.SearchOption.AllDirectories),
-                            Type = InfoType.StringArray
-                        });
-                    }
-                    System.IO.File.Delete(SavePath);
-                }
-                else
-                    Downloaded?.Invoke(this, new InfoExchangeArgs()
-                    {
-                        Integer = MediaIndex,
-                        Object = new Media(SavePath)
-                    });
-            };
-            Client.DownloadFileAsync(new Uri(media.Path, UriKind.Absolute), SavePath);
-        }
-
-        public void Revoke(int index, string main, string sub, string time, MediaType type = MediaType.Music)
+        
+        public void Revoke(string main, string sub, string time, MediaType type = MediaType.Music)
         {
             MainLabel.Content = main;
             SubLabel.Content = sub;
-            MediaIndex = index;
             switch (type)
             {
                 case MediaType.Music: DefaultIcon = Glyph.MusicNote; break;
@@ -251,11 +241,44 @@ namespace Player
                 DownloadButton.Visibility = Visibility.Hidden;
             Resources["TimeLabelTargetMargin"] = new Thickness(0, 0, (int)type > 2 ? 75 : 35, 0);
             Size_Changed(this, null);
-            DefaultExchangeArgs = new InfoExchangeArgs(index);
             IsPlaying = IsPlaying;
         }
-        public void Revoke(int index, Media media) => Revoke(index, media.Title, media.Artist, CastTime(media.Length), media.MediaType);
-        public void Revoke(Media media) => Revoke(MediaIndex, media);
-        public void Revoke(InfoExchangeArgs e) => Revoke(e.Integer, e.Object as Media);
+        public void Revoke(Media media)
+        {
+            Media = media;
+            Revoke(media.Title, media.Artist, CastTime(media.Length), media.MediaType);
+        }
+        public void Revoke(InfoExchangeArgs e) => Revoke(e.Object as Media);
+        public void Revoke() => Revoke(new Media(Media.Path));
+
+        private void MoveTo(string path)
+        {
+            File.Move(Media.Path, path);
+            Media.Path = path;
+        }
+
+        public void RemoveRequest(object sender, RoutedEventArgs e)
+        {
+            RemoveRequested?.Invoke(this, null);
+        }
+        public void PropertiesRequest(object sender, RoutedEventArgs e)
+        {
+            PropertiesUI.OpenFor(Media, (s, f) => Revoke(f));
+        }
+        public void LocationRequest(object sender, RoutedEventArgs e)
+        {
+            System.Diagnostics.Process.Start("explorer.exe", "/select," + Media.Path);
+        }
+        public void DeleteRequest(object sender, RoutedEventArgs e)
+        {
+            var res = MessageBox.Show($"Sure? this file will be deleted:\r\n{Media}", " ", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
+            if (res == MessageBoxResult.OK)
+            {
+                File.Delete(Media.Path);
+                RemoveRequested?.Invoke(this, null);
+            }
+        }
+
+        public void UpdateLength(TimeSpan length) { }
     }
 }
