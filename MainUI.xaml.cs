@@ -204,7 +204,7 @@ namespace Player
                         QueueListView.Items.Add(Manager[i]);
                     break;
                 case InfoType.MediaRequested:
-                    Play(Manager.Next(e.Integer));
+                    Play(Manager.Next(sender));
                     break;
                 default:
                     break;

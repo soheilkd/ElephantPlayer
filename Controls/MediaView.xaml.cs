@@ -19,6 +19,7 @@ namespace Player
         public event EventHandler<InfoExchangeArgs> DoubleClicked, PlayClicked;
 
         public event EventHandler<InfoExchangeArgs>
+            TagSaveRequested,
             RemoveRequested,
             PlayAfterRequested,
             RepeatRequested,
@@ -169,7 +170,7 @@ namespace Player
                                 Type = InfoType.StringArray
                             });
                         }
-                        System.IO.File.Delete(SavePath);
+                        File.Delete(SavePath);
                     }
                     else
                     {
@@ -180,8 +181,10 @@ namespace Player
                 downloadCanceled = false;
             }
         }
-        private void Play_Clicked(object sender, MouseButtonEventArgs e) => PlayClicked?.Invoke(this, new InfoExchangeArgs(Media));
-        private void Canvas_DoubleClicked(object sender, MouseButtonEventArgs e) => DoubleClicked?.Invoke(this, new InfoExchangeArgs(Media));
+        public void RenderWidth(double newWidth) => Width = newWidth;
+        private void Play_Clicked(object sender, MouseButtonEventArgs e) =>
+            PlayClicked?.Invoke(this, null);
+        private void Canvas_DoubleClicked(object sender, MouseButtonEventArgs e) => DoubleClicked?.Invoke(this, null);
 
         private void Size_Changed(object sender, SizeChangedEventArgs e)
         {
@@ -263,12 +266,13 @@ namespace Player
         }
         public void PropertiesRequest(object sender, RoutedEventArgs e)
         {
-            PropertiesUI.OpenFor(Media, (s, f) => Revoke(f));
+            PropertiesUI.OpenFor(Media, (s, f) => { if (!isPlaying) Revoke(f); else TagSaveRequested?.Invoke(this, new InfoExchangeArgs(f)); } );
         }
         public void LocationRequest(object sender, RoutedEventArgs e)
         {
             System.Diagnostics.Process.Start("explorer.exe", "/select," + Media.Path);
         }
+        public new MediaView MemberwiseClone() => MemberwiseClone() as MediaView;
         public void DeleteRequest(object sender, RoutedEventArgs e)
         {
             var res = MessageBox.Show($"Sure? this file will be deleted:\r\n{Media}", " ", MessageBoxButton.OKCancel, MessageBoxImage.Warning);

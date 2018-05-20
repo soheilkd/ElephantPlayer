@@ -197,12 +197,7 @@ namespace Player
                     RequestPlay(view);
                 return;
             }
-            MediaViews.Add(new MediaView(media));
-            Change?.Invoke(this, new InfoExchangeArgs()
-            {
-                Type = InfoType.NewMedia,
-                Object = MediaViews[Count - 1]
-            });
+            Add(media, requestPlay);
             if (requestPlay)
                 RequestPlay(Count - 1);
         }
@@ -216,16 +211,36 @@ namespace Player
                     Add(paths[i], requestPlay);
             }
         }
-        public void Add(Media media)
+        public void Add(Media media, bool requestPlay = false)
         {
             if (!media.IsValid)
                 return;
-            MediaViews.Add(new MediaView(media));
-            Change?.Invoke(this, new InfoExchangeArgs()
+            MediaView view = new MediaView(media);
+            view.DoubleClicked += (sender, e) => 
+            RequestPlay(sender as MediaView);
+            view.PlayClicked += (sender, e) => RequestPlay(sender as MediaView);
+            view.RemoveRequested += (sender, e) => Remove(sender as MediaView);
+            view.TagSaveRequested += (sender, e) => Change?.Invoke(sender, new InfoExchangeArgs(InfoType.EditingTag));
+            view.RepeatRequested += (sender, e) =>
             {
-                Type = InfoType.NewMedia,
-                Object = MediaViews[Count - 1]
-            });
+                var sender2 = sender as MediaView;
+                for (int i = 0; i < e.Integer; i++)
+                {
+                    MediaViews.Add(sender2.MemberwiseClone());
+                    InvokeNewMedia(MediaViews[Count - 1]);
+                }
+            };
+            view.PlayAfterRequested += (sender, e) =>
+            {
+                var s = sender as MediaView;
+                MediaViews.Remove(s);
+                MediaViews.Insert(CurrentlyPlayingIndex + 1, s);
+                Change?.Invoke(this, new InfoExchangeArgs(InfoType.MediaUpdate));
+            };
+            MediaViews.Add(view);
+            InvokeNewMedia(MediaViews[Count - 1]);
+            if (requestPlay)
+                RequestPlay(item => item.Media == media);
         }
 
         public void Remove(string path)
@@ -244,6 +259,11 @@ namespace Player
         public static string GetFilter(string ext = ".mp3") => $"{GetType(ext)} | *{ext}";
         public static string GetFilter(Media media) => $"{media.MediaType} | *{GetExtension(media.Path)}";
 
+        public MediaView Next(object sender)
+        {
+            CurrentlyPlayingIndex = MediaViews.FindIndex(item => item.Equals(sender));
+            return CurrentlyPlaying;
+        }
         public MediaView Next(int y = -1)
         {
             if (y != -1)
@@ -318,7 +338,9 @@ namespace Player
                 Type = InfoType.MediaRequested
             });
         }
+        private void RequestPlay(Predicate<MediaView> match) => RequestPlay(MediaViews.Find(match));
 
+        private void InvokeNewMedia(MediaView view) => Change?.Invoke(this, new InfoExchangeArgs(InfoType.NewMedia) { Object = view });
         public bool Contains(Media media, out MediaView view)
         {
             int temp = MediaViews.FindIndex(item => item.Media == media);
@@ -334,7 +356,10 @@ namespace Player
             }
         }
 
-        public void RenderWidth(double width) => MediaViews.AsParallel().ForAll(item => item.Width = width);
+        public void RenderWidth(double width)
+        {
+           // MediaViews.AsParallel().ForAll(item => item.RenderWidth(width));
+        }
 
         public void ResetIsPlayings() => MediaViews.ForEach(item => item.IsPlaying = false);
     }
