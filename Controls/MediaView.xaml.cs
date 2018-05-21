@@ -151,7 +151,7 @@ namespace Player
                         DownloadButton.Glyph = Glyph.Cloud;
                         MainLabel.Content = OriginalStringsOfLabels[0];
                         SubLabel.Content = OriginalStringsOfLabels[1];
-                        System.IO.File.Delete(SavePath);
+                        File.Delete(SavePath);
                         return;
                     }
                     MainLabel.Content = "Downloaded, Processing...";
@@ -166,7 +166,7 @@ namespace Player
                             zip.ExtractAll(folderToExtract, Ionic.Zip.ExtractExistingFileAction.OverwriteSilently);
                             ZipDownloaded?.Invoke(this, new InfoExchangeArgs(InfoType.MediaUpdate)
                             {
-                                Object = System.IO.Directory.GetFiles(folderToExtract, "*.*", System.IO.SearchOption.AllDirectories),
+                                Object = Directory.GetFiles(folderToExtract, "*.*", System.IO.SearchOption.AllDirectories),
                                 Type = InfoType.StringArray
                             });
                         }
@@ -181,7 +181,6 @@ namespace Player
                 downloadCanceled = false;
             }
         }
-        public void RenderWidth(double newWidth) => Width = newWidth;
         private void Play_Clicked(object sender, MouseButtonEventArgs e) =>
             PlayClicked?.Invoke(this, null);
         private void Canvas_DoubleClicked(object sender, MouseButtonEventArgs e) => DoubleClicked?.Invoke(this, null);

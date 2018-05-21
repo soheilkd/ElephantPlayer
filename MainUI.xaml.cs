@@ -49,7 +49,6 @@ namespace Player
                     {
                         if (Player.Magnified)
                             return;
-                        Manager.RenderWidth(QueueListView.ActualWidth);
                     });
                 SizeChangeTimer.Stop();
             };

@@ -312,6 +312,8 @@ namespace Player.Controls
       
         public void Play(Media media)
         {
+            if (!media.IsLoaded)
+                media = new Media(media.Path);
             VisionButton.Visibility = media.IsVideo ? Visibility.Visible : Visibility.Hidden;
             if (IsFullScreen && !media.IsVideo)
                 FullScreenButton_Clicked(this, null);

@@ -140,6 +140,7 @@ namespace Player
             else return false;
         }
         public override int GetHashCode() => base.GetHashCode();
+        public override string ToString() => Path;
     }
 
     public enum PlayMode { Shuffle, RepeatOne, RepeatAll, Queue }
@@ -355,11 +356,7 @@ namespace Player
                 return true;
             }
         }
-
-        public void RenderWidth(double width)
-        {
-           // MediaViews.AsParallel().ForAll(item => item.RenderWidth(width));
-        }
+        public ParallelQuery<MediaView> AsParallel() => MediaViews.AsParallel();
 
         public void ResetIsPlayings() => MediaViews.ForEach(item => item.IsPlaying = false);
     }
