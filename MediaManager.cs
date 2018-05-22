@@ -20,117 +20,133 @@ namespace Player
         public string Artist { get; set; }
         public string Title { get; set; }
         public string Album { get; set; }
-        public string Path { get; set; }
+        public Uri Url { get; set; }
+        public string Path { get => Url.IsFile ? Url.LocalPath : Url.AbsoluteUri; }
         public TimeSpan Length { get; set; }
         public int PlayCount;
-        public bool IsOffline;
-        public MediaType MediaType;
+        public bool IsOffline => (int)Type <= 2;
+        public MediaType Type;
         [NonSerialized] public bool IsPlaying;
         [NonSerialized] public string Lyrics;
         [NonSerialized] public bool IsLoaded;
         [NonSerialized] public long Duration;
         [NonSerialized] public System.Windows.Media.Imaging.BitmapSource Artwork;
-        public bool IsMedia => MediaType != MediaType.None;
-        public bool IsVideo => MediaType == MediaType.Video || MediaType == MediaType.OnlineVideo;
+        public bool IsMedia => Type != MediaType.None;
+        public bool IsVideo => Type == MediaType.Video || Type == MediaType.OnlineVideo;
+        public string Ext => Path.Substring((Path ?? " . ").LastIndexOf(".") + 1).ToLower();
         public bool IsValid
         {
             get
             {
-                switch (MediaType)
+                if (IsOffline)
+                    return File.Exists(Path);
+                else
                 {
-                    case MediaType.Music:
-                    case MediaType.Video:
-                    case MediaType.File: return File.Exists(Path);
-                    case MediaType.OnlineMusic:
-                    case MediaType.OnlineVideo:
-                    case MediaType.OnlineFile:
-                        if (!IsLoaded)
-                            return true;
-                        var request = (HttpWebRequest)WebRequest.Create(Path);
-                        request.AddRange(0, 10);
-                        try
+                    if (!IsLoaded)
+                        return true;
+                    var request = (HttpWebRequest)WebRequest.Create(Path);
+                    request.AddRange(0, 10);
+                    try
+                    {
+                        request.Timeout = 5000;
+                        var response = request.GetResponse();
+                        Thread.Sleep(1);
+                        if (!response.ContentType.EndsWith("octet-stream") && !response.ContentType.StartsWith("video") && !response.ContentType.StartsWith("app"))
                         {
-                            request.Timeout = 5000;
-                            var response = request.GetResponse();
-                            Thread.Sleep(1);
-                            if (!response.ContentType.EndsWith("octet-stream") && !response.ContentType.StartsWith("video") && !response.ContentType.StartsWith("app"))
-                            {
-                                MessageBox.Show("Requested Uri is not a valid octet-stream", ".NET", MessageBoxButton.OK, MessageBoxImage.Error);
-                                return false;
-                            }
-                            response.Dispose();
-                            response = null;
-                        }
-                        catch (WebException e)
-                        {
-                            MessageBox.Show(e.Message);
+                            MessageBox.Show("Requested Uri is not a valid octet-stream", ".NET", MessageBoxButton.OK, MessageBoxImage.Error);
                             return false;
                         }
-                        return true;
-                    default: return false;
+                        response.Dispose();
+                        response = null;
+                    }
+                    catch (WebException e)
+                    {
+                        MessageBox.Show(e.Message);
+                        return false;
+                    }
+                    return true;
                 }
             }
         }
 
-        public Media(string path)
+        private static string[] SupportedMusics = "mp3;wma;aac;m4a".Split(';');
+        private static string[] SupportedVideos = "mp4;mpg;mkv;wmv;mov;avi;m4v;ts;wav;mpeg;webm".Split(';');
+        private static string[] SupportedFiles = "zip;rar;bin;dat".Split(';');
+
+        public static Media FromString(string path) => new Media(new Uri(path));
+        public Media(Uri url)
         {
-            if (path.StartsWith("https://"))
-                path = path.Replace("https://", "http://");
-            Uri uri = new Uri(path);
-            if (uri.IsFile)
+            Url = url;
+            if (url.IsFile)
             {
-                switch (MediaManager.GetType(path))
+                MediaType type;
+                if (SupportedMusics.Contains(Ext))
+                    type = MediaType.Music;
+                else if (SupportedVideos.Contains(Ext))
+                    type = MediaType.Video;
+                else if (SupportedFiles.Contains(Ext))
+                    type = MediaType.File;
+                else
+                    type = MediaType.None;
+
+                switch (type)
                 {
                     case MediaType.Music:
-                        using (var t = TagLib.File.Create(path))
+                        using (var t = TagLib.File.Create(Path))
                         {
-                            Name = path.Substring(path.LastIndexOf("\\") + 1);
-                            Path = path;
-                            Artist = t.Tag.FirstPerformer ?? path.Substring(0, path.LastIndexOf("\\"));
+                            Name = Path.Substring(Path.LastIndexOf("\\") + 1);
+                            Artist = t.Tag.FirstPerformer ?? Path.Substring(0, Path.LastIndexOf("\\"));
                             Title = t.Tag.Title ?? Name.Substring(0, Name.LastIndexOf("."));
                             Album = t.Tag.Album ?? String.Empty;
                             Artwork = t.Tag.Pictures.Length >= 1 ? Imaging.Get.BitmapSource(t.Tag.Pictures[0]) : Imaging.Images.MusicArt;
-                            MediaType = MediaType.Music;
+                            Type = MediaType.Music;
                             Lyrics = t.Tag.Lyrics ?? String.Empty;
                             IsLoaded = true;
                         }
                         break;
                     case MediaType.Video:
-                        Name = path.Substring(path.LastIndexOf("\\") + 1);
+                        Name = Path.Substring(Path.LastIndexOf("\\") + 1);
                         Title = Name;
-                        Path = path;
-                        Artist = path.Substring(0, path.LastIndexOf("\\"));
+                        Artist = Path.Substring(0, Path.LastIndexOf("\\"));
                         Artist = Artist.Substring(Artist.LastIndexOf("\\") + 1);
                         Album = "Video";
                         Artwork = Imaging.Images.VideoArt;
-                        MediaType = MediaType.Video;
+                        Type = MediaType.Video;
                         IsLoaded = true;
                         Length = TimeSpan.Zero;
                         break;
                     case MediaType.None:
                         Name = null;
                         Title = null;
-                        Path = "NULL";
                         Artist = null;
                         Album = null;
                         Artwork = null;
                         Length = TimeSpan.Zero;
                         IsLoaded = false;
-                        MediaType = MediaType.None;
+                        Type = MediaType.None;
                         break;
                     default: break;
                 }
             }
             else
             {
-                Name = Uri.UnescapeDataString(uri.Segments[uri.Segments.Count() - 1]);
+                if (url.AbsoluteUri.StartsWith("https://"))
+                    url = new Uri(url.AbsoluteUri.Replace("https://", "http://"));
+                Name = Uri.UnescapeDataString(url.Segments[url.Segments.Count() - 1]);
                 Title = Name;
-                Path = uri.AbsoluteUri;
-                Artist = uri.Host;
+                Url = url;
+                Artist = url.Host;
                 Album = "Cloud";
                 Duration = 1;
                 Artwork = Imaging.Images.NetArt;
-                MediaType = MediaManager.GetType(path, true);
+                if (SupportedMusics.Contains(Ext))
+                    Type = MediaType.OnlineMusic;
+                else if (SupportedVideos.Contains(Ext))
+                    Type = MediaType.OnlineVideo;
+                else if (SupportedFiles.Contains(Ext))
+                    Type = MediaType.OnlineFile;
+                else
+                    Type = MediaType.None;
                 IsLoaded = true;
             }
         }
@@ -141,6 +157,18 @@ namespace Player
         }
         public override int GetHashCode() => base.GetHashCode();
         public override string ToString() => Path;
+
+        public void MoveTo(string dir)
+        {
+            dir += Name;
+            File.Move(Path, dir);
+            Url = new Uri(dir);
+        }
+        public void CopyTo(string dir)
+        {
+            dir += Name;
+            File.Copy(Path, dir);
+        }
     }
 
     public enum PlayMode { Shuffle, RepeatOne, RepeatAll, Queue }
@@ -148,9 +176,6 @@ namespace Player
     {
         public MediaManager() { }
         public MediaView this[int index] => MediaViews[index];
-        private static string[] SupportedMusics = "mp3;wma;aac;m4a".Split(';');
-        private static string[] SupportedVideos = "mp4;mpg;mkv;wmv;mov;avi;m4v;ts;wav;mpeg;webm".Split(';');
-        private static string[] SupportedFiles = "zip;rar;bin;dat".Split(';');
         private List<MediaView> MediaViews = new List<MediaView>();
         private int CurrentQueuePosition = -1;
         private List<int> PlayQueue = new List<int>();
@@ -162,27 +187,10 @@ namespace Player
         public PlayMode ActivePlayMode { get; set; } = PlayMode.RepeatAll;
         public int CurrentlyPlayingIndex { get; private set; }
 
-        public static MediaType GetType(string FileName, bool checkOnline = false)
-        {
-            if (checkOnline && FileName.StartsWith("http"))
-            {
-                switch (GetType(FileName))
-                {
-                    case MediaType.Music: return MediaType.OnlineMusic;
-                    case MediaType.Video: return MediaType.OnlineVideo;
-                    default: return MediaType.OnlineFile;
-                }
-            }
-            string ext = GetExtension(FileName);
-            if (SupportedMusics.Contains(ext)) return MediaType.Music;
-            else if (SupportedVideos.Contains(ext)) return MediaType.Video;
-            else if (SupportedFiles.Contains(ext)) return MediaType.File;
-            return MediaType.None;
-        }
 
         public void Add(Uri uri, bool requestPlay = false)
         {
-            var media = new Media(uri.AbsoluteUri);
+            var media = new Media(uri);
             if (!media.IsValid)
                 return;
             Add(media);
@@ -191,7 +199,7 @@ namespace Player
         }
         public void Add(string path, bool requestPlay = false)
         {
-            var media = new Media(path);
+            var media = Media.FromString(path);
             if (Contains(media, out var view))
             {
                 if (requestPlay)
@@ -255,11 +263,6 @@ namespace Player
         }
         public void Remove(int index) => Remove(MediaViews[index]);
 
-        public static string GetExtension(string full) => full.Substring((full?? " . ").LastIndexOf(".") + 1).ToLower();
-        public static string GetExtension(Media media) => GetExtension(media.Path);
-        public static string GetFilter(string ext = ".mp3") => $"{GetType(ext)} | *{ext}";
-        public static string GetFilter(Media media) => $"{media.MediaType} | *{GetExtension(media.Path)}";
-
         public MediaView Next(object sender)
         {
             CurrentlyPlayingIndex = MediaViews.FindIndex(item => item.Equals(sender));
@@ -316,11 +319,6 @@ namespace Player
         public void Repeat(int index, int times = 1) => Parallel.For(0, times, (i) => PlayNext(index));
 
         public void PlayNext(int index) => PlayQueue.Insert(CurrentQueuePosition + 1, index);
-
-        public void ShowProperties(int index)
-        {
-
-        }
 
         public void Close()
         {

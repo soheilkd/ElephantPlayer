@@ -13,7 +13,7 @@ namespace Player
         //It's here for those classes need app's path for working, Preferences, Library, etc. (future)
         public static string Path = Environment.GetCommandLineArgs()[0].Substring(0, Environment.GetCommandLineArgs()[0].LastIndexOf("\\") + 1);
 
-        public static Preferences Preferences = Preferences.Load();
+        public static Preferences Settings = Preferences.Load();
         [STAThread]
         public static void Main(string[] args)
         {
@@ -22,6 +22,7 @@ namespace Player
             {
                 MessageBox.Show($"Unhandled {e.ExceptionObject}\r\n" +
                     $"Terminating: {e.IsTerminating}", "Exception", MessageBoxButton.OK, MessageBoxImage.Error);
+                Console.WriteLine((e.ExceptionObject as Exception).StackTrace);
             };
             if (InstanceManager.Instance<App>.InitializeAsFirstInstance("ElepPlayer_CRsoheilkd"))
             {
@@ -36,6 +37,7 @@ namespace Player
 
         public bool SignalExternalCommandLineArgs(IList<string> args)
         {
+            args.Remove(Environment.GetCommandLineArgs()[0]);
             NewInstanceRequested?.Invoke(this, new InstanceEventArgs(args));
             return true;
         }

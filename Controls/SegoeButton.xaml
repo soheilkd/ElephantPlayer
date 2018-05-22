@@ -15,7 +15,7 @@
                 <BeginStoryboard>
                     <Storyboard>
                         <ThicknessAnimation Storyboard.TargetName="MainEllipse" Storyboard.TargetProperty="BorderThickness" 
-                                                    From="{Binding ElementName=MainEllipse, Path=BorderThickness}" To="3"
+                                                    From="{Binding ElementName=MainEllipse, Path=BorderThickness}" To="2"
                                             AccelerationRatio="0.6" DecelerationRatio="0.4" SpeedRatio="5"/>
                     </Storyboard>
                 </BeginStoryboard>

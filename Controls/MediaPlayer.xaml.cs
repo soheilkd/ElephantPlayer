@@ -75,7 +75,7 @@ namespace Player.Controls
             Thumb.PausePressed += (obj, f) => PlayPause();
             Thumb.PlayPressed += (obj, f) => PlayPause();
             Thumb.PrevPressed += (obj, f) => PlayPrevious();
-            switch (App.Preferences.MouseOverTimeout)
+            switch (App.Settings.MouseOverTimeout)
             {
                 case 0: MouseMoveTimer.Interval = 500; break;
                 case 1: MouseMoveTimer.Interval = 1000; break;
@@ -87,7 +87,7 @@ namespace Player.Controls
                 case 7: MouseMoveTimer.Interval = 60000; break;
                 default: MouseMoveTimer.Interval = 5000; break;
             }
-            switch ((PlayMode)App.Preferences.PlayMode)
+            switch ((PlayMode)App.Settings.PlayMode)
             {
                 case PlayMode.Shuffle: PlayModeButton.Glyph = Glyph.Shuffle; break;
                 case PlayMode.RepeatOne: PlayModeButton.Glyph = Glyph.RepeatOne; break;
@@ -313,7 +313,7 @@ namespace Player.Controls
         public void Play(Media media)
         {
             if (!media.IsLoaded)
-                media = new Media(media.Path);
+                media = Media.FromString(media.Path);
             VisionButton.Visibility = media.IsVideo ? Visibility.Visible : Visibility.Hidden;
             if (IsFullScreen && !media.IsVideo)
                 FullScreenButton_Clicked(this, null);
@@ -321,7 +321,7 @@ namespace Player.Controls
             FullScreenButton.Visibility = VisionButton.Visibility;
             PositionSlider.Value = 0;
             PlayPauseButton.Glyph = Glyph.Pause;
-            element.Source = new Uri(media.Path);
+            element.Source = media.Url;
             element.Play();
             Invoke(media.IsVideo ? InfoType.OrinateToVision : InfoType.OrinateToDefault);
         }

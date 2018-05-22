@@ -26,15 +26,15 @@ namespace Player
         {
             InitializeComponent();
             Manager.Change += Manager_Change;
-            App.NewInstanceRequested += (_, e) => Manager.Add(e.Args);
+            App.NewInstanceRequested += (_, e) => Manager.Add(e.Args, true);
             
             var lib = MassiveLibrary.Load();
             for (int i = 0; i < lib.Medias.Length; i++)
                 Manager.Add(lib.Medias[i]);
-            Width = App.Preferences.LastSize.Width;
-            Height = App.Preferences.LastSize.Height;
-            Left = App.Preferences.LastLoc.X;
-            Top = App.Preferences.LastLoc.Y;
+            Width = App.Settings.LastSize.Width;
+            Height = App.Settings.LastSize.Height;
+            Left = App.Settings.LastLoc.X;
+            Top = App.Settings.LastLoc.Y;
         }
         private void BindUI()
         {
@@ -53,28 +53,28 @@ namespace Player
                 SizeChangeTimer.Stop();
             };
             User.Keyboard.Events.KeyDown += Keyboard_KeyDown;
-            Settings_AncestorCombo.SelectedIndex = App.Preferences.MainKey;
-            Settings_OrinateCheck.IsChecked = App.Preferences.VisionOrientation;
-            Settings_TimeoutCombo.SelectedIndex = App.Preferences.MouseOverTimeout;
-            Settings_AncestorCombo.SelectionChanged += (_, __) => App.Preferences.MainKey = Settings_AncestorCombo.SelectedIndex;
+            Settings_AncestorCombo.SelectedIndex = App.Settings.MainKey;
+            Settings_OrinateCheck.IsChecked = App.Settings.VisionOrientation;
+            Settings_TimeoutCombo.SelectedIndex = App.Settings.MouseOverTimeout;
+            Settings_AncestorCombo.SelectionChanged += (_, __) => App.Settings.MainKey = Settings_AncestorCombo.SelectedIndex;
             Settings_TimeoutCombo.SelectionChanged += delegate
             {
-                App.Preferences.MouseOverTimeout = Settings_TimeoutCombo.SelectedIndex;
+                App.Settings.MouseOverTimeout = Settings_TimeoutCombo.SelectedIndex;
                 switch (Settings_TimeoutCombo.SelectedIndex)
                 {
-                    case 0: App.Preferences.MouseOverTimeout = 500; break;
-                    case 1: App.Preferences.MouseOverTimeout = 1000; break;
-                    case 2: App.Preferences.MouseOverTimeout = 2000; break;
-                    case 3: App.Preferences.MouseOverTimeout = 3000; break;
-                    case 4: App.Preferences.MouseOverTimeout = 4000; break;
-                    case 5: App.Preferences.MouseOverTimeout = 5000; break;
-                    case 6: App.Preferences.MouseOverTimeout = 10000; break;
-                    case 7: App.Preferences.MouseOverTimeout = 60000; break;
-                    default: App.Preferences.MouseOverTimeout = 5000; break;
+                    case 0: App.Settings.MouseOverTimeout = 500; break;
+                    case 1: App.Settings.MouseOverTimeout = 1000; break;
+                    case 2: App.Settings.MouseOverTimeout = 2000; break;
+                    case 3: App.Settings.MouseOverTimeout = 3000; break;
+                    case 4: App.Settings.MouseOverTimeout = 4000; break;
+                    case 5: App.Settings.MouseOverTimeout = 5000; break;
+                    case 6: App.Settings.MouseOverTimeout = 10000; break;
+                    case 7: App.Settings.MouseOverTimeout = 60000; break;
+                    default: App.Settings.MouseOverTimeout = 5000; break;
                 }
             };
-            Settings_OrinateCheck.Checked += (_, __) => App.Preferences.VisionOrientation = Settings_OrinateCheck.IsChecked.Value;
-            Settings_OrinateCheck.Unchecked += (_, __) => App.Preferences.VisionOrientation = Settings_OrinateCheck.IsChecked.Value;
+            Settings_OrinateCheck.Checked += (_, __) => App.Settings.VisionOrientation = Settings_OrinateCheck.IsChecked.Value;
+            Settings_OrinateCheck.Unchecked += (_, __) => App.Settings.VisionOrientation = Settings_OrinateCheck.IsChecked.Value;
             SettingsButton.MouseUp += delegate
             {
                 if (!IsVisionOn[2])
@@ -121,10 +121,10 @@ namespace Player
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            App.Preferences.LastSize = new Size(Width, Height);
-            App.Preferences.LastLoc = new Point(Left, Top);
-            App.Preferences.Volume = Player.Volume;
-            App.Preferences.Save();
+            App.Settings.LastSize = new Size(Width, Height);
+            App.Settings.LastLoc = new Point(Left, Top);
+            App.Settings.Volume = Player.Volume;
+            App.Settings.Save();
             Manager.Close();
             Application.Current.Shutdown();
         }
@@ -156,24 +156,19 @@ namespace Player
                 {
                     var paths = SelectedMediaViews.Select(item => item.Media.Path);
                     var views = SelectedMediaViews.ToList();
-                    views.ForEach(item => item.RemoveRequest(this, null));
+                    Media_RemoveRequested(this, null);
                     paths.AsParallel().ForAll(item => File.Delete(item));
                 }
             }
             else
-                (sender as MediaView).DeleteRequest(this, null);
-        }
-        private void Media_LocationRequested(object sender, InfoExchangeArgs e)
-        {
-            OnSelectedMediaViews(each => each.LocationRequest(this, null));
+            {
+                File.Delete((sender as MediaView).Media.Path);
+                Manager.Remove(sender as MediaView);
+            }
         }
         private void Media_RemoveRequested(object sender, InfoExchangeArgs e)
         {
             OnSelectedMediaViews(each => Manager.Remove(each));
-        }
-        private void Media_PropertiesRequested(object sender, InfoExchangeArgs e)
-        {
-            OnSelectedMediaViews(each => each.PropertiesRequest(this, null));
         }
         private void Media_ZipDownloaded(object sender, InfoExchangeArgs e)
         {
@@ -198,9 +193,7 @@ namespace Player
                     Player.Position = pos;
                     break;
                 case InfoType.MediaRemoved:
-                    QueueListView.Items.Clear();
-                    for (int i = 0; i < Manager.Count; i++)
-                        QueueListView.Items.Add(Manager[i]);
+                    QueueListView.Items.Remove(e.Object);
                     break;
                 case InfoType.MediaRequested:
                     Play(Manager.Next(sender));
@@ -247,7 +240,7 @@ namespace Player
         {
             if (!IsLoaded)
                 return;
-            App.Preferences.Save();
+            App.Settings.Save();
         }
 
         private void Play(MediaView mediaView)
@@ -259,7 +252,7 @@ namespace Player
         }
         private bool IsAncestorKeyDown(Forms::KeyEventArgs e)
         {
-            switch (App.Preferences.MainKey)
+            switch (App.Settings.MainKey)
             {
                 case 0: return e.Control;
                 case 1: return e.Alt;
