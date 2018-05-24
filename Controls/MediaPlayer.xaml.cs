@@ -54,7 +54,7 @@ namespace Player.Controls
                 else
                     MinifyBoard.Begin();
                 MouseMoveTimer.Start();
-                if (!Magnified)
+                if (!Magnified && false)
                 {
                     ParentWindow.Height--;
                     ParentWindow.Height++;
@@ -87,12 +87,11 @@ namespace Player.Controls
                 case 7: MouseMoveTimer.Interval = 60000; break;
                 default: MouseMoveTimer.Interval = 5000; break;
             }
-            switch ((PlayMode)App.Settings.PlayMode)
+            switch (App.Settings.PlayMode)
             {
                 case PlayMode.Shuffle: PlayModeButton.Glyph = Glyph.Shuffle; break;
                 case PlayMode.RepeatOne: PlayModeButton.Glyph = Glyph.RepeatOne; break;
                 case PlayMode.RepeatAll: PlayModeButton.Glyph = Glyph.RepeatAll; break;
-                case PlayMode.Queue: PlayModeButton.Glyph = Glyph.GroupList; break;
                 default: PlayModeButton.Glyph = Glyph.RepeatAll; break;
             }
             MouseMoveTimer.Elapsed += (_, __) => ControlsVisible = false;
@@ -121,7 +120,6 @@ namespace Player.Controls
                 return;
             element.Cursor = Cursors.Arrow;
             ControlsVisible = true;
-            Time:
             MouseMoveTimer.Stop();
             MouseMoveTimer.Start();
         }
@@ -183,10 +181,6 @@ namespace Player.Controls
                     Invoke(InfoType.PlayModeChange, PlayMode.RepeatAll);
                     break;
                 case Glyph.RepeatAll:
-                    PlayModeButton.Glyph = Glyph.GroupList;
-                    Invoke(InfoType.PlayModeChange, PlayMode.Queue);
-                    break;
-                case Glyph.GroupList:
                     PlayModeButton.Glyph = Glyph.Shuffle;
                     Invoke(InfoType.PlayModeChange, PlayMode.Shuffle);
                     break;

@@ -15,7 +15,7 @@ namespace Player
     public partial class MediaView : UserControl
     {
         public Media Media;
-        
+        public MenuItem[] OriginMenuItems;
         public event EventHandler<InfoExchangeArgs>
             DoubleClicked,
             PlayClicked,
@@ -69,7 +69,7 @@ namespace Player
             //Load SubContextMenuItems
             if (ProperGlyph == Glyph.Cloud)
             {
-                MenuItem[] OnlineMediaMenu = new MenuItem[]
+                OriginMenuItems = new MenuItem[]
                 {
                     GetMenu("Download", (_,__) => DownloadButton_Clicked(this, null)),
                     GetMenu("Play After", (_,__) => PlayAfterRequested?.Invoke(this, null)),
@@ -84,11 +84,10 @@ namespace Player
                     }),
                     GetMenu("Remove", (_,__) => RemoveRequested?.Invoke(this, null))
                 };
-                ContextMenu = new ContextMenu() { ItemsSource = OnlineMediaMenu };
             }
             else
             {
-                MenuItem[] OfflineMediaMenu = new MenuItem[]
+                OriginMenuItems = new MenuItem[]
                     {
                      GetMenu("Play After", (_,__) => PlayAfterRequested?.Invoke(this, null)),
                      GetMenu("Repeat",
@@ -129,8 +128,8 @@ namespace Player
                      GetMenu("Open Location", (_,__) => System.Diagnostics.Process.Start("explorer.exe", "/select," + Media.Path)),
                      GetMenu("Properties", (_, __) => { })
                     };
-                ContextMenu = new ContextMenu() { ItemsSource = OfflineMediaMenu };
             }
+            ContextMenu = new ContextMenu() { ItemsSource = OriginMenuItems };
         }
 
         private void Play_Clicked(object sender, MouseButtonEventArgs e) => PlayClicked?.Invoke(this, null);
@@ -159,21 +158,7 @@ namespace Player
                 DownloadButton.Height = 26;
             }
         }
-
-        private static MenuItem GetMenu(string header, RoutedEventHandler onClick)
-        {
-            var menu = new MenuItem() { Header = header };
-            menu.Click += onClick;
-            return menu;
-        }
-        private static MenuItem GetMenu(string header, (string subItem, RoutedEventHandler onClick)[] subItems)
-        {
-            var output = new MenuItem() { Header = header };
-            for (int i = 0; i < subItems.Length; i++)
-                output.Items.Add(GetMenu(subItems[i].subItem, subItems[i].onClick));
-            return output;
-        }
-
+        
         public void Sync()
         {
             MainLabel.Content = Media.Title;

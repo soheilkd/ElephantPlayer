@@ -2,6 +2,7 @@
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using Draw = System.Drawing;
@@ -11,7 +12,7 @@ namespace Player
     [Serializable]
     public class Preferences
     {
-        public int PlayMode { get; set; } = 0;
+        public PlayMode PlayMode { get; set; } = 0;
         public int MainKey { get; set; } = 0;
         public double Volume { get; set; } = 1;
         public Size LastSize { get; set; }
@@ -36,6 +37,7 @@ namespace Player
     {
         public static int ToInt(this double e) => Convert.ToInt32(e);
         public static T CastTo<T>(this object obj) => (T)obj;
+        public static T As<T>(this object obj) where T : class => obj as T;
     }
 
     public static class Global
@@ -46,7 +48,21 @@ namespace Player
             return $"{(time.TotalSeconds - (time.TotalSeconds % 60)).ToInt() / 60}:" +
                 $"{((time.TotalSeconds.ToInt() % 60).ToString().Length == 1 ? $"0{time.TotalSeconds.ToInt() % 60}" : (time.TotalSeconds.ToInt() % 60).ToString())}";
         }
-        public static string CastTime(int ms) => CastTime(new TimeSpan(0, 0, 0, 0, ms));  
+        public static string CastTime(int ms) => CastTime(new TimeSpan(0, 0, 0, 0, ms));
+
+        public static MenuItem GetMenu(string header, RoutedEventHandler onClick)
+        {
+            var menu = new MenuItem() { Header = header };
+            menu.Click += onClick;
+            return menu;
+        }
+        public static MenuItem GetMenu(string header, (string subItem, RoutedEventHandler onClick)[] subItems)
+        {
+            var output = new MenuItem() { Header = header };
+            for (int i = 0; i < subItems.Length; i++)
+                output.Items.Add(GetMenu(subItems[i].subItem, subItems[i].onClick));
+            return output;
+        }
     }
 }
 

@@ -1,6 +1,7 @@
 ﻿using Player.Events;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -171,32 +172,17 @@ namespace Player
         }
     }
 
-    public enum PlayMode { Shuffle, RepeatOne, RepeatAll, Queue }
-    public class MediaManager
+    public enum PlayMode { Shuffle, RepeatOne, RepeatAll }
+    public class MediaManager: ObservableCollection<MediaView>
     {
         public MediaManager() { }
-        public MediaView this[int index] => MediaViews[index];
-        private List<MediaView> MediaViews = new List<MediaView>();
-        private int CurrentQueuePosition = -1;
-        private List<int> PlayQueue = new List<int>();
         private Random Shuffle = new Random(2);
-        public int Count => MediaViews.Count;
-        public MediaView CurrentlyPlaying => MediaViews[CurrentlyPlayingIndex];
+        public MediaView CurrentlyPlaying => Items[CurrentlyPlayingIndex];
         public event EventHandler<InfoExchangeArgs> Change;
-        public Preferences Preferences { private get; set; } = Preferences.Load();
-        public PlayMode ActivePlayMode { get; set; } = PlayMode.RepeatAll;
         public int CurrentlyPlayingIndex { get; private set; }
-
-
-        public void Add(Uri uri, bool requestPlay = false)
-        {
-            var media = new Media(uri);
-            if (!media.IsValid)
-                return;
-            Add(media);
-            if (requestPlay)
-                RequestPlay(Count - 1);
-        }
+        public event System.Windows.Controls.ContextMenuEventHandler ContextMenuOpening;
+        public event System.Windows.Controls.ContextMenuEventHandler ContextMenuClosing;
+        
         public void Add(string path, bool requestPlay = false)
         {
             var media = Media.FromString(path);
@@ -208,7 +194,7 @@ namespace Player
             }
             Add(media, requestPlay);
             if (requestPlay)
-                RequestPlay(Count - 1);
+                RequestPlay();
         }
         public void Add(string[] paths, bool requestPlay = false)
         {
@@ -235,101 +221,73 @@ namespace Player
                 var sender2 = sender as MediaView;
                 for (int i = 0; i < e.Integer; i++)
                 {
-                    MediaViews.Add(sender2.MemberwiseClone());
-                    InvokeNewMedia(MediaViews[Count - 1]);
+                    Add(sender2.MemberwiseClone());
+                    InvokeNewMedia(Items[Count - 1]);
                 }
             };
             view.PlayAfterRequested += (sender, e) =>
             {
                 var s = sender as MediaView;
-                MediaViews.Remove(s);
-                MediaViews.Insert(CurrentlyPlayingIndex + 1, s);
+                Remove(s);
+                Insert(CurrentlyPlayingIndex + 1, s);
                 Change?.Invoke(this, new InfoExchangeArgs(InfoType.MediaUpdate));
             };
-            MediaViews.Add(view);
-            InvokeNewMedia(MediaViews[Count - 1]);
+            view.ContextMenuOpening += ContextMenuOpening;
+            view.ContextMenuClosing += ContextMenuClosing;
+            Add(view);
+            InvokeNewMedia(Items[Count - 1]);
             if (requestPlay)
-                RequestPlay(item => item.Media == media);
+                RequestPlay();
         }
 
         public void Remove(string path)
         {
-            MediaViews.AsParallel().Where(item => item.Media.Path == path).ForAll(item => Remove(item));
+            foreach (var item in this.Where(item => item.Media.Path == path))
+                Remove(item);
         }
-        public void Remove(MediaView media)
-        {
-            MediaViews.Remove(media);
-            Change?.Invoke(this, new InfoExchangeArgs() { Type = InfoType.MediaRemoved, Object = media });
-        }
-        public void Remove(int index) => Remove(MediaViews[index]);
 
-        public MediaView Next(object sender)
+        public Media Play(object view) => Play(IndexOf(view as MediaView));
+        public Media Play(int index)
         {
-            CurrentlyPlayingIndex = MediaViews.FindIndex(item => item.Equals(sender));
-            return CurrentlyPlaying;
+            CurrentlyPlayingIndex = index;
+            foreach (var item in Items)
+                item.IsPlaying = false;
+            this[CurrentlyPlayingIndex].IsPlaying = true;
+            return CurrentlyPlaying.Media;
         }
-        public MediaView Next(int y = -1)
+        public Media Next()
         {
-            if (y != -1)
-                CurrentlyPlayingIndex = y;
-            else
-                switch (ActivePlayMode)
-                {
-                    case PlayMode.Shuffle: CurrentlyPlayingIndex = Shuffle.Next(0, Count); break;
-                    case PlayMode.Queue:
-                        if (CurrentQueuePosition == PlayQueue.Count - 1)
-                        {
-                            CurrentlyPlayingIndex = PlayQueue[0];
-                            CurrentQueuePosition = 0;
-                        }
-                        else
-                            CurrentlyPlayingIndex = PlayQueue[CurrentQueuePosition++];
-                        break;
-                    case PlayMode.RepeatAll:
-                        if (CurrentlyPlayingIndex != Count - 1) CurrentlyPlayingIndex++;
-                        else CurrentlyPlayingIndex = 0;
-                        break;
-                    default: break;
-                }
-            return CurrentlyPlaying;
-        }
-        public MediaView Previous()
-        {
-            switch (ActivePlayMode)
+            switch (App.Settings.PlayMode)
             {
-                case PlayMode.Shuffle: CurrentlyPlayingIndex = Shuffle.Next(0, Count); break;
-                case PlayMode.Queue:
-                    if (CurrentQueuePosition == 0)
-                    {
-                        CurrentQueuePosition = PlayQueue.Count - 1;
-                        CurrentlyPlayingIndex = PlayQueue[CurrentQueuePosition];
-                    }
-                    else
-                        CurrentlyPlayingIndex = PlayQueue[CurrentQueuePosition--];
-                    break;
-                case PlayMode.RepeatAll:
-                    if (CurrentlyPlayingIndex != 0) CurrentlyPlayingIndex--;
-                    else CurrentlyPlayingIndex = Count - 1;
-                    break;
+                case PlayMode.Shuffle: return Play(Shuffle.Next(0, Count));
+                case PlayMode.RepeatAll: return Play(CurrentlyPlayingIndex == Count - 1 ? 0 : ++CurrentlyPlayingIndex);
                 default: break;
             }
-            return CurrentlyPlaying;
+            return Play(CurrentlyPlayingIndex);
+        }
+        public Media Previous()
+        {
+            switch (App.Settings.PlayMode)
+            {
+                case PlayMode.Shuffle: CurrentlyPlayingIndex = Shuffle.Next(0, Count); break;
+                case PlayMode.RepeatAll:
+                    if (CurrentlyPlayingIndex != 0) return Play(--CurrentlyPlayingIndex);
+                    else return Play(Count - 1);
+                default: break;
+            }
+            return Play(CurrentlyPlayingIndex);
         }
 
-        public void Repeat(int index, int times = 1) => Parallel.For(0, times, (i) => PlayNext(index));
-
-        public void PlayNext(int index) => PlayQueue.Insert(CurrentQueuePosition + 1, index);
+        public void Repeat(int index, int times = 1) => Parallel.For(0, times, (i) => Insert(index, Items[index]));
 
         public void Close()
         {
-            MassiveLibrary.Save(MediaViews.Select(item => item.Media).ToArray());
+            MassiveLibrary.Save(this.Select(item => item.Media).ToArray());
         }
 
-        public void AddCount() => MediaViews[CurrentlyPlayingIndex].Media.PlayCount++;
+        public void AddCount() => Items[CurrentlyPlayingIndex].Media.PlayCount++;
 
-        public bool IsPlaying(int index) => index == CurrentlyPlayingIndex;
-
-        private void RequestPlay(int index) => RequestPlay(MediaViews[index]);
+        private void RequestPlay() => RequestPlay(this[Count - 1]);
         private void RequestPlay(MediaView view)
         {
             Change?.Invoke(view, new InfoExchangeArgs()
@@ -337,26 +295,22 @@ namespace Player
                 Type = InfoType.MediaRequested
             });
         }
-        private void RequestPlay(Predicate<MediaView> match) => RequestPlay(MediaViews.Find(match));
 
         private void InvokeNewMedia(MediaView view) => Change?.Invoke(this, new InfoExchangeArgs(InfoType.NewMedia) { Object = view });
         public bool Contains(Media media, out MediaView view)
         {
-            int temp = MediaViews.FindIndex(item => item.Media == media);
-            if (temp == -1)
+            var temp = this.Where(item => item.Media.Path == media.Path); 
+            if (temp.Count() == 0)
             {
                 view = null;
                 return false;
             }
             else
             {
-                view = MediaViews[temp];
+                view = temp.First();
                 return true;
             }
         }
-        public ParallelQuery<MediaView> AsParallel() => MediaViews.AsParallel();
-
-        public void ResetIsPlayings() => MediaViews.ForEach(item => item.IsPlaying = false);
     }
 
     [Serializable]

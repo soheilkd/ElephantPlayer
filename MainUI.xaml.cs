@@ -11,6 +11,7 @@ using System.Windows.Media.Animation;
 using System.Linq;
 using Forms = System.Windows.Forms;
 using System.IO;
+using System.Windows.Data;
 
 namespace Player
 {
@@ -21,10 +22,13 @@ namespace Player
         private Timer PlayCountTimer = new Timer(100000) { AutoReset = false };
         private Timer SizeChangeTimer = new Timer(50) { AutoReset = true };
         private bool[] IsVisionOn = new bool[] { false, false, false };
-
+        private MenuItem[] MultipleSelectionMenuItems;
+        
         public MainUI()
         {
             InitializeComponent();
+            Manager.ContextMenuOpening += Manager_ContextMenuOpening;
+            Manager.ContextMenuClosing += Manager_ContextMenuClosing;
             Manager.Change += Manager_Change;
             App.NewInstanceRequested += (_, e) => Manager.Add(e.Args, true);
             
@@ -36,6 +40,22 @@ namespace Player
             Left = App.Settings.LastLoc.X;
             Top = App.Settings.LastLoc.Y;
         }
+
+        private void Manager_ContextMenuClosing(object sender, ContextMenuEventArgs e)
+        {
+            e.Source.As<MediaView>().ContextMenu.ItemsSource = e.Source.As<MediaView>().OriginMenuItems;
+        }
+
+        private void Manager_ContextMenuOpening(object sender, ContextMenuEventArgs e)
+        {
+            if (SelectedItems.Count() == 1)
+                return;
+            else
+            {
+                e.Source.As<MediaView>().ContextMenu.ItemsSource = MultipleSelectionMenuItems;
+            }
+        }
+
         private void BindUI()
         {
             PlayCountTimer.Elapsed += (_, __) => Manager.AddCount();
@@ -90,6 +110,13 @@ namespace Player
 
             Player.ParentWindow = this;
             TaskbarItemInfo = Player.Thumb.Info;
+            MultipleSelectionMenuItems = new MenuItem[]
+            {
+                Global.GetMenu("Remove", (_,__) => For(each => Manager.Remove(each)))
+            };
+            QueueListView.ItemsSource = Manager;
+           
+            ///BindingOperations.EnableCollectionSynchronization(Manager.Items, QueueListView);
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -114,7 +141,7 @@ namespace Player
                 case InfoType.LengthFound:
                     Manager.CurrentlyPlaying.UpdateLength((TimeSpan)e.Object);
                     break;
-                case InfoType.PlayModeChange: Manager.ActivePlayMode = (PlayMode)e.Object; break;
+                case InfoType.PlayModeChange: App.Settings.PlayMode = (PlayMode)e.Object; break;
                 default: break;
             }
         }
@@ -150,13 +177,13 @@ namespace Player
             if (QueueListView.SelectedItems.Count > 1)
             {
                 string selectedFilesInString = "";
-                OnSelectedMediaViews(each => selectedFilesInString += $"\r\n{each.Media.Path}");
+                For(each => selectedFilesInString += $"\r\n{each.Media.Path}");
                 var res = MessageBox.Show($"Sure? this files will be deleted:{selectedFilesInString}", " ", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
                 if (res == MessageBoxResult.OK)
                 {
-                    var paths = SelectedMediaViews.Select(item => item.Media.Path);
-                    var views = SelectedMediaViews.ToList();
-                    Media_RemoveRequested(this, null);
+                    var paths = SelectedItems.Select(item => item.Media.Path);
+                    var views = SelectedItems.ToList();
+                    For(each => Manager.Remove(each));
                     paths.AsParallel().ForAll(item => File.Delete(item));
                 }
             }
@@ -165,10 +192,6 @@ namespace Player
                 File.Delete((sender as MediaView).Media.Path);
                 Manager.Remove(sender as MediaView);
             }
-        }
-        private void Media_RemoveRequested(object sender, InfoExchangeArgs e)
-        {
-            OnSelectedMediaViews(each => Manager.Remove(each));
         }
         private void Media_ZipDownloaded(object sender, InfoExchangeArgs e)
         {
@@ -180,23 +203,16 @@ namespace Player
         {
             switch (e.Type)
             {
-                case InfoType.NewMedia:
-                    QueueListView.Items.Add(e.Object as MediaView);
-                    Height--; Height++;
-                    break;
                 case InfoType.EditingTag:
                     var pos = Player.Position;
                     Player.FullStop();
                     await Task.Delay(500);
                     (e.Object as TagLib.File).Save();
-                    Play(e.Object as MediaView);
+                    Play(e.Object.As<MediaView>().Media);
                     Player.Position = pos;
                     break;
-                case InfoType.MediaRemoved:
-                    QueueListView.Items.Remove(e.Object);
-                    break;
                 case InfoType.MediaRequested:
-                    Play(Manager.Next(sender));
+                    Play(Manager.Play(sender));
                     break;
                 default:
                     break;
@@ -219,7 +235,7 @@ namespace Player
                     case Forms::Keys.A:
                         var cb = Clipboard.GetText() ?? String.Empty;
                         if (Uri.TryCreate(cb, UriKind.Absolute, out var uri))
-                            Manager.Add(uri);
+                            Manager.Add(uri.AbsoluteUri);
                         else
                             return;
                         QueueListView.ScrollIntoView(QueueListView.Items[QueueListView.Items.Count - 1]);
@@ -243,12 +259,10 @@ namespace Player
             App.Settings.Save();
         }
 
-        private void Play(MediaView mediaView)
+        private void Play(Media media)
         {
-            Player.Play(mediaView.Media);
-            MiniArtworkImage.Source = mediaView.Media.Artwork;
-            Manager.ResetIsPlayings();
-            mediaView.IsPlaying = true;
+            Player.Play(media);
+            MiniArtworkImage.Source = media.Artwork;
         }
         private bool IsAncestorKeyDown(Forms::KeyEventArgs e)
         {
@@ -265,7 +279,11 @@ namespace Player
             }
         }
         
-        private void OnSelectedMediaViews(Action<MediaView> action) => QueueListView.SelectedItems.Cast<MediaView>().AsParallel().ForAll(action);
-        private IEnumerable<MediaView> SelectedMediaViews => QueueListView.SelectedItems.Cast<MediaView>();
+        private void For(Action<MediaView> action)
+        {
+            foreach (var item in SelectedItems)
+                action.Invoke(item);
+        }
+        private IEnumerable<MediaView> SelectedItems => QueueListView.SelectedItems.Cast<MediaView>();
     }
 }
