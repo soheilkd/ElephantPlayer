@@ -24,6 +24,7 @@ namespace Player.Controls
         public Taskbar.Thumb Thumb = new Taskbar.Thumb();
         private Storyboard MagnifyBoard, MinifyBoard, FullOnBoard, FullOffBoard;
         private ThicknessAnimation MagnifyAnimation, MinifyAnimation;
+ 
         private bool controlsVisibile;
         private bool ControlsVisible
         {
@@ -174,18 +175,17 @@ namespace Player.Controls
             {
                 case Glyph.Shuffle:
                     PlayModeButton.Glyph = Glyph.RepeatOne;
-                    Invoke(InfoType.PlayModeChange, PlayMode.RepeatOne);
+                    App.Settings.PlayMode = PlayMode.RepeatOne;
                     break;
                 case Glyph.RepeatOne:
                     PlayModeButton.Glyph = Glyph.RepeatAll;
-                    Invoke(InfoType.PlayModeChange, PlayMode.RepeatAll);
+                    App.Settings.PlayMode = PlayMode.RepeatAll;
                     break;
                 case Glyph.RepeatAll:
                     PlayModeButton.Glyph = Glyph.Shuffle;
-                    Invoke(InfoType.PlayModeChange, PlayMode.Shuffle);
+                    App.Settings.PlayMode = PlayMode.Shuffle;
                     break;
-                default:
-                    break;
+                default: break;
             }
         }
         private async void VolumeButton_Holding(object sender, MouseButtonEventArgs e)
@@ -306,8 +306,7 @@ namespace Player.Controls
       
         public void Play(Media media)
         {
-            if (!media.IsLoaded)
-                media = Media.FromString(media.Path);
+            media.Load();
             VisionButton.Visibility = media.IsVideo ? Visibility.Visible : Visibility.Hidden;
             if (IsFullScreen && !media.IsVideo)
                 FullScreenButton_Clicked(this, null);
@@ -317,7 +316,6 @@ namespace Player.Controls
             PlayPauseButton.Glyph = Glyph.Pause;
             element.Source = media.Url;
             element.Play();
-            Invoke(media.IsVideo ? InfoType.OrinateToVision : InfoType.OrinateToDefault);
         }
 
         private void UserControl_Loaded(object sender, RoutedEventArgs e)

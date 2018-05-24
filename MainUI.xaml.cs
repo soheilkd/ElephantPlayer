@@ -131,17 +131,11 @@ namespace Player
         {
             switch (e.Type)
             {
-                case InfoType.DragMoveRequest: DragMove(); break;
                 case InfoType.NextRequest: Play(Manager.Next()); break;
                 case InfoType.PrevRequest: Play(Manager.Previous()); break;
-                case InfoType.Handling:
-                    break;
-                case InfoType.UserInterface:
-                    break;
                 case InfoType.LengthFound:
                     Manager.CurrentlyPlaying.UpdateLength((TimeSpan)e.Object);
                     break;
-                case InfoType.PlayModeChange: App.Settings.PlayMode = (PlayMode)e.Object; break;
                 default: break;
             }
         }

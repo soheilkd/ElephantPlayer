@@ -22,17 +22,14 @@ namespace Player
         public string Title { get; set; }
         public string Album { get; set; }
         public Uri Url { get; set; }
-        public string Path { get => Url.IsFile ? Url.LocalPath : Url.AbsoluteUri; }
+        public string Path => Url.IsFile ? Url.LocalPath : Url.AbsoluteUri;
         public TimeSpan Length { get; set; }
         public int PlayCount;
         public bool IsOffline => (int)Type <= 2;
         public MediaType Type;
-        [NonSerialized] public bool IsPlaying;
         [NonSerialized] public string Lyrics;
-        [NonSerialized] public bool IsLoaded;
-        [NonSerialized] public long Duration;
+        [NonSerialized] public bool IsLoaded = false;
         [NonSerialized] public System.Windows.Media.Imaging.BitmapSource Artwork;
-        public bool IsMedia => Type != MediaType.None;
         public bool IsVideo => Type == MediaType.Video || Type == MediaType.OnlineVideo;
         public string Ext => Path.Substring((Path ?? " . ").LastIndexOf(".") + 1).ToLower();
         public bool IsValid
@@ -74,11 +71,36 @@ namespace Player
         private static string[] SupportedVideos = "mp4;mpg;mkv;wmv;mov;avi;m4v;ts;wav;mpeg;webm".Split(';');
         private static string[] SupportedFiles = "zip;rar;bin;dat".Split(';');
 
-        public static Media FromString(string path) => new Media(new Uri(path));
+        public Media(string path) : this(new Uri(path)) { }
         public Media(Uri url)
         {
             Url = url;
-            if (url.IsFile)
+            Load();
+        }
+        public override bool Equals(object obj)
+        {
+            if (obj is Media e) return Path.Equals(e.Path ?? "NULL", StringComparison.CurrentCultureIgnoreCase);
+            else return false;
+        }
+        public override int GetHashCode() => base.GetHashCode();
+        public override string ToString() => Path;
+
+        public void MoveTo(string dir)
+        {
+            dir += Name;
+            File.Move(Path, dir);
+            Url = new Uri(dir);
+        }
+        public void CopyTo(string dir)
+        {
+            dir += Name;
+            File.Copy(Path, dir);
+        }
+        public void Load()
+        {
+            if (IsLoaded)
+                return;
+            if (Url.IsFile)
             {
                 MediaType type;
                 if (SupportedMusics.Contains(Ext))
@@ -131,14 +153,13 @@ namespace Player
             }
             else
             {
-                if (url.AbsoluteUri.StartsWith("https://"))
-                    url = new Uri(url.AbsoluteUri.Replace("https://", "http://"));
-                Name = Uri.UnescapeDataString(url.Segments[url.Segments.Count() - 1]);
+                if (Url.AbsoluteUri.StartsWith("https://"))
+                    Url = new Uri(Url.AbsoluteUri.Replace("https://", "http://"));
+                Name = Uri.UnescapeDataString(Url.Segments[Url.Segments.Count() - 1]);
                 Title = Name;
-                Url = url;
-                Artist = url.Host;
+                Url = Url;
+                Artist = Url.Host;
                 Album = "Cloud";
-                Duration = 1;
                 Artwork = Imaging.Images.NetArt;
                 if (SupportedMusics.Contains(Ext))
                     Type = MediaType.OnlineMusic;
@@ -150,25 +171,6 @@ namespace Player
                     Type = MediaType.None;
                 IsLoaded = true;
             }
-        }
-        public override bool Equals(object obj)
-        {
-            if (obj is Media e) return Path.Equals(e.Path ?? "NULL", StringComparison.CurrentCultureIgnoreCase);
-            else return false;
-        }
-        public override int GetHashCode() => base.GetHashCode();
-        public override string ToString() => Path;
-
-        public void MoveTo(string dir)
-        {
-            dir += Name;
-            File.Move(Path, dir);
-            Url = new Uri(dir);
-        }
-        public void CopyTo(string dir)
-        {
-            dir += Name;
-            File.Copy(Path, dir);
         }
     }
 
@@ -185,7 +187,7 @@ namespace Player
         
         public void Add(string path, bool requestPlay = false)
         {
-            var media = Media.FromString(path);
+            var media = new Media(path);
             if (Contains(media, out var view))
             {
                 if (requestPlay)
@@ -220,22 +222,17 @@ namespace Player
             {
                 var sender2 = sender as MediaView;
                 for (int i = 0; i < e.Integer; i++)
-                {
                     Add(sender2.MemberwiseClone());
-                    InvokeNewMedia(Items[Count - 1]);
-                }
             };
             view.PlayAfterRequested += (sender, e) =>
             {
                 var s = sender as MediaView;
                 Remove(s);
                 Insert(CurrentlyPlayingIndex + 1, s);
-                Change?.Invoke(this, new InfoExchangeArgs(InfoType.MediaUpdate));
             };
             view.ContextMenuOpening += ContextMenuOpening;
             view.ContextMenuClosing += ContextMenuClosing;
             Add(view);
-            InvokeNewMedia(Items[Count - 1]);
             if (requestPlay)
                 RequestPlay();
         }
@@ -295,8 +292,7 @@ namespace Player
                 Type = InfoType.MediaRequested
             });
         }
-
-        private void InvokeNewMedia(MediaView view) => Change?.Invoke(this, new InfoExchangeArgs(InfoType.NewMedia) { Object = view });
+        
         public bool Contains(Media media, out MediaView view)
         {
             var temp = this.Where(item => item.Media.Path == media.Path); 

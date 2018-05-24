@@ -19,12 +19,9 @@ namespace Player.Events
         //Variable exchange
         Integer, Double, Media, Object, StringArray,
         //Media Control
-        DragMoveRequest, FullScreenRequest, NextRequest, PrevRequest, Handling, UserInterface, LengthFound, PlayModeChange,
-        OrinateToVision, OrinateToDefault,
+        NextRequest, PrevRequest, LengthFound,
         //Media Manager
-        NewMedia, MediaRequested, EditingTag,
-        InterfaceUpdate, MediaUpdate, PopupRequest,
-        MediaRemoved, MediaMoved
+        MediaRequested, EditingTag, 
     }
 
     public class InfoExchangeArgs : EventArgs
