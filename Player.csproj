@@ -138,9 +138,6 @@
     <Compile Include="Controls\MediaPlayer.xaml.cs">
       <DependentUpon>MediaPlayer.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Controls\MediaView.xaml.cs">
-      <DependentUpon>MediaView.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Controls\SegoeButton.xaml.cs">
       <DependentUpon>SegoeButton.xaml</DependentUpon>
     </Compile>
@@ -166,10 +163,6 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Controls\MediaPlayer.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Controls\MediaView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

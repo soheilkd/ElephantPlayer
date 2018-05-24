@@ -9,6 +9,7 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
 
 namespace Player
 {
@@ -17,18 +18,18 @@ namespace Player
     public class Media
     {
         public Media() { }
-        public string Name { get; set; }
+        public new string Name { get; set; }
         public string Artist { get; set; }
         public string Title { get; set; }
         public string Album { get; set; }
         public Uri Url { get; set; }
         public string Path => Url.IsFile ? Url.LocalPath : Url.AbsoluteUri;
         public TimeSpan Length { get; set; }
-        public int PlayCount;
+        public int PlayCount = 0;
         public bool IsOffline => (int)Type <= 2;
         public MediaType Type;
         [NonSerialized] public string Lyrics;
-        [NonSerialized] public bool IsLoaded = false;
+        [NonSerialized] public new bool IsLoaded = false;
         [NonSerialized] public System.Windows.Media.Imaging.BitmapSource Artwork;
         public bool IsVideo => Type == MediaType.Video || Type == MediaType.OnlineVideo;
         public string Ext => Path.Substring((Path ?? " . ").LastIndexOf(".") + 1).ToLower();
@@ -77,13 +78,7 @@ namespace Player
             Url = url;
             Load();
         }
-        public override bool Equals(object obj)
-        {
-            if (obj is Media e) return Path.Equals(e.Path ?? "NULL", StringComparison.CurrentCultureIgnoreCase);
-            else return false;
-        }
-        public override int GetHashCode() => base.GetHashCode();
-        public override string ToString() => Path;
+        public override string ToString() => $"{Artist} - {Title}";
 
         public void MoveTo(string dir)
         {
@@ -175,26 +170,25 @@ namespace Player
     }
 
     public enum PlayMode { Shuffle, RepeatOne, RepeatAll }
-    public class MediaManager: ObservableCollection<MediaView>
+    public class MediaManager: ObservableCollection<Media>
     {
         public MediaManager() { }
         private Random Shuffle = new Random(2);
-        public MediaView CurrentlyPlaying => Items[CurrentlyPlayingIndex];
+        public Media CurrentlyPlaying => Items[CurrentlyPlayingIndex];
         public event EventHandler<InfoExchangeArgs> Change;
         public int CurrentlyPlayingIndex { get; private set; }
-        public event System.Windows.Controls.ContextMenuEventHandler ContextMenuOpening;
-        public event System.Windows.Controls.ContextMenuEventHandler ContextMenuClosing;
         
         public void Add(string path, bool requestPlay = false)
         {
             var media = new Media(path);
-            if (Contains(media, out var view))
+            var duplication = this.Where(item => item.Path == path);
+            if (duplication.Count() != 0)
             {
                 if (requestPlay)
-                    RequestPlay(view);
+                    RequestPlay(duplication.First());
                 return;
             }
-            Add(media, requestPlay);
+            Add(media);
             if (requestPlay)
                 RequestPlay();
         }
@@ -208,49 +202,17 @@ namespace Player
                     Add(paths[i], requestPlay);
             }
         }
-        public void Add(Media media, bool requestPlay = false)
-        {
-            if (!media.IsValid)
-                return;
-            MediaView view = new MediaView(media);
-            view.DoubleClicked += (sender, e) => 
-            RequestPlay(sender as MediaView);
-            view.PlayClicked += (sender, e) => RequestPlay(sender as MediaView);
-            view.RemoveRequested += (sender, e) => Remove(sender as MediaView);
-            view.TagSaveRequested += (sender, e) => Change?.Invoke(sender, new InfoExchangeArgs(InfoType.EditingTag));
-            view.RepeatRequested += (sender, e) =>
-            {
-                var sender2 = sender as MediaView;
-                for (int i = 0; i < e.Integer; i++)
-                    Add(sender2.MemberwiseClone());
-            };
-            view.PlayAfterRequested += (sender, e) =>
-            {
-                var s = sender as MediaView;
-                Remove(s);
-                Insert(CurrentlyPlayingIndex + 1, s);
-            };
-            view.ContextMenuOpening += ContextMenuOpening;
-            view.ContextMenuClosing += ContextMenuClosing;
-            Add(view);
-            if (requestPlay)
-                RequestPlay();
-        }
 
         public void Remove(string path)
         {
-            foreach (var item in this.Where(item => item.Media.Path == path))
+            foreach (var item in this.Where(item => item.Path == path))
                 Remove(item);
         }
-
-        public Media Play(object view) => Play(IndexOf(view as MediaView));
+        
         public Media Play(int index)
         {
             CurrentlyPlayingIndex = index;
-            foreach (var item in Items)
-                item.IsPlaying = false;
-            this[CurrentlyPlayingIndex].IsPlaying = true;
-            return CurrentlyPlaying.Media;
+            return CurrentlyPlaying;
         }
         public Media Next()
         {
@@ -279,33 +241,18 @@ namespace Player
 
         public void Close()
         {
-            MassiveLibrary.Save(this.Select(item => item.Media).ToArray());
+            MassiveLibrary.Save(this.ToArray());
         }
 
-        public void AddCount() => Items[CurrentlyPlayingIndex].Media.PlayCount++;
+        public void AddCount() => this[CurrentlyPlayingIndex].PlayCount++;
 
         private void RequestPlay() => RequestPlay(this[Count - 1]);
-        private void RequestPlay(MediaView view)
+        private void RequestPlay(Media media)
         {
-            Change?.Invoke(view, new InfoExchangeArgs()
+            Change?.Invoke(media, new InfoExchangeArgs()
             {
                 Type = InfoType.MediaRequested
             });
-        }
-        
-        public bool Contains(Media media, out MediaView view)
-        {
-            var temp = this.Where(item => item.Media.Path == media.Path); 
-            if (temp.Count() == 0)
-            {
-                view = null;
-                return false;
-            }
-            else
-            {
-                view = temp.First();
-                return true;
-            }
         }
     }
 

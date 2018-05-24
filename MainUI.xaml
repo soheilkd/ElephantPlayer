@@ -5,17 +5,11 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008" SizeChanged="Window_SizeChanged"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" KeyUp="Window_KeyUp"
     xmlns:player="clr-namespace:Player.Controls" xmlns:sys="clr-namespace:System;assembly=mscorlib"
+    xmlns:player1="clr-namespace:Player"
     x:Name="window"
     mc:Ignorable="d" Loaded="Window_Loaded" Closing="Window_Closing" Drop="Window_Drop" AllowDrop="True"
     Title="Elephant Player" Height="544" Width="432" >
     <Grid Background="{DynamicResource KeyOfBackground}" x:Name="ContentGrid">
-        <ListView x:Name="QueueListView" BorderThickness="0" Margin="0, 0, 0, 85"
-                  ScrollViewer.CanContentScroll="False" Background="{DynamicResource KeyOfBackground}"
-                  HorizontalContentAlignment="Stretch" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
-            <ListView.Resources>
-                <sys:Double x:Key="{x:Static SystemParameters.VerticalScrollBarWidthKey}">10</sys:Double>
-            </ListView.Resources>
-        </ListView>
 
         <Image x:Name="MiniArtworkImage" Height="55" Width="55" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="0,0,0,25">
             <Image.Triggers>
@@ -85,11 +79,104 @@
         </Grid>
         <player:SegoeButton x:Name="SettingsButton" Glyph="Settings"  HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,145,25" />
         <player:MediaPlayer x:Name="Player" />
+        <TabControl Background="{DynamicResource KeyOfBackground}" Margin="0,0,0,85">
+            <TabItem Header="Titles">
+                <ListView x:Name="TitlesView">
+                </ListView>
+            </TabItem>
+            <TabItem Header="Artists">
+                <ListView Name="ArtistsView">
+                    <ListView.View>
+                        <GridView>
+                            <GridViewColumn Header="Title" Width="120" DisplayMemberBinding="{Binding Title}" />
+                            <GridViewColumn Header="Album" Width="50" DisplayMemberBinding="{Binding Album}" />
+                            <GridViewColumn Header="Plays" Width="50" DisplayMemberBinding="{Binding PlayCount}" />
+                        </GridView>
+                    </ListView.View>
+                    <ListView.GroupStyle>
+                        <GroupStyle>
+                            <GroupStyle.ContainerStyle>
+                                <Style TargetType="{x:Type GroupItem}">
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate>
+                                                <Expander IsExpanded="True">
+                                                    <Expander.Header>
+                                                        <StackPanel Orientation="Horizontal">
+                                                            <TextBlock Text="{Binding Name}" FontWeight="Bold" Foreground="Black" FontSize="16" VerticalAlignment="Bottom" />
+                                                            <TextBlock Text="{Binding ItemCount}" FontSize="18" Foreground="White" FontWeight="Bold" FontStyle="Italic" Margin="10,0,0,0" VerticalAlignment="Bottom" />
+                                                            <TextBlock Text=" items" FontSize="16" Foreground="Silver" FontStyle="Italic" VerticalAlignment="Bottom" />
+                                                        </StackPanel>
+                                                    </Expander.Header>
+                                                    <ItemsPresenter />
+                                                </Expander>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </GroupStyle.ContainerStyle>
+                        </GroupStyle>
+                    </ListView.GroupStyle>
+                </ListView>
+            </TabItem>
+            <TabItem Header="Albums" >
+                <ListView Name="AlbumsView">
+                    <ListView.View>
+                        <GridView>
+                            <GridViewColumn Header="Title" Width="120" DisplayMemberBinding="{Binding Title}" >
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Label Content="{Binding Title}" Foreground="White" MouseUp="Label_MouseUp"/>
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>
+                            <GridViewColumn Header="Title" Width="50" DisplayMemberBinding="{Binding Title}" />
+                            <GridViewColumn Header="Plays" Width="50" DisplayMemberBinding="{Binding PlayCount}" />
+                        </GridView>
+                    </ListView.View>
+                    <!--
+                    <ListView.GroupStyle>
+                        <GroupStyle>
+                            <GroupStyle.ContainerStyle>
+                                
+                                <Style TargetType="{x:Type GroupItem}">
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate>
+                                                <Expander IsExpanded="True">
+                                                    <Expander.Header>
+                                                        <StackPanel Orientation="Horizontal">
+                                                            <TextBlock Text="{Binding Name}" FontWeight="Bold" Foreground="Gray" FontSize="22" VerticalAlignment="Bottom" />
+                                                            <TextBlock Text="{Binding ItemCount}" FontSize="22" Foreground="White" FontWeight="Bold" FontStyle="Italic" Margin="10,0,0,0" VerticalAlignment="Bottom" />
+                                                            <TextBlock Text=" items" FontSize="22" Foreground="Silver" FontStyle="Italic" VerticalAlignment="Bottom" />
+                                                        </StackPanel>
+                                                    </Expander.Header>
+                                                    <ItemsPresenter />
+                                                </Expander>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </GroupStyle.ContainerStyle>
+                        </GroupStyle>
+                    </ListView.GroupStyle>-->
+                </ListView>
+            </TabItem>
+        </TabControl>
 
     </Grid>
     <Window.Resources>
-        <SolidColorBrush x:Key="KeyOfBackground" Color="#FF303030" />
-        <SolidColorBrush x:Key="KeyOfForeground" Color="#FEEE" />
+        <Style TargetType="{x:Type ListView}">
+            <Setter Property="Background" Value="{DynamicResource KeyOfBackground}" />
+            <Setter Property="ScrollViewer.CanContentScroll" Value="False" />
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+            <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled" />
+            <Style.Resources>
+                <sys:Double x:Key="{x:Static SystemParameters.VerticalScrollBarWidthKey}">10</sys:Double>
+            </Style.Resources>
+        </Style>
+        <SolidColorBrush x:Key="KeyOfBackground" Color="#FFAAAAAA" />
+        <SolidColorBrush x:Key="KeyOfForeground" Color="#F111" />
 
         <Storyboard x:Key="SettingsOnBoard" AccelerationRatio="0.1" DecelerationRatio="0.9" Storyboard.TargetProperty="Opacity">
             <DoubleAnimation From="{Binding ElementName=SettingsGrid, Path=Opacity}" To="1" Storyboard.TargetName="SettingsGrid"/>

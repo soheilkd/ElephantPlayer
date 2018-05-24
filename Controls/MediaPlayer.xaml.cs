@@ -60,6 +60,7 @@ namespace Player.Controls
                     ParentWindow.Height--;
                     ParentWindow.Height++;
                 }
+
             }
         }
         public MediaPlayer()

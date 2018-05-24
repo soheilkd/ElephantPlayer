@@ -106,7 +106,7 @@
     </Grid>
     <UserControl.Resources>
         <Style TargetType="{x:Type Label}" x:Key="TimeLabel">
-            <Setter Property="Foreground" Value="White" />
+            <Setter Property="Foreground" Value="#F111" />
             <Setter Property="VerticalAlignment" Value="Bottom"/>
             <Setter Property="Width" Value="40" />
             <Setter Property="RenderTransform">

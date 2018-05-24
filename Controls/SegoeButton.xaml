@@ -6,7 +6,7 @@
              Loaded="UserControl_Loaded">
     <Grid x:Name="MainGrid">
         <Border x:Name="MainEllipse" BorderThickness="0" Margin="-7" BorderBrush="#FBBB" CornerRadius="20"/>
-        <controls:SegoeIcon x:Name="MainIcon" Foreground="White" Background="#01FFFFFF" Glyph="Accept"
+        <controls:SegoeIcon x:Name="MainIcon" Foreground="Black" Background="#01FFFFFF" Glyph="Accept"
                             Width="{Binding Width, ElementName=MainGrid}" Height="{Binding Height, ElementName=MainGrid}" />
     </Grid>
     <UserControl.Triggers>
