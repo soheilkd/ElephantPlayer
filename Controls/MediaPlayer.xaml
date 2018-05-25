@@ -12,8 +12,28 @@
                           MouseDown="Element_MouseDown" MediaEnded="element_MediaEnded" 
                           Volume="1"/>
         </Grid>
-        <Grid Background="Transparent" VerticalAlignment="Bottom" Height="50">
-
+        <Grid Background="Transparent" VerticalAlignment="Bottom" Height="80">
+            <Image x:Name="MiniArtworkImage" Height="55" Width="55" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="0,0,0,25">
+                <Image.Triggers>
+                    <EventTrigger RoutedEvent="UIElement.MouseDown">
+                        <BeginStoryboard>
+                            <Storyboard Storyboard.TargetName="MiniArtworkImage" SpeedRatio="2" AccelerationRatio="0.3" DecelerationRatio="0.7">
+                                <DoubleAnimation Storyboard.TargetProperty="Width" From="{Binding Width, ElementName=MiniArtworkImage}" To="400"/>
+                                <DoubleAnimation Storyboard.TargetProperty="Height" From="{Binding Width, ElementName=MiniArtworkImage}" To="400"/>
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </EventTrigger>
+                    <EventTrigger RoutedEvent="UIElement.MouseUp">
+                        <BeginStoryboard>
+                            <Storyboard Storyboard.TargetName="MiniArtworkImage" SpeedRatio="2" AccelerationRatio="0.3" DecelerationRatio="0.7">
+                                <DoubleAnimation Storyboard.TargetProperty="Width" From="{Binding Width, ElementName=MiniArtworkImage}" To="55"/>
+                                <DoubleAnimation Storyboard.TargetProperty="Height" From="{Binding Width, ElementName=MiniArtworkImage}" To="55"/>
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </EventTrigger>
+                </Image.Triggers>
+            </Image>
+            <Label Content="Content Title" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="60,0,0,0" FontSize="18" x:Name="TitleLabel"/>
             <Slider x:Name="PositionSlider"  ValueChanged="Position_Changed" PreviewMouseDown="Position_Holding"  
                VerticalAlignment="Bottom" Maximum="1000" 
                         Foreground="#FF575757" Margin="40, 0, 40, 5">
@@ -89,7 +109,7 @@
             <Label Content="00:00" Style="{DynamicResource TimeLabel}" HorizontalAlignment="Right" x:Name="TimeLabel_Full" Width="38"/>
             <local:SegoeButton x:Name="PreviousButton" Glyph="Previous" Margin="80,0,0,25" MouseUp="PreviousButton_Clicked" />
             <local:SegoeButton x:Name="NextButton" Glyph="Next" Margin="165,0,0,25" MouseUp="NextButton_Clicked" />
-            <local:SegoeButton x:Name="PlayPauseButton" Glyph="Play" MouseUp="PlayPauseButton_Clicked" Margin="120,0,0,24" Height="28" Width="28"/>
+            <local:SegoeButton x:Name="PlayPauseButton" Glyph="Play" MouseUp="PlayPauseButton_Clicked" Margin="120,0,0,24" Height="24" Width="24"/>
             <local:SegoeButton x:Name="PlayModeButton" Glyph="RepeatAll"  MouseUp="PlayModeButton_Clicked" HorizontalAlignment="Right" Margin="0,0,100,25" />
             <local:SegoeButton x:Name="VisionButton" Glyph="TVMonitor" HorizontalAlignment="Center" Margin="0,0,0,25" MouseUp="VisionButton_Clicked" />
             <local:SegoeButton x:Name="FullScreenButton" Glyph="FullScreen" HorizontalAlignment="Right" Margin="0,0,145, 25" MouseUp="FullScreenButton_Clicked" />
@@ -101,12 +121,11 @@
                 <TranslateTransform x:Name="ControlsTranslation" Y="0" />
             </Grid.RenderTransform>
         </Grid>
-
-
     </Grid>
     <UserControl.Resources>
+        <SolidColorBrush x:Key="ButtonsForeground" Color="White" />
         <Style TargetType="{x:Type Label}" x:Key="TimeLabel">
-            <Setter Property="Foreground" Value="#F111" />
+            <Setter Property="Foreground" Value="{DynamicResource ButtonsForeground}" />
             <Setter Property="VerticalAlignment" Value="Bottom"/>
             <Setter Property="Width" Value="40" />
             <Setter Property="RenderTransform">
@@ -115,7 +134,8 @@
                 </Setter.Value>
             </Setter>
         </Style>
-        <Style TargetType="local:SegoeButton">
+        <Style TargetType="local:SegoeButton" >
+            <Setter Property="Foreground" Value="{DynamicResource ButtonsForeground}" />
             <Setter Property="VerticalAlignment" Value="Bottom" />
             <Setter Property="HorizontalAlignment" Value="Left"/>
         </Style>

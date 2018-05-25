@@ -2,6 +2,8 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -18,18 +20,19 @@ namespace Player
     public class Media
     {
         public Media() { }
-        public new string Name { get; set; }
+        public string Name { get; set; }
         public string Artist { get; set; }
         public string Title { get; set; }
         public string Album { get; set; }
         public Uri Url { get; set; }
         public string Path => Url.IsFile ? Url.LocalPath : Url.AbsoluteUri;
-        public TimeSpan Length { get; set; }
-        public int PlayCount = 0;
+        public TimeSpan Length { get; set; } = TimeSpan.Zero;
+        public int PlayCount { get; set; } = 0;
         public bool IsOffline => (int)Type <= 2;
         public MediaType Type;
         [NonSerialized] public string Lyrics;
-        [NonSerialized] public new bool IsLoaded = false;
+        [NonSerialized] public bool IsLoaded = false;
+        [NonSerialized] public bool IsPlaying = false;
         [NonSerialized] public System.Windows.Media.Imaging.BitmapSource Artwork;
         public bool IsVideo => Type == MediaType.Video || Type == MediaType.OnlineVideo;
         public string Ext => Path.Substring((Path ?? " . ").LastIndexOf(".") + 1).ToLower();
@@ -79,7 +82,14 @@ namespace Player
             Load();
         }
         public override string ToString() => $"{Artist} - {Title}";
-
+        public bool Contains(string d)
+        {
+            return 
+                (Name ?? "INDEFINITIVE").ToLower().Contains(d.ToLower()) ||
+                (Artist ?? "INDEFINITIVE").ToLower().Contains(d.ToLower()) ||
+                (Title ?? "INDEFINITIVE").ToLower().Contains(d.ToLower()) ||
+                (Artist ?? "INDEFINITIVE").ToLower().Contains(d.ToLower());
+        }
         public void MoveTo(string dir)
         {
             dir += Name;
@@ -172,12 +182,49 @@ namespace Player
     public enum PlayMode { Shuffle, RepeatOne, RepeatAll }
     public class MediaManager: ObservableCollection<Media>
     {
+        protected override void OnCollectionChanged(NotifyCollectionChangedEventArgs e)
+        {
+            base.OnCollectionChanged(e);
+           
+            switch (e.Action)
+            {
+                case NotifyCollectionChangedAction.Add:
+                    for (int i = 0; i < VariousSources.Length; i++)
+                            VariousSources[i].Add(e.NewItems[0] as Media);
+                    break;
+                case NotifyCollectionChangedAction.Remove:
+                    for (int i = 0; i < VariousSources.Length; i++)
+                            VariousSources[i].Remove(e.OldItems[0] as Media);
+                    break;
+                case NotifyCollectionChangedAction.Replace:
+                    for (int i = 0; i < VariousSources.Length; i++)
+                        VariousSources[i][e.OldStartingIndex] = e.NewItems[0] as Media;
+                        break;
+                case NotifyCollectionChangedAction.Move:
+                    for (int i = 0; i < VariousSources.Length; i++)
+                        VariousSources[i].Move(e.OldStartingIndex, e.NewStartingIndex);
+                    break;
+                case NotifyCollectionChangedAction.Reset:
+                    for (int i = 0; i < VariousSources.Length; i++)
+                        VariousSources[i].Clear();
+                    break;
+                default:
+                    break;
+            }
+        }
         public MediaManager() { }
         private Random Shuffle = new Random(2);
         public Media CurrentlyPlaying => Items[CurrentlyPlayingIndex];
         public event EventHandler<InfoExchangeArgs> Change;
         public int CurrentlyPlayingIndex { get; private set; }
-        
+        public ObservableCollection<Media>[] VariousSources = new ObservableCollection<Media>[]
+        {
+            new ObservableCollection<Media>(),
+            new ObservableCollection<Media>(),
+            new ObservableCollection<Media>(),
+            new ObservableCollection<Media>()
+        };
+
         public void Add(string path, bool requestPlay = false)
         {
             var media = new Media(path);
@@ -188,6 +235,8 @@ namespace Player
                     RequestPlay(duplication.First());
                 return;
             }
+            for (int i = 0; i < VariousSources.Length; i++)
+                VariousSources[i].Add(media);
             Add(media);
             if (requestPlay)
                 RequestPlay();
@@ -212,6 +261,8 @@ namespace Player
         public Media Play(int index)
         {
             CurrentlyPlayingIndex = index;
+            this.AsParallel().ForAll(item => item.IsPlaying = false);
+            this[index].IsPlaying = true;
             return CurrentlyPlaying;
         }
         public Media Next()

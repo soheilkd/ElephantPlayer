@@ -5,6 +5,7 @@ using System.Timers;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
 using System.Windows.Media.Animation;
 using static Player.Global;
 
@@ -14,10 +15,11 @@ namespace Player.Controls
     {
         public TimeSpan Position { get => element.Position; set => element.Position = value; }
         public double Volume { get => element.Volume; set => element.Volume = value; }
+        private Media _Media = new Media();
         public event EventHandler<InfoExchangeArgs> EventHappened;
         private Timer DraggerTimer = new Timer(250) { AutoReset = false };
         private Timer MouseMoveTimer = new Timer(5000) { AutoReset = false };
-        private Timer PlayCountTimer;
+        private Timer PlayCountTimer = new Timer(120000) { AutoReset = false };
         private TimeSpan TimeSpan;
         private bool IsUserSeeking, IsFullScreen, WasMaximized;
         public Window ParentWindow;
@@ -60,7 +62,7 @@ namespace Player.Controls
                     ParentWindow.Height--;
                     ParentWindow.Height++;
                 }
-
+                Resources["ButtonsForeground"] = value ? Brushes.White : Brushes.Black;
             }
         }
         public MediaPlayer()
@@ -97,6 +99,13 @@ namespace Player.Controls
                 default: PlayModeButton.Glyph = Glyph.RepeatAll; break;
             }
             MouseMoveTimer.Elapsed += (_, __) => ControlsVisible = false;
+            PlayCountTimer.Elapsed += PlayCountTimer_Elapsed;
+        }
+
+        private void PlayCountTimer_Elapsed(object sender, ElapsedEventArgs e)
+        {
+            _Media.PlayCount++;
+            PlayCountTimer.Stop();
         }
 
         private void Element_MouseDown(object sender, MouseButtonEventArgs e)
@@ -140,11 +149,11 @@ namespace Player.Controls
                     PositionSlider.Maximum = TimeSpan.TotalMilliseconds;
                     PositionSlider.SmallChange = 1 * PositionSlider.Maximum / 100;
                     PositionSlider.LargeChange = 5 * PositionSlider.Maximum / 100;
-                    TimeLabel_Full.Content = CastTime(TimeSpan);
+                    TimeLabel_Full.Content = TimeSpan.ToCustomString();
                     Invoke(InfoType.LengthFound, TimeSpan);
                 }
             PositionSlider.Value = element.Position.TotalMilliseconds;
-            TimeLabel_Current.Content = CastTime(Position);
+            TimeLabel_Current.Content = Position.ToCustomString();
             goto UX;
         }
 
@@ -302,12 +311,18 @@ namespace Player.Controls
         {
             if (!sliding) element.Position = timeSpan;
             else element.Position.Add(timeSpan);
+            if (PositionSlider.Value <= 20000)
+            {
+                PlayCountTimer.Stop();
+                PlayCountTimer.Start();
+            }
         }
         public void Seek(int ms, bool sliding = false) => Seek(new TimeSpan(0, 0, 0, 0, ms), sliding);
       
         public void Play(Media media)
         {
             media.Load();
+            _Media = media;
             VisionButton.Visibility = media.IsVideo ? Visibility.Visible : Visibility.Hidden;
             if (IsFullScreen && !media.IsVideo)
                 FullScreenButton_Clicked(this, null);
@@ -317,6 +332,10 @@ namespace Player.Controls
             PlayPauseButton.Glyph = Glyph.Pause;
             element.Source = media.Url;
             element.Play();
+            PlayCountTimer.Stop();
+            PlayCountTimer.Start();
+            TitleLabel.Content = media.ToString();
+            MiniArtworkImage.Source = media.Artwork;
         }
 
         private void UserControl_Loaded(object sender, RoutedEventArgs e)

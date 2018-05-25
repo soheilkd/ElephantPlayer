@@ -2,12 +2,12 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:Player" Width="22" Height="22"
-             xmlns:controls="clr-namespace:Player.Controls"
+             xmlns:controls="clr-namespace:Player.Controls" x:Name="P"
              Loaded="UserControl_Loaded">
-    <Grid x:Name="MainGrid">
-        <Border x:Name="MainEllipse" BorderThickness="0" Margin="-7" BorderBrush="#FBBB" CornerRadius="20"/>
-        <controls:SegoeIcon x:Name="MainIcon" Foreground="Black" Background="#01FFFFFF" Glyph="Accept"
-                            Width="{Binding Width, ElementName=MainGrid}" Height="{Binding Height, ElementName=MainGrid}" />
+    <Grid>
+        <Border x:Name="MainEllipse" BorderThickness="0" Margin="-7" BorderBrush="#F444" CornerRadius="20"/>
+        <controls:SegoeIcon x:Name="MainIcon" Foreground="{Binding ElementName=P, Path=Foreground}" Background="#01FFFFFF" Glyph="Accept"
+                            Width="{Binding Width, ElementName=P}" Height="{Binding Height, ElementName=P}" />
     </Grid>
     <UserControl.Triggers>
         <EventTrigger RoutedEvent="MouseEnter">

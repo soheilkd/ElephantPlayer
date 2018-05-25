@@ -38,18 +38,12 @@ namespace Player
         public static int ToInt(this double e) => Convert.ToInt32(e);
         public static T CastTo<T>(this object obj) => (T)obj;
         public static T As<T>(this object obj) where T : class => obj as T;
+        public static string ToCustomString(this TimeSpan time) => time.ToString("c").Substring(3, 5);
     }
 
     public static class Global
     {
-        public static string CastTime(TimeSpan time)
-        {
-            //Absolutely unreadable, btw just works...
-            return $"{(time.TotalSeconds - (time.TotalSeconds % 60)).ToInt() / 60}:" +
-                $"{((time.TotalSeconds.ToInt() % 60).ToString().Length == 1 ? $"0{time.TotalSeconds.ToInt() % 60}" : (time.TotalSeconds.ToInt() % 60).ToString())}";
-        }
-        public static string CastTime(int ms) => CastTime(new TimeSpan(0, 0, 0, 0, ms));
-
+        public static string CastTime(int ms) => (new TimeSpan(0, 0, 0, 0, ms)).ToString($"");
         public static MenuItem GetMenu(string header, RoutedEventHandler onClick)
         {
             var menu = new MenuItem() { Header = header };

@@ -98,24 +98,30 @@ namespace Player
                 Global.GetMenu("Remove", (_,__) => For(each => Manager.Remove(each)))
             };
 
-            ArtistsView.ItemsSource = Manager;
-            TitlesView.ItemsSource = Manager;
-            AlbumsView.ItemsSource = Manager;
+            ArtistsView.ItemsSource = Manager.VariousSources[0];
+            TitlesView.ItemsSource = Manager.VariousSources[1];
+            AlbumsView.ItemsSource = Manager.VariousSources[2];
+            RebindViews();
+            ///BindingOperations.EnableCollectionSynchronization(Manager.Items, QueueListView);
+            Manager.CollectionChanged += Manager_CollectionChanged;
+            ArtistsView.MouseDoubleClick += DMouseDoubleClick;
+            TitlesView.MouseDoubleClick += DMouseDoubleClick;
+            AlbumsView.MouseDoubleClick += DMouseDoubleClick;
+        }
+        private void RebindViews()
+        {
+
             CollectionView view = (CollectionView)CollectionViewSource.GetDefaultView(ArtistsView.ItemsSource);
             PropertyGroupDescription groupDescription = new PropertyGroupDescription("Artist");
             view.GroupDescriptions.Add(groupDescription);
-
+            
             CollectionView view1 = (CollectionView)CollectionViewSource.GetDefaultView(AlbumsView.ItemsSource);
             PropertyGroupDescription groupDescription1 = new PropertyGroupDescription("Album");
-            view1.GroupDescriptions.Add(groupDescription);
-            ///BindingOperations.EnableCollectionSynchronization(Manager.Items, QueueListView);
-            Manager.CollectionChanged += Manager_CollectionChanged;
-            ArtistsView.MouseDoubleClick += ArtistsView_MouseDoubleClick;
+            view1.GroupDescriptions.Add(groupDescription1);
         }
-
-        private void ArtistsView_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        private void DMouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
-            if (ArtistsView.SelectedItem is Media med)
+            if (sender.As<ListView>().SelectedItem is Media med)
                 Play(med);
         }
 
@@ -178,6 +184,7 @@ namespace Player
 
         private void Media_DeleteRequested(object sender, InfoExchangeArgs e)
         {
+
             //if (QueueListView.SelectedItems.Count > 1)
             {/*
                 string selectedFilesInString = "";
@@ -265,7 +272,6 @@ namespace Player
         private void Play(Media media)
         {
             Player.Play(media);
-            MiniArtworkImage.Source = media.Artwork;
         }
         private bool IsAncestorKeyDown(Forms::KeyEventArgs e)
         {
@@ -291,6 +297,19 @@ namespace Player
         private void Label_MouseUp(object sender, MouseButtonEventArgs e)
         {
             Forms.MessageBox.Show("Test");
+        }
+
+        private void SearchBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            var newFound = Manager.Where(item => item.Contains(SearchBox.Text));
+            ArtistsView.ItemsSource = newFound;
+            AlbumsView.ItemsSource = newFound;
+            TitlesView.ItemsSource = newFound;
+        }
+
+        private void SearchIcon_MouseEnter(object sender, MouseEventArgs e)
+        {
+            SearchPopup.IsOpen = true;
         }
     }
 }
