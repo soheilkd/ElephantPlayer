@@ -33,7 +33,7 @@
                     </EventTrigger>
                 </Image.Triggers>
             </Image>
-            <Label Content="Content Title" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="60,0,0,0" FontSize="18" x:Name="TitleLabel"/>
+            <Label Content="Content Title" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="60,0,0,0" FontSize="18" x:Name="TitleLabel" Foreground="{DynamicResource ButtonsForeground}"/>
             <Slider x:Name="PositionSlider"  ValueChanged="Position_Changed" PreviewMouseDown="Position_Holding"  
                VerticalAlignment="Bottom" Maximum="1000" 
                         Foreground="#FF575757" Margin="40, 0, 40, 5">
@@ -146,7 +146,7 @@
             <ThicknessAnimation From="{Binding ElementName=elementCanvas, Path=Margin}" To="0" Storyboard.TargetProperty="Margin" />
         </Storyboard>
         <Storyboard x:Key="FullOnBoard" Storyboard.TargetProperty="Y" Storyboard.TargetName="ControlsTranslation" AccelerationRatio="0.9" DecelerationRatio="0.1">
-            <DoubleAnimation From="{Binding ElementName=ControlsTranslation, Path=Y}" To="55" />
+            <DoubleAnimation From="{Binding ElementName=ControlsTranslation, Path=Y}" To="70" />
         </Storyboard>
         <Storyboard x:Key="FullOffBoard" Storyboard.TargetProperty="Y" Storyboard.TargetName="ControlsTranslation" AccelerationRatio="0.1" DecelerationRatio="0.9">
             <DoubleAnimation From="{Binding ElementName=ControlsTranslation, Path=Y}" To="0" />

@@ -82,14 +82,7 @@ namespace Player
             Load();
         }
         public override string ToString() => $"{Artist} - {Title}";
-        public bool Contains(string d)
-        {
-            return 
-                (Name ?? "INDEFINITIVE").ToLower().Contains(d.ToLower()) ||
-                (Artist ?? "INDEFINITIVE").ToLower().Contains(d.ToLower()) ||
-                (Title ?? "INDEFINITIVE").ToLower().Contains(d.ToLower()) ||
-                (Artist ?? "INDEFINITIVE").ToLower().Contains(d.ToLower());
-        }
+
         public void MoveTo(string dir)
         {
             dir += Name;
@@ -177,6 +170,12 @@ namespace Player
                 IsLoaded = true;
             }
         }
+        public void Reload()
+        {
+            IsLoaded = false;
+            Load();
+        }
+        public Media Shallow => MemberwiseClone() as Media;
     }
 
     public enum PlayMode { Shuffle, RepeatOne, RepeatAll }
@@ -190,7 +189,7 @@ namespace Player
             {
                 case NotifyCollectionChangedAction.Add:
                     for (int i = 0; i < VariousSources.Length; i++)
-                            VariousSources[i].Add(e.NewItems[0] as Media);
+                            VariousSources[i].Insert(e.NewStartingIndex, e.NewItems[0] as Media);
                     break;
                 case NotifyCollectionChangedAction.Remove:
                     for (int i = 0; i < VariousSources.Length; i++)
@@ -213,10 +212,23 @@ namespace Player
             }
         }
         public MediaManager() { }
-        private Random Shuffle = new Random(2);
-        public Media CurrentlyPlaying => Items[CurrentlyPlayingIndex];
+        public ObservableCollection<Media> ActiveQueue { get; set; } 
+        private Random Shuffle = new Random(DateTime.Now.Millisecond);
+        public Media CurrentlyPlaying => 
+            ActiveQueue[CurrentlyPlayingIndex];
         public event EventHandler<InfoExchangeArgs> Change;
-        public int CurrentlyPlayingIndex { get; private set; }
+        private int _CurrentlyPlayingIndex = -1;
+        public int CurrentlyPlayingIndex
+        {
+            get => _CurrentlyPlayingIndex;
+            private set
+            {
+                _CurrentlyPlayingIndex = value;
+                this.AsParallel().ForAll(item => item.IsPlaying = false);
+                ActiveQueue[value].IsPlaying = true;
+            }
+        }
+        public bool IsFiltered => VariousSources[0].Count == Count;
         public ObservableCollection<Media>[] VariousSources = new ObservableCollection<Media>[]
         {
             new ObservableCollection<Media>(),
@@ -261,8 +273,6 @@ namespace Player
         public Media Play(int index)
         {
             CurrentlyPlayingIndex = index;
-            this.AsParallel().ForAll(item => item.IsPlaying = false);
-            this[index].IsPlaying = true;
             return CurrentlyPlaying;
         }
         public Media Next()
@@ -304,6 +314,24 @@ namespace Player
             {
                 Type = InfoType.MediaRequested
             });
+        }
+
+        public void FilterVariousSources(string query)
+        {
+            if (String.IsNullOrWhiteSpace(query))
+            {
+                for (int i = 0; i < VariousSources.Length; i++)
+                    VariousSources[i] = this;
+                return;
+            }
+            VariousSources[0] = new ObservableCollection<Media>(this.Where(item => (item.Title ?? "INDIVIDABLE").ToLower().Contains(query.ToLower())));
+            VariousSources[1] = new ObservableCollection<Media>(this.Where(item => (item.Artist ?? "INDIVIDABLE").ToLower().Contains(query.ToLower())));
+            VariousSources[2] = new ObservableCollection<Media>(this.Where(item => (item.Album ?? "INDIVIDABLE").ToLower().Contains(query.ToLower())));
+        }
+        
+        public void UpdateOnPath(Media source)
+        {
+            this.Where(item => item.Path == source.Path).AsParallel().ForAll(item => item.Reload());
         }
     }
 

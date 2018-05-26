@@ -18,7 +18,7 @@ namespace Player.Controls
         private Media _Media = new Media();
         public event EventHandler<InfoExchangeArgs> EventHappened;
         private Timer DraggerTimer = new Timer(250) { AutoReset = false };
-        private Timer MouseMoveTimer = new Timer(5000) { AutoReset = false };
+        private Timer MouseMoveTimer = new Timer(App.Settings.MouseOverTimeout) { AutoReset = false };
         private Timer PlayCountTimer = new Timer(120000) { AutoReset = false };
         private TimeSpan TimeSpan;
         private bool IsUserSeeking, IsFullScreen, WasMaximized;
@@ -65,6 +65,7 @@ namespace Player.Controls
                 Resources["ButtonsForeground"] = value ? Brushes.White : Brushes.Black;
             }
         }
+
         public MediaPlayer()
         {
             InitializeComponent();
@@ -161,7 +162,7 @@ namespace Player.Controls
         {
             if (IsUserSeeking)
             {
-                Position = new TimeSpan(0, 0, 0, 0, PositionSlider.Value.ToInt());
+                element.Position = new TimeSpan(0, 0, 0, 0, PositionSlider.Value.ToInt());
                 PositionSlider.Value = ((Slider)sender).Value;
             }
         }
@@ -279,6 +280,7 @@ namespace Player.Controls
                 case double n when (n < 0.8): VolumeButton.Glyph = Glyph.Volume2; break;
                 default: VolumeButton.Glyph = Glyph.Volume3; break;
             }
+            App.Settings.Volume = element.Volume;
         }
 
         public void PlayNext() => NextButton_Clicked(this, null);
@@ -341,6 +343,8 @@ namespace Player.Controls
         private void UserControl_Loaded(object sender, RoutedEventArgs e)
         {
             RunUX();
+            element.Volume = App.Settings.Volume;
+            App.Settings.Changed += (_, __) => MouseMoveTimer = new Timer(App.Settings.MouseOverTimeout) { AutoReset = false };
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Player.Events;
+using System;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Windows;
@@ -12,15 +13,37 @@ namespace Player
     [Serializable]
     public class Preferences
     {
-        public PlayMode PlayMode { get; set; } = 0;
+        [field: NonSerialized]
+        public event EventHandler Changed;
+
+        private int _MOT;
+
+        public PlayMode PlayMode { get; set; }
         public int MainKey { get; set; } = 0;
         public double Volume { get; set; } = 1;
         public Size LastSize { get; set; }
+        public bool VisionOrientation { get; set; }
         public Point LastLoc { get; set; } = new Point(20, 20);
         public string LastPath { get; set; }
-        public bool VisionOrientation { get; set; } = true;
-        public bool LibraryValidation { get; set; } = false;
-        public int MouseOverTimeout { get; set; } = 5000;
+        public int MouseOverTimeoutIndex { get => _MOT; set { _MOT = value; Changed?.Invoke(this, null); } }
+        public int MouseOverTimeout
+        {
+            get
+            {
+                switch (MouseOverTimeoutIndex)
+                {
+                    case 0: return 500;
+                    case 1: return 1000;
+                    case 2: return 2000;
+                    case 3: return 3000; 
+                    case 4: return 4000; 
+                    case 5: return 5000; 
+                    case 6: return 10000; 
+                    case 7: return 60000; 
+                    default: return 2000;
+                }
+            }
+        }
         public static Preferences Load()
         {
             using (FileStream stream = File.Open($"{App.Path}SettingsProvider.dll", FileMode.Open))

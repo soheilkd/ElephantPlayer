@@ -12,6 +12,8 @@ using System.Linq;
 using Forms = System.Windows.Forms;
 using System.IO;
 using System.Windows.Data;
+using System.Collections.ObjectModel;
+using Microsoft.Win32;
 
 namespace Player
 {
@@ -22,7 +24,7 @@ namespace Player
         private Timer PlayCountTimer = new Timer(100000) { AutoReset = false };
         private Timer SizeChangeTimer = new Timer(50) { AutoReset = true };
         private bool[] IsVisionOn = new bool[] { false, false, false };
-        private MenuItem[] MultipleSelectionMenuItems;
+      
         
         public MainUI()
         {
@@ -37,14 +39,12 @@ namespace Player
             Height = App.Settings.LastSize.Height;
             Left = App.Settings.LastLoc.X;
             Top = App.Settings.LastLoc.Y;
+            Manager.ActiveQueue = Manager;
         }
 
         private void BindUI()
         {
             PlayCountTimer.Elapsed += (_, __) => Manager.AddCount();
-            (Resources["SettingsOnBoard"] as Storyboard).CurrentStateInvalidated += (_, __) => SettingsGrid.Visibility = Visibility.Visible;
-            (Resources["SettingsOffBoard"] as Storyboard).Completed += (_, __) => SettingsGrid.Visibility = Visibility.Hidden;
-            SettingsGrid.Visibility = Visibility.Hidden;
             SizeChangeTimer.Elapsed += delegate
             {
                 Dispatcher.Invoke(
@@ -58,24 +58,9 @@ namespace Player
             User.Keyboard.Events.KeyDown += Keyboard_KeyDown;
             Settings_AncestorCombo.SelectedIndex = App.Settings.MainKey;
             Settings_OrinateCheck.IsChecked = App.Settings.VisionOrientation;
-            Settings_TimeoutCombo.SelectedIndex = App.Settings.MouseOverTimeout;
+            Settings_TimeoutCombo.SelectedIndex = App.Settings.MouseOverTimeoutIndex;
             Settings_AncestorCombo.SelectionChanged += (_, __) => App.Settings.MainKey = Settings_AncestorCombo.SelectedIndex;
-            Settings_TimeoutCombo.SelectionChanged += delegate
-            {
-                App.Settings.MouseOverTimeout = Settings_TimeoutCombo.SelectedIndex;
-                switch (Settings_TimeoutCombo.SelectedIndex)
-                {
-                    case 0: App.Settings.MouseOverTimeout = 500; break;
-                    case 1: App.Settings.MouseOverTimeout = 1000; break;
-                    case 2: App.Settings.MouseOverTimeout = 2000; break;
-                    case 3: App.Settings.MouseOverTimeout = 3000; break;
-                    case 4: App.Settings.MouseOverTimeout = 4000; break;
-                    case 5: App.Settings.MouseOverTimeout = 5000; break;
-                    case 6: App.Settings.MouseOverTimeout = 10000; break;
-                    case 7: App.Settings.MouseOverTimeout = 60000; break;
-                    default: App.Settings.MouseOverTimeout = 5000; break;
-                }
-            };
+            Settings_TimeoutCombo.SelectionChanged += (_, __) => App.Settings.MouseOverTimeoutIndex = Settings_TimeoutCombo.SelectedIndex;
             Settings_OrinateCheck.Checked += (_, __) => App.Settings.VisionOrientation = Settings_OrinateCheck.IsChecked.Value;
             Settings_OrinateCheck.Unchecked += (_, __) => App.Settings.VisionOrientation = Settings_OrinateCheck.IsChecked.Value;
             SettingsButton.MouseUp += delegate
@@ -93,14 +78,9 @@ namespace Player
 
             Player.ParentWindow = this;
             TaskbarItemInfo = Player.Thumb.Info;
-            MultipleSelectionMenuItems = new MenuItem[]
-            {
-                Global.GetMenu("Remove", (_,__) => For(each => Manager.Remove(each)))
-            };
 
-            ArtistsView.ItemsSource = Manager.VariousSources[0];
-            TitlesView.ItemsSource = Manager.VariousSources[1];
-            AlbumsView.ItemsSource = Manager.VariousSources[2];
+            Resources["LastPath"] = App.Settings.LastPath;
+
             RebindViews();
             ///BindingOperations.EnableCollectionSynchronization(Manager.Items, QueueListView);
             Manager.CollectionChanged += Manager_CollectionChanged;
@@ -110,6 +90,9 @@ namespace Player
         }
         private void RebindViews()
         {
+            TitlesView.ItemsSource = Manager.VariousSources[0];
+            ArtistsView.ItemsSource = Manager.VariousSources[1];
+            AlbumsView.ItemsSource = Manager.VariousSources[2];
 
             CollectionView view = (CollectionView)CollectionViewSource.GetDefaultView(ArtistsView.ItemsSource);
             PropertyGroupDescription groupDescription = new PropertyGroupDescription("Artist");
@@ -182,28 +165,6 @@ namespace Player
             Player.Size_Changed(this, null);
         }
 
-        private void Media_DeleteRequested(object sender, InfoExchangeArgs e)
-        {
-
-            //if (QueueListView.SelectedItems.Count > 1)
-            {/*
-                string selectedFilesInString = "";
-                For(each => selectedFilesInString += $"\r\n{each.Media.Path}");
-                var res = MessageBox.Show($"Sure? this files will be deleted:{selectedFilesInString}", " ", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
-                if (res == MessageBoxResult.OK)
-                {
-                    var paths = SelectedItems.Select(item => item.Media.Path);
-                    var views = SelectedItems.ToList();
-                    For(each => Manager.Remove(each));
-                    paths.AsParallel().ForAll(item => File.Delete(item));
-                }*/
-            }
-            //else
-            {
-                File.Delete((sender as Media).Path);
-                Manager.Remove(sender as Media);
-            }
-        }
         private void Media_ZipDownloaded(object sender, InfoExchangeArgs e)
         {
             Manager.Remove(sender as Media);
@@ -271,7 +232,12 @@ namespace Player
 
         private void Play(Media media)
         {
-            Player.Play(media);
+            Player.FullStop();
+            Player.Play(Manager.Play(Manager.IndexOf(media)));
+            if (Manager.IsFiltered)
+                Manager.ActiveQueue = Manager.VariousSources[TabControl.SelectedIndex];
+            else
+                Manager.ActiveQueue = Manager;
         }
         private bool IsAncestorKeyDown(Forms::KeyEventArgs e)
         {
@@ -287,29 +253,147 @@ namespace Player
                 default: return false;
             }
         }
-        
-        private void For(Action<Media> action)
-        {
-            //foreach (var item in SelectedItems)
-               // action.Invoke(item);
-        }
-
-        private void Label_MouseUp(object sender, MouseButtonEventArgs e)
-        {
-            Forms.MessageBox.Show("Test");
-        }
 
         private void SearchBox_TextChanged(object sender, TextChangedEventArgs e)
         {
-            var newFound = Manager.Where(item => item.Contains(SearchBox.Text));
-            ArtistsView.ItemsSource = newFound;
-            AlbumsView.ItemsSource = newFound;
-            TitlesView.ItemsSource = newFound;
+            Manager.FilterVariousSources(SearchBox.Text);
+            RebindViews();
         }
 
         private void SearchIcon_MouseEnter(object sender, MouseEventArgs e)
         {
             SearchPopup.IsOpen = true;
+        }
+
+        private void Menu_PlayAfterClick(object sender, RoutedEventArgs e)
+        {
+            if (App.Settings.PlayMode != PlayMode.RepeatAll)
+            {
+                MessageBox.Show("Hey, illegal on shuffle or repeat-single playing mode", "WHAT THA FUCK", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            For(item => Manager.Move(Manager.IndexOf(item), Manager.CurrentlyPlayingIndex + 1));
+        }
+
+        private void Menu_DuplicateClick(object sender, RoutedEventArgs e)
+        {
+            var d = Int32.Parse(e.Source.As<MenuItem>().Header.ToString());
+            for (int i = 0; i < d; i++)
+                For(item => Manager.Insert(Manager.IndexOf(item), item.Shallow));
+        }
+
+        private void Menu_MoveClick(object sender, RoutedEventArgs e)
+        {
+            switch (e.Source.As<MenuItem>().Header.ToString().Substring(0, 1).ToLower())
+            {
+                case "b":
+                    SaveFileDialog saveDiag = new SaveFileDialog()
+                    {
+                        AddExtension = false,
+                        CheckPathExists = true,
+                        CreatePrompt = false,
+                        DereferenceLinks = true,
+                        InitialDirectory = App.Settings.LastPath,
+                        Title = "Move"
+                    };
+                    if (saveDiag.ShowDialog().Value)
+                    {
+                        App.Settings.LastPath = saveDiag.FileName.Substring(0, saveDiag.FileName.LastIndexOf('\\') + 1);
+                        Resources["LastPath"] = App.Settings.LastPath;
+                        goto default;
+                    }
+                    break;
+                default:
+                    For(item => item.MoveTo(Resources["LastPath"].ToString()));
+                    break;
+            }
+        }
+
+        private void Menu_CopyClick(object sender, RoutedEventArgs e)
+        {
+            switch (e.Source.As<MenuItem>().Header.ToString().Substring(0, 1).ToLower())
+            {
+                case "b":
+                    SaveFileDialog saveDiag = new SaveFileDialog()
+                    {
+                        AddExtension = false,
+                        CheckPathExists = true,
+                        CreatePrompt = false,
+                        DereferenceLinks = true,
+                        InitialDirectory = App.Settings.LastPath,
+                        Title = "Copy"
+                    };
+                    if (saveDiag.ShowDialog().Value)
+                    {
+                        App.Settings.LastPath = saveDiag.FileName.Substring(0, saveDiag.FileName.LastIndexOf('\\') + 1);
+                        Resources["LastPath"] = App.Settings.LastPath;
+                        goto default;
+                    }
+                    break;
+                default:
+                    For(item => item.CopyTo(Resources["LastPath"].ToString()));
+                    break;
+            }
+        }
+
+        private void Menu_RemoveClick(object sender, RoutedEventArgs e)
+        {
+            For(item => Manager.Remove(item));
+        }
+
+        private void Menu_DeleteClick(object sender, RoutedEventArgs e)
+        {
+            string msg = "Sure? These will be deleted:\r\n";
+            For(item => msg += $"{item.Path}\r\n");
+            if (MessageBox.Show(msg, "Sure?", MessageBoxButton.OKCancel, MessageBoxImage.Warning) != MessageBoxResult.OK)
+                return;
+            For(item => File.Delete(item.Path));
+            For(item => Manager.Remove(item));
+        }
+
+        private void Menu_LocationClick(object sender, RoutedEventArgs e)
+        {
+            For(item => System.Diagnostics.Process.Start("explorer.exe", "/select," + item.Path));
+        }
+
+        private void Menu_PropertiesClick(object sender, RoutedEventArgs e)
+        {
+            For(item => PropertiesUI.OpenFor(item, (_, f) =>
+            {
+                var file = f.Object as TagLib.File;
+                if (file.Name == Manager.CurrentlyPlaying.Path)
+                {
+                    var pos = Player.Position;
+                    Player.FullStop();
+                    file.Save();
+                    Manager.CurrentlyPlaying.Reload();
+                    Play(Manager.CurrentlyPlaying);
+                    Player.Seek(pos);
+                    Manager.UpdateOnPath(item);
+                }
+                else
+                {
+                    f.Object.As<TagLib.File>().Save();
+                    Manager.UpdateOnPath(item);
+                }
+            }));
+        }
+
+        private ListView ActiveView
+        {
+            get
+            {
+                switch (TabControl.SelectedIndex)
+                {
+                    case 0: return TitlesView;
+                    case 1: return ArtistsView;
+                    case 2: return AlbumsView;
+                    default: return null;
+                }
+            }
+        }
+        private void For(Action<Media> action)
+        {
+            ActiveView.SelectedItems.Cast<Media>().ToList().ForEach(action);
         }
     }
 }

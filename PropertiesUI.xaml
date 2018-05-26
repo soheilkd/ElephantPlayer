@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:Player" Background="#F222"
+        xmlns:local="clr-namespace:Player" Background="#DDD"
         mc:Ignorable="d"
         Title="PropertiesUI" Height="450" Width="436.029">
     <Grid >
@@ -40,8 +40,6 @@
             <Style TargetType="{x:Type Button}">
                 <Setter Property="HorizontalAlignment" Value="Left"/>
                 <Setter Property="VerticalAlignment" Value="Top" />
-                <Setter Property="Background" Value="#F333" />
-                <Setter Property="Foreground" Value="#FFFF" />
                 <Setter Property="FontSize" Value="14" />
                 <Setter Property="Width" Value="90" />
             </Style>
@@ -52,12 +50,10 @@
                 <Setter Property="MaxLines" Value="1" />
                 <Setter Property="Text" Value="Sample" />
                 <Setter Property="Background" Value="Transparent" />
-                <Setter Property="Foreground" Value="White" />
             </Style>
             <Style TargetType="{x:Type Label}">
                 <Setter Property="HorizontalAlignment" Value="Left" />
                 <Setter Property="VerticalAlignment" Value="Top" />
-                <Setter Property="Foreground" Value="White" />
             </Style>
         </Grid.Resources>
     </Grid>

@@ -10,56 +10,16 @@
     mc:Ignorable="d" Loaded="Window_Loaded" Closing="Window_Closing" Drop="Window_Drop" AllowDrop="True"
     Title="Elephant Player" Height="544" Width="432" >
     <Grid Background="{DynamicResource KeyOfBackground}" x:Name="ContentGrid">
-        <Grid x:Name="SettingsGrid" Background="Black" Visibility="Hidden" Opacity="0">
-            <Label Content="Preferences" FontSize="22" FontWeight="SemiBold"/>
-            <Label Content="Ancestor Key" Margin="0, 40, 0,0"/>
-            <ComboBox x:Name="Settings_AncestorCombo" Margin="80,43,0,0" Width="120">
-                <ComboBoxItem Content="Ctrl" />
-                <ComboBoxItem Content="Alt" />
-                <ComboBoxItem Content="Shift" />
-                <ComboBoxItem Content="Ctrl + Alt" />
-                <ComboBoxItem Content="Ctrl + Shift"/>
-                <ComboBoxItem Content="Shift + Alt" />
-                <ComboBoxItem Content="Ctrl +Alt + Shift" />
-            </ComboBox>
-            <CheckBox x:Name="Settings_OrinateCheck" Content="Auto Orinate Vision" Margin="5, 73,0,0" />
-            <Label Content="Vision Timeout" Margin="0, 96, 0, 0"/>
-            <ComboBox x:Name="Settings_TimeoutCombo" Margin="100, 99, 0, 0" Width="120">
-                <ComboBoxItem Content="0.5 s"/>
-                <ComboBoxItem Content="1 s"/>
-                <ComboBoxItem Content="2 s"/>
-                <ComboBoxItem Content="3 s"/>
-                <ComboBoxItem Content="4 s"/>
-                <ComboBoxItem Content="5 s"/>
-                <ComboBoxItem Content="10 s"/>
-                <ComboBoxItem Content="60 s"/>
-            </ComboBox>
-            <Button Content="Revalidate Library" Margin="5, 130, 0, 0" Height="24" Width="200"/>
-            <Grid.Resources>
-                <Style TargetType="Label" >
-                    <Setter Property="Foreground" Value="White"/>
-                    <Setter Property="HorizontalAlignment" Value="Left"/>
-                    <Setter Property="VerticalAlignment" Value="Top"/>
-                </Style>
-                <Style TargetType="CheckBox" >
-                    <Setter Property="Foreground" Value="White"/>
-                    <Setter Property="HorizontalAlignment" Value="Left"/>
-                    <Setter Property="VerticalAlignment" Value="Top"/>
-                </Style>
-                <Style TargetType="ComboBox">
-                    <Setter Property="HorizontalAlignment" Value="Left"/>
-                    <Setter Property="VerticalAlignment" Value="Top"/>
-                </Style>
-                <Style TargetType="Button">
-                    <Setter Property="HorizontalAlignment" Value="Left"/>
-                    <Setter Property="VerticalAlignment" Value="Top"/>
-                </Style>
-            </Grid.Resources>
-        </Grid>
-        <player:SegoeButton x:Name="SettingsButton" Glyph="Settings"  HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,145,25" />
-        <TabControl Background="{DynamicResource KeyOfBackground}" Margin="0,0,0,85">
-            <TabItem Header="Titles">
-                <ListView x:Name="TitlesView">
+        <TabControl x:Name="TabControl" Background="{DynamicResource KeyOfBackground}" Margin="0,0,0,85">
+            <TabItem>
+                <TabItem.Header>
+                    <StackPanel Orientation="Horizontal" >
+                        <player:SegoeIcon Glyph="MusicInfo" />
+                        <TextBlock Text="  " />
+                        <TextBlock Text="Titles" FontSize="18" />
+                    </StackPanel>
+                </TabItem.Header>
+                <ListView x:Name="TitlesView" ContextMenu="{DynamicResource ContextMenu1}">
                     <ListView.View>
                         <GridView>
                             <GridViewColumn Header="Title" Width="300">
@@ -80,8 +40,15 @@
                     </ListView.View>
                 </ListView>
             </TabItem>
-            <TabItem Header="Artists">
-                <ListView Name="ArtistsView">
+            <TabItem >
+                <TabItem.Header>
+                    <StackPanel Orientation="Horizontal" >
+                        <player:SegoeIcon Glyph="OtherUser" />
+                        <TextBlock Text="  " />
+                        <TextBlock Text="  Artists" FontSize="18" />
+                    </StackPanel>
+                </TabItem.Header>
+                <ListView Name="ArtistsView" ContextMenu="{DynamicResource ContextMenu1}">
                     <ListView.View>
                         <GridView>
                             <GridViewColumn Header="Title" Width="120" DisplayMemberBinding="{Binding Title}" />
@@ -115,17 +82,18 @@
                     </ListView.GroupStyle>
                 </ListView>
             </TabItem>
-            <TabItem Header="Albums" >
-                <ListView Name="AlbumsView">
+            <TabItem>
+                <TabItem.Header>
+                    <StackPanel Orientation="Horizontal" >
+                        <player:SegoeIcon Glyph="MusicAlbum" />
+                        <TextBlock Text="  " />
+                        <TextBlock Text="Albums" FontSize="18" />
+                    </StackPanel>
+                </TabItem.Header>
+                <ListView Name="AlbumsView" ContextMenu="{DynamicResource ContextMenu1}">
                     <ListView.View>
                         <GridView>
-                            <GridViewColumn Header="Title" Width="120" DisplayMemberBinding="{Binding Title}" >
-                                <GridViewColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <Label Content="{Binding Title}" Foreground="White" MouseUp="Label_MouseUp"/>
-                                    </DataTemplate>
-                                </GridViewColumn.CellTemplate>
-                            </GridViewColumn>
+                            <GridViewColumn Header="Title" Width="120" DisplayMemberBinding="{Binding Title}" />
                             <GridViewColumn Header="Title" Width="50" DisplayMemberBinding="{Binding Title}" />
                             <GridViewColumn Header="Plays" Width="50" DisplayMemberBinding="{Binding PlayCount}" />
                         </GridView>
@@ -158,14 +126,82 @@
                 </ListView>
             </TabItem>
         </TabControl>
+        <Label Content="{Binding Text, ElementName=SearchBox}" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,0,20,0"/>
         <player:SegoeIcon x:Name="SearchIcon" HorizontalAlignment="Right" VerticalAlignment="Top" Glyph="Search" MouseEnter="SearchIcon_MouseEnter"/>
         <Popup x:Name="SearchPopup" PlacementTarget="{Binding ElementName=SearchIcon}" StaysOpen="False" Placement="Left">
             <TextBox HorizontalAlignment="Right" VerticalAlignment="Top" Width="140" Height="20" x:Name="SearchBox" TextChanged="SearchBox_TextChanged"/>
         </Popup>
-        <player:MediaPlayer x:Name="Player" />
-
+        <player:MediaPlayer x:Name="Player"/>
+        <Grid x:Name="SettingsGrid" HorizontalAlignment="Left" Width="300" Margin="-300,0,0,0" Background="#DBBB">
+            <Label Content="Preferences" FontSize="22" FontWeight="SemiBold"/>
+            <Label Content="Ancestor Key" Margin="0, 40, 0,0"/>
+            <ComboBox x:Name="Settings_AncestorCombo" Margin="80,43,0,0" Width="120">
+                <ComboBoxItem Content="Ctrl" />
+                <ComboBoxItem Content="Alt" />
+                <ComboBoxItem Content="Shift" />
+                <ComboBoxItem Content="Ctrl + Alt" />
+                <ComboBoxItem Content="Ctrl + Shift"/>
+                <ComboBoxItem Content="Shift + Alt" />
+                <ComboBoxItem Content="Ctrl +Alt + Shift" />
+            </ComboBox>
+            <CheckBox x:Name="Settings_OrinateCheck" Content="Auto Orinate Vision" Margin="5, 73,0,0" />
+            <Label Content="Vision Timeout" Margin="0, 96, 0, 0"/>
+            <ComboBox x:Name="Settings_TimeoutCombo" Margin="100, 99, 0, 0" Width="120">
+                <ComboBoxItem Content="0.5 s"/>
+                <ComboBoxItem Content="1 s"/>
+                <ComboBoxItem Content="2 s"/>
+                <ComboBoxItem Content="3 s"/>
+                <ComboBoxItem Content="4 s"/>
+                <ComboBoxItem Content="5 s"/>
+                <ComboBoxItem Content="10 s"/>
+                <ComboBoxItem Content="60 s"/>
+            </ComboBox>
+            <Button Content="Revalidate Library" Margin="5, 130, 0, 0" Height="24" Width="200"/>
+            <Grid.Resources>
+                <Style TargetType="Label" >
+                    <Setter Property="HorizontalAlignment" Value="Left"/>
+                    <Setter Property="VerticalAlignment" Value="Top"/>
+                </Style>
+                <Style TargetType="CheckBox" >
+                    <Setter Property="HorizontalAlignment" Value="Left"/>
+                    <Setter Property="VerticalAlignment" Value="Top"/>
+                </Style>
+                <Style TargetType="ComboBox">
+                    <Setter Property="HorizontalAlignment" Value="Left"/>
+                    <Setter Property="VerticalAlignment" Value="Top"/>
+                </Style>
+                <Style TargetType="Button">
+                    <Setter Property="HorizontalAlignment" Value="Left"/>
+                    <Setter Property="VerticalAlignment" Value="Top"/>
+                </Style>
+            </Grid.Resources>
+        </Grid>
+        <player:SegoeButton x:Name="SettingsButton" Glyph="Settings"  HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,10,25" />
     </Grid>
     <Window.Resources>
+        <sys:String x:Key="LastPath" >D:\\</sys:String>
+        <ContextMenu x:Key="ContextMenu1">
+            <MenuItem Header="Play after current" Click="Menu_PlayAfterClick" />
+            <MenuItem Header="Duplicate...">
+                <MenuItem Header="1" Click="Menu_DuplicateClick"/>
+                <MenuItem Header="2" Click="Menu_DuplicateClick"/>
+                <MenuItem Header="3" Click="Menu_DuplicateClick"/>
+                <MenuItem Header="5" Click="Menu_DuplicateClick"/>
+                <MenuItem Header="10" Click="Menu_DuplicateClick"/>
+            </MenuItem>
+            <MenuItem Header="Move to..." >
+                <MenuItem Header="{DynamicResource LastPath}" Click="Menu_MoveClick"/>
+                <MenuItem Header="Browse..." Click="Menu_MoveClick"/>
+            </MenuItem>
+            <MenuItem Header="Copy to..." >
+                <MenuItem Header="{DynamicResource LastPath}" Click="Menu_CopyClick"/>
+                <MenuItem Header="Browse..." Click="Menu_CopyClick"/>
+            </MenuItem>
+            <MenuItem Header="Remove" Click="Menu_RemoveClick"/>
+            <MenuItem Header="Delete" Click="Menu_DeleteClick" />
+            <MenuItem Header="Open Location" Click="Menu_LocationClick"/>
+            <MenuItem Header="Properties" Click="Menu_PropertiesClick"/>
+        </ContextMenu>
         <Style TargetType="{x:Type ListView}">
             <Setter Property="Background" Value="{DynamicResource KeyOfBackground}" />
             <Setter Property="ScrollViewer.CanContentScroll" Value="False" />
@@ -179,11 +215,11 @@
         <SolidColorBrush x:Key="KeyOfBackground" Color="#FFAAAAAA" />
         <SolidColorBrush x:Key="KeyOfForeground" Color="#F111" />
 
-        <Storyboard x:Key="SettingsOnBoard" AccelerationRatio="0.1" DecelerationRatio="0.9" Storyboard.TargetProperty="Opacity">
-            <DoubleAnimation From="{Binding ElementName=SettingsGrid, Path=Opacity}" To="1" Storyboard.TargetName="SettingsGrid"/>
+        <Storyboard x:Key="SettingsOnBoard" AccelerationRatio="0.1" DecelerationRatio="0.9" Storyboard.TargetProperty="Margin" >
+            <ThicknessAnimation From="{Binding Margin, ElementName=SettingsGrid}" Storyboard.TargetName="SettingsGrid" To="0"/>
         </Storyboard>
-        <Storyboard x:Key="SettingsOffBoard" AccelerationRatio="0.1" DecelerationRatio="0.9" Storyboard.TargetProperty="Opacity">
-            <DoubleAnimation From="{Binding ElementName=SettingsGrid, Path=Opacity}" To="0" Storyboard.TargetName="SettingsGrid"/>
+        <Storyboard x:Key="SettingsOffBoard" AccelerationRatio="0.1" DecelerationRatio="0.9" Storyboard.TargetProperty="Margin">
+            <ThicknessAnimation From="{Binding Margin, ElementName=SettingsGrid}" Storyboard.TargetName="SettingsGrid" To="-300,0,0,0"/>
         </Storyboard>
     </Window.Resources>
 </Window>
