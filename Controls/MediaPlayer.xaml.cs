@@ -36,12 +36,16 @@ namespace Player.Controls
                 if (!Magnified)
                     value = true;
                 controlsVisibile = value;
-                FullOnBoard.Stop();
-                FullOffBoard.Stop();
                 if (value)
+                {
+                    FullOnBoard.Stop();
                     Dispatcher.Invoke(() => FullOffBoard.Begin());
+                }
                 else
+                {
+                    FullOffBoard.Stop();
                     Dispatcher.Invoke(() => FullOnBoard.Begin());
+                }
             }
         }
         private bool magnified;
@@ -65,7 +69,6 @@ namespace Player.Controls
                 Resources["ButtonsForeground"] = value ? Brushes.White : Brushes.Black;
             }
         }
-
         public MediaPlayer()
         {
             InitializeComponent();
@@ -80,18 +83,6 @@ namespace Player.Controls
             Thumb.PausePressed += (obj, f) => PlayPause();
             Thumb.PlayPressed += (obj, f) => PlayPause();
             Thumb.PrevPressed += (obj, f) => PlayPrevious();
-            switch (App.Settings.MouseOverTimeout)
-            {
-                case 0: MouseMoveTimer.Interval = 500; break;
-                case 1: MouseMoveTimer.Interval = 1000; break;
-                case 2: MouseMoveTimer.Interval = 2000; break;
-                case 3: MouseMoveTimer.Interval = 3000; break;
-                case 4: MouseMoveTimer.Interval = 4000; break;
-                case 5: MouseMoveTimer.Interval = 5000; break;
-                case 6: MouseMoveTimer.Interval = 10000; break;
-                case 7: MouseMoveTimer.Interval = 60000; break;
-                default: MouseMoveTimer.Interval = 5000; break;
-            }
             switch (App.Settings.PlayMode)
             {
                 case PlayMode.Shuffle: PlayModeButton.Glyph = Glyph.Shuffle; break;
@@ -101,6 +92,8 @@ namespace Player.Controls
             }
             MouseMoveTimer.Elapsed += (_, __) => ControlsVisible = false;
             PlayCountTimer.Elapsed += PlayCountTimer_Elapsed;
+            FullOnBoard.Completed += (_, __) => Cursor = Cursors.None;
+            FullOffBoard.CurrentStateInvalidated += (_, __) => Cursor = Cursors.Arrow;
         }
 
         private void PlayCountTimer_Elapsed(object sender, ElapsedEventArgs e)
@@ -130,9 +123,7 @@ namespace Player.Controls
             await Task.Delay(50);
             if (ControlsTranslation.Y < y)
                 return;
-            element.Cursor = Cursors.Arrow;
             ControlsVisible = true;
-            MouseMoveTimer.Stop();
             MouseMoveTimer.Start();
         }
         
@@ -307,8 +298,7 @@ namespace Player.Controls
                 elementCanvas.SetValue(MarginProperty, new Thickness(ActualWidth / 2, ActualHeight, ActualWidth / 2, 0));
             }
         }
-
-
+        
         public void Seek(TimeSpan timeSpan, bool sliding = false)
         {
             if (!sliding) element.Position = timeSpan;
