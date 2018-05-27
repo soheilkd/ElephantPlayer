@@ -14,6 +14,7 @@ using System.IO;
 using System.Windows.Data;
 using System.Collections.ObjectModel;
 using Microsoft.Win32;
+using System.Diagnostics;
 
 namespace Player
 {
@@ -88,19 +89,22 @@ namespace Player
             TitlesView.MouseDoubleClick += DMouseDoubleClick;
             AlbumsView.MouseDoubleClick += DMouseDoubleClick;
         }
+
+        CollectionView[] Views = new CollectionView[2];
+        PropertyGroupDescription[] Descriptions = new PropertyGroupDescription[2];
         private void RebindViews()
         {
             TitlesView.ItemsSource = Manager.VariousSources[0];
             ArtistsView.ItemsSource = Manager.VariousSources[1];
             AlbumsView.ItemsSource = Manager.VariousSources[2];
 
-            CollectionView view = (CollectionView)CollectionViewSource.GetDefaultView(ArtistsView.ItemsSource);
-            PropertyGroupDescription groupDescription = new PropertyGroupDescription("Artist");
-            view.GroupDescriptions.Add(groupDescription);
+            Views[0] = (CollectionView)CollectionViewSource.GetDefaultView(ArtistsView.ItemsSource);
+            Descriptions[0] = new PropertyGroupDescription("Artist");
+            Views[0].GroupDescriptions.Add(Descriptions[0]);
             
-            CollectionView view1 = (CollectionView)CollectionViewSource.GetDefaultView(AlbumsView.ItemsSource);
-            PropertyGroupDescription groupDescription1 = new PropertyGroupDescription("Album");
-            view1.GroupDescriptions.Add(groupDescription1);
+            Views[1] = (CollectionView)CollectionViewSource.GetDefaultView(AlbumsView.ItemsSource);
+            Descriptions[1] = new PropertyGroupDescription("Album");
+            Views[1].GroupDescriptions.Add(Descriptions[1]);
         }
         private void DMouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
@@ -192,6 +196,23 @@ namespace Player
         }
         private async void Keyboard_KeyDown(object sender, Forms::KeyEventArgs e)
         {
+            if (IsActive && SearchBox.IsFocused)
+                return;
+            //Key shortcuts when window is active and main key is down (default: alt)
+            if (IsActive && IsAncestorKeyDown(e))
+            {
+                switch (e.KeyCode)
+                {
+                    case Forms.Keys.Delete: Menu_RemoveClick(this, null); break;
+                    case Forms.Keys.Enter: DMouseDoubleClick(ActiveView, null); break;
+                    case Forms.Keys.C: Menu_CopyClick(new MenuItem(), null); break;
+                    case Forms.Keys.M: Menu_MoveClick(new MenuItem(), null); break;
+                    case Forms.Keys.P: Menu_PropertiesClick(this, null); break;
+                    case Forms.Keys.L: Menu_LocationClick(this, null); break;
+                    default: break;
+                }
+            }
+            //Key shortcuts whether window is active or main key is down (default: alt)
             if (IsActive || IsAncestorKeyDown(e))
             {
                 switch (e.KeyCode)
@@ -214,6 +235,7 @@ namespace Player
                     default: break;
                 }
             }
+            //Key shortcuts always invokable
             switch (e.KeyCode)
             {
                 case Forms::Keys.MediaNextTrack: Player.PlayNext(); break;
@@ -273,17 +295,15 @@ namespace Player
             }
             For(item => Manager.Move(Manager.IndexOf(item), Manager.CurrentlyPlayingIndex + 1));
         }
-
         private void Menu_DuplicateClick(object sender, RoutedEventArgs e)
         {
             var d = Int32.Parse(e.Source.As<MenuItem>().Header.ToString());
             for (int i = 0; i < d; i++)
                 For(item => Manager.Insert(Manager.IndexOf(item), item.Shallow));
         }
-
         private void Menu_MoveClick(object sender, RoutedEventArgs e)
         {
-            switch (e.Source.As<MenuItem>().Header.ToString().Substring(0, 1).ToLower())
+            switch (e.Source.As<MenuItem>().Header ?? "INDIV".ToString().Substring(0, 1).ToLower())
             {
                 case "b":
                     SaveFileDialog saveDiag = new SaveFileDialog()
@@ -307,10 +327,9 @@ namespace Player
                     break;
             }
         }
-
         private void Menu_CopyClick(object sender, RoutedEventArgs e)
         {
-            switch (e.Source.As<MenuItem>().Header.ToString().Substring(0, 1).ToLower())
+            switch (e.Source.As<MenuItem>().Header ?? "INDIV".ToString().Substring(0, 1).ToLower())
             {
                 case "b":
                     SaveFileDialog saveDiag = new SaveFileDialog()
@@ -334,12 +353,10 @@ namespace Player
                     break;
             }
         }
-
         private void Menu_RemoveClick(object sender, RoutedEventArgs e)
         {
             For(item => Manager.Remove(item));
         }
-
         private void Menu_DeleteClick(object sender, RoutedEventArgs e)
         {
             string msg = "Sure? These will be deleted:\r\n";
@@ -349,12 +366,10 @@ namespace Player
             For(item => File.Delete(item.Path));
             For(item => Manager.Remove(item));
         }
-
         private void Menu_LocationClick(object sender, RoutedEventArgs e)
         {
-            For(item => System.Diagnostics.Process.Start("explorer.exe", "/select," + item.Path));
+            For(item => Process.Start("explorer.exe", "/select," + item.Path));
         }
-
         private void Menu_PropertiesClick(object sender, RoutedEventArgs e)
         {
             For(item => PropertiesUI.OpenFor(item, (_, f) =>
@@ -394,6 +409,26 @@ namespace Player
         private void For(Action<Media> action)
         {
             ActiveView.SelectedItems.Cast<Media>().ToList().ForEach(action);
+        }
+
+        private async void RevalidateLibraryClick(object sender, RoutedEventArgs e)
+        {
+            sender.As<Button>().Content = "Revalidating... will restart soon";
+            IsEnabled = false;
+            await Task.Delay(2000);
+            Hide();
+            Player.FullStop();
+            Manager.Revalidate();
+            Close();
+            Process.Start(App.Path + "Elephant Player.exe");
+        }
+
+        private void ResetRatingsClick(object sender, RoutedEventArgs e)
+        {
+            foreach (var item in Manager)
+                item.Rate = 0;
+            Close();
+            Process.Start(App.Path + "Elephant Player.exe");
         }
     }
 }

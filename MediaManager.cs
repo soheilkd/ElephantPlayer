@@ -25,6 +25,7 @@ namespace Player
         public string Title { get; set; }
         public string Album { get; set; }
         public Uri Url { get; set; }
+        public int Rate { get; set; }
         public string Path => Url.IsFile ? Url.LocalPath : Url.AbsoluteUri;
         public TimeSpan Length { get; set; } = TimeSpan.Zero;
         public int PlayCount { get; set; } = 0;
@@ -321,7 +322,7 @@ namespace Player
             if (String.IsNullOrWhiteSpace(query))
             {
                 for (int i = 0; i < VariousSources.Length; i++)
-                    VariousSources[i] = this;
+                    VariousSources[i] = new ObservableCollection<Media>(this.Select(item => item));
                 return;
             }
             VariousSources[0] = new ObservableCollection<Media>(this.Where(item => (item.Title ?? "INDIVIDABLE").ToLower().Contains(query.ToLower())));
@@ -332,6 +333,14 @@ namespace Player
         public void UpdateOnPath(Media source)
         {
             this.Where(item => item.Path == source.Path).AsParallel().ForAll(item => item.Reload());
+        }
+        public void Revalidate()
+        {
+            foreach (var item in this)
+                item.Reload();
+            var invalids = this.Where(item => !item.IsValid).ToArray();
+            foreach (var item in invalids)
+                Remove(item);
         }
     }
 

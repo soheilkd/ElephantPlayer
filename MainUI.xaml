@@ -22,20 +22,11 @@
                 <ListView x:Name="TitlesView" ContextMenu="{DynamicResource ContextMenu1}">
                     <ListView.View>
                         <GridView>
-                            <GridViewColumn Header="Title" Width="300">
-                                <GridViewColumn.HeaderContainerStyle>
-                                    <Style TargetType="GridViewColumnHeader">
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding IsPlaying}" Value="True">
-                                                <Setter Property="Foreground" Value="Blue" />
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </GridViewColumn.HeaderContainerStyle>
-                            </GridViewColumn>
-                            <GridViewColumn Header="Artist" Width="100" DisplayMemberBinding="{Binding Artist}" />
-                            <GridViewColumn Header="Album" Width="100" DisplayMemberBinding="{Binding Album}" />
-                            <GridViewColumn Header="Plays" Width="50" DisplayMemberBinding="{Binding PlayCount}" />
+                            <GridViewColumn Header="Title" Width="300" CellTemplate="{DynamicResource TitleCell}"/>
+                            <GridViewColumn Header="Artist" Width="100" CellTemplate="{DynamicResource ArtistCell}" />
+                            <GridViewColumn Header="Album" Width="100" CellTemplate="{DynamicResource AlbumCell}" />
+                            <GridViewColumn Header="Rate" Width="120" CellTemplate="{DynamicResource RateCell}" />
+                            <GridViewColumn Header="Plays" Width="50" CellTemplate="{DynamicResource PlayCell}"/>
                         </GridView>
                     </ListView.View>
                 </ListView>
@@ -156,7 +147,8 @@
                 <ComboBoxItem Content="10 s"/>
                 <ComboBoxItem Content="60 s"/>
             </ComboBox>
-            <Button Content="Revalidate Library" Margin="5, 130, 0, 0" Height="24" Width="200"/>
+            <Button Content="Revalidate Library" Margin="5, 130, 0, 0" Height="24" Width="200" Click="RevalidateLibraryClick"/>
+            <Button Content="Reset Ratings" Margin="5,159,0,0" Height="24" Width="200" Click="ResetRatingsClick"/>
             <Grid.Resources>
                 <Style TargetType="Label" >
                     <Setter Property="HorizontalAlignment" Value="Left"/>
@@ -179,6 +171,27 @@
         <player:SegoeButton x:Name="SettingsButton" Glyph="Settings"  HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,10,25" />
     </Grid>
     <Window.Resources>
+        <DataTemplate x:Key="TitleCell">
+            <TextBlock Text="{Binding Title}" FontSize="16" FontWeight="Light" Foreground="Black"/>
+        </DataTemplate>
+        <DataTemplate x:Key="ArtistCell">
+            <TextBlock Text="{Binding Artist}" FontSize="16" FontWeight="Light" Foreground="Black" />
+        </DataTemplate>
+        <DataTemplate x:Key="AlbumCell">
+            <TextBlock Text="{Binding Album}"  FontSize="16" FontWeight="Light" Foreground="Black" />
+        </DataTemplate>
+        <DataTemplate x:Key="PlayCell">
+            <TextBlock Text="{Binding PlayCount}" FontSize="16" FontWeight="Light" Foreground="Black" />
+        </DataTemplate>
+        <DataTemplate x:Key="NameCell">
+            <TextBlock Text="{Binding Name}"  FontSize="16" FontWeight="Light"  Foreground="Black"/>
+        </DataTemplate>
+        <DataTemplate x:Key="PathCell">
+            <TextBlock Text="{Binding Path}"  FontSize="16" FontWeight="Light"  Foreground="Black"/>
+        </DataTemplate>
+        <DataTemplate x:Key="RateCell">
+            <player:RatingCell RatingValue="{Binding Rate, BindsDirectlyToSource=True, Mode=TwoWay}"/>
+        </DataTemplate>
         <sys:String x:Key="LastPath" >D:\\</sys:String>
         <ContextMenu x:Key="ContextMenu1">
             <MenuItem Header="Play after current" Click="Menu_PlayAfterClick" />
