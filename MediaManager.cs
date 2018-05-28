@@ -93,7 +93,7 @@ namespace Player
         public void CopyTo(string dir)
         {
             dir += Name;
-            File.Copy(Path, dir);
+            File.Copy(Path, dir, true);
         }
         public void Load()
         {

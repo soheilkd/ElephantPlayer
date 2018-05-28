@@ -1,20 +1,17 @@
-﻿using Player.Controls;
+﻿using Microsoft.Win32;
 using Player.Events;
 using System;
-using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Timers;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media.Animation;
-using System.Linq;
 using Forms = System.Windows.Forms;
-using System.IO;
-using System.Windows.Data;
-using System.Collections.ObjectModel;
-using Microsoft.Win32;
-using System.Diagnostics;
 
 namespace Player
 {
@@ -24,7 +21,16 @@ namespace Player
         private MassiveLibrary Library = new MassiveLibrary();
         private Timer PlayCountTimer = new Timer(100000) { AutoReset = false };
         private Timer SizeChangeTimer = new Timer(50) { AutoReset = true };
-        private bool[] IsVisionOn = new bool[] { false, false, false };
+        private bool SettingsOpened;
+        private bool ControlsNotNeededOnVisionIsVisible
+        {
+            set
+            {
+                TabControl.Visibility = value ? Visibility.Visible : Visibility.Collapsed;
+                SettingsButton.Visibility = value ? Visibility.Visible : Visibility.Collapsed;
+                MiniArtworkImage.Visibility = value ? Visibility.Visible : Visibility.Collapsed;
+            }
+        }
       
         
         public MainUI()
@@ -66,7 +72,7 @@ namespace Player
             Settings_OrinateCheck.Unchecked += (_, __) => App.Settings.VisionOrientation = Settings_OrinateCheck.IsChecked.Value;
             SettingsButton.MouseUp += delegate
             {
-                if (!IsVisionOn[2])
+                if (!SettingsOpened)
                 {
                     (Resources["SettingsOnBoard"] as Storyboard).Begin();
                 }
@@ -74,7 +80,7 @@ namespace Player
                 {
                     (Resources["SettingsOffBoard"] as Storyboard).Begin();
                 }
-                IsVisionOn[2] = !IsVisionOn[2];
+                SettingsOpened = !SettingsOpened;
             };
 
             Player.ParentWindow = this;
@@ -88,6 +94,9 @@ namespace Player
             ArtistsView.MouseDoubleClick += DMouseDoubleClick;
             TitlesView.MouseDoubleClick += DMouseDoubleClick;
             AlbumsView.MouseDoubleClick += DMouseDoubleClick;
+
+            Resources["MagnifyOnBoard"].As<Storyboard>().Completed += (_, __) => ControlsNotNeededOnVisionIsVisible = false;
+            Resources["MagnifyOffBoard"].As<Storyboard>().CurrentStateInvalidated += (_, __) => ControlsNotNeededOnVisionIsVisible = true;
         }
 
         CollectionView[] Views = new CollectionView[2];
@@ -106,6 +115,7 @@ namespace Player
             Descriptions[1] = new PropertyGroupDescription("Album");
             Views[1].GroupDescriptions.Add(Descriptions[1]);
         }
+
         private void DMouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
             if (sender.As<ListView>().SelectedItem is Media med)
@@ -116,14 +126,7 @@ namespace Player
         {
 
         }
-
-        private void Item_MouseDoubleClick(object sender, MouseButtonEventArgs e)
-        {
-            var test = sender as Media;
-            Console.WriteLine(test);
-
-        }
-
+        
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             BindUI();
@@ -139,6 +142,16 @@ namespace Player
                 case InfoType.NextRequest: Play(Manager.Next()); break;
                 case InfoType.PrevRequest: Play(Manager.Previous()); break;
                 case InfoType.LengthFound: Manager.CurrentlyPlaying.Length = (TimeSpan)e.Object; break;
+                case InfoType.Magnifiement:
+                    var val = (bool)e.Object;
+                    SettingsButton.Visibility = val ? Visibility.Hidden : Visibility.Visible;
+                    MiniArtworkImage.Visibility = val ? Visibility.Hidden : Visibility.Visible;
+                    if ((bool)e.Object && SettingsOpened)
+                        Resources["SettingsOffBoard"].As<Storyboard>().Begin();
+                    SettingsOpened = false;
+                    Resources[val ? "MagnifyOnBoard" : "MagnifyOffBoard"].As<Storyboard>().Begin();
+                    ControlsNotNeededOnVisionIsVisible = true;
+                    break;
                 default: break;
             }
         }
@@ -260,6 +273,7 @@ namespace Player
                 Manager.ActiveQueue = Manager.VariousSources[TabControl.SelectedIndex];
             else
                 Manager.ActiveQueue = Manager;
+            MiniArtworkImage.Source = media.Artwork;
         }
         private bool IsAncestorKeyDown(Forms::KeyEventArgs e)
         {
@@ -282,7 +296,7 @@ namespace Player
             RebindViews();
         }
 
-        private void SearchIcon_MouseEnter(object sender, MouseEventArgs e)
+        private void SearchIcon_MouseEnter(object sender, MouseButtonEventArgs e)
         {
             SearchPopup.IsOpen = true;
         }
@@ -303,9 +317,9 @@ namespace Player
         }
         private void Menu_MoveClick(object sender, RoutedEventArgs e)
         {
-            switch (e.Source.As<MenuItem>().Header ?? "INDIV".ToString().Substring(0, 1).ToLower())
+            switch ((sender.As<MenuItem>().Header ?? "INDIV").ToString().Substring(0, 1))
             {
-                case "b":
+                case "B":
                     SaveFileDialog saveDiag = new SaveFileDialog()
                     {
                         AddExtension = false,
@@ -329,9 +343,9 @@ namespace Player
         }
         private void Menu_CopyClick(object sender, RoutedEventArgs e)
         {
-            switch (e.Source.As<MenuItem>().Header ?? "INDIV".ToString().Substring(0, 1).ToLower())
+            switch ((sender.As<MenuItem>().Header ?? "INDIV").ToString().Substring(0, 1))
             {
-                case "b":
+                case "B":
                     SaveFileDialog saveDiag = new SaveFileDialog()
                     {
                         AddExtension = false,

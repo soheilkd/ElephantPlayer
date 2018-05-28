@@ -6,37 +6,30 @@
              xmlns:local="clr-namespace:Player.Controls" x:Name="Parentic" MouseUp="Parentic_MouseUp"
              mc:Ignorable="d" >
     <StackPanel.Resources>
-        <Style x:Key="ratingButton" TargetType="{x:Type ToggleButton}">
+        <Style TargetType="ToggleButton">
             <Style.Setters>
                 <Setter Property="Template">
                     <Setter.Value>
-                        <ControlTemplate TargetType="{x:Type ToggleButton}">
-                            <Path Name="starPath" Fill="Gray" Data="M 9,0 L 7,6 L 0,6 L 6,11 L 4,17 L 9,12 L 14,17 L 12,11 L 18,6 L 11,6 L 9,0">
-                                <Path.LayoutTransform>
-                                    <ScaleTransform ScaleX="0.8" ScaleY="0.8" />
-                                </Path.LayoutTransform>
-                            </Path>
+                        <ControlTemplate TargetType="ToggleButton">
+                            <Path x:Name="star" Data="M 9,0 L 7,6 L 0,6 L 6,11 L 4,17 L 9,12 L 14,17 L 12,11 L 18,6 L 11,6 L 9,0" Width="21" Height="20" Fill="LightGray" />
                             <ControlTemplate.Triggers>
                                 <Trigger Property="IsChecked" Value="True">
-                                    <Setter TargetName="starPath" Property="Fill" Value="Gold"/>
-                                </Trigger>
-                                <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter TargetName="starPath" Property="Fill" Value="Gold"/>
+                                    <Setter TargetName="star" Property="Fill" Value="Gold"/>
                                 </Trigger>
                             </ControlTemplate.Triggers>
                         </ControlTemplate>
                     </Setter.Value>
                 </Setter>
-                <EventSetter Event="MouseEnter" Handler="RatingButtonMouseEnter" />
+                <EventSetter Event="MouseEnter" Handler="RatingButtonMouseEnter"/>
                 <EventSetter Event="MouseUp" Handler="Parentic_MouseUp" />
-                <EventSetter Event="Click" Handler="ToggleButton_Click"/>
+                <EventSetter Event="Click" Handler="ToggleButton_Click" />
             </Style.Setters>
         </Style>
     </StackPanel.Resources>
-    <ToggleButton FocusVisualStyle="{x:Null}" Tag ="1" Width="20" Height="20"  Style="{StaticResource ratingButton}"/>
-    <ToggleButton FocusVisualStyle="{x:Null}" Tag ="2" Width="20" Height="20"  Style="{StaticResource ratingButton}"/>
-    <ToggleButton FocusVisualStyle="{x:Null}" Tag ="3" Width="20" Height="20"  Style="{StaticResource ratingButton}"/>
-    <ToggleButton FocusVisualStyle="{x:Null}" Tag ="4" Width="20" Height="20"  Style="{StaticResource ratingButton}"/>
-    <ToggleButton FocusVisualStyle="{x:Null}" Tag ="5" Width="20" Height="20"  Style="{StaticResource ratingButton}"/>
+    <ToggleButton Tag ="1"/>
+    <ToggleButton Tag ="2"/>
+    <ToggleButton Tag ="3"/>
+    <ToggleButton Tag ="4"/>
+    <ToggleButton Tag ="5"/>
 
 </StackPanel>

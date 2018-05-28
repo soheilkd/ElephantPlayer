@@ -29,25 +29,15 @@ namespace Player.Controls
 
         public Int32 RatingValue
         {
-            get
-            {
-
-                return (Int32)GetValue(RatingValueProperty);
-            }
+            get => (int)GetValue(RatingValueProperty);
             set
             {
                 if (value < 0)
-                {
                     SetValue(RatingValueProperty, 0);
-                }
                 else if (value > 5)
-                {
                     SetValue(RatingValueProperty, 5);
-                }
                 else
-                {
                     SetValue(RatingValueProperty, value);
-                }
             }
         }
         private Int32 tempRatingValue;
@@ -65,20 +55,24 @@ namespace Player.Controls
             for (Int32 i = ratingValue; i < children.Count; i++)
             {
                 button = children[i] as ToggleButton;
-                button.IsChecked = false;
+                button.IsChecked = true;
             }
         }
         
         private void RatingButtonMouseLeave(object sender, MouseEventArgs e)
         {
+            Update(RatingValue);
+        }
+        private void Update(int withValue)
+        {
             ToggleButton button = null;
-            for (Int32 i = 0; i < RatingValue; i++)
+            for (Int32 i = 0; i < withValue; i++)
             {
                 button = Children[i] as ToggleButton;
                 button.IsChecked = true;
             }
 
-            for (Int32 i = RatingValue; i < Children.Count; i++)
+            for (Int32 i = withValue; i < Children.Count; i++)
             {
                 button = Children[i] as ToggleButton;
                 button.IsChecked = false;
@@ -86,20 +80,8 @@ namespace Player.Controls
         }
         private void RatingButtonMouseEnter(object sender, MouseEventArgs e)
         {
-            tempRatingValue = Int32.Parse(sender.As<Control>().Tag.ToString());
-
-            ToggleButton button = null;
-            for (Int32 i = 0; i < tempRatingValue; i++)
-            {
-                button = Children[i] as ToggleButton;
-                button.IsChecked = true;
-            }
-
-            for (Int32 i = tempRatingValue; i < Children.Count; i++)
-            {
-                button = Children[i] as ToggleButton;
-                button.IsChecked = false;
-            }
+            tempRatingValue = int.Parse(sender.As<ToggleButton>().Tag.ToString());
+            Update(tempRatingValue);
         }
 
         private void Parentic_MouseUp(object sender, MouseButtonEventArgs e)
@@ -107,9 +89,6 @@ namespace Player.Controls
             RatingValue = tempRatingValue;
         }
 
-        private void ToggleButton_Click(object sender, RoutedEventArgs e)
-        {
-            RatingValue = tempRatingValue;
-        }
+        private void ToggleButton_Click(object sender, RoutedEventArgs e) => Parentic_MouseUp(this, null);
     }
 }

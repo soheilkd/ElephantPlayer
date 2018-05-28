@@ -13,7 +13,11 @@ namespace Player.Controls
 {
     public partial class MediaPlayer : UserControl
     {
-        public TimeSpan Position { get => element.Position; set => element.Position = value; }
+        public TimeSpan Position
+        {
+            get => element.Position;
+            set => element.Position = value;
+        }
         public double Volume { get => element.Volume; set => element.Volume = value; }
         private Media _Media = new Media();
         public event EventHandler<InfoExchangeArgs> EventHappened;
@@ -67,6 +71,7 @@ namespace Player.Controls
                     ParentWindow.Height++;
                 }
                 Resources["ButtonsForeground"] = value ? Brushes.White : Brushes.Black;
+                EventHappened?.Invoke(this, new InfoExchangeArgs() { Type = InfoType.Magnifiement, Object = value });
             }
         }
         public MediaPlayer()
@@ -144,8 +149,8 @@ namespace Player.Controls
                     TimeLabel_Full.Content = TimeSpan.ToCustomString();
                     Invoke(InfoType.LengthFound, TimeSpan);
                 }
-            PositionSlider.Value = element.Position.TotalMilliseconds;
             TimeLabel_Current.Content = Position.ToCustomString();
+            PositionSlider.Value = Position.TotalMilliseconds;
             goto UX;
         }
 
@@ -153,8 +158,7 @@ namespace Player.Controls
         {
             if (IsUserSeeking)
             {
-                element.Position = new TimeSpan(0, 0, 0, 0, PositionSlider.Value.ToInt());
-                PositionSlider.Value = ((Slider)sender).Value;
+                Position = new TimeSpan(0, 0, 0, 0, PositionSlider.Value.ToInt());
             }
         }
         private async void Position_Holding(object sender, MouseButtonEventArgs e)
@@ -277,8 +281,8 @@ namespace Player.Controls
         public void PlayNext() => NextButton_Clicked(this, null);
         public void PlayPrevious() => PreviousButton_Clicked(this, null);
         public void PlayPause() => PlayPauseButton_Clicked(this, null);
-        public void SmallSlideLeft() => Seek((int)PositionSlider.SmallChange * -1, true);
-        public void SmallSlideRight() => Seek((int)PositionSlider.SmallChange, true);
+        public void SmallSlideLeft() => Seek(new TimeSpan(0, 0, 0, 0, -1 * PositionSlider.SmallChange.ToInt()), true);
+        public void SmallSlideRight() => Seek(new TimeSpan(0, 0, 0, 0, PositionSlider.SmallChange.ToInt()), true);
 
         private void element_MediaEnded(object sender, RoutedEventArgs e)
         {
@@ -301,13 +305,15 @@ namespace Player.Controls
         
         public void Seek(TimeSpan timeSpan, bool sliding = false)
         {
-            if (!sliding) element.Position = timeSpan;
-            else element.Position.Add(timeSpan);
+            IsUserSeeking = true;
+            if (!sliding) Position = timeSpan;
+            else Position = Position.Add(timeSpan);
             if (PositionSlider.Value <= 20000)
             {
                 PlayCountTimer.Stop();
                 PlayCountTimer.Start();
             }
+            IsUserSeeking = false;
         }
         public void Seek(int ms, bool sliding = false) => Seek(new TimeSpan(0, 0, 0, 0, ms), sliding);
       
@@ -320,14 +326,12 @@ namespace Player.Controls
                 FullScreenButton_Clicked(this, null);
             Magnified = media.IsVideo;
             FullScreenButton.Visibility = VisionButton.Visibility;
-            PositionSlider.Value = 0;
             PlayPauseButton.Glyph = Glyph.Pause;
             element.Source = media.Url;
             element.Play();
             PlayCountTimer.Stop();
             PlayCountTimer.Start();
             TitleLabel.Content = media.ToString();
-            MiniArtworkImage.Source = media.Artwork;
         }
 
         private void UserControl_Loaded(object sender, RoutedEventArgs e)

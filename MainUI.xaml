@@ -10,7 +10,7 @@
     mc:Ignorable="d" Loaded="Window_Loaded" Closing="Window_Closing" Drop="Window_Drop" AllowDrop="True"
     Title="Elephant Player" Height="544" Width="432" >
     <Grid Background="{DynamicResource KeyOfBackground}" x:Name="ContentGrid">
-        <TabControl x:Name="TabControl" Background="{DynamicResource KeyOfBackground}" Margin="0,0,0,85">
+        <TabControl x:Name="TabControl" Background="{DynamicResource KeyOfBackground}" Margin="0,0,-5,85">
             <TabItem>
                 <TabItem.Header>
                     <StackPanel Orientation="Horizontal" >
@@ -118,11 +118,34 @@
             </TabItem>
         </TabControl>
         <Label Content="{Binding Text, ElementName=SearchBox}" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,0,20,0"/>
-        <player:SegoeIcon x:Name="SearchIcon" HorizontalAlignment="Right" VerticalAlignment="Top" Glyph="Search" MouseEnter="SearchIcon_MouseEnter"/>
-        <Popup x:Name="SearchPopup" PlacementTarget="{Binding ElementName=SearchIcon}" StaysOpen="False" Placement="Left">
+        <player:SegoeButton x:Name="SearchIcon" HorizontalAlignment="Right" VerticalAlignment="Top" Glyph="Search" 
+                            MouseUp="SearchIcon_MouseEnter" Margin="8" EllipseType="Rectular" Width="16" Height="16"/>
+        <Popup x:Name="SearchPopup" PlacementTarget="{Binding ElementName=SearchIcon}" StaysOpen="False" 
+               Placement="Bottom" PopupAnimation="Fade" AllowsTransparency="True">
             <TextBox HorizontalAlignment="Right" VerticalAlignment="Top" Width="140" Height="20" x:Name="SearchBox" TextChanged="SearchBox_TextChanged"/>
         </Popup>
         <player:MediaPlayer x:Name="Player"/>
+
+        <Image x:Name="MiniArtworkImage" Height="55" Width="55" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="0,0,0,25">
+            <Image.Triggers>
+                <EventTrigger RoutedEvent="UIElement.MouseDown">
+                    <BeginStoryboard>
+                        <Storyboard Storyboard.TargetName="MiniArtworkImage" SpeedRatio="2" AccelerationRatio="0.3" DecelerationRatio="0.7">
+                            <DoubleAnimation Storyboard.TargetProperty="Width" From="{Binding Width, ElementName=MiniArtworkImage}" To="400"/>
+                            <DoubleAnimation Storyboard.TargetProperty="Height" From="{Binding Width, ElementName=MiniArtworkImage}" To="400"/>
+                        </Storyboard>
+                    </BeginStoryboard>
+                </EventTrigger>
+                <EventTrigger RoutedEvent="UIElement.MouseUp">
+                    <BeginStoryboard>
+                        <Storyboard Storyboard.TargetName="MiniArtworkImage" SpeedRatio="2" AccelerationRatio="0.3" DecelerationRatio="0.7">
+                            <DoubleAnimation Storyboard.TargetProperty="Width" From="{Binding Width, ElementName=MiniArtworkImage}" To="55"/>
+                            <DoubleAnimation Storyboard.TargetProperty="Height" From="{Binding Width, ElementName=MiniArtworkImage}" To="55"/>
+                        </Storyboard>
+                    </BeginStoryboard>
+                </EventTrigger>
+            </Image.Triggers>
+        </Image>
         <Grid x:Name="SettingsGrid" HorizontalAlignment="Left" Width="300" Margin="-300,0,0,0" Background="#DBBB">
             <Label Content="Preferences" FontSize="22" FontWeight="SemiBold"/>
             <Label Content="Ancestor Key" Margin="0, 40, 0,0"/>
@@ -233,6 +256,16 @@
         </Storyboard>
         <Storyboard x:Key="SettingsOffBoard" AccelerationRatio="0.1" DecelerationRatio="0.9" Storyboard.TargetProperty="Margin">
             <ThicknessAnimation From="{Binding Margin, ElementName=SettingsGrid}" Storyboard.TargetName="SettingsGrid" To="-300,0,0,0"/>
+        </Storyboard>
+        <Storyboard x:Key="MagnifyOnBoard" AccelerationRatio="0.1" DecelerationRatio="0.9" Storyboard.TargetProperty="Opacity">
+            <DoubleAnimation Storyboard.TargetName="SettingsButton" From="{Binding Opacity, ElementName=SettingsButton}" To="0" />
+            <DoubleAnimation Storyboard.TargetName="TabControl" From="{Binding Opacity, ElementName=SettingsButton}" To="0" />
+            <DoubleAnimation Storyboard.TargetName="MiniArtworkImage" From="{Binding Opacity, ElementName=SettingsButton}" To="0" />
+        </Storyboard>
+        <Storyboard x:Key="MagnifyOffBoard" AccelerationRatio="0.1" DecelerationRatio="0.9" Storyboard.TargetProperty="Opacity">
+            <DoubleAnimation Storyboard.TargetName="SettingsButton" From="{Binding Opacity, ElementName=SettingsButton}" To="1" />
+            <DoubleAnimation Storyboard.TargetName="TabControl" From="{Binding Opacity, ElementName=SettingsButton}" To="1" />
+            <DoubleAnimation Storyboard.TargetName="MiniArtworkImage" From="{Binding Opacity, ElementName=SettingsButton}" To="1" />
         </Storyboard>
     </Window.Resources>
 </Window>

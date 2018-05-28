@@ -19,7 +19,7 @@ namespace Player.Events
         //Variable exchange
         Integer, Double, Media, Object, StringArray,
         //Media Control
-        NextRequest, PrevRequest, LengthFound,
+        NextRequest, PrevRequest, LengthFound, Magnifiement,
         //Media Manager
         MediaRequested, EditingTag, 
     }

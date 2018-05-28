@@ -13,30 +13,10 @@
                           Volume="1"/>
         </Grid>
         <Grid Background="Transparent" VerticalAlignment="Bottom" Height="80">
-            <Image x:Name="MiniArtworkImage" Height="55" Width="55" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="0,0,0,25">
-                <Image.Triggers>
-                    <EventTrigger RoutedEvent="UIElement.MouseDown">
-                        <BeginStoryboard>
-                            <Storyboard Storyboard.TargetName="MiniArtworkImage" SpeedRatio="2" AccelerationRatio="0.3" DecelerationRatio="0.7">
-                                <DoubleAnimation Storyboard.TargetProperty="Width" From="{Binding Width, ElementName=MiniArtworkImage}" To="400"/>
-                                <DoubleAnimation Storyboard.TargetProperty="Height" From="{Binding Width, ElementName=MiniArtworkImage}" To="400"/>
-                            </Storyboard>
-                        </BeginStoryboard>
-                    </EventTrigger>
-                    <EventTrigger RoutedEvent="UIElement.MouseUp">
-                        <BeginStoryboard>
-                            <Storyboard Storyboard.TargetName="MiniArtworkImage" SpeedRatio="2" AccelerationRatio="0.3" DecelerationRatio="0.7">
-                                <DoubleAnimation Storyboard.TargetProperty="Width" From="{Binding Width, ElementName=MiniArtworkImage}" To="55"/>
-                                <DoubleAnimation Storyboard.TargetProperty="Height" From="{Binding Width, ElementName=MiniArtworkImage}" To="55"/>
-                            </Storyboard>
-                        </BeginStoryboard>
-                    </EventTrigger>
-                </Image.Triggers>
-            </Image>
             <Label Content="Content Title" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="60,0,0,0" FontSize="18" x:Name="TitleLabel" Foreground="{DynamicResource ButtonsForeground}"/>
-            <Slider x:Name="PositionSlider"  ValueChanged="Position_Changed" PreviewMouseDown="Position_Holding"  
-               VerticalAlignment="Bottom" Maximum="1000" 
-                        Foreground="#FF575757" Margin="40, 0, 40, 5">
+            <Slider x:Name="PositionSlider"  ValueChanged="Position_Changed" PreviewMouseDown="Position_Holding" 
+               VerticalAlignment="Bottom" Maximum="1000" Focusable="False" FocusVisualStyle="{x:Null}"
+                        Foreground="#FF303030" Margin="40, 0, 40, 5">
                 <Slider.Template>
                     <ControlTemplate >
                         <Border x:Name="border" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Background="{TemplateBinding Background}" SnapsToDevicePixels="True">
@@ -67,8 +47,7 @@
 
                                                         </Trigger>
                                                         <Trigger Property="IsDragging" Value="true">
-                                                            <Setter Property="Fill" TargetName="grip" Value="DarkGray"/>
-                                                            <Setter Property="StrokeThickness" TargetName="grip" Value="0" />
+                                                            <Setter Property="StrokeThickness" TargetName="grip" Value="10" />
                                                         </Trigger>
                                                         <EventTrigger RoutedEvent="UIElement.MouseEnter">
                                                             <BeginStoryboard>
