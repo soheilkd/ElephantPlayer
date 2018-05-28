@@ -100,7 +100,7 @@ namespace Player.Imaging
     }
     public static class Get
     {
-        public static BitmapImage Bitmap<T>(T element) where T : System.Windows.Controls.Control
+        public static BitmapImage Bitmap<T>(T element) where T : Control
         {
             //element.BeginInit();
             element.UpdateLayout();
@@ -137,28 +137,22 @@ namespace Player.Imaging
 
             return output;
         }
-        public static Draw.Image Image(TagLib.IPicture picture) => Draw.Image.FromStream(new MemoryStream(picture?.Data.Data));
 
-        public static BitmapSource BitmapSource(Draw.Bitmap source)
-        {
-            return System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap(
-                          source.GetHbitmap(),
-                          IntPtr.Zero,
-                          Int32Rect.Empty,
-                          BitmapSizeOptions.FromEmptyOptions());
-        }
         public static BitmapSource BitmapSource(TagLib.IPicture picture)
         {
-            var bitmap = new Draw.Bitmap(Image(picture));
-            IntPtr bmpPt = bitmap.GetHbitmap();
-            BitmapSource bitmapSource =
-             System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap(
-                   bmpPt,
-                   IntPtr.Zero,
-                   Int32Rect.Empty,
-                   BitmapSizeOptions.FromEmptyOptions());
-            bitmapSource.Freeze();
-            return bitmapSource;
+            byte[] pixels = new byte[picture.Data.Count];
+            picture.Data.CopyTo(pixels, 0);
+            var image = new BitmapImage();
+            using (var ms = new MemoryStream(pixels))
+            {
+                image.BeginInit();
+                image.CacheOption = BitmapCacheOption.OnLoad; // here
+                image.StreamSource = ms;
+                image.EndInit();
+            }
+            picture = null;
+            pixels = new byte[0];
+            return image;
         }
     }
 }
