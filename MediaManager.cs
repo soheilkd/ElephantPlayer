@@ -8,6 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Runtime.Serialization.Formatters.Binary;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -17,20 +18,27 @@ namespace Player
 {
     public enum MediaType { Music, Video, File, OnlineMusic, OnlineVideo, OnlineFile, None }
     [Serializable]
-    public class Media
+    public class Media: INotifyPropertyChanged
     {
         public Media() { }
-        public string Name { get; set; }
-        public string Artist { get; set; }
-        public string Title { get; set; }
-        public string Album { get; set; }
+        public string _Name;
+        public string Name { get => _Name; set { _Name = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Name))); } }
+        public string _Artist;
+        public string Artist { get => _Artist; set { _Artist = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Artist))); } }
+        public string _Title;
+        public string Title { get => _Title; set { _Title = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Title))); } }
+        public string _Album;
+        public string Album { get => _Album; set { _Album = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Album))); } }
         public Uri Url { get; set; }
-        public int Rate { get; set; }
-        public string Path => Url.IsFile ? Url.LocalPath : Url.AbsoluteUri;
-        public TimeSpan Length { get; set; } = TimeSpan.Zero;
-        public int PlayCount { get; set; } = 0;
+        public int _Rate;
+        public int Rate { get => _Rate; set { _Rate = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Rate))); } }
+        public TimeSpan _Len;
+        public TimeSpan Length { get => _Len; set { _Len = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Length))); } }
+        public int _PlayCount;
+        public int PlayCount { get => _PlayCount; set { _PlayCount = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(PlayCount))); } }
         public bool IsOffline => (int)Type <= 2;
         public MediaType Type;
+        public string Path => Url.IsFile ? Url.LocalPath : Url.AbsoluteUri;
         [NonSerialized] public string Lyrics;
         [NonSerialized] public bool IsLoaded = false;
         [NonSerialized] public bool IsPlaying = false;
@@ -75,6 +83,8 @@ namespace Player
         private static string[] SupportedMusics = "mp3;wma;aac;m4a".Split(';');
         private static string[] SupportedVideos = "mp4;mpg;mkv;wmv;mov;avi;m4v;ts;wav;mpeg;webm".Split(';');
         private static string[] SupportedFiles = "zip;rar;bin;dat".Split(';');
+        [field: NonSerialized]
+        public event PropertyChangedEventHandler PropertyChanged;
 
         public Media(string path) : this(new Uri(path)) { }
         public Media(Uri url)
@@ -218,7 +228,7 @@ namespace Player
         public Media CurrentlyPlaying => 
             ActiveQueue[CurrentlyPlayingIndex];
         public event EventHandler<InfoExchangeArgs> Change;
-        private int _CurrentlyPlayingIndex = -1;
+        private int _CurrentlyPlayingIndex = 0;
         public int CurrentlyPlayingIndex
         {
             get => _CurrentlyPlayingIndex;
@@ -250,7 +260,7 @@ namespace Player
             }
             for (int i = 0; i < VariousSources.Length; i++)
                 VariousSources[i].Add(media);
-            Add(media);
+            InsertItem(0, media);
             if (requestPlay)
                 RequestPlay();
         }
@@ -270,7 +280,17 @@ namespace Player
             foreach (var item in this.Where(item => item.Path == path))
                 Remove(item);
         }
-        
+        public void Delete(Media media)
+        {
+            bool reqNext = CurrentlyPlaying == media;
+            File.Delete(media.Path);
+            var sames = this.Where(item => item.Path == media.Path).ToArray();
+            foreach (var item in sames)
+                Remove(item);
+            if (reqNext)
+                RequestPlay(Next());
+        }
+
         public Media Play(int index)
         {
             CurrentlyPlayingIndex = index;
@@ -301,14 +321,14 @@ namespace Player
 
         public void Repeat(int index, int times = 1) => Parallel.For(0, times, (i) => Insert(index, Items[index]));
 
-        public void Close()
+        public void DeployLibrary()
         {
             MassiveLibrary.Save(this.ToArray());
         }
 
         public void AddCount() => this[CurrentlyPlayingIndex].PlayCount++;
 
-        private void RequestPlay() => RequestPlay(this[Count - 1]);
+        private void RequestPlay() => RequestPlay(this[0]);
         private void RequestPlay(Media media)
         {
             Change?.Invoke(media, new InfoExchangeArgs()
@@ -341,6 +361,111 @@ namespace Player
             var invalids = this.Where(item => !item.IsValid).ToArray();
             foreach (var item in invalids)
                 Remove(item);
+        }
+        public void Detergent(Media media)
+        {
+            if (media.Type != MediaType.Music)
+            {
+                MessageBox.Show("Not supported on this type of media", "", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+            string deleteWord(string target, string word)
+            {
+                string output = "";
+                int lit1 = target.ToLower().IndexOf(word);
+                if (target.StartsWith(word)) lit1 = 0;
+                if (lit1 == -1)
+                    return target;
+                string temp1 = target.Substring(0, lit1);
+                if (temp1 == String.Empty) temp1 = " ";
+                if (temp1.LastIndexOf(' ') == -1) return " ";
+                string temp2 = temp1.Substring(0, temp1.LastIndexOf(' '));
+                output += temp2;
+                int lit2 = target.ToLower().LastIndexOf(word);
+                temp1 = target.Substring(lit2);
+                if (!temp1.EndsWith(temp1))
+                    temp2 = temp1.Substring(temp1.IndexOf(' '));
+                else temp2 = "";
+                output += temp2;
+                return output;
+            }
+            string c(string target)
+            {
+                if (String.IsNullOrWhiteSpace(target))
+                    return target;
+                string[] litretures = new string[] { ".com", ".ir", ".org", "www.", "@", ".me", ".biz", ".net" };
+                var lit = new List<string>();
+                foreach (var item in litretures)
+                    if (target.ToLower().Contains(item))
+                        lit.Add(item);
+                foreach (var item in lit)
+                    target = deleteWord(target, item);
+                return target;
+            }
+            
+            using (var file = TagLib.File.Create(media.Path))
+            {
+                string[] form(TagLib.Tag tag2)
+                {
+                    return new string[]
+                    {
+                        tag2.Album,
+                        tag2.Comment,
+                        tag2.FirstComposer,
+                        tag2.Conductor,
+                        tag2.Copyright,
+                        tag2.FirstGenre,
+                        tag2.FirstPerformer,
+                        tag2.Title
+                    };
+                }
+                var tag = file.Tag;
+                var manip1 = form(tag);
+                tag.Album = c(tag.Album ?? " ");
+                tag.Comment = "";
+                tag.Composers = new string[] { c(tag.FirstComposer ?? " ") };
+                tag.Conductor = c(tag.Conductor ?? " ");
+                tag.Copyright = "";
+                tag.Genres = new string[] { c(tag.FirstGenre ?? " ") };
+                tag.Performers = new string[] { c(tag.FirstPerformer ?? " ") };
+                tag.Title = c(tag.Title ?? " ");
+                var manip2 = form(tag);
+                var manip = "Detergent will change these values: \r\n";
+                if (manip1[0] != manip2[0]) manip += "Album: " + manip1[0] + " => " + manip2[0] + "\r\n";
+                if (manip1[1] != manip2[1]) manip += "Comment: " + manip1[1] + " => " + manip2[1] + "\r\n";
+                if (manip1[2] != manip2[2]) manip += "Composer: " + manip1[2] + " => " + manip2[2] + "\r\n";
+                if (manip1[3] != manip2[3]) manip += "Conductor: " + manip1[3] + " => " + manip2[3] + "\r\n";
+                if (manip1[4] != manip2[4]) manip += "Copyright: " + manip1[4] + " => " + manip2[4] + "\r\n";
+                if (manip1[5] != manip2[5]) manip += "Genre: " + manip1[5] + " => " + manip2[5] + "\r\n";
+                if (manip1[6] != manip2[6]) manip += "Artist: " + manip1[6] + " => " + manip2[6] + "\r\n";
+                if (manip1[7] != manip2[7]) manip += "Title: " + manip1[7] + " => " + manip2[7] + "\r\n";
+                if (manip.Length <= 42)
+                {
+                    MessageBox.Show("Couldn't find any changable thing", "JIZZZ", MessageBoxButton.OK, MessageBoxImage.Asterisk);
+                    return;
+                }
+                manip += "\r\nContinue?";
+                var res = MessageBox.Show(manip, "Continue?", MessageBoxButton.YesNo, MessageBoxImage.Question, MessageBoxResult.Yes);
+                if (res == MessageBoxResult.No)
+                    return;
+                if (CurrentlyPlaying != media)
+                {
+                    try
+                    {
+                        file.Save();
+                    }
+                    catch (IOException)
+                    {
+                        MessageBox.Show("I/O Exception occured, try again");
+                        return;
+                    }
+                    media.Reload();
+                }
+                else
+                {
+                    Change?.Invoke(media, new InfoExchangeArgs(InfoType.EditingTag) { Object = file });
+                }
+            }
         }
     }
 
