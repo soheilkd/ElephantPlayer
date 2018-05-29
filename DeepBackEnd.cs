@@ -212,31 +212,29 @@ namespace Player.Taskbar
         public ThumbButtonInfo PlayThumb = new ThumbButtonInfo()
         {
             Description = "Play",
-            ImageSource = Imaging.Get.Bitmap(new Controls.SegoeIcon() { Glyph = Controls.Glyph.Play, Foreground = Brushes.White })
+            ImageSource = Imaging.Get.Bitmap(new Controls.SegoeIcon() { Glyph = Controls.Glyph.Play, Foreground = Brushes.White, FontWeight = FontWeights.Black })
         };
         public ThumbButtonInfo PauseThumb = new ThumbButtonInfo()
         {
             Description = "Pause",
-            ImageSource = Imaging.Get.Bitmap(new Controls.SegoeIcon() { Glyph = Controls.Glyph.Pause, Foreground = Brushes.White })
+            ImageSource = Imaging.Get.Bitmap(new Controls.SegoeIcon() { Glyph = Controls.Glyph.Pause, Foreground = Brushes.White, FontWeight = FontWeights.Black })
         };
         public ThumbButtonInfo PreviousThumb = new ThumbButtonInfo()
         {
-            DismissWhenClicked = true,
             Description = "Previous",
-            ImageSource = Imaging.Get.Bitmap(new Controls.SegoeIcon() { Glyph = Controls.Glyph.Previous, Foreground = Brushes.White })
+            ImageSource = Imaging.Get.Bitmap(new Controls.SegoeIcon() { Glyph = Controls.Glyph.Previous, Foreground = Brushes.White, FontWeight = FontWeights.Black })
         };
         public ThumbButtonInfo NextThumb = new ThumbButtonInfo()
         {
-            DismissWhenClicked = true,
             Description = "Next",
             ImageSource = Imaging.Get.Bitmap(new Controls.SegoeIcon() { Glyph = Controls.Glyph.Next, Foreground = Brushes.White })
         };
-        private TaskbarItemInfo TaskbarItem = new TaskbarItemInfo();
         private Command PlayHandler = new Command();
         private Command PauseHandler = new Command();
         private Command PrevHandler = new Command();
         private Command NextHandler = new Command();
-        public TaskbarItemInfo Info => TaskbarItem;
+        public TaskbarItemInfo Info { get; } = new TaskbarItemInfo();
+
         public Thumb()
         {
             PreviousThumb.Command = PrevHandler;
@@ -247,14 +245,14 @@ namespace Player.Taskbar
             PauseHandler.Raised += (sender, e) => PausePressed?.Invoke(sender, e);
             PrevHandler.Raised += (sender, e) => PrevPressed?.Invoke(sender, e);
             NextHandler.Raised += (sender, e) => NextPressed?.Invoke(sender, e);
-            TaskbarItem.ThumbButtonInfos.Clear();
-            TaskbarItem.ThumbButtonInfos.Add(PreviousThumb);
-            TaskbarItem.ThumbButtonInfos.Add(PauseThumb);
-            TaskbarItem.ThumbButtonInfos.Add(NextThumb);
+            Info.ThumbButtonInfos.Clear();
+            Info.ThumbButtonInfos.Add(PreviousThumb);
+            Info.ThumbButtonInfos.Add(PauseThumb);
+            Info.ThumbButtonInfos.Add(NextThumb);
         }
-        public void Refresh(bool IsPlaying = false) => TaskbarItem.ThumbButtonInfos[1] = IsPlaying ? PauseThumb : PlayThumb;
-        public void SetProgressState(TaskbarItemProgressState state) => TaskbarItem.ProgressState = state;
-        public void SetProgressValue(double value) => TaskbarItem.ProgressValue = value;
+        public void Refresh(bool IsPlaying = false) => Info.ThumbButtonInfos[1] = IsPlaying ? PauseThumb : PlayThumb;
+        public void SetProgressState(TaskbarItemProgressState state) => Info.ProgressState = state;
+        public void SetProgressValue(double value) => Info.ProgressValue = value;
     }
 }
 

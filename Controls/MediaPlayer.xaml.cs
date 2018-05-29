@@ -16,7 +16,16 @@ namespace Player.Controls
         public TimeSpan Position
         {
             get => element.Position;
-            set => element.Position = value;
+            set
+            {
+
+                element.Position = value;
+                if (value.TotalSeconds <= 20)
+                {
+                    PlayCountTimer.Stop();
+                    PlayCountTimer.Start();
+                }
+            }
         }
         public double Volume { get => element.Volume; set => element.Volume = value; }
         private Media _Media = new Media();
@@ -30,7 +39,7 @@ namespace Player.Controls
         public Taskbar.Thumb Thumb = new Taskbar.Thumb();
         private Storyboard MagnifyBoard, MinifyBoard, FullOnBoard, FullOffBoard;
         private ThicknessAnimation MagnifyAnimation, MinifyAnimation;
- 
+        private TimeSpan SmallChange, BackwardSmallChange;
         private bool controlsVisibile;
         private bool ControlsVisible
         {
@@ -148,6 +157,8 @@ namespace Player.Controls
                     PositionSlider.LargeChange = 5 * PositionSlider.Maximum / 100;
                     TimeLabel_Full.Content = TimeSpan.ToCustomString();
                     Invoke(InfoType.LengthFound, TimeSpan);
+                    SmallChange = new TimeSpan(0, 0, 0, 0, PositionSlider.SmallChange.ToInt());
+                    BackwardSmallChange = new TimeSpan(0, 0, 0, 0, -1 * PositionSlider.SmallChange.ToInt());
                 }
             TimeLabel_Current.Content = Position.ToCustomString();
             PositionSlider.Value = Position.TotalMilliseconds;
@@ -232,7 +243,10 @@ namespace Player.Controls
         private void PreviousButton_Clicked(object sender, MouseButtonEventArgs e)
         {
             if (PositionSlider.Value > PositionSlider.Maximum / 100 * 10)
-                Seek(TimeSpan.Zero);
+            {
+                element.Stop();
+                element.Play();
+            }
             else
                 Invoke(InfoType.PrevRequest);
         }
@@ -281,10 +295,10 @@ namespace Player.Controls
         public void PlayNext() => NextButton_Clicked(this, null);
         public void PlayPrevious() => PreviousButton_Clicked(this, null);
         public void PlayPause() => PlayPauseButton_Clicked(this, null);
-        public void SmallSlideLeft() => Seek(new TimeSpan(0, 0, 0, 0, -1 * PositionSlider.SmallChange.ToInt()), true);
-        public void SmallSlideRight() => Seek(new TimeSpan(0, 0, 0, 0, PositionSlider.SmallChange.ToInt()), true);
+        public void SmallSlideLeft() => Position = Position.Subtract(SmallChange);
+        public void SmallSlideRight() => Position = Position.Add(SmallChange);
 
-        private void element_MediaEnded(object sender, RoutedEventArgs e)
+        private void Element_MediaEnded(object sender, RoutedEventArgs e)
         {
             PlayNext();
         }
@@ -302,21 +316,7 @@ namespace Player.Controls
                 elementCanvas.SetValue(MarginProperty, new Thickness(ActualWidth / 2, ActualHeight, ActualWidth / 2, 0));
             }
         }
-        
-        public void Seek(TimeSpan timeSpan, bool sliding = false)
-        {
-            IsUserSeeking = true;
-            if (!sliding) Position = timeSpan;
-            else Position = Position.Add(timeSpan);
-            if (PositionSlider.Value <= 20000)
-            {
-                PlayCountTimer.Stop();
-                PlayCountTimer.Start();
-            }
-            IsUserSeeking = false;
-        }
-        public void Seek(int ms, bool sliding = false) => Seek(new TimeSpan(0, 0, 0, 0, ms), sliding);
-      
+
         public void Play(Media media)
         {
             media.Load();

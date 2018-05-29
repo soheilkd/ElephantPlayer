@@ -116,6 +116,50 @@
                     </ListView.GroupStyle>
                 </ListView>
             </TabItem>
+            <TabItem>
+                <TabItem.Header>
+                    <StackPanel Orientation="Horizontal" >
+                        <player:SegoeIcon Glyph="FavoriteStar" />
+                        <TextBlock Text="  " />
+                        <TextBlock Text="Ratings" FontSize="18" />
+                    </StackPanel>
+                </TabItem.Header>
+                <ListView x:Name="RatesView" ContextMenu="{DynamicResource ContextMenu1}">
+                    <ListView.View>
+                        <GridView>
+                            <GridViewColumn Header="Title" Width="300" CellTemplate="{DynamicResource TitleCell}"/>
+                            <GridViewColumn Header="Artist" Width="100" CellTemplate="{DynamicResource ArtistCell}" />
+                            <GridViewColumn Header="Album" Width="100" CellTemplate="{DynamicResource AlbumCell}" />
+                            <GridViewColumn Header="Rate" Width="120" CellTemplate="{DynamicResource RateCell}" />
+                            <GridViewColumn Header="Plays" Width="50" CellTemplate="{DynamicResource PlayCell}"/>
+                        </GridView>
+                    </ListView.View>
+                    <ListView.GroupStyle>
+                        <GroupStyle>
+                            <GroupStyle.ContainerStyle>
+                                <Style TargetType="{x:Type GroupItem}">
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate>
+                                                <Expander IsExpanded="False">
+                                                    <Expander.Header>
+                                                        <StackPanel Orientation="Horizontal">
+                                                            <TextBlock Text="{Binding Name}" FontWeight="SemiBold" Foreground="Black" FontSize="16" VerticalAlignment="Bottom" />
+                                                            <TextBlock Text="{Binding ItemCount}" FontSize="18" Foreground="#F333" FontWeight="Light" FontStyle="Italic" Margin="10,0,0,0" VerticalAlignment="Bottom" />
+                                                            <TextBlock Text=" items" FontSize="16" Foreground="Black" FontStyle="Italic" VerticalAlignment="Bottom" />
+                                                        </StackPanel>
+                                                    </Expander.Header>
+                                                    <ItemsPresenter />
+                                                </Expander>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </GroupStyle.ContainerStyle>
+                        </GroupStyle>
+                    </ListView.GroupStyle>
+                </ListView>
+            </TabItem>
         </TabControl>
         <Label Content="{Binding Text, ElementName=SearchBox}" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,0,20,0"/>
         <player:SegoeButton x:Name="SearchIcon" HorizontalAlignment="Right" VerticalAlignment="Top" Glyph="Search" 
@@ -159,8 +203,9 @@
                 <ComboBoxItem Content="Ctrl +Alt + Shift" />
             </ComboBox>
             <CheckBox x:Name="Settings_OrinateCheck" Content="Auto Orinate Vision" Margin="5, 73,0,0" />
-            <Label Content="Vision Timeout" Margin="0, 96, 0, 0"/>
-            <ComboBox x:Name="Settings_TimeoutCombo" Margin="100, 99, 0, 0" Width="120">
+            <CheckBox x:Name="Settings_LiveLibraryCheck" Content="Live Library" Margin="5, 93,0,0" />
+            <Label Content="Vision Timeout" Margin="0, 116, 0, 0"/>
+            <ComboBox x:Name="Settings_TimeoutCombo" Margin="100, 119, 0, 0" Width="120">
                 <ComboBoxItem Content="0.5 s"/>
                 <ComboBoxItem Content="1 s"/>
                 <ComboBoxItem Content="2 s"/>
@@ -170,8 +215,8 @@
                 <ComboBoxItem Content="10 s"/>
                 <ComboBoxItem Content="60 s"/>
             </ComboBox>
-            <Button Content="Revalidate Library" Margin="5, 130, 0, 0" Height="24" Width="200" Click="RevalidateLibraryClick"/>
-            <Button Content="Reset Ratings" Margin="5,159,0,0" Height="24" Width="200" Click="ResetRatingsClick"/>
+            <Button Content="Revalidate Library" Margin="5, 150, 0, 0" Height="24" Width="200" Click="RevalidateLibraryClick"/>
+            <Button Content="Reset Ratings" Margin="5,179,0,0" Height="24" Width="200" Click="ResetRatingsClick"/>
             <Grid.Resources>
                 <Style TargetType="Label" >
                     <Setter Property="HorizontalAlignment" Value="Left"/>
@@ -217,6 +262,7 @@
         </DataTemplate>
         <sys:String x:Key="LastPath" >D:\\</sys:String>
         <ContextMenu x:Key="ContextMenu1">
+            <MenuItem Header="Detergent Meta" Click="Menu_TagDetergent" />
             <MenuItem Header="Play after current" Click="Menu_PlayAfterClick" />
             <MenuItem Header="Duplicate...">
                 <MenuItem Header="1" Click="Menu_DuplicateClick"/>

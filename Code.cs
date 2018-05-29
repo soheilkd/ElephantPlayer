@@ -19,12 +19,14 @@ namespace Player
         private int _MOT;
 
         public PlayMode PlayMode { get; set; }
-        public int MainKey { get; set; } = 0;
-        public double Volume { get; set; } = 1;
+        public int MainKey { get; set; }
+        public double Volume { get; set; }
         public Size LastSize { get; set; }
         public bool VisionOrientation { get; set; }
-        public Point LastLoc { get; set; } = new Point(20, 20);
+        public Point LastLoc { get; set; }
         public string LastPath { get; set; }
+        public bool LiveLibrary { get; set; }
+
         public int MouseOverTimeoutIndex { get => _MOT; set { _MOT = value; Changed?.Invoke(this, null); } }
         public int MouseOverTimeout
         {

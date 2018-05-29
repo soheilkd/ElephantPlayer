@@ -9,7 +9,7 @@
     <Grid>
         <Grid Background="Black" x:Name="elementCanvas">
             <MediaElement x:Name="element" LoadedBehavior="Manual" UnloadedBehavior="Manual" 
-                          MouseDown="Element_MouseDown" MediaEnded="element_MediaEnded" 
+                          MouseDown="Element_MouseDown" MediaEnded="Element_MediaEnded" 
                           Volume="1"/>
         </Grid>
         <Grid Background="Transparent" VerticalAlignment="Bottom" Height="80">

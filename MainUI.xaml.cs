@@ -65,11 +65,14 @@ namespace Player
             User.Keyboard.Events.KeyDown += Keyboard_KeyDown;
             Settings_AncestorCombo.SelectedIndex = App.Settings.MainKey;
             Settings_OrinateCheck.IsChecked = App.Settings.VisionOrientation;
+            Settings_LiveLibraryCheck.IsChecked = App.Settings.LiveLibrary;
             Settings_TimeoutCombo.SelectedIndex = App.Settings.MouseOverTimeoutIndex;
             Settings_AncestorCombo.SelectionChanged += (_, __) => App.Settings.MainKey = Settings_AncestorCombo.SelectedIndex;
             Settings_TimeoutCombo.SelectionChanged += (_, __) => App.Settings.MouseOverTimeoutIndex = Settings_TimeoutCombo.SelectedIndex;
-            Settings_OrinateCheck.Checked += (_, __) => App.Settings.VisionOrientation = Settings_OrinateCheck.IsChecked.Value;
-            Settings_OrinateCheck.Unchecked += (_, __) => App.Settings.VisionOrientation = Settings_OrinateCheck.IsChecked.Value;
+            Settings_OrinateCheck.Checked += (_, __) => App.Settings.VisionOrientation = true;
+            Settings_OrinateCheck.Unchecked += (_, __) => App.Settings.VisionOrientation = false;
+            Settings_LiveLibraryCheck.Checked += (_, __) => App.Settings.LiveLibrary = true;
+            Settings_LiveLibraryCheck.Unchecked += (_, __) => App.Settings.LiveLibrary = false;
             SettingsButton.MouseUp += delegate
             {
                 if (!SettingsOpened)
@@ -99,13 +102,14 @@ namespace Player
             Resources["MagnifyOffBoard"].As<Storyboard>().CurrentStateInvalidated += (_, __) => ControlsNotNeededOnVisionIsVisible = true;
         }
 
-        CollectionView[] Views = new CollectionView[2];
-        PropertyGroupDescription[] Descriptions = new PropertyGroupDescription[2];
+        CollectionView[] Views = new CollectionView[3];
+        PropertyGroupDescription[] Descriptions = new PropertyGroupDescription[3];
         private void RebindViews()
         {
-            TitlesView.ItemsSource = Manager.VariousSources[0];
+            TitlesView.ItemsSource = Manager;
             ArtistsView.ItemsSource = Manager.VariousSources[1];
             AlbumsView.ItemsSource = Manager.VariousSources[2];
+            RatesView.ItemsSource = Manager.VariousSources[3];
 
             Views[0] = (CollectionView)CollectionViewSource.GetDefaultView(ArtistsView.ItemsSource);
             Descriptions[0] = new PropertyGroupDescription("Artist");
@@ -114,6 +118,10 @@ namespace Player
             Views[1] = (CollectionView)CollectionViewSource.GetDefaultView(AlbumsView.ItemsSource);
             Descriptions[1] = new PropertyGroupDescription("Album");
             Views[1].GroupDescriptions.Add(Descriptions[1]);
+
+            Views[2] = (CollectionView)CollectionViewSource.GetDefaultView(RatesView.ItemsSource);
+            Descriptions[2] = new PropertyGroupDescription("Rate");
+            Views[2].GroupDescriptions.Add(Descriptions[2]);
         }
 
         private void DMouseDoubleClick(object sender, MouseButtonEventArgs e)
@@ -124,7 +132,8 @@ namespace Player
 
         private void Manager_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
-
+            if (App.Settings.LiveLibrary)
+                Manager.DeployLibrary();
         }
         
         private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -162,7 +171,7 @@ namespace Player
             App.Settings.LastLoc = new Point(Left, Top);
             App.Settings.Volume = Player.Volume;
             App.Settings.Save();
-            Manager.Close();
+            Manager.DeployLibrary();
             Application.Current.Shutdown();
         }
         private void Window_KeyUp(object sender, KeyEventArgs e)
@@ -193,12 +202,22 @@ namespace Player
             switch (e.Type)
             {
                 case InfoType.EditingTag:
+                    IsEnabled = false;
                     var pos = Player.Position;
                     Player.FullStop();
                     await Task.Delay(500);
-                    (e.Object as TagLib.File).Save();
-                    Play(e.Object as Media);
-                    Player.Position = pos;
+                    try
+                    {
+                        (e.Object as TagLib.File).Save();
+                    }
+                    catch (IOException)
+                    {
+                        MessageBox.Show("I/O Exception occured, try again");
+                        Play(sender as Media);
+                        Player.Position = pos;
+                        IsEnabled = true;
+                        return;
+                    }
                     break;
                 case InfoType.MediaRequested:
                     Play(sender as Media);
@@ -207,6 +226,7 @@ namespace Player
                     break;
             }
         }
+
         private async void Keyboard_KeyDown(object sender, Forms::KeyEventArgs e)
         {
             if (IsActive && SearchBox.IsFocused)
@@ -299,14 +319,18 @@ namespace Player
         private void SearchIcon_MouseEnter(object sender, MouseButtonEventArgs e)
         {
             SearchPopup.IsOpen = true;
+            SearchBox.Focus();
+            
         }
 
+        private void Menu_TagDetergent(object sender, RoutedEventArgs e)
+        {
+            For(item => Manager.Detergent(item));
+        }
         private void Menu_PlayAfterClick(object sender, RoutedEventArgs e)
         {
             if (App.Settings.PlayMode != PlayMode.RepeatAll)
-            {
-                MessageBox.Show("Hey, illegal on shuffle or repeat-single playing mode", "WHAT THA FUCK", MessageBoxButton.OK, MessageBoxImage.Information);
-            }
+                MessageBox.Show("Hey, illegal on shuffle or repeat-single playing mode, anyway", "WHAT THA FUCK", MessageBoxButton.OK, MessageBoxImage.Information);
             For(item => Manager.Move(Manager.IndexOf(item), Manager.CurrentlyPlayingIndex + 1));
         }
         private void Menu_DuplicateClick(object sender, RoutedEventArgs e)
@@ -377,8 +401,7 @@ namespace Player
             For(item => msg += $"{item.Path}\r\n");
             if (MessageBox.Show(msg, "Sure?", MessageBoxButton.OKCancel, MessageBoxImage.Warning) != MessageBoxResult.OK)
                 return;
-            For(item => File.Delete(item.Path));
-            For(item => Manager.Remove(item));
+            For(item => Manager.Delete(item));
         }
         private void Menu_LocationClick(object sender, RoutedEventArgs e)
         {
@@ -396,7 +419,7 @@ namespace Player
                     file.Save();
                     Manager.CurrentlyPlaying.Reload();
                     Play(Manager.CurrentlyPlaying);
-                    Player.Seek(pos);
+                    Player.Position = pos;
                     Manager.UpdateOnPath(item);
                 }
                 else
@@ -444,5 +467,6 @@ namespace Player
             Close();
             Process.Start(App.Path + "Elephant Player.exe");
         }
+
     }
 }
