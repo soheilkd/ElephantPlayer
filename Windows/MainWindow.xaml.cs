@@ -1,4 +1,5 @@
 ﻿using Microsoft.Win32;
+using Player.Controls;
 using Player.Events;
 using System;
 using System.Diagnostics;
@@ -15,7 +16,7 @@ using Forms = System.Windows.Forms;
 
 namespace Player
 {
-    public partial class MainUI : Window
+    public partial class MainWindow : Window
     {
         private MediaManager Manager = new MediaManager();
         private MassiveLibrary Library = new MassiveLibrary();
@@ -33,7 +34,7 @@ namespace Player
         }
       
         
-        public MainUI()
+        public MainWindow()
         {
             InitializeComponent();
             Manager.Change += Manager_Change;
@@ -475,15 +476,7 @@ namespace Player
 
         private void Menu_ConvertClick(object sender, RoutedEventArgs e)
         {
-            For(async item => 
-            {
-                if (item.Type != MediaType.Video)
-                {
-                    MessageBox.Show($"FFMpeg is not supported on {item.Title} ");
-                    return;
-                }
-                Manager.ConvertVideo(item);
-            });
+            For(item => ConverterWindow.Open(item, media => Manager.Add(media)));
         }
     }
 }

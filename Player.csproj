@@ -137,7 +137,7 @@
   <ItemGroup>
     <Compile Include="App.cs" />
     <Compile Include="Code.cs" />
-    <Compile Include="Controls\ConverterWindow.xaml.cs">
+    <Compile Include="Windows\ConverterWindow.xaml.cs">
       <DependentUpon>ConverterWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Controls\MediaPlayer.xaml.cs">
@@ -154,12 +154,12 @@
     </Compile>
     <Compile Include="DeepBackEnd.cs" />
     <Compile Include="Events.cs" />
-    <Compile Include="MainUI.xaml.cs">
-      <DependentUpon>MainUI.xaml</DependentUpon>
+    <Compile Include="Windows\MainWindow.xaml.cs">
+      <DependentUpon>MainWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="MediaManager.cs" />
-    <Compile Include="PropertiesUI.xaml.cs">
-      <DependentUpon>PropertiesUI.xaml</DependentUpon>
+    <Compile Include="Windows\PropertiesWindow.xaml.cs">
+      <DependentUpon>PropertiesWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -170,7 +170,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Controls\ConverterWindow.xaml">
+    <Page Include="Windows\ConverterWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -190,11 +190,11 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="MainUI.xaml">
+    <Page Include="Windows\MainWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="PropertiesUI.xaml">
+    <Page Include="Windows\PropertiesWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

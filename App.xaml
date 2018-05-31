@@ -1,6 +1,6 @@
 <Application xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" 
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"	
-             x:Class="Player.App" StartupUri="MainUI.xaml">
+             x:Class="Player.App" StartupUri="Windows\MainWindow.xaml">
     <Application.Resources>
         <Canvas x:Key="None" x:Shared="false">
                 <Path Data="M 3,5 L 1,5 1,21 C 1,22.1 1.9,23 3,23 L 19,23 19,21 3,21 3,5 M 21,1 L 7,1 C 5.9,1 5,1.9 5,3 L 5,17 C 5,18.1 5.9,19 7,19 L 21,19 C 22.1,19 23,18.1 23,17 L 23,3 C 23,1.9 22.1,1 21,1 M 21,17 L 7,17 7,3 21,3 21,17 Z"/>

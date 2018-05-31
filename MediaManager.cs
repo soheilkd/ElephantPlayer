@@ -322,13 +322,7 @@ namespace Player
             }
             return Play(CurrentlyPlayingIndex);
         }
-
-        public void ConvertVideo(Media media)
-        {
-            ConverterWindow window = new ConverterWindow(media);
-            window.Done += (_, e) => Dispatcher.CurrentDispatcher.Invoke(() => Add(e.Object as Media));
-
-        }
+        
         public void Repeat(int index, int times = 1) => Parallel.For(0, times, (i) => Insert(index, Items[index]));
 
         public void DeployLibrary()
