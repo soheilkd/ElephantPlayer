@@ -63,6 +63,7 @@ namespace Player
                 SizeChangeTimer.Stop();
             };
             User.Keyboard.Events.KeyDown += Keyboard_KeyDown;
+            
             Settings_AncestorCombo.SelectedIndex = App.Settings.MainKey;
             Settings_OrinateCheck.IsChecked = App.Settings.VisionOrientation;
             Settings_LiveLibraryCheck.IsChecked = App.Settings.LiveLibrary;
@@ -167,12 +168,14 @@ namespace Player
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
+            
             App.Settings.LastSize = new Size(Width, Height);
             App.Settings.LastLoc = new Point(Left, Top);
             App.Settings.Volume = Player.Volume;
             App.Settings.Save();
             Manager.DeployLibrary();
             Application.Current.Shutdown();
+
         }
         private void Window_KeyUp(object sender, KeyEventArgs e)
         {
@@ -213,10 +216,12 @@ namespace Player
                     catch (IOException)
                     {
                         MessageBox.Show("I/O Exception occured, try again");
+                    }
+                    finally
+                    {
                         Play(sender as Media);
                         Player.Position = pos;
                         IsEnabled = true;
-                        return;
                     }
                     break;
                 case InfoType.MediaRequested:
@@ -468,5 +473,17 @@ namespace Player
             Process.Start(App.Path + "Elephant Player.exe");
         }
 
+        private void Menu_ConvertClick(object sender, RoutedEventArgs e)
+        {
+            For(async item => 
+            {
+                if (item.Type != MediaType.Video)
+                {
+                    MessageBox.Show($"FFMpeg is not supported on {item.Title} ");
+                    return;
+                }
+                Manager.ConvertVideo(item);
+            });
+        }
     }
 }

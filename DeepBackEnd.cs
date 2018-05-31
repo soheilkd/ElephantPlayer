@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Gma.System.MouseKeyHook;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -282,8 +283,8 @@ namespace Player.User
             }
         }
     }
-    public class Keyboard
+    public static class Keyboard
     {
-        public static Gma.System.MouseKeyHook.IKeyboardMouseEvents Events = Gma.System.MouseKeyHook.Hook.GlobalEvents();
+        public static IKeyboardMouseEvents Events = Hook.GlobalEvents();
     }
 }

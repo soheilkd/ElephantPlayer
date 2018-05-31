@@ -1,4 +1,6 @@
-﻿using Player.Events;
+﻿using NReco.VideoConverter;
+using Player.Controls;
+using Player.Events;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -13,6 +15,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Threading;
 
 namespace Player
 {
@@ -223,6 +226,7 @@ namespace Player
             }
         }
         public MediaManager() { }
+        
         public ObservableCollection<Media> ActiveQueue { get; set; } 
         private Random Shuffle = new Random(DateTime.Now.Millisecond);
         public Media CurrentlyPlaying => 
@@ -319,6 +323,12 @@ namespace Player
             return Play(CurrentlyPlayingIndex);
         }
 
+        public void ConvertVideo(Media media)
+        {
+            ConverterWindow window = new ConverterWindow(media);
+            window.Done += (_, e) => Dispatcher.CurrentDispatcher.Invoke(() => Add(e.Object as Media));
+
+        }
         public void Repeat(int index, int times = 1) => Parallel.For(0, times, (i) => Insert(index, Items[index]));
 
         public void DeployLibrary()

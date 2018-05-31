@@ -1,13 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using Microsoft.Win32;
 using Player.Events;
 using System.Media;
 using System.Windows.Media.Imaging;
+using System.Windows.Input;
 
 namespace Player
 {
@@ -33,6 +30,7 @@ namespace Player
                 File = TagLib.File.Create(media.Path)
             };
             var tag = ui.File.Tag;
+            ui.Media.Load();
             ui.TitleBox.Text = tag.Title ?? String.Empty;
             ui.ArtistBox.Text = tag.FirstPerformer ?? String.Empty;
             ui.AlbumArtistBox.Text = tag.FirstAlbumArtist ?? String.Empty;
@@ -48,23 +46,14 @@ namespace Player
             ui.ChangeRequested += onSave;
             ui.Show();
         }
-
-        private void BrowseArtworkClick(object sender, RoutedEventArgs e)
-        {
-            if (ArtworkDialog.ShowDialog().Value)
-            {
-                File.Tag.Pictures = new TagLib.IPicture[] { new TagLib.Picture(ArtworkDialog.FileName) };
-                ArtworkImage.Source = new BitmapImage(new Uri(ArtworkDialog.FileName));
-            }
-        }
-
-        private void RemoveArtworkClick(object sender, RoutedEventArgs e)
+        
+        private void RemoveArtworkClick(object sender, MouseButtonEventArgs e)
         {
             File.Tag.Pictures = new TagLib.IPicture[0];
             ArtworkImage.Source = Media.IsVideo ? Imaging.Images.VideoArt : Imaging.Images.MusicArt;
         }
 
-        private void SaveButtonClick(object sender, RoutedEventArgs e)
+        private void SaveButtonClick(object sender, MouseButtonEventArgs e)
         {
             File.Tag.Title = TitleBox.Text ?? String.Empty;
             File.Tag.Performers = new string[] { ArtistBox.Text ?? String.Empty };
@@ -77,8 +66,18 @@ namespace Player
             File.Tag.Year = UInt32.TryParse(YearBox.Text ?? "0", out uint num2) ? num2 : 0;
             File.Tag.Copyright = CopyrightBox.Text ?? String.Empty;
             File.Tag.Lyrics = LyricsBox.Text ?? String.Empty;
+
             ChangeRequested?.Invoke(this, new InfoExchangeArgs() { Object = File });
             Close();
+        }
+
+        private void ArtworkImage_MouseUp(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            if (ArtworkDialog.ShowDialog().Value)
+            {
+                File.Tag.Pictures = new TagLib.IPicture[] { new TagLib.Picture(ArtworkDialog.FileName) };
+                ArtworkImage.Source = new BitmapImage(new Uri(ArtworkDialog.FileName));
+            }
         }
     }
 }

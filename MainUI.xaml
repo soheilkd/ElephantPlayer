@@ -264,6 +264,7 @@
         <ContextMenu x:Key="ContextMenu1">
             <MenuItem Header="Detergent Meta" Click="Menu_TagDetergent" />
             <MenuItem Header="Play after current" Click="Menu_PlayAfterClick" />
+            <MenuItem Header="Convert to proper format" Click="Menu_ConvertClick" />
             <MenuItem Header="Duplicate...">
                 <MenuItem Header="1" Click="Menu_DuplicateClick"/>
                 <MenuItem Header="2" Click="Menu_DuplicateClick"/>
