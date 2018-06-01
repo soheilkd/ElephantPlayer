@@ -1,6 +1,4 @@
-﻿using NReco.VideoConverter;
-using Player.Controls;
-using Player.Events;
+﻿using Player.Events;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -10,18 +8,15 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Runtime.Serialization.Formatters.Binary;
-using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Threading;
 
 namespace Player
 {
     public enum MediaType { Music, Video, File, OnlineMusic, OnlineVideo, OnlineFile, None }
     [Serializable]
-    public class Media: INotifyPropertyChanged
+    public class Media : INotifyPropertyChanged
     {
         public Media() { }
         public string _Name;
@@ -47,7 +42,17 @@ namespace Player
         [NonSerialized] public bool IsPlaying = false;
         [NonSerialized] public System.Windows.Media.Imaging.BitmapSource Artwork;
         public bool IsVideo => Type == MediaType.Video || Type == MediaType.OnlineVideo;
-        public string Ext => Path.Substring((Path ?? " . ").LastIndexOf(".") + 1).ToLower();
+        public string Ext
+        {
+            get
+            {
+                if (IsOffline)
+                    return Path.Substring((Path ?? " . ").LastIndexOf('.') + 1).ToLower();
+                else
+                    return Url.Segments.Last().Substring(Url.Segments.Last().LastIndexOf('.') + 1).ToLower();
+            }
+        }
+
         public bool IsValid
         {
             get
@@ -165,9 +170,10 @@ namespace Player
             }
             else
             {
+                Type = MediaType.OnlineFile;
                 if (Url.AbsoluteUri.StartsWith("https://"))
                     Url = new Uri(Url.AbsoluteUri.Replace("https://", "http://"));
-                Name = Uri.UnescapeDataString(Url.Segments[Url.Segments.Count() - 1]);
+                Name = Uri.UnescapeDataString(Url.Segments.Last());
                 Title = Name;
                 Url = Url;
                 Artist = Url.Host;
@@ -189,6 +195,7 @@ namespace Player
             IsLoaded = false;
             Load();
         }
+        public static bool IsMedia(string path) => new Media(path).IsValid;
         public Media Shallow => MemberwiseClone() as Media;
     }
 
@@ -262,9 +269,7 @@ namespace Player
                     RequestPlay(duplication.First());
                 return;
             }
-            for (int i = 0; i < VariousSources.Length; i++)
-                VariousSources[i].Add(media);
-            InsertItem(0, media);
+            Insert(0, media);
             if (requestPlay)
                 RequestPlay();
         }
@@ -366,7 +371,7 @@ namespace Player
             foreach (var item in invalids)
                 Remove(item);
         }
-        public void Detergent(Media media)
+        public void Detergent(Media media, bool prompt = true)
         {
             if (media.Type != MediaType.Music)
             {
@@ -449,9 +454,12 @@ namespace Player
                     return;
                 }
                 manip += "\r\nContinue?";
-                var res = MessageBox.Show(manip, "Continue?", MessageBoxButton.YesNo, MessageBoxImage.Question, MessageBoxResult.Yes);
-                if (res == MessageBoxResult.No)
-                    return;
+                if (prompt)
+                {
+                    var res = MessageBox.Show(manip, "Continue?", MessageBoxButton.YesNo, MessageBoxImage.Question, MessageBoxResult.Yes);
+                    if (res == MessageBoxResult.No)
+                        return;
+                }
                 if (CurrentlyPlaying != media)
                 {
                     try
@@ -471,6 +479,41 @@ namespace Player
                 }
             }
         }
+
+        public void Download(Media media)
+        {
+            var SavePath = $"{App.Path}Downloads\\{media.Title}";
+            var Client = new WebClient();
+            Client.DownloadProgressChanged += (_, e) => media.Title = $"Downloading... {e.ProgressPercentage}%";
+            Client.DownloadFileCompleted += (_, e) =>
+            {
+                if (media.Type == MediaType.OnlineFile)
+                {
+                    var path = $"{App.Path}Downloads\\{media.Name.Substring(0, media.Name.LastIndexOf(".z"))}";
+                    using (var zip = new Ionic.Zip.ZipFile(SavePath))
+                        zip.ExtractAll(path, Ionic.Zip.ExtractExistingFileAction.OverwriteSilently);
+                    File.Delete(SavePath);
+                    var d = from item in Directory.GetFiles(path, "*", SearchOption.AllDirectories) where Media.IsMedia(item) select new Media(item);
+                    int index = IndexOf(media);
+                    foreach (var item in d)
+                    {
+                        Detergent(item, false);
+                        Insert(index, item);
+                    }
+                    Remove(media);
+                }
+                else
+                {
+                    int index = IndexOf(media);
+                    Remove(media);
+                    Insert(index, new Media(SavePath));
+                    if (CurrentlyPlayingIndex == index)
+                        RequestPlay(this[index]);
+                }
+            };
+            Client.DownloadFileAsync(media.Url, SavePath);
+        }
+
     }
 
     [Serializable]

@@ -19,8 +19,8 @@ namespace Player.Controls
             window.InitializeComponent();
             window.Converter.ConvertProgress += window.Converter_ConvertProgress;
             window.Converter.LogReceived += window.Converter_LogReceived;
-            window.Expander1.Expanded += (_, __) => window.Height = 230;
-            window.Expander1.Collapsed += (_, __) => window.Height = 115;
+            window.Expander1.Expanded += (_, __) => window.Height = 270;
+            window.Expander1.Collapsed += (_, __) => window.Height = 105;
             window.ProperPath = $"{App.Path}Converted\\{media.Name.Substring(0, media.Name.LastIndexOf("."))}.mp4";
             window.ConverterThread = new Thread(new ThreadStart(() =>
             window.Converter.ConvertMedia(media.Path, window.ProperPath, Format.mp4)))
@@ -36,7 +36,7 @@ namespace Player.Controls
 
         private void Converter_LogReceived(object sender, FFMpegLogEventArgs e)
         {
-            Dispatcher.Invoke(() => { TextBox1.AppendText(e.Data); TextBox1.ScrollToEnd(); });
+            Dispatcher.Invoke(() => { TextBox1.AppendText(e.Data + "\r\n"); TextBox1.ScrollToEnd(); });
         }
 
         private void Converter_ConvertProgress(object sender, ConvertProgressEventArgs e)
@@ -58,13 +58,12 @@ namespace Player.Controls
                 ActionOnDone = null;
             }
         }
-        
-        private void Cancel_Click(object sender, RoutedEventArgs e)
+
+        private void window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             Converter.Stop();
             ConverterThread.Abort();
             System.IO.File.Delete(ProperPath);
-            Close();
         }
     }
 }

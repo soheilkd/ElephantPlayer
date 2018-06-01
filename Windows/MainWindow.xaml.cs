@@ -108,7 +108,7 @@ namespace Player
         PropertyGroupDescription[] Descriptions = new PropertyGroupDescription[3];
         private void RebindViews()
         {
-            TitlesView.ItemsSource = Manager;
+            TitlesView.ItemsSource = Manager.VariousSources[0];
             ArtistsView.ItemsSource = Manager.VariousSources[1];
             AlbumsView.ItemsSource = Manager.VariousSources[2];
             RatesView.ItemsSource = Manager.VariousSources[3];
@@ -435,6 +435,14 @@ namespace Player
                 }
             }));
         }
+        private void Menu_ConvertClick(object sender, RoutedEventArgs e)
+        {
+            For(item => ConverterWindow.Open(item, media => Manager.Add(media)));
+        }
+        private void Menu_DownloadClick(object sender, RoutedEventArgs e)
+        {
+            For(item => Manager.Download(item));
+        }
 
         private ListView ActiveView
         {
@@ -472,11 +480,6 @@ namespace Player
                 item.Rate = 0;
             Close();
             Process.Start(App.Path + "Elephant Player.exe");
-        }
-
-        private void Menu_ConvertClick(object sender, RoutedEventArgs e)
-        {
-            For(item => ConverterWindow.Open(item, media => Manager.Add(media)));
         }
     }
 }
