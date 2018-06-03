@@ -27,7 +27,9 @@ namespace Player
             set
             {
                 TabControl.Visibility = value ? Visibility.Visible : Visibility.Collapsed;
-                MiniArtworkImage.Visibility = value ? Visibility.Visible : Visibility.Collapsed;
+                MiniArtworkImage.Visibility = TabControl.Visibility;
+                SearchButton.Visibility = TabControl.Visibility;
+                SearchLabel.Visibility = TabControl.Visibility;
             }
         }
       
@@ -84,9 +86,6 @@ namespace Player
             ArtistsView.MouseDoubleClick += DMouseDoubleClick;
             TitlesView.MouseDoubleClick += DMouseDoubleClick;
             AlbumsView.MouseDoubleClick += DMouseDoubleClick;
-
-            Resources["MagnifyOnBoard"].As<Storyboard>().Completed += (_, __) => ControlsNotNeededOnVisionIsVisible = false;
-            Resources["MagnifyOffBoard"].As<Storyboard>().CurrentStateInvalidated += (_, __) => ControlsNotNeededOnVisionIsVisible = true;
         }
 
         CollectionView[] Views = new CollectionView[4];
@@ -138,12 +137,7 @@ namespace Player
                 case InfoType.NextRequest: Play(Manager.Next()); break;
                 case InfoType.PrevRequest: Play(Manager.Previous()); break;
                 case InfoType.LengthFound: Manager.CurrentlyPlaying.Length = (TimeSpan)e.Object; break;
-                case InfoType.Magnifiement:
-                    var val = (bool)e.Object;
-                    MiniArtworkImage.Visibility = val ? Visibility.Hidden : Visibility.Visible;
-                    Resources[val ? "MagnifyOnBoard" : "MagnifyOffBoard"].As<Storyboard>().Begin();
-                    ControlsNotNeededOnVisionIsVisible = true;
-                    break;
+                case InfoType.Magnifiement: ControlsNotNeededOnVisionIsVisible = !(bool)e.Object; break;
                 default: break;
             }
         }

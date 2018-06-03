@@ -218,9 +218,9 @@
             </TabItem>
         </TabControl>
         <player:MediaPlayer x:Name="Player"/>
-        <Label Content="{Binding Text, ElementName=SearchBox}" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,0,0,0"/>
+        <Label x:Name="SearchLabel" Content="{Binding Text, ElementName=SearchBox}" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,0,0,0"/>
         <player:SegoeButton x:Name="SearchButton" HorizontalAlignment="Right" VerticalAlignment="Top" Glyph="Search" 
-                            MouseUp="SearchIcon_MouseEnter" Margin="0,20,10,0" EllipseType="Rectular" Width="16" Height="16"/>
+                            MouseUp="SearchIcon_MouseEnter" Margin="0,20,10,0" EllipseType="Rectular" Width="20" Height="20"/>
         <Popup x:Name="SearchPopup" PlacementTarget="{Binding ElementName=SearchButton}" StaysOpen="False" 
                Placement="Bottom" PopupAnimation="Fade" AllowsTransparency="True">
             <TextBox HorizontalAlignment="Right" VerticalAlignment="Top" Width="140" Height="20" x:Name="SearchBox" TextChanged="SearchBox_TextChanged"/>
@@ -311,6 +311,11 @@
                 <sys:Double x:Key="{x:Static SystemParameters.VerticalScrollBarWidthKey}">10</sys:Double>
             </Style.Resources>
         </Style>
+        <Style TargetType="StackPanel" x:Key="HeaderPanel">
+            <Setter Property="Orientation" Value="Horizontal"/>
+            <Setter Property="Height" Value="27"/>
+            <Setter Property="Width" Value="109" />
+        </Style>
         <SolidColorBrush x:Key="KeyOfBackground" Color="#FDDD" />
         <SolidColorBrush x:Key="KeyOfForeground" Color="#F111" />
 
@@ -320,18 +325,5 @@
         <Storyboard x:Key="SettingsOffBoard" AccelerationRatio="0.1" DecelerationRatio="0.9" Storyboard.TargetProperty="Margin">
             <ThicknessAnimation From="{Binding Margin, ElementName=SettingsGrid}" Storyboard.TargetName="SettingsGrid" To="-300,0,0,0"/>
         </Storyboard>
-        <Storyboard x:Key="MagnifyOnBoard" AccelerationRatio="0.1" DecelerationRatio="0.9" Storyboard.TargetProperty="Opacity">
-            <DoubleAnimation Storyboard.TargetName="TabControl" From="{Binding Opacity, ElementName=SettingsButton}" To="0" />
-            <DoubleAnimation Storyboard.TargetName="MiniArtworkImage" From="{Binding Opacity, ElementName=SettingsButton}" To="0" />
-        </Storyboard>
-        <Storyboard x:Key="MagnifyOffBoard" AccelerationRatio="0.1" DecelerationRatio="0.9" Storyboard.TargetProperty="Opacity">
-            <DoubleAnimation Storyboard.TargetName="TabControl" From="{Binding Opacity, ElementName=SettingsButton}" To="1" />
-            <DoubleAnimation Storyboard.TargetName="MiniArtworkImage" From="{Binding Opacity, ElementName=SettingsButton}" To="1" />
-        </Storyboard>
-        <Style TargetType="StackPanel" x:Key="HeaderPanel">
-            <Setter Property="Orientation" Value="Horizontal"/>
-            <Setter Property="Height" Value="30"/>
-            <Setter Property="Width" Value="100" />
-        </Style>
     </Window.Resources>
 </Window>

@@ -11,9 +11,8 @@
             <MediaElement x:Name="element" LoadedBehavior="Manual" UnloadedBehavior="Manual" 
                           MouseDown="Element_MouseDown" MediaEnded="Element_MediaEnded" 
                           Volume="1"/>
-            <local:SegoeButton x:Name="FullScreenButton" Glyph="FullScreen" HorizontalAlignment="Right" Margin="10" VerticalAlignment="Bottom" MouseUp="FullScreenButton_Clicked" />
         </Grid>
-        <Grid Background="Transparent" VerticalAlignment="Top" Height="87">
+        <Grid x:Name="ControlsGrid" Background="Transparent" VerticalAlignment="Top" Height="87">
             <Label Content="Content Title" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="67,0,0,0" FontSize="18" x:Name="TitleLabel" Foreground="{DynamicResource Foreground}"/>
             <Slider x:Name="PositionSlider"  ValueChanged="Position_Changed" PreviewMouseDown="Position_Holding" 
                VerticalAlignment="Center" Maximum="1000" Focusable="False" FocusVisualStyle="{x:Null}" Template="{DynamicResource FlatSlider}"
@@ -24,10 +23,11 @@
             <local:SegoeButton x:Name="PreviousButton" Glyph="Previous" Margin="87,0,0,25" MouseUp="PreviousButton_Clicked" />
             <local:SegoeButton x:Name="NextButton" Glyph="Next" Margin="172,0,0,25" MouseUp="NextButton_Clicked" />
             <local:SegoeButton x:Name="PlayPauseButton" Glyph="Play" MouseUp="PlayPauseButton_Clicked" Margin="127,0,0,24" Height="24" Width="24"/>
-            <local:SegoeButton x:Name="VisionButton" Glyph="TVMonitor" HorizontalAlignment="Center" Margin="0,0,0,25" MouseUp="VisionButton_Clicked" />
-            <local:SegoeIcon x:Name="VolumeIcon" Glyph="Volume3" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0, 0, 147, 25" />
-            <local:SegoeButton x:Name="PlayModeButton" Glyph="RepeatAll" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,185,25" EllipseType="Rectular" MouseUp="PlayMode_Click"/>
-            <Slider x:Name="VolumeSlider" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,40,25"  Template="{DynamicResource FlatSlider}" Foreground="#F444"
+            <local:SegoeButton x:Name="VisionButton" Glyph="TVMonitor" HorizontalAlignment="Center" Margin="0,0,0,24" MouseUp="VisionButton_Clicked" />
+            <local:SegoeButton x:Name="PlayModeButton" Glyph="RepeatAll" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,197,29" EllipseType="Rectular" MouseUp="PlayMode_Click"/>
+            <local:SegoeButton x:Name="FullScreenButton" Glyph="FullScreen" HorizontalAlignment="Right" Margin="0,0,10,29" VerticalAlignment="Bottom" MouseUp="FullScreenButton_Clicked" />
+            <local:SegoeIcon x:Name="VolumeIcon" Glyph="Volume3" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0, 0, 155, 29" Foreground="{DynamicResource Foreground}" />
+            <Slider x:Name="VolumeSlider" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,33,50,26"  Template="{DynamicResource FlatSlider}" Foreground="#F444"
                     Width="100" Maximum="100" SmallChange="2" LargeChange="10" AutoToolTipPlacement="TopLeft" ValueChanged="VolumeSlider_ValueChanged"/>
             <Grid.RenderTransform>
                 <TranslateTransform x:Name="ControlsTranslation" Y="0" />
@@ -58,7 +58,7 @@
             <ThicknessAnimation From="{Binding ElementName=elementCanvas, Path=Margin}" To="0" Storyboard.TargetProperty="Margin" />
         </Storyboard>
         <Storyboard x:Key="FullOnBoard" Storyboard.TargetProperty="Y" Storyboard.TargetName="ControlsTranslation" AccelerationRatio="0.9" DecelerationRatio="0.1">
-            <DoubleAnimation From="{Binding ElementName=ControlsTranslation, Path=Y}" To="-80" />
+            <DoubleAnimation From="{Binding ElementName=ControlsTranslation, Path=Y}" To="80" />
         </Storyboard>
         <Storyboard x:Key="FullOffBoard" Storyboard.TargetProperty="Y" Storyboard.TargetName="ControlsTranslation" AccelerationRatio="0.1" DecelerationRatio="0.9">
             <DoubleAnimation From="{Binding ElementName=ControlsTranslation, Path=Y}" To="0" />

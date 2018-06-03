@@ -68,6 +68,7 @@ namespace Player.Controls
             set
             {
                 magnified = value;
+                ControlsGrid.VerticalAlignment = value ? VerticalAlignment.Bottom : VerticalAlignment.Top;
                 MinifyAnimation.To = new Thickness(ActualWidth / 2, ActualHeight, ActualWidth / 2, 0);
                 if (value)
                     MagnifyBoard.Begin();
@@ -302,6 +303,7 @@ namespace Player.Controls
             media.Load();
             _Media = media;
             VisionButton.Visibility = media.IsVideo ? Visibility.Visible : Visibility.Hidden;
+            FullScreenButton.Visibility = VisionButton.Visibility;
             if (IsFullScreen && !media.IsVideo)
                 FullScreenButton.EmulateClick();
             Magnified = media.IsVideo;
