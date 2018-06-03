@@ -1,10 +1,9 @@
-﻿using System;
-using System.Windows;
-using Microsoft.Win32;
+﻿using Microsoft.Win32;
 using Player.Events;
-using System.Media;
-using System.Windows.Media.Imaging;
+using System;
+using System.Windows;
 using System.Windows.Input;
+using System.Windows.Media.Imaging;
 
 namespace Player
 {
@@ -71,7 +70,7 @@ namespace Player
             Close();
         }
 
-        private void ArtworkImage_MouseUp(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        private void ArtworkImage_MouseUp(object sender, MouseButtonEventArgs e)
         {
             if (ArtworkDialog.ShowDialog().Value)
             {
@@ -79,5 +78,9 @@ namespace Player
                 ArtworkImage.Source = new BitmapImage(new Uri(ArtworkDialog.FileName));
             }
         }
+
+        private void Grid_MouseDown(object sender, MouseButtonEventArgs e) { try { DragMove(); } catch (Exception) { } }
+
+        private void CancelButton_Click(object sender, MouseButtonEventArgs e) => Close();
     }
 }

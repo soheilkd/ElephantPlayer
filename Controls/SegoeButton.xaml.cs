@@ -1,13 +1,12 @@
-﻿using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Input;
-using System.Windows.Media.Animation;
-using System;
+﻿using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 namespace Player.Controls
 {
     public partial class SegoeButton : UserControl
     {
+        public static readonly MouseButtonEventArgs DefaultMouseUpArgs =
+            new MouseButtonEventArgs(Mouse.PrimaryDevice, 1, MouseButton.Left) { RoutedEvent = MouseUpEvent };
         public static readonly DependencyProperty EllipseProperty =
             DependencyProperty.Register(nameof(EllipseType), typeof(EllipseTypes), typeof(SegoeButton), new PropertyMetadata(EllipseTypes.Circular));
         public static readonly DependencyProperty GlyphProperty =
@@ -21,7 +20,8 @@ namespace Player.Controls
             set
             {
                 SetValue(EllipseProperty, value);
-                MainEllipse.CornerRadius = new CornerRadius(value == 0 ? 10 : 20);
+                MainEllipse.CornerRadius = new CornerRadius(value == 0 ? 2 : 20);
+                ClickEllipse.CornerRadius = new CornerRadius(value == 0 ? 2 : 100);
             }
         }
         public Glyph Glyph
@@ -36,14 +36,14 @@ namespace Player.Controls
 
         public SegoeButton() => InitializeComponent();
 
-        void UserControl_Loaded(object sender, RoutedEventArgs e)
+        private void UserControl_Loaded(object sender, RoutedEventArgs e)
         {
-            MainEllipse.CornerRadius = new CornerRadius(EllipseType == 0 ? 2 : 20);
-            MainIcon.Glyph = Glyph;
+            EllipseType = EllipseType;
+            Glyph = Glyph;
         }
-        private static void OnGlyphChange(DependencyObject d, DependencyPropertyChangedEventArgs e)
-        {
+        private static void OnGlyphChange(DependencyObject d, DependencyPropertyChangedEventArgs e) =>
+            d.SetValue(GlyphProperty, (Glyph)d.GetValue(GlyphProperty));
 
-        }
+        public void EmulateClick() => RaiseEvent(DefaultMouseUpArgs);
     }
 }

@@ -3,39 +3,41 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:Player" WindowStartupLocation="CenterScreen"
-        xmlns:controls="clr-namespace:Player.Controls" Background="#DDD"
-        mc:Ignorable="d" WindowStyle="ToolWindow"
-        Title="Properties" Height="626" Width="269">
-    <Grid >
-        <Label Content="Lyrics" Margin="6,435,0,0" />
-        <TextBox x:Name="LyricsBox" Margin="0,463,0,0" Height="Auto" VerticalAlignment="Stretch" VerticalScrollBarVisibility="Auto"/>
+        WindowStartupLocation="CenterScreen" AllowsTransparency="True"
+        xmlns:controls="clr-namespace:Player.Controls" Background="#EEE"
+        mc:Ignorable="d" WindowStyle="None" ResizeMode="NoResize" BorderThickness="0.1"
+        Title="Properties" Height="674" Width="269">
+    <Grid>
+        <DockPanel Background="#01FFFFFF" VerticalAlignment="Top" Height="160" MouseDown="Grid_MouseDown" />
+        <Label Content="Lyrics" Margin="8,476,0,0" />
+        <TextBox x:Name="LyricsBox" Height="170" VerticalAlignment="Bottom" VerticalScrollBarVisibility="Auto"/>
 
-        <Label Content="Title" Margin="13,159,0,0" />
-        <TextBox x:Name="TitleBox" Margin="91,159,8,0"/>
-        <Label Content="Artist" Margin="13,184,0,0"/>
-        <TextBox x:Name="ArtistBox" Margin="91,184,8,0" />
-        <Label Content="Album" Margin="13,209,0,0"/>
-        <TextBox x:Name="AlbumBox" Margin="91,209,8,0" />
-        <Label Content="Album Artist" Margin="10,234,0,0" />
-        <TextBox x:Name="AlbumArtistBox" Margin="91,234,8,0" />
-        <Label Content="Composer" Margin="10,259,0,0" />
-        <TextBox x:Name="ComposerBox" Margin="91,259,8,0" />
-        <Label Content="Conductor" Margin="10,284,0,0" />
-        <TextBox x:Name="ConductorBox" Margin="91,284,8,0" />
-        <Label Content="Genre" Margin="10,309,0,0" />
-        <TextBox x:Name="GenreBox" Margin="91,309,8,0"  />
-        <Label Content="Track" Margin="10,334,0,0"/>
-        <TextBox x:Name="TrackBox" Margin="91,334,8,0" />
-        <Label Content="Comment" Margin="10,359,0,0" />
-        <TextBox x:Name="YearBox" Margin="91,359,8,0" />
-        <Label Content="Year" Margin="10,384,0,0"/>
-        <TextBox x:Name="CommentBox" Margin="91,384,8,0" />
-        <Label Content="Copyright" Margin="10,409,0,-16" />
-        <TextBox x:Name="CopyrightBox" Margin="91,409,8,0" />
-        <Image x:Name="ArtworkImage" Height="150" Width="150"  VerticalAlignment="Top" HorizontalAlignment="Left" MouseUp="ArtworkImage_MouseUp" Margin="3,2,0,0"/>
-        <controls:SegoeButton Margin="164,125,0,0" MouseUp="RemoveArtworkClick" Glyph="Delete" EllipseType="Rectular" />
-        <controls:SegoeButton Margin="0,8,8,0" HorizontalAlignment="Right" MouseUp="SaveButtonClick" Glyph="Save" EllipseType="Rectular"/>
+        <Label Content="Title" Margin="14,200,0,0" />
+        <TextBox x:Name="TitleBox" Margin="92,200,7,0"/>
+        <Label Content="Artist" Margin="14,224,0,0"/>
+        <TextBox x:Name="ArtistBox" Margin="92,224,7,0" />
+        <Label Content="Album" Margin="14,250,0,0"/>
+        <TextBox x:Name="AlbumBox" Margin="92,250,7,0" />
+        <Label Content="Album Artist" Margin="12,274,0,0" />
+        <TextBox x:Name="AlbumArtistBox" Margin="92,274,7,0" />
+        <Label Content="Composer" Margin="12,300,0,0" />
+        <TextBox x:Name="ComposerBox" Margin="92,300,7,0" />
+        <Label Content="Conductor" Margin="12,324,0,0" />
+        <TextBox x:Name="ConductorBox" Margin="92,324,7,0" />
+        <Label Content="Genre" Margin="12,350,0,0" />
+        <TextBox x:Name="GenreBox" Margin="92,350,7,0"  />
+        <Label Content="Track" Margin="12,374,0,0"/>
+        <TextBox x:Name="TrackBox" Margin="92,374,7,0" />
+        <Label Content="Comment" Margin="12,400,0,0" />
+        <TextBox x:Name="YearBox" Margin="92,400,7,0" />
+        <Label Content="Year" Margin="12,424,0,0"/>
+        <TextBox x:Name="CommentBox" Margin="92,424,7,0" />
+        <Label Content="Copyright" Margin="12,450,0,0" />
+        <TextBox x:Name="CopyrightBox" Margin="92,450,7,0" />
+        <Image x:Name="ArtworkImage" Height="150" Width="150"  VerticalAlignment="Top" HorizontalAlignment="Left" MouseUp="ArtworkImage_MouseUp" Margin="4,42,0,0"/>
+        <controls:SegoeButton Margin="166,166,0,0" MouseUp="RemoveArtworkClick" Glyph="Delete" EllipseType="Rectular" />
+        <controls:SegoeButton Margin="0,8,48,0" HorizontalAlignment="Right" MouseUp="SaveButtonClick" Glyph="Save" EllipseType="Rectular"/>
+        <controls:SegoeButton Margin="0,8,8,0" HorizontalAlignment="Right" MouseUp="CancelButton_Click" Glyph="Cancel" EllipseType="Rectular"/>
         <Grid.Resources>
             <Style TargetType="{x:Type controls:SegoeButton}">
                 <Setter Property="HorizontalAlignment" Value="Left"/>
@@ -59,4 +61,13 @@
             </Style>
         </Grid.Resources>
     </Grid>
+    <Window.Triggers>
+        <EventTrigger RoutedEvent="Loaded">
+            <BeginStoryboard>
+                <Storyboard Storyboard.TargetProperty="Opacity">
+                    <DoubleAnimation From="0" To="1" AccelerationRatio="0.8" DecelerationRatio="0.2" SpeedRatio="2"/>
+                </Storyboard>
+            </BeginStoryboard>
+        </EventTrigger>
+    </Window.Triggers>
 </Window>

@@ -19,21 +19,22 @@ namespace Player
     public class Media : INotifyPropertyChanged
     {
         public Media() { }
-        public string _Name;
+        private string _Name;
         public string Name { get => _Name; set { _Name = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Name))); } }
-        public string _Artist;
+        private string _Artist;
         public string Artist { get => _Artist; set { _Artist = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Artist))); } }
-        public string _Title;
+        private string _Title;
         public string Title { get => _Title; set { _Title = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Title))); } }
-        public string _Album;
+        private string _Album;
         public string Album { get => _Album; set { _Album = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Album))); } }
         public Uri Url { get; set; }
-        public int _Rate;
+        private int _Rate;
         public int Rate { get => _Rate; set { _Rate = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Rate))); } }
-        public TimeSpan _Len;
+        private TimeSpan _Len;
         public TimeSpan Length { get => _Len; set { _Len = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Length))); } }
-        public int _PlayCount;
+        private int _PlayCount;
         public int PlayCount { get => _PlayCount; set { _PlayCount = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(PlayCount))); } }
+        public DateTime AdditionDate { get; set; }
         public bool IsOffline => (int)Type <= 2;
         public MediaType Type;
         public string Path => Url.IsFile ? Url.LocalPath : Url.AbsoluteUri;
@@ -98,6 +99,7 @@ namespace Player
         public Media(Uri url)
         {
             Url = url;
+            AdditionDate = DateTime.Now;
             Load();
         }
         public override string ToString() => $"{Artist} - {Title}";
@@ -215,6 +217,12 @@ namespace Player
                 case NotifyCollectionChangedAction.Remove:
                     for (int i = 0; i < VariousSources.Length; i++)
                             VariousSources[i].Remove(e.OldItems[0] as Media);
+                    Clients.ForEach(item =>
+                    {
+                        if (new Uri(item.BaseAddress).AbsoluteUri == e.OldItems[0].As<Media>().Path)
+                            if (item.IsBusy)
+                                item.CancelAsync();
+                    });
                     break;
                 case NotifyCollectionChangedAction.Replace:
                     for (int i = 0; i < VariousSources.Length; i++)
@@ -480,10 +488,12 @@ namespace Player
             }
         }
 
+        List<WebClient> Clients = new List<WebClient>();
         public void Download(Media media)
         {
             var SavePath = $"{App.Path}Downloads\\{media.Title}";
             var Client = new WebClient();
+            Client.BaseAddress = media.Path;
             Client.DownloadProgressChanged += (_, e) => media.Title = $"Downloading... {e.ProgressPercentage}%";
             Client.DownloadFileCompleted += (_, e) =>
             {
@@ -510,8 +520,10 @@ namespace Player
                     if (CurrentlyPlayingIndex == index)
                         RequestPlay(this[index]);
                 }
+                Clients.Remove(Client);
             };
             Client.DownloadFileAsync(media.Url, SavePath);
+            Clients.Add(Client);
         }
 
     }

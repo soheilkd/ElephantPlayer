@@ -22,18 +22,15 @@ namespace Player
         private MassiveLibrary Library = new MassiveLibrary();
         private Timer PlayCountTimer = new Timer(100000) { AutoReset = false };
         private Timer SizeChangeTimer = new Timer(50) { AutoReset = true };
-        private bool SettingsOpened;
         private bool ControlsNotNeededOnVisionIsVisible
         {
             set
             {
                 TabControl.Visibility = value ? Visibility.Visible : Visibility.Collapsed;
-                SettingsButton.Visibility = value ? Visibility.Visible : Visibility.Collapsed;
                 MiniArtworkImage.Visibility = value ? Visibility.Visible : Visibility.Collapsed;
             }
         }
       
-        
         public MainWindow()
         {
             InitializeComponent();
@@ -75,18 +72,6 @@ namespace Player
             Settings_OrinateCheck.Unchecked += (_, __) => App.Settings.VisionOrientation = false;
             Settings_LiveLibraryCheck.Checked += (_, __) => App.Settings.LiveLibrary = true;
             Settings_LiveLibraryCheck.Unchecked += (_, __) => App.Settings.LiveLibrary = false;
-            SettingsButton.MouseUp += delegate
-            {
-                if (!SettingsOpened)
-                {
-                    (Resources["SettingsOnBoard"] as Storyboard).Begin();
-                }
-                else
-                {
-                    (Resources["SettingsOffBoard"] as Storyboard).Begin();
-                }
-                SettingsOpened = !SettingsOpened;
-            };
 
             Player.ParentWindow = this;
             TaskbarItemInfo = Player.Thumb.Info;
@@ -104,8 +89,8 @@ namespace Player
             Resources["MagnifyOffBoard"].As<Storyboard>().CurrentStateInvalidated += (_, __) => ControlsNotNeededOnVisionIsVisible = true;
         }
 
-        CollectionView[] Views = new CollectionView[3];
-        PropertyGroupDescription[] Descriptions = new PropertyGroupDescription[3];
+        CollectionView[] Views = new CollectionView[4];
+        PropertyGroupDescription[] Descriptions = new PropertyGroupDescription[4];
         private void RebindViews()
         {
             TitlesView.ItemsSource = Manager.VariousSources[0];
@@ -155,11 +140,7 @@ namespace Player
                 case InfoType.LengthFound: Manager.CurrentlyPlaying.Length = (TimeSpan)e.Object; break;
                 case InfoType.Magnifiement:
                     var val = (bool)e.Object;
-                    SettingsButton.Visibility = val ? Visibility.Hidden : Visibility.Visible;
                     MiniArtworkImage.Visibility = val ? Visibility.Hidden : Visibility.Visible;
-                    if ((bool)e.Object && SettingsOpened)
-                        Resources["SettingsOffBoard"].As<Storyboard>().Begin();
-                    SettingsOpened = false;
                     Resources[val ? "MagnifyOnBoard" : "MagnifyOffBoard"].As<Storyboard>().Begin();
                     ControlsNotNeededOnVisionIsVisible = true;
                     break;
@@ -248,6 +229,14 @@ namespace Player
                     case Forms.Keys.M: Menu_MoveClick(new MenuItem(), null); break;
                     case Forms.Keys.P: Menu_PropertiesClick(this, null); break;
                     case Forms.Keys.L: Menu_LocationClick(this, null); break;
+                    case Forms.Keys.Q:
+                        SearchBox.IsEnabled = false;
+                        SearchBox.Text = "";
+                        SearchButton.EmulateClick();
+                        await Task.Delay(100);
+                        SearchBox.IsEnabled = true;
+                        SearchBox.Focus();
+                        break;
                     default: break;
                 }
             }
@@ -267,7 +256,11 @@ namespace Player
                     case Forms::Keys.A:
                         var cb = Clipboard.GetText() ?? String.Empty;
                         if (Uri.TryCreate(cb, UriKind.Absolute, out var uri))
+                        {
                             Manager.Add(uri.AbsoluteUri);
+                            if (Manager[0].Type == MediaType.OnlineFile)
+                                Manager.Download(Manager[0]);
+                        }
                         else
                             return;
                         break;
@@ -443,6 +436,10 @@ namespace Player
         {
             For(item => Manager.Download(item));
         }
+        private void Menu_VLC(object sender, RoutedEventArgs e)
+        {
+            For(item => Process.Start(new ProcessStartInfo(@"C:\Program Files\VideoLAN\VLC\vlc.exe", $"\"{item.Path}\"")));
+        }
 
         private ListView ActiveView
         {
@@ -453,6 +450,7 @@ namespace Player
                     case 0: return TitlesView;
                     case 1: return ArtistsView;
                     case 2: return AlbumsView;
+                    case 3: return RatesView;
                     default: return null;
                 }
             }
@@ -481,5 +479,6 @@ namespace Player
             Close();
             Process.Start(App.Path + "Elephant Player.exe");
         }
+
     }
 }

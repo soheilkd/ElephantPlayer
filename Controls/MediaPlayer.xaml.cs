@@ -27,7 +27,7 @@ namespace Player.Controls
                 }
             }
         }
-        public double Volume { get => element.Volume; set => element.Volume = value; }
+        public double Volume { get => element.Volume; set { element.Volume = value; ProcessVolume(); } }
         private Media _Media = new Media();
         public event EventHandler<InfoExchangeArgs> EventHappened;
         private Timer DraggerTimer = new Timer(250) { AutoReset = false };
@@ -79,7 +79,7 @@ namespace Player.Controls
                     ParentWindow.Height--;
                     ParentWindow.Height++;
                 }
-                Resources["ButtonsForeground"] = value ? Brushes.White : Brushes.Black;
+                Resources["Foreground"] = value ? Brushes.White : Brushes.Black;
                 EventHappened?.Invoke(this, new InfoExchangeArgs() { Type = InfoType.Magnifiement, Object = value });
             }
         }
@@ -97,13 +97,6 @@ namespace Player.Controls
             Thumb.PausePressed += (obj, f) => PlayPause();
             Thumb.PlayPressed += (obj, f) => PlayPause();
             Thumb.PrevPressed += (obj, f) => PlayPrevious();
-            switch (App.Settings.PlayMode)
-            {
-                case PlayMode.Shuffle: PlayModeButton.Glyph = Glyph.Shuffle; break;
-                case PlayMode.RepeatOne: PlayModeButton.Glyph = Glyph.RepeatOne; break;
-                case PlayMode.RepeatAll: PlayModeButton.Glyph = Glyph.RepeatAll; break;
-                default: PlayModeButton.Glyph = Glyph.RepeatAll; break;
-            }
             MouseMoveTimer.Elapsed += (_, __) => ControlsVisible = false;
             PlayCountTimer.Elapsed += PlayCountTimer_Elapsed;
             FullOnBoard.Completed += (_, __) => Cursor = Cursors.None;
@@ -186,44 +179,6 @@ namespace Player.Controls
             element.Play();
             IsUserSeeking = false;
         }
-        private void PlayModeButton_Clicked(object sender, MouseButtonEventArgs e)
-        {
-            switch (PlayModeButton.Glyph)
-            {
-                case Glyph.Shuffle:
-                    PlayModeButton.Glyph = Glyph.RepeatOne;
-                    App.Settings.PlayMode = PlayMode.RepeatOne;
-                    break;
-                case Glyph.RepeatOne:
-                    PlayModeButton.Glyph = Glyph.RepeatAll;
-                    App.Settings.PlayMode = PlayMode.RepeatAll;
-                    break;
-                case Glyph.RepeatAll:
-                    PlayModeButton.Glyph = Glyph.Shuffle;
-                    App.Settings.PlayMode = PlayMode.Shuffle;
-                    break;
-                default: break;
-            }
-        }
-        private async void VolumeButton_Holding(object sender, MouseButtonEventArgs e)
-        {
-            VolumePopup.IsOpen = true;
-            while (e.LeftButton == MouseButtonState.Pressed)
-            {
-                if (element.Volume < 1)
-                    element.Volume += 0.01;
-                ProcessVolume();
-                await Task.Delay(50);
-            }
-            while (e.RightButton == MouseButtonState.Pressed)
-            {
-                if (element.Volume > 0)
-                    element.Volume -= 0.01;
-                ProcessVolume();
-                await Task.Delay(50);
-            }
-            VolumePopup.IsOpen = false;
-        }
         private void PlayPauseButton_Clicked(object sender, MouseButtonEventArgs e)
         {
             if (PlayPauseButton.Glyph == Glyph.Pause)
@@ -253,7 +208,6 @@ namespace Player.Controls
         private void VisionButton_Clicked(object sender, MouseButtonEventArgs e)
         {
             Magnified = !Magnified;
-  
         }
         private void FullScreenButton_Clicked(object sender, MouseButtonEventArgs e)
         {
@@ -281,20 +235,46 @@ namespace Player.Controls
 
         private void ProcessVolume()
         {
-            VolumeLabel.Content = (element.Volume * 100).ToInt();
             switch (element.Volume)
             {
-                case double n when (n < 0.1): VolumeButton.Glyph = Glyph.Volume0; break;
-                case double n when (n < 0.4): VolumeButton.Glyph = Glyph.Volume1; break;
-                case double n when (n < 0.8): VolumeButton.Glyph = Glyph.Volume2; break;
-                default: VolumeButton.Glyph = Glyph.Volume3; break;
+                case double n when (n < 0.1): VolumeIcon.Glyph = Glyph.Volume0; break;
+                case double n when (n < 0.4): VolumeIcon.Glyph = Glyph.Volume1; break;
+                case double n when (n < 0.8): VolumeIcon.Glyph = Glyph.Volume2; break;
+                default: VolumeIcon.Glyph = Glyph.Volume3; break;
             }
             App.Settings.Volume = element.Volume;
         }
 
-        public void PlayNext() => NextButton_Clicked(this, null);
-        public void PlayPrevious() => PreviousButton_Clicked(this, null);
-        public void PlayPause() => PlayPauseButton_Clicked(this, null);
+        public void PlayNext() => NextButton.EmulateClick();
+        public void PlayPrevious() => PreviousButton.EmulateClick();
+        public void PlayPause() => PlayPauseButton.EmulateClick();
+
+        private void VolumeSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            Volume = VolumeSlider.Value / 100;
+        }
+
+        private void PlayMode_Click(object sender, MouseButtonEventArgs e)
+        {
+            switch (PlayModeButton.Glyph)
+            {
+                case Glyph.RepeatAll:
+                    PlayModeButton.Glyph = Glyph.RepeatOne;
+                    App.Settings.PlayMode = PlayMode.RepeatOne;
+                    break;
+                case Glyph.RepeatOne:
+                    PlayModeButton.Glyph = Glyph.Shuffle;
+                    App.Settings.PlayMode = PlayMode.Shuffle;
+                    break;
+                case Glyph.Shuffle:
+                    PlayModeButton.Glyph = Glyph.RepeatAll;
+                    App.Settings.PlayMode = PlayMode.RepeatAll;
+                    break;
+                default:
+                    break;
+            }
+        }
+
         public void SmallSlideLeft() => Position = Position.Subtract(SmallChange);
         public void SmallSlideRight() => Position = Position.Add(SmallChange);
 
@@ -323,9 +303,8 @@ namespace Player.Controls
             _Media = media;
             VisionButton.Visibility = media.IsVideo ? Visibility.Visible : Visibility.Hidden;
             if (IsFullScreen && !media.IsVideo)
-                FullScreenButton_Clicked(this, null);
+                FullScreenButton.EmulateClick();
             Magnified = media.IsVideo;
-            FullScreenButton.Visibility = VisionButton.Visibility;
             PlayPauseButton.Glyph = Glyph.Pause;
             element.Source = media.Url;
             element.Play();
@@ -337,8 +316,9 @@ namespace Player.Controls
         private void UserControl_Loaded(object sender, RoutedEventArgs e)
         {
             RunUX();
-            element.Volume = App.Settings.Volume;
+            Volume = App.Settings.Volume;
             App.Settings.Changed += (_, __) => MouseMoveTimer = new Timer(App.Settings.MouseOverTimeout) { AutoReset = false };
+            VolumeSlider.Value = Volume * 100;
         }
     }
 }

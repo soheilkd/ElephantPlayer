@@ -11,7 +11,8 @@
                 <Setter Property="Template">
                     <Setter.Value>
                         <ControlTemplate TargetType="ToggleButton">
-                            <Path x:Name="star" Data="M 9,0 L 7,6 L 0,6 L 6,11 L 4,17 L 9,12 L 14,17 L 12,11 L 18,6 L 11,6 L 9,0" Width="21" Height="20" Fill="LightGray" />
+                            <Path x:Name="star" Data="M 9,0 L 7,6 L 0,6 L 6,11 L 4,17 L 9,12 L 14,17 L 12,11 L 18,6 L 11,6 L 9,0" 
+                                  Width="21" Height="20" Fill="LightGray" StrokeThickness="0.15" Stroke="Black" />
                             <ControlTemplate.Triggers>
                                 <Trigger Property="IsChecked" Value="True">
                                     <Setter TargetName="star" Property="Fill" Value="Gold"/>
