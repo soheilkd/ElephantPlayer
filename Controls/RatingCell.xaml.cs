@@ -16,9 +16,17 @@ namespace Player.Controls
 {
     public partial class RatingCell : StackPanel
     {
+        public int RatingValue
+        {
+            get => (int)GetValue(RatingValueProperty);
+            set => SetValue(RatingValueProperty, value);
+        }
+        private int tempRatingValue;
+
         public RatingCell()
         {
             InitializeComponent();
+            Loaded += (_, __) => Update(RatingValue);
         }
 
         public static readonly DependencyProperty RatingValueProperty = DependencyProperty.Register(
@@ -27,20 +35,6 @@ namespace Player.Controls
             typeof(RatingCell),
             new PropertyMetadata(0, new PropertyChangedCallback(RatingValueChanged)));
 
-        public Int32 RatingValue
-        {
-            get => (int)GetValue(RatingValueProperty);
-            set
-            {
-                if (value < 0)
-                    SetValue(RatingValueProperty, 0);
-                else if (value > 5)
-                    SetValue(RatingValueProperty, 5);
-                else
-                    SetValue(RatingValueProperty, value);
-            }
-        }
-        private Int32 tempRatingValue;
         private static void RatingValueChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
         {
             Int32 ratingValue = (Int32)e.NewValue;
@@ -58,11 +52,15 @@ namespace Player.Controls
                 button.IsChecked = true;
             }
         }
-        
-        private void RatingButtonMouseLeave(object sender, MouseEventArgs e)
+        private void RatingButtonMouseLeave(object sender, MouseEventArgs e) => Update(RatingValue);
+        private void RatingButtonMouseEnter(object sender, MouseEventArgs e)
         {
-            Update(RatingValue);
+            tempRatingValue = int.Parse(sender.As<ToggleButton>().Tag.ToString());
+            Update(tempRatingValue);
         }
+        private void Parentic_MouseUp(object sender, MouseButtonEventArgs e) => RatingValue = tempRatingValue;
+        private void ToggleButton_Click(object sender, RoutedEventArgs e) => Parentic_MouseUp(this, null);
+
         private void Update(int withValue)
         {
             ToggleButton button = null;
@@ -78,17 +76,5 @@ namespace Player.Controls
                 button.IsChecked = false;
             }
         }
-        private void RatingButtonMouseEnter(object sender, MouseEventArgs e)
-        {
-            tempRatingValue = int.Parse(sender.As<ToggleButton>().Tag.ToString());
-            Update(tempRatingValue);
-        }
-
-        private void Parentic_MouseUp(object sender, MouseButtonEventArgs e)
-        {
-            RatingValue = tempRatingValue;
-        }
-
-        private void ToggleButton_Click(object sender, RoutedEventArgs e) => Parentic_MouseUp(this, null);
     }
 }

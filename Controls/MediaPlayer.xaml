@@ -51,10 +51,10 @@
             <Setter Property="VerticalAlignment" Value="Bottom" />
             <Setter Property="HorizontalAlignment" Value="Left"/>
         </Style>
-        <Storyboard x:Key="MinifyBoard" Storyboard.TargetName="elementCanvas" AccelerationRatio="0.2" DecelerationRatio="0.8" SpeedRatio="1">
+        <Storyboard x:Key="MinifyBoard" Storyboard.TargetName="elementCanvas" AccelerationRatio="0.4" DecelerationRatio="0.6" SpeedRatio="1">
             <ThicknessAnimation From="{Binding ElementName=elementCanvas, Path=Margin}" To="200,500,200,0" Storyboard.TargetProperty="Margin" />
         </Storyboard>
-        <Storyboard x:Key="MagnifyBoard" Storyboard.TargetName="elementCanvas" AccelerationRatio="0.2" DecelerationRatio="0.8" SpeedRatio="1">
+        <Storyboard x:Key="MagnifyBoard" Storyboard.TargetName="elementCanvas" AccelerationRatio="0.4" DecelerationRatio="0.6" SpeedRatio="1">
             <ThicknessAnimation From="{Binding ElementName=elementCanvas, Path=Margin}" To="0" Storyboard.TargetProperty="Margin" />
         </Storyboard>
         <Storyboard x:Key="FullOnBoard" Storyboard.TargetProperty="Y" Storyboard.TargetName="ControlsTranslation" AccelerationRatio="0.9" DecelerationRatio="0.1">

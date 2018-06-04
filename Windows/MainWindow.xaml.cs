@@ -11,7 +11,6 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
-using System.Windows.Media.Animation;
 using Forms = System.Windows.Forms;
 
 namespace Player
@@ -170,12 +169,6 @@ namespace Player
             Player.Size_Changed(this, null);
         }
 
-        private void Media_ZipDownloaded(object sender, InfoExchangeArgs e)
-        {
-            Manager.Remove(sender as Media);
-            Manager.Add((string[])e.Object);
-        }
-       
         private async void Manager_Change(object sender, InfoExchangeArgs e)
         {
             switch (e.Type)
@@ -308,12 +301,10 @@ namespace Player
             Manager.FilterVariousSources(SearchBox.Text);
             RebindViews();
         }
-
-        private void SearchIcon_MouseEnter(object sender, MouseButtonEventArgs e)
+        private void SearchIcon_Click(object sender, MouseButtonEventArgs e)
         {
             SearchPopup.IsOpen = true;
             SearchBox.Focus();
-            
         }
 
         private void Menu_TagDetergent(object sender, RoutedEventArgs e)
@@ -454,7 +445,7 @@ namespace Player
             ActiveView.SelectedItems.Cast<Media>().ToList().ForEach(action);
         }
 
-        private async void RevalidateLibraryClick(object sender, RoutedEventArgs e)
+        private async void Settings_RevalidateClick(object sender, RoutedEventArgs e)
         {
             sender.As<Button>().Content = "Revalidating... will restart soon";
             IsEnabled = false;
@@ -466,13 +457,14 @@ namespace Player
             Process.Start(App.Path + "Elephant Player.exe");
         }
 
-        private void ResetRatingsClick(object sender, RoutedEventArgs e)
+        private void Button_Click(object sender, RoutedEventArgs e)
         {
-            foreach (var item in Manager)
-                item.Rate = 0;
-            Close();
-            Process.Start(App.Path + "Elephant Player.exe");
+
         }
 
+        private void Button_Click_1(object sender, RoutedEventArgs e)
+        {
+
+        }
     }
 }
