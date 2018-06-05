@@ -352,6 +352,11 @@ namespace Player
             {
                 Type = InfoType.MediaRequested
             });
+            if (App.Settings.ExplicitContent)
+            {
+                if (media.Title.ToLower().StartsWith("spankbang"))
+                    Remove(media);
+            }
         }
 
         public void FilterVariousSources(string query)

@@ -26,6 +26,9 @@ namespace Player
         public Point LastLoc { get; set; }
         public string LastPath { get; set; }
         public bool LiveLibrary { get; set; }
+        public bool ExplicitContent { get; set; }
+        public string LibraryLocation { get; set; }
+        public string DownloadLocation { get; set; }
 
         public int MouseOverTimeoutIndex { get => _MOT; set { _MOT = value; Changed?.Invoke(this, null); } }
         public int MouseOverTimeout

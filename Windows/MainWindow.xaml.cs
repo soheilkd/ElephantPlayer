@@ -66,6 +66,7 @@ namespace Player
             Settings_AncestorCombo.SelectedIndex = App.Settings.MainKey;
             Settings_OrinateCheck.IsChecked = App.Settings.VisionOrientation;
             Settings_LiveLibraryCheck.IsChecked = App.Settings.LiveLibrary;
+            Settings_ExplicitCheck.IsChecked = App.Settings.ExplicitContent;
             Settings_TimeoutCombo.SelectedIndex = App.Settings.MouseOverTimeoutIndex;
             Settings_AncestorCombo.SelectionChanged += (_, __) => App.Settings.MainKey = Settings_AncestorCombo.SelectedIndex;
             Settings_TimeoutCombo.SelectionChanged += (_, __) => App.Settings.MouseOverTimeoutIndex = Settings_TimeoutCombo.SelectedIndex;
@@ -73,6 +74,8 @@ namespace Player
             Settings_OrinateCheck.Unchecked += (_, __) => App.Settings.VisionOrientation = false;
             Settings_LiveLibraryCheck.Checked += (_, __) => App.Settings.LiveLibrary = true;
             Settings_LiveLibraryCheck.Unchecked += (_, __) => App.Settings.LiveLibrary = false;
+            Settings_ExplicitCheck.Checked += (_, __) => App.Settings.ExplicitContent = true;
+            Settings_ExplicitCheck.Unchecked += (_, __) => App.Settings.ExplicitContent = false;
 
             Player.ParentWindow = this;
             TaskbarItemInfo = Player.Thumb.Info;
@@ -80,11 +83,12 @@ namespace Player
             Resources["LastPath"] = App.Settings.LastPath;
 
             RebindViews();
-            ///BindingOperations.EnableCollectionSynchronization(Manager.Items, QueueListView);
             Manager.CollectionChanged += Manager_CollectionChanged;
             ArtistsView.MouseDoubleClick += DMouseDoubleClick;
             TitlesView.MouseDoubleClick += DMouseDoubleClick;
             AlbumsView.MouseDoubleClick += DMouseDoubleClick;
+            Settings_LibraryLabel.Content = "Current: " + App.Settings.LibraryLocation;
+            Settings_DownloadsLabel.Content = "Current: " + App.Settings.DownloadLocation;
         }
 
         CollectionView[] Views = new CollectionView[4];
@@ -263,14 +267,7 @@ namespace Player
                 default: break;
             }
         }
-
-        private void AnySettingChanged(object sender, RoutedEventArgs e)
-        {
-            if (!IsLoaded)
-                return;
-            App.Settings.Save();
-        }
-
+        
         private void Play(Media media)
         {
             Player.FullStop();
@@ -313,8 +310,6 @@ namespace Player
         }
         private void Menu_PlayAfterClick(object sender, RoutedEventArgs e)
         {
-            if (App.Settings.PlayMode != PlayMode.RepeatAll)
-                MessageBox.Show("Hey, illegal on shuffle or repeat-single playing mode, anyway", "WHAT THA FUCK", MessageBoxButton.OK, MessageBoxImage.Information);
             For(item => Manager.Move(Manager.IndexOf(item), Manager.CurrentlyPlayingIndex + 1));
         }
         private void Menu_DuplicateClick(object sender, RoutedEventArgs e)
@@ -426,6 +421,54 @@ namespace Player
             For(item => Process.Start(new ProcessStartInfo(@"C:\Program Files\VideoLAN\VLC\vlc.exe", $"\"{item.Path}\"")));
         }
 
+        private void AnySettingChanged(object sender, RoutedEventArgs e)
+        {
+            if (!IsLoaded)
+                return;
+            App.Settings.Save();
+        }
+        private async void Settings_RevalidateClick(object sender, RoutedEventArgs e)
+        {
+            sender.As<Button>().Content = "Revalidating... will restart soon";
+            IsEnabled = false;
+            await Task.Delay(2000);
+            Hide();
+            Player.FullStop();
+            Manager.Revalidate();
+            Close();
+            Process.Start(App.Path + "Elephant Player.exe");
+        }
+        private void Settings_LibraryLocationBrowse(object sender, RoutedEventArgs e)
+        {
+            var diag = new Forms::FolderBrowserDialog()
+            {
+                RootFolder = Environment.SpecialFolder.Desktop,
+                ShowNewFolderButton = true,
+                Description = "Library Location",
+                SelectedPath = App.Settings.LibraryLocation
+            };
+            if (diag.ShowDialog() == Forms::DialogResult.OK)
+            {
+                App.Settings.LibraryLocation = diag.SelectedPath;
+                Settings_LibraryLabel.Content = "Current: " + diag.SelectedPath;
+            }
+        }
+        private void Settings_DownloadsLocationBrowse(object sender, RoutedEventArgs e)
+        {
+            var diag = new Forms::FolderBrowserDialog()
+            {
+                RootFolder = Environment.SpecialFolder.Desktop,
+                ShowNewFolderButton = true,
+                Description = "Downloads Location",
+                SelectedPath = App.Settings.DownloadLocation
+            };
+            if (diag.ShowDialog() == Forms::DialogResult.OK)
+            {
+                App.Settings.DownloadLocation = diag.SelectedPath;
+                Settings_DownloadsLabel.Content = "Current: " + diag.SelectedPath;
+            }
+        }
+
         private ListView ActiveView
         {
             get
@@ -443,28 +486,6 @@ namespace Player
         private void For(Action<Media> action)
         {
             ActiveView.SelectedItems.Cast<Media>().ToList().ForEach(action);
-        }
-
-        private async void Settings_RevalidateClick(object sender, RoutedEventArgs e)
-        {
-            sender.As<Button>().Content = "Revalidating... will restart soon";
-            IsEnabled = false;
-            await Task.Delay(2000);
-            Hide();
-            Player.FullStop();
-            Manager.Revalidate();
-            Close();
-            Process.Start(App.Path + "Elephant Player.exe");
-        }
-
-        private void Button_Click(object sender, RoutedEventArgs e)
-        {
-
-        }
-
-        private void Button_Click_1(object sender, RoutedEventArgs e)
-        {
-
         }
     }
 }
