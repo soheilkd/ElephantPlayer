@@ -3,9 +3,8 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             FontSize="22" x:Name="Parent" Width="22" Height="22"
+             FontSize="22" x:Name="control" Width="26" Height="26"  BorderBrush="Black"
              mc:Ignorable="d"  Foreground="Black">
-    <Viewbox>
-        <TextBlock x:Name="textBlock" FontFamily="Segoe MDL2 Assets" Text="{Binding ElementName=Parent, Path=GlyphString}"/>
-    </Viewbox>
+    <Path x:Name="path" Stroke="{Binding BorderBrush, ElementName=control}" Fill="{Binding Foreground, ElementName=control}" StrokeThickness="0.5"
+          Data="{Binding ElementName=control, Path=GlyphData}"/>
 </UserControl>
