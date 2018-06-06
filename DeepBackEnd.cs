@@ -1,4 +1,5 @@
 ﻿using Gma.System.MouseKeyHook;
+using Player.Controls;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -17,7 +18,6 @@ using System.Windows.Media;
 using System.Windows.Shell;
 using System.Windows.Threading;
 using Draw = System.Drawing;
-
 namespace Player.InstanceManager
 {
     internal enum WM
@@ -44,9 +44,6 @@ namespace Player.InstanceManager
     [SuppressUnmanagedCodeSecurity]
     internal static class NativeMethods
     {
-        [DllImport("user32.dll")]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        internal static extern bool GetCursorPos(ref User.Mouse.Win32Point pt);
         public delegate IntPtr MessageHandler(WM uMsg, IntPtr wParam, IntPtr lParam, out bool handled);
         [DllImport("shell32.dll", EntryPoint = "CommandLineToArgvW", CharSet = CharSet.Unicode)]
         private static extern IntPtr _CommandLineToArgvW([MarshalAs(UnmanagedType.LPWStr)] string cmdLine, out int numArgs);
@@ -213,22 +210,22 @@ namespace Player.Taskbar
         public ThumbButtonInfo PlayThumb = new ThumbButtonInfo()
         {
             Description = "Play",
-            ImageSource = Imaging.Get.Bitmap(new Controls.SegoeIcon() { Glyph = Controls.Glyph.Play, Foreground = Brushes.White, FontWeight = FontWeights.Black })
+            ImageSource = Imaging.Get.Bitmap(new Controls.SegoeIcon() { Glyph = Glyph.Play, Foreground = Brushes.White, BorderBrush = Brushes.White })
         };
         public ThumbButtonInfo PauseThumb = new ThumbButtonInfo()
         {
             Description = "Pause",
-            ImageSource = Imaging.Get.Bitmap(new Controls.SegoeIcon() { Glyph = Controls.Glyph.Pause, Foreground = Brushes.White, FontWeight = FontWeights.Black })
+            ImageSource = Imaging.Get.Bitmap(new Controls.SegoeIcon() { Glyph = Glyph.Pause, Foreground = Brushes.White, BorderBrush = Brushes.White })
         };
         public ThumbButtonInfo PreviousThumb = new ThumbButtonInfo()
         {
             Description = "Previous",
-            ImageSource = Imaging.Get.Bitmap(new Controls.SegoeIcon() { Glyph = Controls.Glyph.Previous, Foreground = Brushes.White, FontWeight = FontWeights.Black })
+            ImageSource = Imaging.Get.Bitmap(new Controls.SegoeIcon() { Glyph = Glyph.Previous, Foreground = Brushes.White, BorderBrush = Brushes.White })
         };
         public ThumbButtonInfo NextThumb = new ThumbButtonInfo()
         {
             Description = "Next",
-            ImageSource = Imaging.Get.Bitmap(new Controls.SegoeIcon() { Glyph = Controls.Glyph.Next, Foreground = Brushes.White })
+            ImageSource = Imaging.Get.Bitmap(new Controls.SegoeIcon() { Glyph = Glyph.Next, Foreground = Brushes.White, BorderBrush = Brushes.White })
         };
         private Command PlayHandler = new Command();
         private Command PauseHandler = new Command();
@@ -248,7 +245,7 @@ namespace Player.Taskbar
             NextHandler.Raised += (sender, e) => NextPressed?.Invoke(sender, e);
             Info.ThumbButtonInfos.Clear();
             Info.ThumbButtonInfos.Add(PreviousThumb);
-            Info.ThumbButtonInfos.Add(PauseThumb);
+            Info.ThumbButtonInfos.Add(PlayThumb);
             Info.ThumbButtonInfos.Add(NextThumb);
         }
         public void Refresh(bool IsPlaying = false) => Info.ThumbButtonInfos[1] = IsPlaying ? PauseThumb : PlayThumb;
@@ -266,23 +263,7 @@ namespace Player.User
         public static double FullHeight => SystemParameters.PrimaryScreenHeight;
         public static double Height => SystemParameters.PrimaryScreenHeight;
     }
-    public static class Mouse
-    {
-        public static double Y => Position.Y;
-        public static double X => Position.X;
-        public static MouseDevice PrimaryDevice => System.Windows.Input.Mouse.PrimaryDevice;
-        [StructLayout(LayoutKind.Sequential)]
-        internal struct Win32Point { public int X; public int Y; }
-        private static Draw.Point Position
-        {
-            get
-            {
-                Win32Point w32 = new Win32Point();
-                InstanceManager.NativeMethods.GetCursorPos(ref w32);
-                return new Draw.Point(w32.X, w32.Y);
-            }
-        }
-    }
+
     public static class Keyboard
     {
         public static IKeyboardMouseEvents Events = Hook.GlobalEvents();
