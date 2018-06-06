@@ -3,14 +3,14 @@ using System.Windows.Controls;
 using System.Windows.Input;
 namespace Player.Controls
 {
-    public partial class SegoeButton : UserControl
+    public partial class MaterialButton : UserControl
     {
         public static readonly MouseButtonEventArgs DefaultMouseUpArgs =
             new MouseButtonEventArgs(Mouse.PrimaryDevice, 1, MouseButton.Left) { RoutedEvent = MouseUpEvent };
         public static readonly DependencyProperty EllipseProperty =
-            DependencyProperty.Register(nameof(EllipseType), typeof(EllipseTypes), typeof(SegoeButton), new PropertyMetadata(EllipseTypes.Circular));
+            DependencyProperty.Register(nameof(EllipseType), typeof(EllipseTypes), typeof(MaterialButton), new PropertyMetadata(EllipseTypes.Circular));
         public static readonly DependencyProperty GlyphProperty =
-            DependencyProperty.Register(nameof(Glyph), typeof(Glyph), typeof(SegoeButton), new PropertyMetadata(Glyph.Settings, new PropertyChangedCallback(OnGlyphChange)));
+            DependencyProperty.Register(nameof(Glyph), typeof(Glyph), typeof(MaterialButton), new PropertyMetadata(Glyph.Settings, new PropertyChangedCallback(OnGlyphChange)));
         
         public enum EllipseTypes { Rectular, Circular }
 
@@ -34,7 +34,7 @@ namespace Player.Controls
             }
         }
 
-        public SegoeButton() => InitializeComponent();
+        public MaterialButton() => InitializeComponent();
 
         private void UserControl_Loaded(object sender, RoutedEventArgs e)
         {
