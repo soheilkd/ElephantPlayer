@@ -220,7 +220,7 @@ namespace Player.Controls
                 ParentWindow.WindowStyle = WindowStyle.None;
                 ParentWindow.ResizeMode = ResizeMode.NoResize;
                 ParentWindow.WindowState = WindowState.Maximized;
-                FullScreenButton.Glyph = Glyph.BackToWindow;
+                FullScreenButton.Glyph = Glyph.ExitFullScreen;
                 VisionButton.Visibility = Visibility.Hidden;
             }
             else

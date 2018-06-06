@@ -14,7 +14,7 @@
             <TabItem>
                 <TabItem.Header>
                     <StackPanel Orientation="Horizontal"  Style="{DynamicResource HeaderPanel}">
-                        <player:SegoeIcon Glyph="MusicInfo" />
+                        <player:SegoeIcon Glyph="MusicQueue" />
                         <TextBlock Text="  " />
                         <TextBlock Text="Titles" FontSize="18" VerticalAlignment="Center"/>
                     </StackPanel>
@@ -35,7 +35,7 @@
             <TabItem >
                 <TabItem.Header>
                     <StackPanel Orientation="Horizontal" Style="{DynamicResource HeaderPanel}">
-                        <player:SegoeIcon Glyph="OtherUser" />
+                        <player:SegoeIcon Glyph="UpArrow" />
                         <TextBlock Text="  " />
                         <TextBlock Text="Artists" FontSize="18" />
                     </StackPanel>
@@ -77,7 +77,7 @@
             <TabItem>
                 <TabItem.Header>
                     <StackPanel Orientation="Horizontal"  Style="{DynamicResource HeaderPanel}">
-                        <player:SegoeIcon Glyph="MusicAlbum" />
+                        <player:SegoeIcon Glyph="UpArrow" />
                         <TextBlock Text="  " />
                         <TextBlock Text="Albums" FontSize="18" />
                     </StackPanel>
@@ -120,7 +120,7 @@
             <TabItem>
                 <TabItem.Header>
                     <StackPanel Orientation="Horizontal"  Style="{DynamicResource HeaderPanel}">
-                        <player:SegoeIcon Glyph="FavoriteStar" />
+                        <player:SegoeIcon Glyph="Settings" />
                         <TextBlock Text="  " />
                         <TextBlock Text="Ratings" FontSize="18" />
                     </StackPanel>

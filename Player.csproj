@@ -140,9 +140,6 @@
   <ItemGroup>
     <Compile Include="App.cs" />
     <Compile Include="Code.cs" />
-    <Compile Include="TestWindow.xaml.cs">
-      <DependentUpon>TestWindow.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Windows\ConverterWindow.xaml.cs">
       <DependentUpon>ConverterWindow.xaml</DependentUpon>
     </Compile>
@@ -175,10 +172,6 @@
     <Page Include="App.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
-    </Page>
-    <Page Include="TestWindow.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Windows\ConverterWindow.xaml">
       <SubType>Designer</SubType>

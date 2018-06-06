@@ -27,7 +27,6 @@ namespace Player
         public string Title { get => _Title; set { _Title = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Title))); } }
         private string _Album;
         public string Album { get => _Album; set { _Album = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Album))); } }
-        public Uri Url { get; set; }
         private int _Rate;
         public int Rate { get => _Rate; set { _Rate = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Rate))); } }
         private TimeSpan _Len;
@@ -35,6 +34,7 @@ namespace Player
         private int _PlayCount;
         public int PlayCount { get => _PlayCount; set { _PlayCount = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(PlayCount))); } }
         public DateTime AdditionDate { get; set; }
+        public Uri Url { get; set; }
         public bool IsOffline => (int)Type <= 2;
         public MediaType Type;
         public string Path => Url.IsFile ? Url.LocalPath : Url.AbsoluteUri;
@@ -89,9 +89,9 @@ namespace Player
             }
         }
 
-        private static string[] SupportedMusics = "mp3;wma;aac;m4a".Split(';');
-        private static string[] SupportedVideos = "mp4;mpg;mkv;wmv;mov;avi;m4v;ts;wav;mpeg;webm".Split(';');
-        private static string[] SupportedFiles = "zip;rar;bin;dat".Split(';');
+        private static readonly string[] SupportedMusics = "mp3;wma;aac;m4a".Split(';');
+        private static readonly string[] SupportedVideos = "mp4;mpg;mkv;wmv;mov;avi;m4v;ts;wav;mpeg;webm".Split(';');
+        private static readonly string[] SupportedFiles = "zip;rar;bin;dat".Split(';');
         [field: NonSerialized]
         public event PropertyChangedEventHandler PropertyChanged;
 

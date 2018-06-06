@@ -98,16 +98,15 @@ namespace Player.Imaging
         public static void Initialize()
         {
             Get.Bitmap(new Controls.SegoeIcon() { Width = 1, Height = 1 });
-            MusicArt = Get.Bitmap(new Controls.SegoeIcon() { Glyph = Controls.Glyph.MusicInfo, Foreground = Brushes.White, Width = 60, Height = 60 });
-            VideoArt = Get.Bitmap(new Controls.SegoeIcon() { Glyph = Controls.Glyph.Video, Foreground = Brushes.White, Width = 60, Height = 60 });
-            NetArt = Get.Bitmap(new Controls.SegoeIcon() { Glyph = Controls.Glyph.Cloud, Foreground = Brushes.White, Width = 60, Height = 60 });
+            MusicArt = Get.Bitmap(new Controls.SegoeIcon() { Glyph = Controls.Glyph.Music, Foreground = Brushes.White });
+            VideoArt = Get.Bitmap(new Controls.SegoeIcon() { Glyph = Controls.Glyph.Video, Foreground = Brushes.White });
+            NetArt = Get.Bitmap(new Controls.SegoeIcon() { Glyph = Controls.Glyph.Cloud, Foreground = Brushes.White });
         }
     }
     public static class Get
     {
         public static BitmapImage Bitmap<T>(T element) where T : Control
         {
-            //element.BeginInit();
             element.UpdateLayout();
             if (Double.IsNaN(element.Height))
                 element.Height = 50d;
@@ -155,6 +154,7 @@ namespace Player.Imaging
                 image.StreamSource = ms;
                 image.EndInit();
             }
+            picture.Data.Clear();
             picture = null;
             pixels = new byte[0];
             return image;
