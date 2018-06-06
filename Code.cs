@@ -1,12 +1,9 @@
-﻿using Player.Events;
-using System;
+﻿using System;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using Draw = System.Drawing;
 
 namespace Player
 {
@@ -16,7 +13,6 @@ namespace Player
         [field: NonSerialized]
         public event EventHandler Changed;
 
-        private int _MOT;
 
         public PlayMode PlayMode { get; set; }
         public int MainKey { get; set; }
@@ -30,7 +26,8 @@ namespace Player
         public string LibraryLocation { get; set; }
         public string DownloadLocation { get; set; }
 
-        public int MouseOverTimeoutIndex { get => _MOT; set { _MOT = value; Changed?.Invoke(this, null); } }
+        private int _MouseOverTimeOutIndex;
+        public int MouseOverTimeoutIndex { get => _MouseOverTimeOutIndex; set { _MouseOverTimeOutIndex = value; Changed?.Invoke(this, null); } }
         public int MouseOverTimeout
         {
             get
@@ -66,25 +63,7 @@ namespace Player
         public static int ToInt(this double e) => Convert.ToInt32(e);
         public static T CastTo<T>(this object obj) => (T)obj;
         public static T As<T>(this object obj) where T : class => obj as T;
-        public static string ToCustomString(this TimeSpan time) => time.ToString("c").Substring(3, 5);
-    }
-
-    public static class Global
-    {
-        public static string CastTime(int ms) => (new TimeSpan(0, 0, 0, 0, ms)).ToString($"");
-        public static MenuItem GetMenu(string header, RoutedEventHandler onClick)
-        {
-            var menu = new MenuItem() { Header = header };
-            menu.Click += onClick;
-            return menu;
-        }
-        public static MenuItem GetMenu(string header, (string subItem, RoutedEventHandler onClick)[] subItems)
-        {
-            var output = new MenuItem() { Header = header };
-            for (int i = 0; i < subItems.Length; i++)
-                output.Items.Add(GetMenu(subItems[i].subItem, subItems[i].onClick));
-            return output;
-        }
+        public static string ToNewString(this TimeSpan time) => time.ToString("c").Substring(3, 5);
     }
 }
 
@@ -97,37 +76,43 @@ namespace Player.Imaging
         public static BitmapImage NetArt;
         public static void Initialize()
         {
-            Get.Bitmap(new Controls.SegoeIcon() { Width = 1, Height = 1 });
-            MusicArt = Get.Bitmap(new Controls.SegoeIcon() { Glyph = Controls.Glyph.Music, Foreground = Brushes.White });
-            VideoArt = Get.Bitmap(new Controls.SegoeIcon() { Glyph = Controls.Glyph.Video, Foreground = Brushes.White });
-            NetArt = Get.Bitmap(new Controls.SegoeIcon() { Glyph = Controls.Glyph.Cloud, Foreground = Brushes.White });
+            Get.Bitmap(Controls.Glyph.None);
+            MusicArt = Get.Bitmap(Controls.Glyph.Music);
+            VideoArt = Get.Bitmap(Controls.Glyph.Video);
+            NetArt = Get.Bitmap(Controls.Glyph.Cloud);
         }
     }
     public static class Get
     {
-        public static BitmapImage Bitmap<T>(T element) where T : Control
+        public static BitmapImage Bitmap(Controls.Glyph glyph, Brush foreground = null, Brush border = null)
         {
-            element.UpdateLayout();
-            if (Double.IsNaN(element.Height))
-                element.Height = 50d;
-            if (Double.IsNaN(element.Width))
-                element.Width = 50d;
+            var control = new Controls.MaterialIcon()
+            {
+                Glyph = glyph,
+                Foreground = foreground ?? Brushes.White,
+                BorderBrush = border ?? Brushes.White
+            };
+            control.UpdateLayout();
+            if (Double.IsNaN(control.Height))
+                control.Height = 50d;
+            if (Double.IsNaN(control.Width))
+                control.Width = 50d;
             PngBitmapEncoder encoder = new PngBitmapEncoder();
             encoder.Frames.Clear();
-            Transform transform = element.LayoutTransform;
-            element.LayoutTransform = null;
-            Size size = new Size(element.Width, element.Height);
-            element.Measure(size);
-            element.Arrange(new Rect(size));
+            Transform transform = control.LayoutTransform;
+            control.LayoutTransform = null;
+            Size size = new Size(control.Width, control.Height);
+            control.Measure(size);
+            control.Arrange(new Rect(size));
 
             RenderTargetBitmap renderBitmap =
               new RenderTargetBitmap(
-                (int)size.Width,
-                (int)size.Height,
+                (Int32)size.Width,
+                (Int32)size.Height,
                 96d,
                 96d,
                 PixelFormats.Pbgra32);
-            renderBitmap.Render(element);
+            renderBitmap.Render(control);
 
             MemoryStream memStream = new MemoryStream();
 

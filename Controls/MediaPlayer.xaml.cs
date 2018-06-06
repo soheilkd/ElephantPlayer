@@ -148,12 +148,12 @@ namespace Player.Controls
                     PositionSlider.Maximum = TimeSpan.TotalMilliseconds;
                     PositionSlider.SmallChange = 1 * PositionSlider.Maximum / 100;
                     PositionSlider.LargeChange = 5 * PositionSlider.Maximum / 100;
-                    TimeLabel_Full.Content = TimeSpan.ToCustomString();
+                    TimeLabel_Full.Content = TimeSpan.ToNewString();
                     Invoke(InfoType.LengthFound, TimeSpan);
                     SmallChange = new TimeSpan(0, 0, 0, 0, PositionSlider.SmallChange.ToInt());
                     BackwardSmallChange = new TimeSpan(0, 0, 0, 0, -1 * PositionSlider.SmallChange.ToInt());
                 }
-            TimeLabel_Current.Content = Position.ToCustomString();
+            TimeLabel_Current.Content = Position.ToNewString();
             PositionSlider.Value = Position.TotalMilliseconds;
             goto UX;
         }
@@ -185,13 +185,13 @@ namespace Player.Controls
             {
                 element.Pause();
                 PlayPauseButton.Glyph = Glyph.Play;
-                Thumb.Refresh(false);
+                Thumb.SetPlayingState(false);
             }
             else
             {
                 element.Play();
                 PlayPauseButton.Glyph = Glyph.Pause;
-                Thumb.Refresh(true);
+                Thumb.SetPlayingState(true);
             }
         }
         private void NextButton_Clicked(object sender, MouseButtonEventArgs e) => Invoke(InfoType.NextRequest);

@@ -20,13 +20,13 @@
             </Slider>
             <Label Content="00:00" Style="{DynamicResource TimeLabel}" HorizontalAlignment="Left" x:Name="TimeLabel_Current" Margin="10,0,0,0"/>
             <Label Content="00:00" Style="{DynamicResource TimeLabel}" HorizontalAlignment="Right" x:Name="TimeLabel_Full" Width="38" Margin="0,0,10,0"/>
-            <local:SegoeButton x:Name="PreviousButton" Glyph="Previous" Margin="87,0,0,25" MouseUp="PreviousButton_Clicked" />
-            <local:SegoeButton x:Name="NextButton" Glyph="Next" Margin="172,0,0,25" MouseUp="NextButton_Clicked" />
-            <local:SegoeButton x:Name="PlayPauseButton" Glyph="Play" MouseUp="PlayPauseButton_Clicked" Margin="127,0,0,24" Height="24" Width="24"/>
-            <local:SegoeButton x:Name="VisionButton" Glyph="Video" HorizontalAlignment="Center" Margin="0,0,0,24" MouseUp="VisionButton_Clicked" />
-            <local:SegoeButton x:Name="PlayModeButton" Glyph="RepeatAll" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,197,29" EllipseType="Rectular" MouseUp="PlayMode_Click"/>
-            <local:SegoeButton x:Name="FullScreenButton" Glyph="FullScreen" HorizontalAlignment="Right" Margin="0,0,10,29" VerticalAlignment="Bottom" MouseUp="FullScreenButton_Clicked" />
-            <local:SegoeIcon x:Name="VolumeIcon" Glyph="Volume3" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0, 0, 155, 29" Foreground="{DynamicResource Foreground}" />
+            <local:MaterialButton x:Name="PreviousButton" Glyph="Previous" Margin="87,0,0,25" MouseUp="PreviousButton_Clicked" />
+            <local:MaterialButton x:Name="NextButton" Glyph="Next" Margin="172,0,0,25" MouseUp="NextButton_Clicked" />
+            <local:MaterialButton x:Name="PlayPauseButton" Glyph="Play" MouseUp="PlayPauseButton_Clicked" Margin="127,0,0,24" Height="24" Width="24"/>
+            <local:MaterialButton x:Name="VisionButton" Glyph="Video" HorizontalAlignment="Center" Margin="0,0,0,24" MouseUp="VisionButton_Clicked" />
+            <local:MaterialButton x:Name="PlayModeButton" Glyph="RepeatAll" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,197,29" EllipseType="Rectular" MouseUp="PlayMode_Click"/>
+            <local:MaterialButton x:Name="FullScreenButton" Glyph="FullScreen" HorizontalAlignment="Right" Margin="0,0,10,29" VerticalAlignment="Bottom" MouseUp="FullScreenButton_Clicked" />
+            <local:MaterialIcon x:Name="VolumeIcon" Glyph="Volume3" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0, 0, 155, 29" Foreground="{DynamicResource Foreground}" />
             <Slider x:Name="VolumeSlider" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,28,50,26"  Template="{DynamicResource FlatSlider}" Foreground="#F444"
                     Width="100" Maximum="100" SmallChange="2" LargeChange="10" AutoToolTipPlacement="TopLeft" ValueChanged="VolumeSlider_ValueChanged"/>
             <Grid.RenderTransform>
@@ -46,7 +46,7 @@
                 </Setter.Value>
             </Setter>
         </Style>
-        <Style TargetType="local:SegoeButton" >
+        <Style TargetType="local:MaterialButton" >
             <Setter Property="Foreground" Value="{DynamicResource Foreground}" />
             <Setter Property="VerticalAlignment" Value="Bottom" />
             <Setter Property="HorizontalAlignment" Value="Left"/>

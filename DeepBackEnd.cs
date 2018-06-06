@@ -1,5 +1,4 @@
-﻿using Gma.System.MouseKeyHook;
-using Player.Controls;
+﻿using Player.Controls;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -14,10 +13,8 @@ using System.Security;
 using System.Threading;
 using System.Windows;
 using System.Windows.Input;
-using System.Windows.Media;
 using System.Windows.Shell;
 using System.Windows.Threading;
-using Draw = System.Drawing;
 namespace Player.InstanceManager
 {
     internal enum WM
@@ -86,19 +83,18 @@ namespace Player.InstanceManager
         private const string IpcProtocol = "ipc://";
         private static Mutex singleInstanceMutex;
         private static IpcServerChannel channel;
-        private static IList<string> commandLineArgs;
-        public static IList<string> CommandLineArgs => commandLineArgs;
+        public static IList<string> CommandLineArgs { get; private set; }
 
         public static bool InitializeAsFirstInstance(string uniqueName)
         {
-            commandLineArgs = GetCommandLineArgs(uniqueName);
+            CommandLineArgs = GetCommandLineArgs(uniqueName);
             string applicationIdentifier = uniqueName + Environment.UserName;
             string channelName = String.Concat(applicationIdentifier, Delimiter, ChannelNameSuffix);
             singleInstanceMutex = new Mutex(true, applicationIdentifier, out bool firstInstance);
             if (firstInstance)
                 CreateRemoteService(channelName);
             else
-                SignalFirstInstance(channelName, commandLineArgs);
+                SignalFirstInstance(channelName, CommandLineArgs);
             return firstInstance;
         }
         public static void Cleanup()
@@ -207,26 +203,28 @@ namespace Player.Taskbar
         public event EventHandler PausePressed;
         public event EventHandler PrevPressed;
         public event EventHandler NextPressed;
+
         public ThumbButtonInfo PlayThumb = new ThumbButtonInfo()
         {
             Description = "Play",
-            ImageSource = Imaging.Get.Bitmap(new Controls.SegoeIcon() { Glyph = Glyph.Play, Foreground = Brushes.White, BorderBrush = Brushes.White })
+            ImageSource = Imaging.Get.Bitmap(Glyph.Play)
         };
         public ThumbButtonInfo PauseThumb = new ThumbButtonInfo()
         {
             Description = "Pause",
-            ImageSource = Imaging.Get.Bitmap(new Controls.SegoeIcon() { Glyph = Glyph.Pause, Foreground = Brushes.White, BorderBrush = Brushes.White })
+            ImageSource = Imaging.Get.Bitmap(Glyph.Pause)
         };
         public ThumbButtonInfo PreviousThumb = new ThumbButtonInfo()
         {
             Description = "Previous",
-            ImageSource = Imaging.Get.Bitmap(new Controls.SegoeIcon() { Glyph = Glyph.Previous, Foreground = Brushes.White, BorderBrush = Brushes.White })
+            ImageSource = Imaging.Get.Bitmap(Glyph.Previous)
         };
         public ThumbButtonInfo NextThumb = new ThumbButtonInfo()
         {
             Description = "Next",
-            ImageSource = Imaging.Get.Bitmap(new Controls.SegoeIcon() { Glyph = Glyph.Next, Foreground = Brushes.White, BorderBrush = Brushes.White })
+            ImageSource = Imaging.Get.Bitmap(Glyph.Next)
         };
+
         private Command PlayHandler = new Command();
         private Command PauseHandler = new Command();
         private Command PrevHandler = new Command();
@@ -235,37 +233,23 @@ namespace Player.Taskbar
 
         public Thumb()
         {
-            PreviousThumb.Command = PrevHandler;
-            NextThumb.Command = NextHandler;
-            PlayThumb.Command = PlayHandler;
-            PauseThumb.Command = PauseHandler;
             PlayHandler.Raised += (sender, e) => PlayPressed?.Invoke(sender, e);
             PauseHandler.Raised += (sender, e) => PausePressed?.Invoke(sender, e);
             PrevHandler.Raised += (sender, e) => PrevPressed?.Invoke(sender, e);
             NextHandler.Raised += (sender, e) => NextPressed?.Invoke(sender, e);
+            PreviousThumb.Command = PrevHandler;
+            NextThumb.Command = NextHandler;
+            PlayThumb.Command = PlayHandler;
+            PauseThumb.Command = PauseHandler;
+
             Info.ThumbButtonInfos.Clear();
             Info.ThumbButtonInfos.Add(PreviousThumb);
             Info.ThumbButtonInfos.Add(PlayThumb);
             Info.ThumbButtonInfos.Add(NextThumb);
         }
-        public void Refresh(bool IsPlaying = false) => Info.ThumbButtonInfos[1] = IsPlaying ? PauseThumb : PlayThumb;
+
+        public void SetPlayingState(bool IsPlaying = false) => Info.ThumbButtonInfos[1] = IsPlaying ? PauseThumb : PlayThumb;
         public void SetProgressState(TaskbarItemProgressState state) => Info.ProgressState = state;
         public void SetProgressValue(double value) => Info.ProgressValue = value;
-    }
-}
-
-namespace Player.User
-{
-    public static class Screen
-    {
-        public static double Width => SystemParameters.PrimaryScreenWidth;
-        public static double FullWidth => SystemParameters.FullPrimaryScreenWidth;
-        public static double FullHeight => SystemParameters.PrimaryScreenHeight;
-        public static double Height => SystemParameters.PrimaryScreenHeight;
-    }
-
-    public static class Keyboard
-    {
-        public static IKeyboardMouseEvents Events = Hook.GlobalEvents();
     }
 }

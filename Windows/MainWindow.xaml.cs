@@ -22,6 +22,7 @@ namespace Player
         private MassiveLibrary Library = new MassiveLibrary();
         private Timer PlayCountTimer = new Timer(100000) { AutoReset = false };
         private Timer SizeChangeTimer = new Timer(50) { AutoReset = true };
+        private Gma.System.MouseKeyHook.IKeyboardMouseEvents KeyboardEvents = Gma.System.MouseKeyHook.Hook.GlobalEvents();
         private bool ControlsNotNeededOnVisionIsVisible
         {
             set
@@ -62,7 +63,7 @@ namespace Player
                     });
                 SizeChangeTimer.Stop();
             };
-            User.Keyboard.Events.KeyDown += Keyboard_KeyDown;
+            KeyboardEvents.KeyDown += Keyboard_KeyDown;
             
             Settings_AncestorCombo.SelectedIndex = App.Settings.MainKey;
             Settings_OrinateCheck.IsChecked = App.Settings.VisionOrientation;

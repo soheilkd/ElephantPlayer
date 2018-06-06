@@ -35,11 +35,11 @@
         <Label Content="Copyright" Margin="12,450,0,0" />
         <TextBox x:Name="CopyrightBox" Margin="92,450,7,0" />
         <Image x:Name="ArtworkImage" Height="150" Width="150"  VerticalAlignment="Top" HorizontalAlignment="Left" MouseUp="ArtworkImage_MouseUp" Margin="4,42,0,0"/>
-        <controls:SegoeButton Margin="166,166,0,0" MouseUp="RemoveArtworkClick" Glyph="Delete" EllipseType="Rectular" />
-        <controls:SegoeButton Margin="0,8,48,0" HorizontalAlignment="Right" MouseUp="SaveButtonClick" Glyph="Save" EllipseType="Rectular"/>
-        <controls:SegoeButton Margin="0,8,8,0" HorizontalAlignment="Right" MouseUp="CancelButton_Click" Glyph="Cancel" EllipseType="Rectular"/>
+        <controls:MaterialButton Margin="166,166,0,0" MouseUp="RemoveArtworkClick" Glyph="Delete" EllipseType="Rectular" />
+        <controls:MaterialButton Margin="0,8,48,0" HorizontalAlignment="Right" MouseUp="SaveButtonClick" Glyph="Save" EllipseType="Rectular"/>
+        <controls:MaterialButton Margin="0,8,8,0" HorizontalAlignment="Right" MouseUp="CancelButton_Click" Glyph="Cancel" EllipseType="Rectular"/>
         <Grid.Resources>
-            <Style TargetType="{x:Type controls:SegoeButton}">
+            <Style TargetType="{x:Type controls:MaterialButton}">
                 <Setter Property="HorizontalAlignment" Value="Left"/>
                 <Setter Property="VerticalAlignment" Value="Top" />
                 <Setter Property="FontSize" Value="14" />
