@@ -7,7 +7,7 @@
     <Grid>
         <Border x:Name="MainEllipse" BorderThickness="0" Margin="-7" BorderBrush="#F444" CornerRadius="20" Background="#01FFFFFF"/>
         <Border x:Name="ClickEllipse" BorderBrush="#F444" CornerRadius="100"  />
-        <controls:SegoeIcon x:Name="MainIcon" Foreground="{Binding ElementName=P, Path=Foreground}" Background="#01FFFFFF" Glyph="Accept"
+        <controls:SegoeIcon x:Name="MainIcon" Foreground="{Binding ElementName=P, Path=Foreground}" Background="#01FFFFFF" Glyph="Settings"
                             Width="{Binding Width, ElementName=P}" Height="{Binding Height, ElementName=P}" />
     </Grid>
     <UserControl.Triggers>

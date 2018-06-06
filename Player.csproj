@@ -140,6 +140,9 @@
   <ItemGroup>
     <Compile Include="App.cs" />
     <Compile Include="Code.cs" />
+    <Compile Include="TestWindow.xaml.cs">
+      <DependentUpon>TestWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Windows\ConverterWindow.xaml.cs">
       <DependentUpon>ConverterWindow.xaml</DependentUpon>
     </Compile>
@@ -149,11 +152,11 @@
     <Compile Include="Controls\RatingCell.xaml.cs">
       <DependentUpon>RatingCell.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Controls\SegoeButton.xaml.cs">
-      <DependentUpon>SegoeButton.xaml</DependentUpon>
+    <Compile Include="Controls\MaterialButton.xaml.cs">
+      <DependentUpon>MaterialButton.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Controls\SegoeIcon.xaml.cs">
-      <DependentUpon>SegoeIcon.xaml</DependentUpon>
+    <Compile Include="Controls\MaterialIcon.xaml.cs">
+      <DependentUpon>MaterialIcon.xaml</DependentUpon>
     </Compile>
     <Compile Include="DeepBackEnd.cs" />
     <Compile Include="Events.cs" />
@@ -173,6 +176,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="TestWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Windows\ConverterWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -185,11 +192,11 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Controls\SegoeButton.xaml">
+    <Page Include="Controls\MaterialButton.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Controls\SegoeIcon.xaml">
+    <Page Include="Controls\MaterialIcon.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>

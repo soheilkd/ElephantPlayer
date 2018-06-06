@@ -10,7 +10,7 @@ namespace Player.Controls
         public static readonly DependencyProperty EllipseProperty =
             DependencyProperty.Register(nameof(EllipseType), typeof(EllipseTypes), typeof(SegoeButton), new PropertyMetadata(EllipseTypes.Circular));
         public static readonly DependencyProperty GlyphProperty =
-            DependencyProperty.Register(nameof(Glyph), typeof(Glyph), typeof(SegoeButton), new PropertyMetadata(Glyph.GlobalNavigationButton, new PropertyChangedCallback(OnGlyphChange)));
+            DependencyProperty.Register(nameof(Glyph), typeof(Glyph), typeof(SegoeButton), new PropertyMetadata(Glyph.Settings, new PropertyChangedCallback(OnGlyphChange)));
         
         public enum EllipseTypes { Rectular, Circular }
 
