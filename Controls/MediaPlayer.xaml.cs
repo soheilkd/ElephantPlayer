@@ -150,8 +150,8 @@ namespace Player.Controls
                     PositionSlider.LargeChange = 5 * PositionSlider.Maximum / 100;
                     TimeLabel_Full.Content = TimeSpan.ToNewString();
                     Invoke(InfoType.LengthFound, TimeSpan);
-                    SmallChange = new TimeSpan(0, 0, 0, 0, PositionSlider.SmallChange.ToInt());
-                    BackwardSmallChange = new TimeSpan(0, 0, 0, 0, -1 * PositionSlider.SmallChange.ToInt());
+                    SmallChange = new TimeSpan(0, 0, 0, 0, (int)PositionSlider.SmallChange);
+                    BackwardSmallChange = new TimeSpan(0, 0, 0, 0, -1 * (int)PositionSlider.SmallChange);
                 }
             TimeLabel_Current.Content = Position.ToNewString();
             PositionSlider.Value = Position.TotalMilliseconds;
@@ -162,7 +162,8 @@ namespace Player.Controls
         {
             if (IsUserSeeking)
             {
-                Position = new TimeSpan(0, 0, 0, 0, PositionSlider.Value.ToInt());
+                Position = new TimeSpan(0, 0, 0, 0, (int)PositionSlider.Value);
+                element.Play();
             }
         }
         private async void Position_Holding(object sender, MouseButtonEventArgs e)
@@ -170,10 +171,8 @@ namespace Player.Controls
             IsUserSeeking = true;
             while (e.ButtonState == MouseButtonState.Pressed)
             {
+                await Task.Delay(50);
                 element.Pause();
-                await Task.Delay(50);
-                element.Play();
-                await Task.Delay(50);
             }
             PlayPauseButton.Glyph = Glyph.Pause;
             element.Play();
