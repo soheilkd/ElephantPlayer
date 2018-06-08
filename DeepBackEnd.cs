@@ -207,22 +207,22 @@ namespace Player.Taskbar
         public ThumbButtonInfo PlayThumb = new ThumbButtonInfo()
         {
             Description = "Play",
-            ImageSource = Imaging.Get.Bitmap(Glyph.Play)
+            ImageSource = Images.GetBitmap(Glyph.Play)
         };
         public ThumbButtonInfo PauseThumb = new ThumbButtonInfo()
         {
             Description = "Pause",
-            ImageSource = Imaging.Get.Bitmap(Glyph.Pause)
+            ImageSource = Images.GetBitmap(Glyph.Pause)
         };
         public ThumbButtonInfo PreviousThumb = new ThumbButtonInfo()
         {
             Description = "Previous",
-            ImageSource = Imaging.Get.Bitmap(Glyph.Previous)
+            ImageSource = Images.GetBitmap(Glyph.Previous)
         };
         public ThumbButtonInfo NextThumb = new ThumbButtonInfo()
         {
             Description = "Next",
-            ImageSource = Imaging.Get.Bitmap(Glyph.Next)
+            ImageSource = Images.GetBitmap(Glyph.Next)
         };
 
         private Command PlayHandler = new Command();

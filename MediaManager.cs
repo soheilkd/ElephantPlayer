@@ -140,7 +140,7 @@ namespace Player
                             Artist = t.Tag.FirstPerformer ?? Path.Substring(0, Path.LastIndexOf("\\"));
                             Title = t.Tag.Title ?? Name.Substring(0, Name.LastIndexOf("."));
                             Album = t.Tag.Album ?? String.Empty;
-                            Artwork = t.Tag.Pictures.Length >= 1 ? Imaging.Get.BitmapSource(t.Tag.Pictures[0]) : Imaging.Images.MusicArt;
+                            Artwork = t.Tag.Pictures.Length >= 1 ? Images.GetBitmap(t.Tag.Pictures[0]) : Images.MusicArt;
                             Type = MediaType.Music;
                             Lyrics = t.Tag.Lyrics ?? String.Empty;
                             IsLoaded = true;
@@ -152,7 +152,7 @@ namespace Player
                         Artist = Path.Substring(0, Path.LastIndexOf("\\"));
                         Artist = Artist.Substring(Artist.LastIndexOf("\\") + 1);
                         Album = "Video";
-                        Artwork = Imaging.Images.VideoArt;
+                        Artwork = Images.VideoArt;
                         Type = MediaType.Video;
                         IsLoaded = true;
                         Length = TimeSpan.Zero;
@@ -180,7 +180,7 @@ namespace Player
                 Url = Url;
                 Artist = Url.Host;
                 Album = "Cloud";
-                Artwork = Imaging.Images.NetArt;
+                Artwork = Images.NetArt;
                 if (SupportedMusics.Contains(Ext))
                     Type = MediaType.OnlineMusic;
                 else if (SupportedVideos.Contains(Ext))
@@ -497,8 +497,10 @@ namespace Player
         public void Download(Media media)
         {
             var SavePath = $"{App.Path}Downloads\\{media.Title}";
-            var Client = new WebClient();
-            Client.BaseAddress = media.Path;
+            var Client = new WebClient
+            {
+                BaseAddress = media.Path
+            };
             Client.DownloadProgressChanged += (_, e) => media.Title = $"Downloading... {e.ProgressPercentage}%";
             Client.DownloadFileCompleted += (_, e) =>
             {

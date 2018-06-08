@@ -1,16 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace Player.Controls
 {
@@ -37,16 +29,16 @@ namespace Player.Controls
 
         private static void RatingValueChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
         {
-            Int32 ratingValue = (Int32)e.NewValue;
+            int ratingValue = (int)e.NewValue;
             UIElementCollection children = sender.As<RatingCell>().Children;
             ToggleButton button = null;
-            for (Int32 i = 0; i < ratingValue; i++)
+            for (int i = 0; i < ratingValue; i++)
             {
                 button = children[i] as ToggleButton;
                 button.IsChecked = true;
             }
 
-            for (Int32 i = ratingValue; i < children.Count; i++)
+            for (int i = ratingValue; i < children.Count; i++)
             {
                 button = children[i] as ToggleButton;
                 button.IsChecked = true;

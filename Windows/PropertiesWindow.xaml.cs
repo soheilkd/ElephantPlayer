@@ -49,7 +49,7 @@ namespace Player
         private void RemoveArtworkClick(object sender, MouseButtonEventArgs e)
         {
             File.Tag.Pictures = new TagLib.IPicture[0];
-            ArtworkImage.Source = Media.IsVideo ? Imaging.Images.VideoArt : Imaging.Images.MusicArt;
+            ArtworkImage.Source = Media.IsVideo ? Images.VideoArt : Images.MusicArt;
         }
 
         private void SaveButtonClick(object sender, MouseButtonEventArgs e)

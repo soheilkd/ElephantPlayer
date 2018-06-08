@@ -11,8 +11,12 @@ namespace Player
     public class Preferences
     {
         [field: NonSerialized]
-        public event EventHandler Changed;
+        private static readonly BinaryFormatter Formatter = new BinaryFormatter();
+        [field: NonSerialized]
+        private static readonly string DllFilePath = $"{App.Path}SettingsProvider.dll";
 
+        [field: NonSerialized]
+        public event EventHandler Changed;
 
         public PlayMode PlayMode { get; set; }
         public int MainKey { get; set; }
@@ -46,45 +50,40 @@ namespace Player
                 }
             }
         }
+
         public static Preferences Load()
         {
-            using (FileStream stream = File.Open($"{App.Path}SettingsProvider.dll", FileMode.Open))
-                return (Preferences)(new BinaryFormatter()).Deserialize(stream);
+            using (FileStream stream = File.Open(DllFilePath, FileMode.Open))
+                return Formatter.Deserialize(stream) as Preferences;
         }
         public void Save()
         {
-            using (FileStream stream = File.Open($"{App.Path}SettingsProvider.dll", FileMode.Create))
-                (new BinaryFormatter()).Serialize(stream, this);
+            using (FileStream stream = File.Open(DllFilePath, FileMode.Create))
+                Formatter.Serialize(stream, this);
         }
     }
     
     public static class Extensions
     {
-        public static int ToInt(this double e) => Convert.ToInt32(e);
-        public static T CastTo<T>(this object obj) => (T)obj;
+        /// <summary>
+        /// Casts object to specified type T
+        /// </summary>
+        /// <typeparam name="T">Destinition</typeparam>
+        /// <param name="obj">Source</param>
+        /// <returns></returns>
+        public static T To<T>(this object obj) => (T)obj;
         public static T As<T>(this object obj) where T : class => obj as T;
         public static string ToNewString(this TimeSpan time) => time.ToString("c").Substring(3, 5);
     }
-}
 
-namespace Player.Imaging
-{
     public static class Images
     {
-        public static BitmapImage MusicArt;
-        public static BitmapImage VideoArt;
-        public static BitmapImage NetArt;
-        public static void Initialize()
-        {
-            Get.Bitmap(Controls.Glyph.None);
-            MusicArt = Get.Bitmap(Controls.Glyph.Music);
-            VideoArt = Get.Bitmap(Controls.Glyph.Video);
-            NetArt = Get.Bitmap(Controls.Glyph.Cloud);
-        }
-    }
-    public static class Get
-    {
-        public static BitmapImage Bitmap(Controls.Glyph glyph, Brush foreground = null, Brush border = null)
+        public static readonly BitmapImage MusicArt = GetBitmap(Controls.Glyph.Music);
+        public static readonly BitmapImage VideoArt = GetBitmap(Controls.Glyph.Video);
+        public static readonly BitmapImage NetArt = GetBitmap(Controls.Glyph.Cloud);
+
+
+        public static BitmapImage GetBitmap(Controls.Glyph glyph, Brush foreground = null, Brush border = null)
         {
             var control = new Controls.MaterialIcon()
             {
@@ -127,7 +126,7 @@ namespace Player.Imaging
             return output;
         }
 
-        public static BitmapSource BitmapSource(TagLib.IPicture picture)
+        public static BitmapImage GetBitmap(TagLib.IPicture picture)
         {
             byte[] pixels = new byte[picture.Data.Count];
             picture.Data.CopyTo(pixels, 0);
@@ -135,12 +134,11 @@ namespace Player.Imaging
             using (var ms = new MemoryStream(pixels))
             {
                 image.BeginInit();
-                image.CacheOption = BitmapCacheOption.OnLoad; // here
+                image.CacheOption = BitmapCacheOption.OnLoad;
                 image.StreamSource = ms;
                 image.EndInit();
             }
             picture.Data.Clear();
-            picture = null;
             pixels = new byte[0];
             return image;
         }
