@@ -169,13 +169,17 @@ namespace Player.Controls
         private async void Position_Holding(object sender, MouseButtonEventArgs e)
         {
             IsUserSeeking = true;
+            var but = PlayPauseButton.Glyph;
             while (e.ButtonState == MouseButtonState.Pressed)
             {
                 await Task.Delay(50);
                 element.Pause();
             }
-            PlayPauseButton.Glyph = Glyph.Pause;
-            element.Play();
+            PlayPauseButton.Glyph = Glyph.Play;
+            if (but == Glyph.Play)
+                PlayPauseButton.EmulateClick();
+            else
+                PlayPauseButton_Clicked(this, null);
             IsUserSeeking = false;
         }
         private void PlayPauseButton_Clicked(object sender, MouseButtonEventArgs e)
