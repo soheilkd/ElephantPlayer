@@ -19,7 +19,6 @@ namespace Player
     public partial class MainWindow : Window
     {
         private MediaManager Manager = new MediaManager();
-        private MassiveLibrary Library = new MassiveLibrary();
         private Timer PlayCountTimer = new Timer(100000) { AutoReset = false };
         private Timer SizeChangeTimer = new Timer(50) { AutoReset = true };
         private Gma.System.MouseKeyHook.IKeyboardMouseEvents KeyboardEvents = Gma.System.MouseKeyHook.Hook.GlobalEvents();
@@ -39,10 +38,9 @@ namespace Player
             InitializeComponent();
             Manager.Change += Manager_Change;
             App.NewInstanceRequested += (_, e) => Manager.Add(e.Args, true);
+
+            Library.Load().ForEach(each => Manager.Add(each));
             
-            var lib = MassiveLibrary.Load();
-            for (int i = 0; i < lib.Medias.Length; i++)
-                Manager.Add(lib.Medias[i]);
             Width = App.Settings.LastSize.Width;
             Height = App.Settings.LastSize.Height;
             Left = App.Settings.LastLoc.X;

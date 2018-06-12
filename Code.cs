@@ -71,7 +71,7 @@ namespace Player
         /// <typeparam name="T">Destinition</typeparam>
         /// <param name="obj">Source</param>
         /// <returns></returns>
-        public static T To<T>(this object obj) => (T)obj;
+        public static T To<T>(this object obj) where T : struct => (T)obj;
         public static T As<T>(this object obj) where T : class => obj as T;
         public static string ToNewString(this TimeSpan time) => time.ToString("c").Substring(3, 5);
     }

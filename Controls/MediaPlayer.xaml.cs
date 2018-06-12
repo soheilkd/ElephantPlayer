@@ -17,7 +17,6 @@ namespace Player.Controls
             get => element.Position;
             set
             {
-
                 element.Position = value;
                 if (value.TotalSeconds <= 20)
                 {
@@ -101,6 +100,7 @@ namespace Player.Controls
             PlayCountTimer.Elapsed += PlayCountTimer_Elapsed;
             FullOnBoard.Completed += (_, __) => Cursor = Cursors.None;
             FullOffBoard.CurrentStateInvalidated += (_, __) => Cursor = Cursors.Arrow;
+            PlayModeButton.Glyph = (Glyph)Enum.Parse(typeof(Glyph), App.Settings.PlayMode.ToString());
         }
 
         private void PlayCountTimer_Elapsed(object sender, ElapsedEventArgs e)
@@ -215,24 +215,20 @@ namespace Player.Controls
         private void FullScreenButton_Clicked(object sender, MouseButtonEventArgs e)
         {
             IsFullScreen = !IsFullScreen;
+            ParentWindow.ResizeMode = IsFullScreen ? ResizeMode.NoResize : ResizeMode.CanResize;
+            FullScreenButton.Glyph = IsFullScreen ? Glyph.ExitFullScreen : Glyph.FullScreen;
+            VisionButton.Visibility = IsFullScreen ? Visibility.Hidden : Visibility.Visible;
+            ParentWindow.WindowStyle = IsFullScreen ? WindowStyle.None : WindowStyle.SingleBorderWindow;
             if (IsFullScreen)
             {
                 WasMaximized = ParentWindow.WindowState == WindowState.Maximized;
                 if (WasMaximized)
                     ParentWindow.WindowState = WindowState.Normal;
-                ParentWindow.WindowStyle = WindowStyle.None;
-                ParentWindow.ResizeMode = ResizeMode.NoResize;
                 ParentWindow.WindowState = WindowState.Maximized;
-                FullScreenButton.Glyph = Glyph.ExitFullScreen;
-                VisionButton.Visibility = Visibility.Hidden;
             }
             else
             {
-                ParentWindow.ResizeMode = ResizeMode.CanResize;
-                ParentWindow.WindowStyle = WindowStyle.ThreeDBorderWindow;
                 ParentWindow.WindowState = WasMaximized ? WindowState.Maximized : WindowState.Normal;
-                FullScreenButton.Glyph = Glyph.FullScreen;
-                VisionButton.Visibility = Visibility.Visible;
             }
         }
 

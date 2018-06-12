@@ -15,6 +15,7 @@ using System.Windows;
 namespace Player
 {
     public enum MediaType { Music, Video, File, OnlineMusic, OnlineVideo, OnlineFile, None }
+
     [Serializable]
     public class Media : INotifyPropertyChanged
     {
@@ -266,7 +267,7 @@ namespace Player
             new ObservableCollection<Media>(),
             new ObservableCollection<Media>()
         };
-
+        
         public void Add(string path, bool requestPlay = false)
         {
             var media = new Media(path);
@@ -319,28 +320,26 @@ namespace Player
             {
                 case PlayMode.Shuffle: return Play(Shuffle.Next(0, Count));
                 case PlayMode.RepeatAll: return Play(CurrentlyPlayingIndex == Count - 1 ? 0 : ++CurrentlyPlayingIndex);
-                default: break;
+                case PlayMode.RepeatOne: return Play(CurrentlyPlayingIndex);
+                default: return null;
             }
-            return Play(CurrentlyPlayingIndex);
         }
         public Media Previous()
         {
             switch (App.Settings.PlayMode)
             {
-                case PlayMode.Shuffle: CurrentlyPlayingIndex = Shuffle.Next(0, Count); break;
-                case PlayMode.RepeatAll:
-                    if (CurrentlyPlayingIndex != 0) return Play(--CurrentlyPlayingIndex);
-                    else return Play(Count - 1);
-                default: break;
+                case PlayMode.Shuffle: return Play(Shuffle.Next(0, Count));
+                case PlayMode.RepeatAll: return Play(CurrentlyPlayingIndex == 0 ? this.Count - 1 : --CurrentlyPlayingIndex);
+                case PlayMode.RepeatOne: return Play(CurrentlyPlayingIndex);
+                default: return null;
             }
-            return Play(CurrentlyPlayingIndex);
         }
         
         public void Repeat(int index, int times = 1) => Parallel.For(0, times, (i) => Insert(index, Items[index]));
 
         public void DeployLibrary()
         {
-            MassiveLibrary.Save(this.ToArray());
+            Library.Save(this.ToList());
         }
 
         public void AddCount() => this[CurrentlyPlayingIndex].PlayCount++;
@@ -536,28 +535,20 @@ namespace Player
     }
 
     [Serializable]
-    public class MassiveLibrary
+    public static class Library
     {
-        private static readonly string LibraryPath = $"{App.Path}Library.dll";
-        public Media[] Medias { get; set; } = new Media[0];
-        public MassiveLibrary(Media[] medias) => Medias = medias;
-        public MassiveLibrary() { }
-        public void Save()
+        private static string LibraryPath => $"{App.Settings.LibraryLocation}\\Library.dll";
+        public static void Save(List<Media> medias)
         {
             using (FileStream stream = new FileStream(LibraryPath, FileMode.Create))
-                (new BinaryFormatter()).Serialize(stream, this);
+                (new BinaryFormatter()).Serialize(stream, medias);
         }
-        public static void Save(Media[] medias)
-        {
-            using (FileStream stream = new FileStream(LibraryPath, FileMode.Create))
-                (new BinaryFormatter()).Serialize(stream, new MassiveLibrary(medias));
-        }
-        public static MassiveLibrary Load()
+        public static List<Media> Load()
         {
             if (!File.Exists(LibraryPath))
-                return new MassiveLibrary();
+                return new List<Media>();
             using (FileStream stream = new FileStream(LibraryPath, FileMode.Open))
-                return (new BinaryFormatter()).Deserialize(stream) as MassiveLibrary;
+                return (new BinaryFormatter()).Deserialize(stream) as List<Media>;
         }
     }
 

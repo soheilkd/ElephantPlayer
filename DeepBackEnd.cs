@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Runtime.Remoting;
 using System.Runtime.Remoting.Channels;
@@ -15,8 +16,18 @@ using System.Windows;
 using System.Windows.Input;
 using System.Windows.Shell;
 using System.Windows.Threading;
-namespace Player.InstanceManager
+
+namespace Player.InstanceManagement
 {
+    public class InstanceEventArgs : EventArgs
+    {
+        private InstanceEventArgs() { }
+        public InstanceEventArgs(IList<string> args) { _Args = args; }
+        private IList<string> _Args { get; set; }
+        public string this[int index] => Args[index];
+        public int ArgsCount => _Args.Count;
+        public string[] Args => _Args.ToArray();
+    }
     internal enum WM
     {
         NULL = 0x0000, CREATE = 0x0001, DESTROY = 0x0002, MOVE = 0x0003, SIZE = 0x0005, ACTIVATE = 0x0006,
@@ -190,9 +201,9 @@ namespace Player.Taskbar
 {
     public class Command : ICommand
     {
-#pragma warning disable CS0067
+        #pragma warning disable CS0067 //Suppres never used warning
         public event EventHandler CanExecuteChanged;
-#pragma warning restore CS0067
+        #pragma warning restore CS0067
         public event EventHandler Raised;
         public bool CanExecute(object parameter) => true;
         public void Execute(object parameter) => Raised?.Invoke(this, null);
