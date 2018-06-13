@@ -31,13 +31,28 @@ namespace Player.Controls
         private Timer DraggerTimer = new Timer(250) { AutoReset = false };
         private Timer MouseMoveTimer = new Timer(App.Settings.MouseOverTimeout) { AutoReset = false };
         private Timer PlayCountTimer = new Timer(120000) { AutoReset = false };
-        private TimeSpan TimeSpan;
+        private TimeSpan timeSpan;
+        private TimeSpan TimeSpan
+        {
+            get => timeSpan;
+            set
+            {
+                timeSpan = value;
+                PositionSlider.Maximum = TimeSpan.TotalMilliseconds;
+                PositionSlider.SmallChange = 1 * PositionSlider.Maximum / 100;
+                PositionSlider.LargeChange = 5 * PositionSlider.Maximum / 100;
+                TimeLabel_Full.Content = TimeSpan.ToNewString();
+                Invoke(InfoType.LengthFound, TimeSpan);
+                SmallChange = new TimeSpan(0, 0, 0, 0, (int)PositionSlider.SmallChange);
+                BackwardSmallChange = new TimeSpan(0, 0, 0, 0, -1 * (int)PositionSlider.SmallChange);
+            }
+        }
         private bool IsUserSeeking, IsFullScreen, WasMaximized;
         public Window ParentWindow;
         public Taskbar.Thumb Thumb = new Taskbar.Thumb();
         private Storyboard MagnifyBoard, MinifyBoard, FullOnBoard, FullOffBoard;
         private ThicknessAnimation MagnifyAnimation, MinifyAnimation;
-        private TimeSpan SmallChange, BackwardSmallChange;
+        public TimeSpan SmallChange, BackwardSmallChange;
         private bool controlsVisibile;
         private bool ControlsVisible
         {
@@ -69,19 +84,18 @@ namespace Player.Controls
                 ControlsGrid.VerticalAlignment = value ? VerticalAlignment.Bottom : VerticalAlignment.Top;
                 MinifyAnimation.To = new Thickness(ActualWidth / 2, ActualHeight, ActualWidth / 2, 0);
                 if (value)
+                {
+                    elementCanvas.Height = Double.NaN;
                     MagnifyBoard.Begin();
+                }
                 else
                     MinifyBoard.Begin();
                 MouseMoveTimer.Start();
-                if (!Magnified && false)
-                {
-                    ParentWindow.Height--;
-                    ParentWindow.Height++;
-                }
                 Resources["Foreground"] = value ? Brushes.White : Brushes.Black;
                 EventHappened?.Invoke(this, new InfoExchangeArgs() { Type = InfoType.Magnifiement, Object = value });
             }
         }
+
         public MediaPlayer()
         {
             InitializeComponent();
@@ -101,6 +115,14 @@ namespace Player.Controls
             FullOnBoard.Completed += (_, __) => Cursor = Cursors.None;
             FullOffBoard.CurrentStateInvalidated += (_, __) => Cursor = Cursors.Arrow;
             PlayModeButton.Glyph = (Glyph)Enum.Parse(typeof(Glyph), App.Settings.PlayMode.ToString());
+        }
+
+        private void UserControl_Loaded(object sender, RoutedEventArgs e)
+        {
+            RunUX();
+            Volume = App.Settings.Volume;
+            App.Settings.Changed += (_, __) => MouseMoveTimer = new Timer(App.Settings.MouseOverTimeout) { AutoReset = false };
+            VolumeSlider.Value = Volume * 100;
         }
 
         private void PlayCountTimer_Elapsed(object sender, ElapsedEventArgs e)
@@ -134,25 +156,12 @@ namespace Player.Controls
             MouseMoveTimer.Start();
         }
         
-        private void Invoke(InfoType type, object obj = null) => EventHappened?.Invoke(this, new InfoExchangeArgs() { Type = type, Object = obj });
-        
         private async void RunUX()
         {
             UX:
             await Task.Delay(250);
-            if (element.NaturalDuration.HasTimeSpan)
-                if (element.NaturalDuration.TimeSpan != TimeSpan)
-                {
-                    //Update TimeSpan
-                    TimeSpan = element.NaturalDuration.TimeSpan;
-                    PositionSlider.Maximum = TimeSpan.TotalMilliseconds;
-                    PositionSlider.SmallChange = 1 * PositionSlider.Maximum / 100;
-                    PositionSlider.LargeChange = 5 * PositionSlider.Maximum / 100;
-                    TimeLabel_Full.Content = TimeSpan.ToNewString();
-                    Invoke(InfoType.LengthFound, TimeSpan);
-                    SmallChange = new TimeSpan(0, 0, 0, 0, (int)PositionSlider.SmallChange);
-                    BackwardSmallChange = new TimeSpan(0, 0, 0, 0, -1 * (int)PositionSlider.SmallChange);
-                }
+            if (element.NaturalDuration.HasTimeSpan && element.NaturalDuration.TimeSpan != TimeSpan)
+                TimeSpan = element.NaturalDuration.TimeSpan;
             TimeLabel_Current.Content = Position.ToNewString();
             PositionSlider.Value = Position.TotalMilliseconds;
             goto UX;
@@ -236,9 +245,9 @@ namespace Player.Controls
         {
             switch (element.Volume)
             {
-                case double n when (n < 0.1): VolumeIcon.Glyph = Glyph.Volume0; break;
-                case double n when (n < 0.4): VolumeIcon.Glyph = Glyph.Volume1; break;
-                case double n when (n < 0.8): VolumeIcon.Glyph = Glyph.Volume2; break;
+                case double n when (n <= 0.1): VolumeIcon.Glyph = Glyph.Volume0; break;
+                case double n when (n <= 0.4): VolumeIcon.Glyph = Glyph.Volume1; break;
+                case double n when (n <= 0.8): VolumeIcon.Glyph = Glyph.Volume2; break;
                 default: VolumeIcon.Glyph = Glyph.Volume3; break;
             }
             App.Settings.Volume = element.Volume;
@@ -274,9 +283,6 @@ namespace Player.Controls
             }
         }
 
-        public void SmallSlideLeft() => Position = Position.Subtract(SmallChange);
-        public void SmallSlideRight() => Position = Position.Add(SmallChange);
-
         private void Element_MediaEnded(object sender, RoutedEventArgs e)
         {
             PlayNext();
@@ -290,10 +296,7 @@ namespace Player.Controls
 
         public void Size_Changed(object sender, SizeChangedEventArgs e)
         {
-            if (!Magnified)
-            {
-                elementCanvas.SetValue(MarginProperty, new Thickness(ActualWidth / 2, ActualHeight, ActualWidth / 2, 0));
-            }
+            elementCanvas.Height = Magnified ? Double.NaN : 0;
         }
 
         public void Play(Media media)
@@ -305,20 +308,15 @@ namespace Player.Controls
             if (IsFullScreen && !media.IsVideo)
                 FullScreenButton.EmulateClick();
             Magnified = media.IsVideo;
-            PlayPauseButton.Glyph = Glyph.Pause;
             element.Source = media.Url;
             element.Play();
+            if (PlayPauseButton.Glyph == Glyph.Play)
+                PlayPauseButton.EmulateClick();
             PlayCountTimer.Stop();
             PlayCountTimer.Start();
             TitleLabel.Content = media.ToString();
         }
-
-        private void UserControl_Loaded(object sender, RoutedEventArgs e)
-        {
-            RunUX();
-            Volume = App.Settings.Volume;
-            App.Settings.Changed += (_, __) => MouseMoveTimer = new Timer(App.Settings.MouseOverTimeout) { AutoReset = false };
-            VolumeSlider.Value = Volume * 100;
-        }
+        
+        private void Invoke(InfoType type, object obj = null) => EventHappened?.Invoke(this, new InfoExchangeArgs() { Type = type, Object = obj });
     }
 }
