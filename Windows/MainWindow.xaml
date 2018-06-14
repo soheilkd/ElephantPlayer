@@ -9,335 +9,335 @@
     x:Name="window"
     mc:Ignorable="d" Loaded="Window_Loaded" Closing="Window_Closing" Drop="Window_Drop" AllowDrop="True"
     Title="Elephant Player" Height="544" Width="651" >
-    <Grid Background="{DynamicResource KeyOfBackground}" x:Name="ContentGrid">
-        <TabControl x:Name="TabControl" Background="{DynamicResource KeyOfBackground}" Margin="0,85,-5,0" BorderThickness="0" TabStripPlacement="Left">
-            <TabItem>
-                <TabItem.Header>
-                    <StackPanel Orientation="Horizontal"  Style="{DynamicResource HeaderPanel}">
-                        <player:MaterialIcon Glyph="MusicQueue" />
-                        <TextBlock Text="  " />
-                        <TextBlock Text="Titles" FontSize="18" VerticalAlignment="Center"/>
-                    </StackPanel>
-                </TabItem.Header>
-                <ListView x:Name="TitlesView" ContextMenu="{DynamicResource ContextMenu1}">
-                    <ListView.View>
-                        <GridView>
-                            <GridViewColumn Header="Title" Width="300" CellTemplate="{DynamicResource TitleCell}"/>
-                            <GridViewColumn Header="Artist" Width="100" CellTemplate="{DynamicResource ArtistCell}" />
-                            <GridViewColumn Header="Album" Width="100" CellTemplate="{DynamicResource AlbumCell}" />
-                            <GridViewColumn Header="Rate" Width="120" CellTemplate="{DynamicResource RateCell}" />
-                            <GridViewColumn Header="Plays" Width="50" CellTemplate="{DynamicResource PlayCell}"/>
-                            <GridViewColumn Header="Date Added" Width="150" CellTemplate="{DynamicResource DateCell}"/>
-                        </GridView>
-                    </ListView.View>
-                </ListView>
-            </TabItem>
-            <TabItem >
-                <TabItem.Header>
-                    <StackPanel Orientation="Horizontal" Style="{DynamicResource HeaderPanel}">
-                        <player:MaterialIcon Glyph="Artist" />
-                        <TextBlock Text="  " />
-                        <TextBlock Text="Artists" FontSize="18" />
-                    </StackPanel>
-                </TabItem.Header>
-                <ListView Name="ArtistsView" ContextMenu="{DynamicResource ContextMenu1}">
-                    <ListView.View>
-                        <GridView>
-                            <GridViewColumn Header="Title" Width="120" DisplayMemberBinding="{Binding Title}" />
-                            <GridViewColumn Header="Album" Width="50" DisplayMemberBinding="{Binding Album}" />
-                            <GridViewColumn Header="Plays" Width="50" DisplayMemberBinding="{Binding PlayCount}" />
-                        </GridView>
-                    </ListView.View>
-                    <ListView.GroupStyle>
-                        <GroupStyle>
-                            <GroupStyle.ContainerStyle>
-                                <Style TargetType="{x:Type GroupItem}">
-                                    <Setter Property="Template">
-                                        <Setter.Value>
-                                            <ControlTemplate>
-                                                <Expander IsExpanded="False">
-                                                    <Expander.Header>
-                                                        <StackPanel Orientation="Horizontal">
-                                                            <TextBlock Text="{Binding Name}" FontWeight="SemiBold" Foreground="Black" FontSize="16" VerticalAlignment="Bottom" />
-                                                            <TextBlock Text="{Binding ItemCount}" FontSize="18" Foreground="#F333" FontWeight="Light" FontStyle="Italic" Margin="10,0,0,0" VerticalAlignment="Bottom" />
-                                                            <TextBlock Text=" items" FontSize="16" Foreground="Black" FontStyle="Italic" VerticalAlignment="Bottom" />
-                                                        </StackPanel>
-                                                    </Expander.Header>
-                                                    <ItemsPresenter />
-                                                </Expander>
-                                            </ControlTemplate>
-                                        </Setter.Value>
-                                    </Setter>
-                                </Style>
-                            </GroupStyle.ContainerStyle>
-                        </GroupStyle>
-                    </ListView.GroupStyle>
-                </ListView>
-            </TabItem>
-            <TabItem>
-                <TabItem.Header>
-                    <StackPanel Orientation="Horizontal"  Style="{DynamicResource HeaderPanel}">
-                        <player:MaterialIcon Glyph="Album" />
-                        <TextBlock Text="  " />
-                        <TextBlock Text="Albums" FontSize="18" />
-                    </StackPanel>
-                </TabItem.Header>
-                <ListView Name="AlbumsView" ContextMenu="{DynamicResource ContextMenu1}">
-                    <ListView.View>
-                        <GridView>
-                            <GridViewColumn Header="Title" Width="120" DisplayMemberBinding="{Binding Title}" />
-                            <GridViewColumn Header="Title" Width="50" DisplayMemberBinding="{Binding Title}" />
-                            <GridViewColumn Header="Plays" Width="50" DisplayMemberBinding="{Binding PlayCount}" />
-                        </GridView>
-                    </ListView.View>
+	<Grid Background="{DynamicResource KeyOfBackground}" x:Name="ContentGrid">
+		<TabControl x:Name="TabControl" Background="{DynamicResource KeyOfBackground}" Margin="0,85,-5,0" BorderThickness="0" TabStripPlacement="Left">
+			<TabItem>
+				<TabItem.Header>
+					<StackPanel Orientation="Horizontal"  Style="{DynamicResource HeaderPanel}">
+						<player:MaterialIcon Glyph="MusicQueue" />
+						<TextBlock Text="  " />
+						<TextBlock Text="Titles" FontSize="18" VerticalAlignment="Center"/>
+					</StackPanel>
+				</TabItem.Header>
+				<ListView x:Name="TitlesView" ContextMenu="{DynamicResource ContextMenu1}">
+					<ListView.View>
+						<GridView>
+							<GridViewColumn Header="Title" Width="300" CellTemplate="{DynamicResource TitleCell}"/>
+							<GridViewColumn Header="Artist" Width="100" CellTemplate="{DynamicResource ArtistCell}" />
+							<GridViewColumn Header="Album" Width="100" CellTemplate="{DynamicResource AlbumCell}" />
+							<GridViewColumn Header="Rate" Width="120" CellTemplate="{DynamicResource RateCell}" />
+							<GridViewColumn Header="Plays" Width="50" CellTemplate="{DynamicResource PlayCell}"/>
+							<GridViewColumn Header="Date Added" Width="150" CellTemplate="{DynamicResource DateCell}"/>
+						</GridView>
+					</ListView.View>
+				</ListView>
+			</TabItem>
+			<TabItem >
+				<TabItem.Header>
+					<StackPanel Orientation="Horizontal" Style="{DynamicResource HeaderPanel}">
+						<player:MaterialIcon Glyph="Artist" />
+						<TextBlock Text="  " />
+						<TextBlock Text="Artists" FontSize="18" />
+					</StackPanel>
+				</TabItem.Header>
+				<ListView Name="ArtistsView" ContextMenu="{DynamicResource ContextMenu1}">
+					<ListView.View>
+						<GridView>
+							<GridViewColumn Header="Title" Width="120" DisplayMemberBinding="{Binding Title}" />
+							<GridViewColumn Header="Album" Width="50" DisplayMemberBinding="{Binding Album}" />
+							<GridViewColumn Header="Plays" Width="50" DisplayMemberBinding="{Binding PlayCount}" />
+						</GridView>
+					</ListView.View>
+					<ListView.GroupStyle>
+						<GroupStyle>
+							<GroupStyle.ContainerStyle>
+								<Style TargetType="{x:Type GroupItem}">
+									<Setter Property="Template">
+										<Setter.Value>
+											<ControlTemplate>
+												<Expander IsExpanded="False">
+													<Expander.Header>
+														<StackPanel Orientation="Horizontal">
+															<TextBlock Text="{Binding Name}" FontWeight="SemiBold" Foreground="Black" FontSize="16" VerticalAlignment="Bottom" />
+															<TextBlock Text="{Binding ItemCount}" FontSize="18" Foreground="#F333" FontWeight="Light" FontStyle="Italic" Margin="10,0,0,0" VerticalAlignment="Bottom" />
+															<TextBlock Text=" items" FontSize="16" Foreground="Black" FontStyle="Italic" VerticalAlignment="Bottom" />
+														</StackPanel>
+													</Expander.Header>
+													<ItemsPresenter />
+												</Expander>
+											</ControlTemplate>
+										</Setter.Value>
+									</Setter>
+								</Style>
+							</GroupStyle.ContainerStyle>
+						</GroupStyle>
+					</ListView.GroupStyle>
+				</ListView>
+			</TabItem>
+			<TabItem>
+				<TabItem.Header>
+					<StackPanel Orientation="Horizontal"  Style="{DynamicResource HeaderPanel}">
+						<player:MaterialIcon Glyph="Album" />
+						<TextBlock Text="  " />
+						<TextBlock Text="Albums" FontSize="18" />
+					</StackPanel>
+				</TabItem.Header>
+				<ListView Name="AlbumsView" ContextMenu="{DynamicResource ContextMenu1}">
+					<ListView.View>
+						<GridView>
+							<GridViewColumn Header="Title" Width="120" DisplayMemberBinding="{Binding Title}" />
+							<GridViewColumn Header="Title" Width="50" DisplayMemberBinding="{Binding Title}" />
+							<GridViewColumn Header="Plays" Width="50" DisplayMemberBinding="{Binding PlayCount}" />
+						</GridView>
+					</ListView.View>
 
-                    <ListView.GroupStyle>
-                        <GroupStyle>
-                            <GroupStyle.ContainerStyle>
-                                <Style TargetType="{x:Type GroupItem}">
-                                    <Setter Property="Template">
-                                        <Setter.Value>
-                                            <ControlTemplate>
-                                                <Expander IsExpanded="False">
-                                                    <Expander.Header>
-                                                        <StackPanel Orientation="Horizontal">
-                                                            <TextBlock Text="{Binding Name}" FontWeight="SemiBold" Foreground="Black" FontSize="16" VerticalAlignment="Bottom" />
-                                                            <TextBlock Text="{Binding ItemCount}" FontSize="18" Foreground="#F333" FontWeight="Light" FontStyle="Italic" Margin="10,0,0,0" VerticalAlignment="Bottom" />
-                                                            <TextBlock Text=" items" FontSize="16" Foreground="Black" FontStyle="Italic" VerticalAlignment="Bottom" />
-                                                        </StackPanel>
-                                                    </Expander.Header>
-                                                    <ItemsPresenter />
-                                                </Expander>
-                                            </ControlTemplate>
-                                        </Setter.Value>
-                                    </Setter>
-                                </Style>
-                            </GroupStyle.ContainerStyle>
-                        </GroupStyle>
-                    </ListView.GroupStyle>
-                </ListView>
-            </TabItem>
-            <TabItem>
-                <TabItem.Header>
-                    <StackPanel Orientation="Horizontal"  Style="{DynamicResource HeaderPanel}">
-                        <player:MaterialIcon Glyph="Rate" />
-                        <TextBlock Text="  " />
-                        <TextBlock Text="Ratings" FontSize="18" />
-                    </StackPanel>
-                </TabItem.Header>
-                <ListView x:Name="RatesView" ContextMenu="{DynamicResource ContextMenu1}">
-                    <ListView.View>
-                        <GridView>
-                            <GridViewColumn Header="Title" Width="300" CellTemplate="{DynamicResource TitleCell}"/>
-                            <GridViewColumn Header="Artist" Width="100" CellTemplate="{DynamicResource ArtistCell}" />
-                            <GridViewColumn Header="Album" Width="100" CellTemplate="{DynamicResource AlbumCell}" />
-                            <GridViewColumn Header="Rate" Width="120" CellTemplate="{DynamicResource RateCell}" />
-                            <GridViewColumn Header="Plays" Width="50" CellTemplate="{DynamicResource PlayCell}"/>
-                        </GridView>
-                    </ListView.View>
-                    <ListView.GroupStyle>
-                        <GroupStyle>
-                            <GroupStyle.ContainerStyle>
-                                <Style TargetType="{x:Type GroupItem}">
-                                    <Setter Property="Template">
-                                        <Setter.Value>
-                                            <ControlTemplate>
-                                                <Expander IsExpanded="False">
-                                                    <Expander.Header>
-                                                        <StackPanel Orientation="Horizontal">
-                                                            <TextBlock Text="{Binding Name}" FontWeight="SemiBold" Foreground="Black" FontSize="16" VerticalAlignment="Bottom" />
-                                                            <TextBlock Text="{Binding ItemCount}" FontSize="18" Foreground="#F333" FontWeight="Light" FontStyle="Italic" Margin="10,0,0,0" VerticalAlignment="Bottom" />
-                                                            <TextBlock Text=" items" FontSize="16" Foreground="Black" FontStyle="Italic" VerticalAlignment="Bottom" />
-                                                        </StackPanel>
-                                                    </Expander.Header>
-                                                    <ItemsPresenter />
-                                                </Expander>
-                                            </ControlTemplate>
-                                        </Setter.Value>
-                                    </Setter>
-                                </Style>
-                            </GroupStyle.ContainerStyle>
-                        </GroupStyle>
-                    </ListView.GroupStyle>
-                </ListView>
-            </TabItem>
-            <TabItem >
-                <TabItem.Header>
-                    <StackPanel Orientation="Horizontal" Style="{DynamicResource HeaderPanel}">
-                        <player:MaterialIcon Glyph="Settings" />
-                        <TextBlock Text="  " />
-                        <TextBlock Text="Settings" FontSize="18" />
-                    </StackPanel>
-                </TabItem.Header>
-                <StackPanel Orientation="Vertical">
-                    <Label Content="Ancestor Key" />
-                    <ComboBox x:Name="Settings_AncestorCombo" Width="120" Margin="10,0,0,0">
-                        <ComboBoxItem Content="Ctrl" />
-                        <ComboBoxItem Content="Alt" />
-                        <ComboBoxItem Content="Shift" />
-                        <ComboBoxItem Content="Ctrl + Alt" />
-                        <ComboBoxItem Content="Ctrl + Shift"/>
-                        <ComboBoxItem Content="Shift + Alt" />
-                        <ComboBoxItem Content="Ctrl +Alt + Shift" />
-                    </ComboBox>
-                    <CheckBox x:Name="Settings_OrinateCheck" Content="Auto Orinate Vision" Margin="5,5,0,0"/>
-                    <CheckBox x:Name="Settings_LiveLibraryCheck" Content="Live Library" Margin="5,5,0,0" />
-                    <CheckBox x:Name="Settings_ExplicitCheck" Content="Explicit Content" Margin="5,5,0,0" />
-                    <Canvas Height="30">
-                        <Label Content="Library location" Margin="10"  />
-                        <Button Content="Browse" Width="85" Canvas.Left="140" Canvas.Top="15" Click="Settings_LibraryLocationBrowse"/>
-                        <Label x:Name="Settings_LibraryLabel" Canvas.Left="240" Canvas.Top="10" Content="Current: " />
-                    </Canvas>
-                    <Canvas Height="40">
-                        <Label Content="Downloads location" Margin="10"  />
-                        <Button Content="Browse" Width="85" Canvas.Left="140" Canvas.Top="15" Click="Settings_DownloadsLocationBrowse"/>
-                        <Label x:Name="Settings_DownloadsLabel" Canvas.Left="240" Canvas.Top="10" Content="Current: " />
-                    </Canvas>
-                    <Label Content="Vision Timeout"/>
-                    <ComboBox x:Name="Settings_TimeoutCombo" Margin="10,0,0,0" Width="120">
-                        <ComboBoxItem Content="0.5 s"/>
-                        <ComboBoxItem Content="1 s"/>
-                        <ComboBoxItem Content="2 s"/>
-                        <ComboBoxItem Content="3 s"/>
-                        <ComboBoxItem Content="4 s"/>
-                        <ComboBoxItem Content="5 s"/>
-                        <ComboBoxItem Content="10 s"/>
-                        <ComboBoxItem Content="60 s"/>
-                    </ComboBox>
-                    <Button Content="Revalidate Library" Height="24" Width="200" Click="Settings_RevalidateClick" Margin="20"/>
-                    <Label Content="soheilkd" HorizontalAlignment="Right" VerticalAlignment="Bottom" FontSize="10"/>
-                    <StackPanel.Resources>
-                        <Style TargetType="Label" >
-                            <Setter Property="HorizontalAlignment" Value="Left"/>
-                            <Setter Property="VerticalAlignment" Value="Top"/>
-                            <Setter Property="FontSize" Value="14" />
-                            <Setter Property="FontWeight" Value="Light" />
-                        </Style>
-                        <Style TargetType="CheckBox" >
-                            <Setter Property="FontSize" Value="14" />
-                            <Setter Property="FontWeight" Value="Light" />
-                            <Setter Property="HorizontalAlignment" Value="Left"/>
-                            <Setter Property="VerticalAlignment" Value="Top"/>
-                        </Style>
-                        <Style TargetType="ComboBox">
-                            <Setter Property="HorizontalAlignment" Value="Left"/>
-                            <Setter Property="VerticalAlignment" Value="Top"/>
-                        </Style>
-                        <Style TargetType="Button">
-                            <Setter Property="HorizontalAlignment" Value="Left"/>
-                            <Setter Property="VerticalAlignment" Value="Top"/>
-                        </Style>
-                    </StackPanel.Resources>
-                </StackPanel>
-            </TabItem>
-        </TabControl>
-        <player:MediaPlayer x:Name="Player"/>
-        <Label x:Name="SearchLabel" Content="{Binding Text, ElementName=SearchBox}" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,0,0,0"/>
-        <player:MaterialButton x:Name="SearchButton" HorizontalAlignment="Right" VerticalAlignment="Top" Glyph="Search" 
+					<ListView.GroupStyle>
+						<GroupStyle>
+							<GroupStyle.ContainerStyle>
+								<Style TargetType="{x:Type GroupItem}">
+									<Setter Property="Template">
+										<Setter.Value>
+											<ControlTemplate>
+												<Expander IsExpanded="False">
+													<Expander.Header>
+														<StackPanel Orientation="Horizontal">
+															<TextBlock Text="{Binding Name}" FontWeight="SemiBold" Foreground="Black" FontSize="16" VerticalAlignment="Bottom" />
+															<TextBlock Text="{Binding ItemCount}" FontSize="18" Foreground="#F333" FontWeight="Light" FontStyle="Italic" Margin="10,0,0,0" VerticalAlignment="Bottom" />
+															<TextBlock Text=" items" FontSize="16" Foreground="Black" FontStyle="Italic" VerticalAlignment="Bottom" />
+														</StackPanel>
+													</Expander.Header>
+													<ItemsPresenter />
+												</Expander>
+											</ControlTemplate>
+										</Setter.Value>
+									</Setter>
+								</Style>
+							</GroupStyle.ContainerStyle>
+						</GroupStyle>
+					</ListView.GroupStyle>
+				</ListView>
+			</TabItem>
+			<TabItem>
+				<TabItem.Header>
+					<StackPanel Orientation="Horizontal"  Style="{DynamicResource HeaderPanel}">
+						<player:MaterialIcon Glyph="Rate" />
+						<TextBlock Text="  " />
+						<TextBlock Text="Ratings" FontSize="18" />
+					</StackPanel>
+				</TabItem.Header>
+				<ListView x:Name="RatesView" ContextMenu="{DynamicResource ContextMenu1}">
+					<ListView.View>
+						<GridView>
+							<GridViewColumn Header="Title" Width="300" CellTemplate="{DynamicResource TitleCell}"/>
+							<GridViewColumn Header="Artist" Width="100" CellTemplate="{DynamicResource ArtistCell}" />
+							<GridViewColumn Header="Album" Width="100" CellTemplate="{DynamicResource AlbumCell}" />
+							<GridViewColumn Header="Rate" Width="120" CellTemplate="{DynamicResource RateCell}" />
+							<GridViewColumn Header="Plays" Width="50" CellTemplate="{DynamicResource PlayCell}"/>
+						</GridView>
+					</ListView.View>
+					<ListView.GroupStyle>
+						<GroupStyle>
+							<GroupStyle.ContainerStyle>
+								<Style TargetType="{x:Type GroupItem}">
+									<Setter Property="Template">
+										<Setter.Value>
+											<ControlTemplate>
+												<Expander IsExpanded="False">
+													<Expander.Header>
+														<StackPanel Orientation="Horizontal">
+															<TextBlock Text="{Binding Name}" FontWeight="SemiBold" Foreground="Black" FontSize="16" VerticalAlignment="Bottom" />
+															<TextBlock Text="{Binding ItemCount}" FontSize="18" Foreground="#F333" FontWeight="Light" FontStyle="Italic" Margin="10,0,0,0" VerticalAlignment="Bottom" />
+															<TextBlock Text=" items" FontSize="16" Foreground="Black" FontStyle="Italic" VerticalAlignment="Bottom" />
+														</StackPanel>
+													</Expander.Header>
+													<ItemsPresenter />
+												</Expander>
+											</ControlTemplate>
+										</Setter.Value>
+									</Setter>
+								</Style>
+							</GroupStyle.ContainerStyle>
+						</GroupStyle>
+					</ListView.GroupStyle>
+				</ListView>
+			</TabItem>
+			<TabItem >
+				<TabItem.Header>
+					<StackPanel Orientation="Horizontal" Style="{DynamicResource HeaderPanel}">
+						<player:MaterialIcon Glyph="Settings" />
+						<TextBlock Text="  " />
+						<TextBlock Text="Settings" FontSize="18" />
+					</StackPanel>
+				</TabItem.Header>
+				<StackPanel Orientation="Vertical">
+					<Label Content="Ancestor Key" />
+					<ComboBox x:Name="Settings_AncestorCombo" Width="120" Margin="10,0,0,0">
+						<ComboBoxItem Content="Ctrl" />
+						<ComboBoxItem Content="Alt" />
+						<ComboBoxItem Content="Shift" />
+						<ComboBoxItem Content="Ctrl + Alt" />
+						<ComboBoxItem Content="Ctrl + Shift"/>
+						<ComboBoxItem Content="Shift + Alt" />
+						<ComboBoxItem Content="Ctrl +Alt + Shift" />
+					</ComboBox>
+					<CheckBox x:Name="Settings_OrinateCheck" Content="Auto Orinate Vision" Margin="5,5,0,0"/>
+					<CheckBox x:Name="Settings_LiveLibraryCheck" Content="Live Library" Margin="5,5,0,0" />
+					<CheckBox x:Name="Settings_ExplicitCheck" Content="Explicit Content" Margin="5,5,0,0" />
+					<Canvas Height="30">
+						<Label Content="Library location" Margin="10"  />
+						<Button Content="Browse" Width="85" Canvas.Left="140" Canvas.Top="15" Click="Settings_LibraryLocationBrowse"/>
+						<Label x:Name="Settings_LibraryLabel" Canvas.Left="240" Canvas.Top="10" Content="Current: " />
+					</Canvas>
+					<Canvas Height="40">
+						<Label Content="Downloads location" Margin="10"  />
+						<Button Content="Browse" Width="85" Canvas.Left="140" Canvas.Top="15" Click="Settings_DownloadsLocationBrowse"/>
+						<Label x:Name="Settings_DownloadsLabel" Canvas.Left="240" Canvas.Top="10" Content="Current: " />
+					</Canvas>
+					<Label Content="Vision Timeout"/>
+					<ComboBox x:Name="Settings_TimeoutCombo" Margin="10,0,0,0" Width="120">
+						<ComboBoxItem Content="0.5 s"/>
+						<ComboBoxItem Content="1 s"/>
+						<ComboBoxItem Content="2 s"/>
+						<ComboBoxItem Content="3 s"/>
+						<ComboBoxItem Content="4 s"/>
+						<ComboBoxItem Content="5 s"/>
+						<ComboBoxItem Content="10 s"/>
+						<ComboBoxItem Content="60 s"/>
+					</ComboBox>
+					<Button Content="Revalidate Library" Height="24" Width="200" Click="Settings_RevalidateClick" Margin="20"/>
+					<Label Content="soheilkd" HorizontalAlignment="Right" VerticalAlignment="Bottom" FontSize="10"/>
+					<StackPanel.Resources>
+						<Style TargetType="Label" >
+							<Setter Property="HorizontalAlignment" Value="Left"/>
+							<Setter Property="VerticalAlignment" Value="Top"/>
+							<Setter Property="FontSize" Value="14" />
+							<Setter Property="FontWeight" Value="Light" />
+						</Style>
+						<Style TargetType="CheckBox" >
+							<Setter Property="FontSize" Value="14" />
+							<Setter Property="FontWeight" Value="Light" />
+							<Setter Property="HorizontalAlignment" Value="Left"/>
+							<Setter Property="VerticalAlignment" Value="Top"/>
+						</Style>
+						<Style TargetType="ComboBox">
+							<Setter Property="HorizontalAlignment" Value="Left"/>
+							<Setter Property="VerticalAlignment" Value="Top"/>
+						</Style>
+						<Style TargetType="Button">
+							<Setter Property="HorizontalAlignment" Value="Left"/>
+							<Setter Property="VerticalAlignment" Value="Top"/>
+						</Style>
+					</StackPanel.Resources>
+				</StackPanel>
+			</TabItem>
+		</TabControl>
+		<player:MediaPlayer x:Name="Player"/>
+		<Label x:Name="SearchLabel" Content="{Binding Text, ElementName=SearchBox}" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,0,0,0"/>
+		<player:MaterialButton x:Name="SearchButton" HorizontalAlignment="Right" VerticalAlignment="Top" Glyph="Search" 
                             MouseUp="SearchIcon_Click" Margin="0,20,10,0" EllipseType="Rectular" Width="20" Height="20"/>
-        <Popup x:Name="SearchPopup" PlacementTarget="{Binding ElementName=SearchButton}" StaysOpen="False" 
+		<Popup x:Name="SearchPopup" PlacementTarget="{Binding ElementName=SearchButton}" StaysOpen="False" 
                Placement="Bottom" PopupAnimation="Fade" AllowsTransparency="True">
-            <TextBox HorizontalAlignment="Right" VerticalAlignment="Top" Width="140" Height="20" x:Name="SearchBox" TextChanged="SearchBox_TextChanged"/>
-        </Popup>
+			<TextBox HorizontalAlignment="Right" VerticalAlignment="Top" Width="140" Height="20" x:Name="SearchBox" TextChanged="SearchBox_TextChanged"/>
+		</Popup>
 
-        <Image x:Name="MiniArtworkImage" Height="55" Width="55" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="6,6,0,0">
-            <Image.Triggers>
-                <EventTrigger RoutedEvent="UIElement.MouseDown">
-                    <BeginStoryboard>
-                        <Storyboard Storyboard.TargetName="MiniArtworkImage" SpeedRatio="2" AccelerationRatio="0.3" DecelerationRatio="0.7">
-                            <DoubleAnimation Storyboard.TargetProperty="Width" From="{Binding Width, ElementName=MiniArtworkImage}" To="400"/>
-                            <DoubleAnimation Storyboard.TargetProperty="Height" From="{Binding Width, ElementName=MiniArtworkImage}" To="400"/>
-                        </Storyboard>
-                    </BeginStoryboard>
-                </EventTrigger>
-                <EventTrigger RoutedEvent="UIElement.MouseUp">
-                    <BeginStoryboard>
-                        <Storyboard Storyboard.TargetName="MiniArtworkImage" SpeedRatio="2" AccelerationRatio="0.3" DecelerationRatio="0.7">
-                            <DoubleAnimation Storyboard.TargetProperty="Width" From="{Binding Width, ElementName=MiniArtworkImage}" To="55"/>
-                            <DoubleAnimation Storyboard.TargetProperty="Height" From="{Binding Width, ElementName=MiniArtworkImage}" To="55"/>
-                        </Storyboard>
-                    </BeginStoryboard>
-                </EventTrigger>
-            </Image.Triggers>
-        </Image>
-        
-    </Grid>
-    <Window.Resources>
-        <DataTemplate x:Key="TitleCell">
-            <TextBlock Text="{Binding Title}" FontSize="16" FontWeight="Normal" Foreground="Black"/>
-        </DataTemplate>
-        <DataTemplate x:Key="ArtistCell">
-            <TextBlock Text="{Binding Artist}" FontSize="16" FontWeight="Light" Foreground="Black" />
-        </DataTemplate>
-        <DataTemplate x:Key="AlbumCell">
-            <TextBlock Text="{Binding Album}"  FontSize="16" FontWeight="Light" Foreground="Black" />
-        </DataTemplate>
-        <DataTemplate x:Key="PlayCell">
-            <TextBlock Text="{Binding PlayCount}" FontSize="16" FontWeight="Light" Foreground="Black" />
-        </DataTemplate>
-        <DataTemplate x:Key="NameCell">
-            <TextBlock Text="{Binding Name}"  FontSize="16" FontWeight="Light"  Foreground="Black"/>
-        </DataTemplate>
-        <DataTemplate x:Key="PathCell">
-            <TextBlock Text="{Binding Path}"  FontSize="16" FontWeight="Light"  Foreground="Black"/>
-        </DataTemplate>
-        <DataTemplate x:Key="RateCell">
-            <player:RatingCell RatingValue="{Binding Rate, BindsDirectlyToSource=True, Mode=TwoWay}"/>
-        </DataTemplate>
-        <DataTemplate x:Key="DateCell">
-            <TextBlock Text="{Binding AdditionDate}"  FontSize="16" FontWeight="Light"  Foreground="Black"/>
-        </DataTemplate>
-        <sys:String x:Key="LastPath" >D:\\</sys:String>
-        <ContextMenu x:Key="ContextMenu1">
-            <MenuItem Header="Detergent Meta" Click="Menu_TagDetergent" />
-            <MenuItem Header="Play after current" Click="Menu_PlayAfterClick" />
-            <MenuItem Header="Convert" Click="Menu_ConvertClick" />
-            <MenuItem Header="Open in VLC" Click="Menu_VLC"/>
-            <MenuItem Header="Download" Click="Menu_DownloadClick" />
-            <MenuItem Header="Duplicate...">
-                <MenuItem Header="1" Click="Menu_DuplicateClick"/>
-                <MenuItem Header="2" Click="Menu_DuplicateClick"/>
-                <MenuItem Header="3" Click="Menu_DuplicateClick"/>
-                <MenuItem Header="5" Click="Menu_DuplicateClick"/>
-                <MenuItem Header="10" Click="Menu_DuplicateClick"/>
-            </MenuItem>
-            <MenuItem Header="Move to..." >
-                <MenuItem Header="{DynamicResource LastPath}" Click="Menu_MoveClick"/>
-                <MenuItem Header="Browse..." Click="Menu_MoveClick"/>
-            </MenuItem>
-            <MenuItem Header="Copy to..." >
-                <MenuItem Header="{DynamicResource LastPath}" Click="Menu_CopyClick"/>
-                <MenuItem Header="Browse..." Click="Menu_CopyClick"/>
-            </MenuItem>
-            <MenuItem Header="Remove" Click="Menu_RemoveClick"/>
-            <MenuItem Header="Delete" Click="Menu_DeleteClick" />
-            <MenuItem Header="Open Location" Click="Menu_LocationClick"/>
-            <MenuItem Header="Properties" Click="Menu_PropertiesClick"/>
-        </ContextMenu>
-        <Style TargetType="{x:Type ListView}">
-            <Setter Property="Background" Value="{DynamicResource KeyOfBackground}" />
-            <Setter Property="IsTextSearchEnabled" Value="False" />
-            <Setter Property="ScrollViewer.CanContentScroll" Value="False" />
-            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-            <Setter Property="BorderThickness" Value="0" />
-            <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled" />
-            <Style.Resources>
-                <sys:Double x:Key="{x:Static SystemParameters.VerticalScrollBarWidthKey}">10</sys:Double>
-            </Style.Resources>
-        </Style>
-        <Style TargetType="StackPanel" x:Key="HeaderPanel">
-            <Setter Property="Orientation" Value="Horizontal"/>
-            <Setter Property="Height" Value="27"/>
-            <Setter Property="Width" Value="109" />
-        </Style>
-        <SolidColorBrush x:Key="KeyOfBackground" Color="#FDDD" />
-        <SolidColorBrush x:Key="KeyOfForeground" Color="#F111" />
+		<Image x:Name="MiniArtworkImage" Height="55" Width="55" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="6,6,0,0">
+			<Image.Triggers>
+				<EventTrigger RoutedEvent="UIElement.MouseDown">
+					<BeginStoryboard>
+						<Storyboard Storyboard.TargetName="MiniArtworkImage" SpeedRatio="2" AccelerationRatio="0.3" DecelerationRatio="0.7">
+							<DoubleAnimation Storyboard.TargetProperty="Width" From="{Binding Width, ElementName=MiniArtworkImage}" To="400"/>
+							<DoubleAnimation Storyboard.TargetProperty="Height" From="{Binding Width, ElementName=MiniArtworkImage}" To="400"/>
+						</Storyboard>
+					</BeginStoryboard>
+				</EventTrigger>
+				<EventTrigger RoutedEvent="UIElement.MouseUp">
+					<BeginStoryboard>
+						<Storyboard Storyboard.TargetName="MiniArtworkImage" SpeedRatio="2" AccelerationRatio="0.3" DecelerationRatio="0.7">
+							<DoubleAnimation Storyboard.TargetProperty="Width" From="{Binding Width, ElementName=MiniArtworkImage}" To="55"/>
+							<DoubleAnimation Storyboard.TargetProperty="Height" From="{Binding Width, ElementName=MiniArtworkImage}" To="55"/>
+						</Storyboard>
+					</BeginStoryboard>
+				</EventTrigger>
+			</Image.Triggers>
+		</Image>
 
-        <Storyboard x:Key="SettingsOnBoard" AccelerationRatio="0.1" DecelerationRatio="0.9" Storyboard.TargetProperty="Margin" >
-            <ThicknessAnimation From="{Binding Margin, ElementName=SettingsGrid}" Storyboard.TargetName="SettingsGrid" To="0"/>
-        </Storyboard>
-        <Storyboard x:Key="SettingsOffBoard" AccelerationRatio="0.1" DecelerationRatio="0.9" Storyboard.TargetProperty="Margin">
-            <ThicknessAnimation From="{Binding Margin, ElementName=SettingsGrid}" Storyboard.TargetName="SettingsGrid" To="-300,0,0,0"/>
-        </Storyboard>
-    </Window.Resources>
+	</Grid>
+	<Window.Resources>
+		<DataTemplate x:Key="TitleCell">
+			<TextBlock Text="{Binding Title}" FontSize="16" FontWeight="Normal" Foreground="Black"/>
+		</DataTemplate>
+		<DataTemplate x:Key="ArtistCell">
+			<TextBlock Text="{Binding Artist}" FontSize="16" FontWeight="Light" Foreground="Black" />
+		</DataTemplate>
+		<DataTemplate x:Key="AlbumCell">
+			<TextBlock Text="{Binding Album}"  FontSize="16" FontWeight="Light" Foreground="Black" />
+		</DataTemplate>
+		<DataTemplate x:Key="PlayCell">
+			<TextBlock Text="{Binding PlayCount}" FontSize="16" FontWeight="Light" Foreground="Black" />
+		</DataTemplate>
+		<DataTemplate x:Key="NameCell">
+			<TextBlock Text="{Binding Name}"  FontSize="16" FontWeight="Light"  Foreground="Black"/>
+		</DataTemplate>
+		<DataTemplate x:Key="PathCell">
+			<TextBlock Text="{Binding Path}"  FontSize="16" FontWeight="Light"  Foreground="Black"/>
+		</DataTemplate>
+		<DataTemplate x:Key="RateCell">
+			<player:RatingCell RatingValue="{Binding Rate, BindsDirectlyToSource=True, Mode=TwoWay}"/>
+		</DataTemplate>
+		<DataTemplate x:Key="DateCell">
+			<TextBlock Text="{Binding AdditionDate}"  FontSize="16" FontWeight="Light"  Foreground="Black"/>
+		</DataTemplate>
+		<sys:String x:Key="LastPath" >D:\\</sys:String>
+		<ContextMenu x:Key="ContextMenu1">
+			<MenuItem Header="Detergent Meta" Click="Menu_TagDetergent" />
+			<MenuItem Header="Play after current" Click="Menu_PlayAfterClick" />
+			<MenuItem Header="Convert" Click="Menu_ConvertClick" />
+			<MenuItem Header="Open in VLC" Click="Menu_VLC"/>
+			<MenuItem Header="Download" Click="Menu_DownloadClick" />
+			<MenuItem Header="Duplicate...">
+				<MenuItem Header="1" Click="Menu_DuplicateClick"/>
+				<MenuItem Header="2" Click="Menu_DuplicateClick"/>
+				<MenuItem Header="3" Click="Menu_DuplicateClick"/>
+				<MenuItem Header="5" Click="Menu_DuplicateClick"/>
+				<MenuItem Header="10" Click="Menu_DuplicateClick"/>
+			</MenuItem>
+			<MenuItem Header="Move to..." >
+				<MenuItem Header="{DynamicResource LastPath}" Click="Menu_MoveClick"/>
+				<MenuItem Header="Browse..." Click="Menu_MoveClick"/>
+			</MenuItem>
+			<MenuItem Header="Copy to..." >
+				<MenuItem Header="{DynamicResource LastPath}" Click="Menu_CopyClick"/>
+				<MenuItem Header="Browse..." Click="Menu_CopyClick"/>
+			</MenuItem>
+			<MenuItem Header="Remove" Click="Menu_RemoveClick"/>
+			<MenuItem Header="Delete" Click="Menu_DeleteClick" />
+			<MenuItem Header="Open Location" Click="Menu_LocationClick"/>
+			<MenuItem Header="Properties" Click="Menu_PropertiesClick"/>
+		</ContextMenu>
+		<Style TargetType="{x:Type ListView}">
+			<Setter Property="Background" Value="{DynamicResource KeyOfBackground}" />
+			<Setter Property="IsTextSearchEnabled" Value="False" />
+			<Setter Property="ScrollViewer.CanContentScroll" Value="False" />
+			<Setter Property="HorizontalContentAlignment" Value="Stretch" />
+			<Setter Property="BorderThickness" Value="0" />
+			<Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled" />
+			<Style.Resources>
+				<sys:Double x:Key="{x:Static SystemParameters.VerticalScrollBarWidthKey}">10</sys:Double>
+			</Style.Resources>
+		</Style>
+		<Style TargetType="StackPanel" x:Key="HeaderPanel">
+			<Setter Property="Orientation" Value="Horizontal"/>
+			<Setter Property="Height" Value="27"/>
+			<Setter Property="Width" Value="109" />
+		</Style>
+		<SolidColorBrush x:Key="KeyOfBackground" Color="#FDDD" />
+		<SolidColorBrush x:Key="KeyOfForeground" Color="#F111" />
+
+		<Storyboard x:Key="SettingsOnBoard" AccelerationRatio="0.1" DecelerationRatio="0.9" Storyboard.TargetProperty="Margin" >
+			<ThicknessAnimation From="{Binding Margin, ElementName=SettingsGrid}" Storyboard.TargetName="SettingsGrid" To="0"/>
+		</Storyboard>
+		<Storyboard x:Key="SettingsOffBoard" AccelerationRatio="0.1" DecelerationRatio="0.9" Storyboard.TargetProperty="Margin">
+			<ThicknessAnimation From="{Binding Margin, ElementName=SettingsGrid}" Storyboard.TargetName="SettingsGrid" To="-300,0,0,0"/>
+		</Storyboard>
+	</Window.Resources>
 </Window>

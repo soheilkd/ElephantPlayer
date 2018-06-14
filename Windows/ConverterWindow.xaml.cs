@@ -13,7 +13,7 @@ namespace Player.Controls
         Action<Media> ActionOnDone;
         string ProperPath = "";
 
-        public static void Open(Media media, Action<Media> actionOnDone)
+        public static void Convert(Media media, Action<Media> actionOnDone)
         {
             ConverterWindow window = new ConverterWindow();
             window.InitializeComponent();
@@ -21,7 +21,7 @@ namespace Player.Controls
             window.Converter.LogReceived += window.Converter_LogReceived;
             window.Expander1.Expanded += (_, __) => window.Height = 270;
             window.Expander1.Collapsed += (_, __) => window.Height = 105;
-            window.ProperPath = $"{App.Path}Converted\\{media.Name.Substring(0, media.Name.LastIndexOf("."))}.mp4";
+            window.ProperPath = $"{App.Path}Downloads\\{media.Name.Substring(0, media.Name.LastIndexOf("."))}.mp4";
             window.ConverterThread = new Thread(new ThreadStart(() =>
             window.Converter.ConvertMedia(media.Path, window.ProperPath, Format.mp4)))
             {
@@ -59,8 +59,9 @@ namespace Player.Controls
             }
         }
 
-        private void window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
+            Hide();
             Converter.Stop();
             ConverterThread.Abort();
             System.IO.File.Delete(ProperPath);

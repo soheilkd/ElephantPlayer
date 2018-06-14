@@ -4,7 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Player.Controls" WindowStartupLocation="CenterScreen"
-        mc:Ignorable="d" Height="105" Width="600" x:Name="window" Closing="window_Closing"
+        mc:Ignorable="d" Height="105" Width="600" x:Name="window" Closing="Window_Closing"
         Title="ConverterWindow" >
     <Grid>
         <ProgressBar x:Name="ProgressBar" Height="20" VerticalAlignment="Top"/>
