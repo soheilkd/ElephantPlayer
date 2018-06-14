@@ -3,6 +3,6 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              x:Name="control" Width="26" Height="26"  BorderBrush="Black"
              Foreground="Black">
-    <Path x:Name="path" Stroke="{Binding BorderBrush, ElementName=control}" Fill="{Binding Foreground, ElementName=control}" StrokeThickness="0.5"
+	<Path x:Name="path" Stroke="{Binding BorderBrush, ElementName=control}" Fill="{Binding Foreground, ElementName=control}" StrokeThickness="0.5"
           Data="{Binding ElementName=control, Path=GlyphData}" Width="{Binding Width, ElementName=control}" Height="{Binding Height, ElementName=control}"/>
 </UserControl>

@@ -7,67 +7,67 @@
         xmlns:controls="clr-namespace:Player.Controls" Background="#EEE"
         mc:Ignorable="d" WindowStyle="None" ResizeMode="NoResize" BorderThickness="0.1"
         Title="Properties" Height="674" Width="269">
-    <Grid>
-        <DockPanel Background="#01FFFFFF" VerticalAlignment="Top" Height="160" MouseDown="Grid_MouseDown" />
-        <Label Content="Lyrics" Margin="8,476,0,0" />
-        <TextBox x:Name="LyricsBox" Height="170" VerticalAlignment="Bottom" VerticalScrollBarVisibility="Auto"/>
+	<Grid>
+		<DockPanel Background="#01FFFFFF" VerticalAlignment="Top" Height="160" MouseDown="Grid_MouseDown" />
+		<Label Content="Lyrics" Margin="8,476,0,0" />
+		<TextBox x:Name="LyricsBox" Height="170" VerticalAlignment="Bottom" VerticalScrollBarVisibility="Auto"/>
 
-        <Label Content="Title" Margin="14,200,0,0" />
-        <TextBox x:Name="TitleBox" Margin="92,200,7,0"/>
-        <Label Content="Artist" Margin="14,224,0,0"/>
-        <TextBox x:Name="ArtistBox" Margin="92,224,7,0" />
-        <Label Content="Album" Margin="14,250,0,0"/>
-        <TextBox x:Name="AlbumBox" Margin="92,250,7,0" />
-        <Label Content="Album Artist" Margin="12,274,0,0" />
-        <TextBox x:Name="AlbumArtistBox" Margin="92,274,7,0" />
-        <Label Content="Composer" Margin="12,300,0,0" />
-        <TextBox x:Name="ComposerBox" Margin="92,300,7,0" />
-        <Label Content="Conductor" Margin="12,324,0,0" />
-        <TextBox x:Name="ConductorBox" Margin="92,324,7,0" />
-        <Label Content="Genre" Margin="12,350,0,0" />
-        <TextBox x:Name="GenreBox" Margin="92,350,7,0"  />
-        <Label Content="Track" Margin="12,374,0,0"/>
-        <TextBox x:Name="TrackBox" Margin="92,374,7,0" />
-        <Label Content="Comment" Margin="12,400,0,0" />
-        <TextBox x:Name="YearBox" Margin="92,400,7,0" />
-        <Label Content="Year" Margin="12,424,0,0"/>
-        <TextBox x:Name="CommentBox" Margin="92,424,7,0" />
-        <Label Content="Copyright" Margin="12,450,0,0" />
-        <TextBox x:Name="CopyrightBox" Margin="92,450,7,0" />
-        <Image x:Name="ArtworkImage" Height="150" Width="150"  VerticalAlignment="Top" HorizontalAlignment="Left" MouseUp="ArtworkImage_MouseUp" Margin="4,42,0,0"/>
-        <controls:MaterialButton Margin="166,166,0,0" MouseUp="RemoveArtworkClick" Glyph="Delete" EllipseType="Rectular" />
-        <controls:MaterialButton Margin="0,8,48,0" HorizontalAlignment="Right" MouseUp="SaveButtonClick" Glyph="Save" EllipseType="Rectular"/>
-        <controls:MaterialButton Margin="0,8,8,0" HorizontalAlignment="Right" MouseUp="CancelButton_Click" Glyph="Cancel" EllipseType="Rectular"/>
-        <Grid.Resources>
-            <Style TargetType="{x:Type controls:MaterialButton}">
-                <Setter Property="HorizontalAlignment" Value="Left"/>
-                <Setter Property="VerticalAlignment" Value="Top" />
-                <Setter Property="FontSize" Value="14" />
-                <Setter Property="Width" Value="90" />
-            </Style>
-            <Style TargetType="{x:Type TextBox}">
-                <Setter Property="HorizontalAlignment" Value="Stretch" />
-                <Setter Property="Height" Value="22" />
-                <Setter Property="VerticalAlignment" Value="Top" />
-                <Setter Property="MaxLines" Value="1" />
-                <Setter Property="Text" Value="" />
-                <Setter Property="Background" Value="Transparent" />
-                <Setter Property="BorderThickness" Value="1" />
-                <Setter Property="BorderBrush" Value="#F666" />
-            </Style>
-            <Style TargetType="{x:Type Label}">
-                <Setter Property="HorizontalAlignment" Value="Left" />
-                <Setter Property="VerticalAlignment" Value="Top" />
-            </Style>
-        </Grid.Resources>
-    </Grid>
-    <Window.Triggers>
-        <EventTrigger RoutedEvent="Loaded">
-            <BeginStoryboard>
-                <Storyboard Storyboard.TargetProperty="Opacity">
-                    <DoubleAnimation From="0" To="1" AccelerationRatio="0.8" DecelerationRatio="0.2" SpeedRatio="2"/>
-                </Storyboard>
-            </BeginStoryboard>
-        </EventTrigger>
-    </Window.Triggers>
+		<Label Content="Title" Margin="14,200,0,0" />
+		<TextBox x:Name="TitleBox" Margin="92,200,7,0"/>
+		<Label Content="Artist" Margin="14,224,0,0"/>
+		<TextBox x:Name="ArtistBox" Margin="92,224,7,0" />
+		<Label Content="Album" Margin="14,250,0,0"/>
+		<TextBox x:Name="AlbumBox" Margin="92,250,7,0" />
+		<Label Content="Album Artist" Margin="12,274,0,0" />
+		<TextBox x:Name="AlbumArtistBox" Margin="92,274,7,0" />
+		<Label Content="Composer" Margin="12,300,0,0" />
+		<TextBox x:Name="ComposerBox" Margin="92,300,7,0" />
+		<Label Content="Conductor" Margin="12,324,0,0" />
+		<TextBox x:Name="ConductorBox" Margin="92,324,7,0" />
+		<Label Content="Genre" Margin="12,350,0,0" />
+		<TextBox x:Name="GenreBox" Margin="92,350,7,0"  />
+		<Label Content="Track" Margin="12,374,0,0"/>
+		<TextBox x:Name="TrackBox" Margin="92,374,7,0" />
+		<Label Content="Comment" Margin="12,400,0,0" />
+		<TextBox x:Name="YearBox" Margin="92,400,7,0" />
+		<Label Content="Year" Margin="12,424,0,0"/>
+		<TextBox x:Name="CommentBox" Margin="92,424,7,0" />
+		<Label Content="Copyright" Margin="12,450,0,0" />
+		<TextBox x:Name="CopyrightBox" Margin="92,450,7,0" />
+		<Image x:Name="ArtworkImage" Height="150" Width="150"  VerticalAlignment="Top" HorizontalAlignment="Left" MouseUp="ArtworkImage_MouseUp" Margin="4,42,0,0"/>
+		<controls:MaterialButton Margin="166,166,0,0" MouseUp="RemoveArtworkClick" Glyph="Delete" EllipseType="Rectular" />
+		<controls:MaterialButton Margin="0,8,48,0" HorizontalAlignment="Right" MouseUp="SaveButtonClick" Glyph="Save" EllipseType="Rectular"/>
+		<controls:MaterialButton Margin="0,8,8,0" HorizontalAlignment="Right" MouseUp="CancelButton_Click" Glyph="Cancel" EllipseType="Rectular"/>
+		<Grid.Resources>
+			<Style TargetType="{x:Type controls:MaterialButton}">
+				<Setter Property="HorizontalAlignment" Value="Left"/>
+				<Setter Property="VerticalAlignment" Value="Top" />
+				<Setter Property="FontSize" Value="14" />
+				<Setter Property="Width" Value="90" />
+			</Style>
+			<Style TargetType="{x:Type TextBox}">
+				<Setter Property="HorizontalAlignment" Value="Stretch" />
+				<Setter Property="Height" Value="22" />
+				<Setter Property="VerticalAlignment" Value="Top" />
+				<Setter Property="MaxLines" Value="1" />
+				<Setter Property="Text" Value="" />
+				<Setter Property="Background" Value="Transparent" />
+				<Setter Property="BorderThickness" Value="1" />
+				<Setter Property="BorderBrush" Value="#F666" />
+			</Style>
+			<Style TargetType="{x:Type Label}">
+				<Setter Property="HorizontalAlignment" Value="Left" />
+				<Setter Property="VerticalAlignment" Value="Top" />
+			</Style>
+		</Grid.Resources>
+	</Grid>
+	<Window.Triggers>
+		<EventTrigger RoutedEvent="Loaded">
+			<BeginStoryboard>
+				<Storyboard Storyboard.TargetProperty="Opacity">
+					<DoubleAnimation From="0" To="1" AccelerationRatio="0.8" DecelerationRatio="0.2" SpeedRatio="2"/>
+				</Storyboard>
+			</BeginStoryboard>
+		</EventTrigger>
+	</Window.Triggers>
 </Window>

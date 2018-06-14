@@ -6,16 +6,16 @@
         xmlns:local="clr-namespace:Player.Controls" WindowStartupLocation="CenterScreen"
         mc:Ignorable="d" Height="105" Width="600" x:Name="window" Closing="Window_Closing"
         Title="ConverterWindow" >
-    <Grid>
-        <ProgressBar x:Name="ProgressBar" Height="20" VerticalAlignment="Top"/>
-        <Label x:Name="Label1" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="5,23,0,0" Content="Progress Logging"/>
-        <Expander x:Name="Expander1" VerticalAlignment="Bottom" IsExpanded="False">
-            <Expander.Header>
-                <TextBlock Text="Log" FontSize="14"/>
-            </Expander.Header>
-            <Expander.Content>
-                <TextBox x:Name="TextBox1" MinLines="10" Height="160" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto"  MaxLines="10000"/>
-            </Expander.Content>
-        </Expander>
-    </Grid>
+	<Grid>
+		<ProgressBar x:Name="ProgressBar" Height="20" VerticalAlignment="Top"/>
+		<Label x:Name="Label1" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="5,23,0,0" Content="Progress Logging"/>
+		<Expander x:Name="Expander1" VerticalAlignment="Bottom" IsExpanded="False">
+			<Expander.Header>
+				<TextBlock Text="Log" FontSize="14"/>
+			</Expander.Header>
+			<Expander.Content>
+				<TextBox x:Name="TextBox1" MinLines="10" Height="160" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto"  MaxLines="10000"/>
+			</Expander.Content>
+		</Expander>
+	</Grid>
 </Window>

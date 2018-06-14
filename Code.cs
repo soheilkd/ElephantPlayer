@@ -81,7 +81,7 @@ namespace Player
 		public static readonly BitmapImage MusicArt = GetBitmap(Controls.Glyph.Music);
 		public static readonly BitmapImage VideoArt = GetBitmap(Controls.Glyph.Video);
 		public static readonly BitmapImage NetArt = GetBitmap(Controls.Glyph.Cloud);
-		
+
 		public static BitmapImage GetBitmap(Controls.Glyph glyph, Brush foreground = null, Brush border = null)
 		{
 			var control = new Controls.MaterialIcon()
