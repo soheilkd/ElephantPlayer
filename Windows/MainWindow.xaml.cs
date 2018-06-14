@@ -2,6 +2,8 @@
 using Player.Controls;
 using Player.Events;
 using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -20,7 +22,6 @@ namespace Player
 	{
 		private MediaManager Manager = new MediaManager();
 		private Timer PlayCountTimer = new Timer(100000) { AutoReset = false };
-		private Timer SizeChangeTimer = new Timer(50) { AutoReset = true };
 		private Gma.System.MouseKeyHook.IKeyboardMouseEvents KeyboardEvents = Gma.System.MouseKeyHook.Hook.GlobalEvents();
 		private bool ControlsNotNeededOnVisionIsVisible
 		{
@@ -50,22 +51,13 @@ namespace Player
 		private void BindUI()
 		{
 			PlayCountTimer.Elapsed += (_, __) => Manager.AddCount();
-			SizeChangeTimer.Elapsed += delegate
-			{
-				Dispatcher.Invoke(
-					delegate
-					{
-						if (Player.Magnified)
-							return;
-					});
-				SizeChangeTimer.Stop();
-			};
 			KeyboardEvents.KeyDown += Keyboard_KeyDown;
 
 			Settings_AncestorCombo.SelectedIndex = App.Settings.MainKey;
 			Settings_OrinateCheck.IsChecked = App.Settings.VisionOrientation;
 			Settings_LiveLibraryCheck.IsChecked = App.Settings.LiveLibrary;
 			Settings_ExplicitCheck.IsChecked = App.Settings.ExplicitContent;
+			Settings_PlayOnPosCheck.IsChecked = App.Settings.PlayOnPositionChange;
 			Settings_TimeoutCombo.SelectedIndex = App.Settings.MouseOverTimeoutIndex;
 			Settings_AncestorCombo.SelectionChanged += (_, __) => App.Settings.MainKey = Settings_AncestorCombo.SelectedIndex;
 			Settings_TimeoutCombo.SelectionChanged += (_, __) => App.Settings.MouseOverTimeoutIndex = Settings_TimeoutCombo.SelectedIndex;
@@ -75,6 +67,8 @@ namespace Player
 			Settings_LiveLibraryCheck.Unchecked += (_, __) => App.Settings.LiveLibrary = false;
 			Settings_ExplicitCheck.Checked += (_, __) => App.Settings.ExplicitContent = true;
 			Settings_ExplicitCheck.Unchecked += (_, __) => App.Settings.ExplicitContent = false;
+			Settings_PlayOnPosCheck.Checked += (_, __) => App.Settings.PlayOnPositionChange = true;
+			Settings_PlayOnPosCheck.Unchecked += (_, __) => App.Settings.PlayOnPositionChange = false;
 
 			Player.ParentWindow = this;
 			TaskbarItemInfo = Player.Thumb.Info;
@@ -86,18 +80,16 @@ namespace Player
 			ArtistsView.MouseDoubleClick += DMouseDoubleClick;
 			TitlesView.MouseDoubleClick += DMouseDoubleClick;
 			AlbumsView.MouseDoubleClick += DMouseDoubleClick;
-			Settings_LibraryLabel.Content = "Current: " + App.Settings.LibraryLocation;
-			Settings_DownloadsLabel.Content = "Current: " + App.Settings.DownloadLocation;
 		}
 
 		CollectionView[] Views = new CollectionView[4];
 		PropertyGroupDescription[] Descriptions = new PropertyGroupDescription[4];
 		private void RebindViews()
 		{
-			TitlesView.ItemsSource = Manager.VariousSources[0];
-			ArtistsView.ItemsSource = Manager.VariousSources[1];
-			AlbumsView.ItemsSource = Manager.VariousSources[2];
-			RatesView.ItemsSource = Manager.VariousSources[3];
+			TitlesView.ItemsSource = Manager.Unordered;
+			ArtistsView.ItemsSource = Manager.ByArtists;
+			AlbumsView.ItemsSource = Manager.ByAlbums;
+			RatesView.ItemsSource = Manager.ByRates;
 
 			Views[0] = (CollectionView)CollectionViewSource.GetDefaultView(ArtistsView.ItemsSource);
 			Descriptions[0] = new PropertyGroupDescription("Artist");
@@ -106,10 +98,6 @@ namespace Player
 			Views[1] = (CollectionView)CollectionViewSource.GetDefaultView(AlbumsView.ItemsSource);
 			Descriptions[1] = new PropertyGroupDescription("Album");
 			Views[1].GroupDescriptions.Add(Descriptions[1]);
-
-			Views[2] = (CollectionView)CollectionViewSource.GetDefaultView(RatesView.ItemsSource);
-			Descriptions[2] = new PropertyGroupDescription("Rate");
-			Views[2].GroupDescriptions.Add(Descriptions[2]);
 		}
 
 		private void DMouseDoubleClick(object sender, MouseButtonEventArgs e)
@@ -160,17 +148,13 @@ namespace Player
 			switch (e.Key)
 			{
 				case Key.Space:
-					Player.PlayPause();
+					if (!SearchBox.IsFocused)
+						Player.PlayPause();
 					break;
 				default: break;
 			}
 		}
 		private void Window_Drop(object sender, DragEventArgs e) => Manager.Add((string[])e.Data.GetData(DataFormats.FileDrop));
-		private void Window_SizeChanged(object sender, SizeChangedEventArgs e)
-		{
-			SizeChangeTimer.Start();
-			Player.Size_Changed(this, null);
-		}
 
 		private async void Manager_Change(object sender, InfoExchangeArgs e)
 		{
@@ -179,7 +163,7 @@ namespace Player
 				case InfoType.EditingTag:
 					IsEnabled = false;
 					var pos = Player.Position;
-					Player.FullStop();
+					Player.Stop();
 					await Task.Delay(500);
 					try
 					{
@@ -237,11 +221,11 @@ namespace Player
 				{
 					case Forms::Keys.Left:
 						Player.Position = Player.Position.Subtract(Player.SmallChange);
-						await Task.Delay(200);
+						//await Task.Delay(100);
 						break;
 					case Forms::Keys.Right:
 						Player.Position = Player.Position.Add(Player.SmallChange);
-						await Task.Delay(200);
+						//await Task.Delay(100);
 						break;
 					case Forms::Keys.A:
 						var cb = Clipboard.GetText() ?? String.Empty;
@@ -269,13 +253,12 @@ namespace Player
 
 		private void Play(Media media)
 		{
-			Player.FullStop();
-			Player.Play(Manager.Play(Manager.IndexOf(media)));
-			if (Manager.IsFiltered)
-				Manager.ActiveQueue = Manager.VariousSources[TabControl.SelectedIndex];
-			else
-				Manager.ActiveQueue = Manager;
+			Manager.ActiveQueue = ActiveSource;
+			Player.Stop();
+			Player.Play(Manager.Play(media));
 			MiniArtworkImage.Source = media.Artwork;
+			DeepBackEnd.NativeMethods.SHAddToRecentDocs(DeepBackEnd.NativeMethods.ShellAddToRecentDocsFlags.Path,
+				media.Path);
 		}
 		private bool IsAncestorKeyDown(Forms::KeyEventArgs e)
 		{
@@ -294,7 +277,7 @@ namespace Player
 
 		private void SearchBox_TextChanged(object sender, TextChangedEventArgs e)
 		{
-			Manager.FilterVariousSources(SearchBox.Text);
+			Manager.Search(SearchBox.Text);
 			RebindViews();
 		}
 		private void SearchIcon_Click(object sender, MouseButtonEventArgs e)
@@ -393,7 +376,7 @@ namespace Player
 				if (file.Name == Manager.CurrentlyPlaying.Path)
 				{
 					var pos = Player.Position;
-					Player.FullStop();
+					Player.Stop();
 					file.Save();
 					Manager.CurrentlyPlaying.Reload();
 					Play(Manager.CurrentlyPlaying);
@@ -432,40 +415,10 @@ namespace Player
 			IsEnabled = false;
 			await Task.Delay(2000);
 			Hide();
-			Player.FullStop();
+			Player.Stop();
 			Manager.Revalidate();
 			Close();
 			Process.Start(App.Path + "Elephant Player.exe");
-		}
-		private void Settings_LibraryLocationBrowse(object sender, RoutedEventArgs e)
-		{
-			var diag = new Forms::FolderBrowserDialog()
-			{
-				RootFolder = Environment.SpecialFolder.Desktop,
-				ShowNewFolderButton = true,
-				Description = "Library Location",
-				SelectedPath = App.Settings.LibraryLocation
-			};
-			if (diag.ShowDialog() == Forms::DialogResult.OK)
-			{
-				App.Settings.LibraryLocation = diag.SelectedPath;
-				Settings_LibraryLabel.Content = "Current: " + diag.SelectedPath;
-			}
-		}
-		private void Settings_DownloadsLocationBrowse(object sender, RoutedEventArgs e)
-		{
-			var diag = new Forms::FolderBrowserDialog()
-			{
-				RootFolder = Environment.SpecialFolder.Desktop,
-				ShowNewFolderButton = true,
-				Description = "Downloads Location",
-				SelectedPath = App.Settings.DownloadLocation
-			};
-			if (diag.ShowDialog() == Forms::DialogResult.OK)
-			{
-				App.Settings.DownloadLocation = diag.SelectedPath;
-				Settings_DownloadsLabel.Content = "Current: " + diag.SelectedPath;
-			}
 		}
 
 		private ListView ActiveView
@@ -478,6 +431,20 @@ namespace Player
 					case 1: return ArtistsView;
 					case 2: return AlbumsView;
 					case 3: return RatesView;
+					default: return null;
+				}
+			}
+		}
+		private IEnumerable<Media> ActiveSource
+		{
+			get
+			{
+				switch (TabControl.SelectedIndex)
+				{
+					case 0: return Manager.Unordered;
+					case 1: return Manager.ByArtists;
+					case 2: return Manager.ByAlbums;
+					case 3: return Manager.ByRates;
 					default: return null;
 				}
 			}
