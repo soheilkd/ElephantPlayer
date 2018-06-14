@@ -17,17 +17,8 @@ using System.Windows.Input;
 using System.Windows.Shell;
 using System.Windows.Threading;
 
-namespace Player.InstanceManagement
+namespace Player.DeepBackEnd
 {
-	public class InstanceEventArgs : EventArgs
-	{
-		private InstanceEventArgs() { }
-		public InstanceEventArgs(IList<string> args) { _Args = args; }
-		private IList<string> _Args { get; set; }
-		public string this[int index] => Args[index];
-		public int ArgsCount => _Args.Count;
-		public string[] Args => _Args.ToArray();
-	}
 	internal enum WM
 	{
 		NULL = 0x0000, CREATE = 0x0001, DESTROY = 0x0002, MOVE = 0x0003, SIZE = 0x0005, ACTIVATE = 0x0006,
@@ -48,7 +39,6 @@ namespace Player.InstanceManagement
 		DWMCOMPOSITIONCHANGED = 0x031E, DWMNCRENDERINGCHANGED = 0x031F, DWMCOLORIZATIONCOLORCHANGED = 0x0320,
 		DWMWINDOWMAXIMIZEDCHANGE = 0x0321, DWMSENDICONICTHUMBNAIL = 0x0323, DWMSENDICONICLIVEPREVIEWBITMAP = 0x0326
 	}
-
 	[SuppressUnmanagedCodeSecurity]
 	internal static class NativeMethods
 	{
@@ -57,6 +47,13 @@ namespace Player.InstanceManagement
 		private static extern IntPtr _CommandLineToArgvW([MarshalAs(UnmanagedType.LPWStr)] string cmdLine, out int numArgs);
 		[DllImport("kernel32.dll", EntryPoint = "LocalFree", SetLastError = true)]
 		private static extern IntPtr _LocalFree(IntPtr hMem);
+		internal enum ShellAddToRecentDocsFlags
+		{
+			Pidl = 0x001,
+			Path = 0x002,
+		}
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA2101:SpecifyMarshalingForPInvokeStringArguments", MessageId = "1"), DllImport("shell32.dll", CharSet = CharSet.Ansi)]
+		public static extern void SHAddToRecentDocs(ShellAddToRecentDocsFlags flag, [MarshalAs(UnmanagedType.LPStr)] string path);
 		public static string[] CommandLineToArgvW(string cmdLine)
 		{
 			IntPtr argv = IntPtr.Zero;
@@ -80,6 +77,19 @@ namespace Player.InstanceManagement
 		}
 	}
 
+}
+
+namespace Player.DeepBackEnd.InstanceManagement
+{
+	public class InstanceEventArgs : EventArgs
+	{
+		private InstanceEventArgs() { }
+		public InstanceEventArgs(IList<string> args) { _Args = args; }
+		private IList<string> _Args { get; set; }
+		public string this[int index] => Args[index];
+		public int ArgsCount => _Args.Count;
+		public string[] Args => _Args.ToArray();
+	}
 	public interface ISingleInstanceApp
 	{
 		bool SignalExternalCommandLineArgs(IList<string> args);

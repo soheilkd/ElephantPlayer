@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Windows;
@@ -27,8 +28,7 @@ namespace Player
 		public string LastPath { get; set; }
 		public bool LiveLibrary { get; set; }
 		public bool ExplicitContent { get; set; }
-		public string LibraryLocation { get; set; }
-		public string DownloadLocation { get; set; }
+		public bool PlayOnPositionChange { get; set; }
 
 		private int _MouseOverTimeOutIndex;
 		public int MouseOverTimeoutIndex { get => _MouseOverTimeOutIndex; set { _MouseOverTimeOutIndex = value; Changed?.Invoke(this, null); } }
@@ -74,6 +74,18 @@ namespace Player
 		public static T To<T>(this object obj) where T : struct => (T)obj;
 		public static T As<T>(this object obj) where T : class => obj as T;
 		public static string ToNewString(this TimeSpan time) => time.ToString("c").Substring(3, 5);
+		public static int IndexOf<T>(this IEnumerable<T> source, T value)
+		{
+			int index = 0;
+			var comparer = EqualityComparer<T>.Default; // or pass in as a parameter
+			foreach (T item in source)
+			{
+				if (comparer.Equals(item, value)) return index;
+				index++;
+			}
+			return -1;
+		}
+		public static bool IncaseContains(this string item, string with) => item.ToLower().Contains(with.ToLower());
 	}
 
 	public static class Images
