@@ -3,13 +3,13 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" MouseMove="Element_MouseMove"
-             xmlns:local="clr-namespace:Player.Controls" SizeChanged="Size_Changed"
+             xmlns:local="clr-namespace:Player.Controls"
              mc:Ignorable="d" Loaded="UserControl_Loaded" x:Name="ParentControl"
              d:DesignHeight="300" d:DesignWidth="600">
 	<Grid>
 		<Grid Background="Black" x:Name="elementCanvas" Margin="200,500,200,0">
-			<MediaElement x:Name="element" LoadedBehavior="Manual" UnloadedBehavior="Manual" 
-                          MouseDown="Element_MouseDown" MediaEnded="Element_MediaEnded" 
+			<MediaElement x:Name="element" LoadedBehavior="Manual" UnloadedBehavior="Stop" 
+                          MouseDown="Element_MouseDown" ScrubbingEnabled="True"
                           Volume="1"/>
 		</Grid>
 		<Grid x:Name="ControlsGrid" Background="Transparent" VerticalAlignment="Top" Height="87">
@@ -28,7 +28,7 @@
 			<local:MaterialButton x:Name="FullScreenButton" Glyph="FullScreen" HorizontalAlignment="Right" Margin="0,0,10,29" VerticalAlignment="Bottom" MouseUp="FullScreenButton_Clicked" />
 			<local:MaterialIcon x:Name="VolumeIcon" Glyph="Volume3" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0, 0, 155, 29" Foreground="{DynamicResource Foreground}" />
 			<Slider x:Name="VolumeSlider" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,28,50,26"  Template="{DynamicResource FlatSlider}" Foreground="#F444"
-                    Width="100" Maximum="100" SmallChange="2" LargeChange="10" AutoToolTipPlacement="TopLeft" ValueChanged="VolumeSlider_ValueChanged"/>
+                    Width="100" Maximum="99" SmallChange="2" LargeChange="10" AutoToolTipPlacement="TopLeft" ValueChanged="VolumeSlider_ValueChanged"/>
 			<Grid.RenderTransform>
 				<TranslateTransform x:Name="ControlsTranslation" Y="0" />
 			</Grid.RenderTransform>

@@ -53,48 +53,18 @@ namespace Player.Controls
 		private Storyboard MagnifyBoard, MinifyBoard, FullOnBoard, FullOffBoard;
 		private ThicknessAnimation MagnifyAnimation, MinifyAnimation;
 		public TimeSpan SmallChange, BackwardSmallChange;
-		private bool controlsVisibile;
-		private bool ControlsVisible
+		private bool isTopMost;
+		public bool IsTopMost
 		{
-			get => controlsVisibile;
+			get => isTopMost;
 			set
 			{
-				if (!Magnified)
-					value = true;
-				controlsVisibile = value;
-				if (value)
-				{
-					FullOnBoard.Stop();
-					Dispatcher.Invoke(() => FullOffBoard.Begin());
-				}
-				else
-				{
-					FullOffBoard.Stop();
-					Dispatcher.Invoke(() => FullOnBoard.Begin());
-				}
+				isTopMost = value;
+				ParentWindow.Topmost = value;
+				ParentWindow.WindowStyle = value ? WindowStyle.None : WindowStyle.SingleBorderWindow;
 			}
 		}
-		private bool magnified;
-		public bool Magnified
-		{
-			get => magnified;
-			set
-			{
-				magnified = value;
-				ControlsGrid.VerticalAlignment = value ? VerticalAlignment.Bottom : VerticalAlignment.Top;
-				MinifyAnimation.To = new Thickness(ActualWidth / 2, ActualHeight, ActualWidth / 2, 0);
-				if (value)
-				{
-					elementCanvas.Height = Double.NaN;
-					MagnifyBoard.Begin();
-				}
-				else
-					MinifyBoard.Begin();
-				MouseMoveTimer.Start();
-				Resources["Foreground"] = value ? Brushes.White : Brushes.Black;
-				EventHappened?.Invoke(this, new InfoExchangeArgs() { Type = InfoType.Magnifiement, Object = value });
-			}
-		}
+		private bool Magnified = false;
 
 		public MediaPlayer()
 		{
@@ -110,11 +80,13 @@ namespace Player.Controls
 			Thumb.PausePressed += (obj, f) => PlayPause();
 			Thumb.PlayPressed += (obj, f) => PlayPause();
 			Thumb.PrevPressed += (obj, f) => PlayPrevious();
-			MouseMoveTimer.Elapsed += (_, __) => ControlsVisible = false;
+			MouseMoveTimer.Elapsed += (_, __) => HideControls();
 			PlayCountTimer.Elapsed += PlayCountTimer_Elapsed;
 			FullOnBoard.Completed += (_, __) => Cursor = Cursors.None;
+			SizeChanged += (_,__) => elementCanvas.Height = Magnified ? Double.NaN : 0;
 			FullOffBoard.CurrentStateInvalidated += (_, __) => Cursor = Cursors.Arrow;
 			PlayModeButton.Glyph = (Glyph)Enum.Parse(typeof(Glyph), App.Settings.PlayMode.ToString());
+			element.MediaEnded += (_, __) => PlayNext();
 		}
 
 		private void UserControl_Loaded(object sender, RoutedEventArgs e)
@@ -139,10 +111,7 @@ namespace Player.Controls
 				if (ParentWindow.WindowState != WindowState.Maximized)
 					ParentWindow.DragMove();
 				if (DraggerTimer.Enabled && !IsFullScreen)
-				{
-					ParentWindow.Topmost = !ParentWindow.Topmost;
-					ParentWindow.WindowStyle = ParentWindow.Topmost ? WindowStyle.None : WindowStyle.SingleBorderWindow;
-				}
+					IsTopMost = !IsTopMost;
 			}
 			catch (Exception) { }
 		}
@@ -152,7 +121,7 @@ namespace Player.Controls
 			await Task.Delay(50);
 			if (ControlsTranslation.Y < y)
 				return;
-			ControlsVisible = true;
+			ShowControls();
 			MouseMoveTimer.Start();
 		}
 
@@ -170,41 +139,27 @@ namespace Player.Controls
 		private void Position_Changed(object sender, RoutedPropertyChangedEventArgs<double> e)
 		{
 			if (IsUserSeeking)
-			{
 				Position = new TimeSpan(0, 0, 0, 0, (int)PositionSlider.Value);
-				element.Play();
-			}
 		}
 		private async void Position_Holding(object sender, MouseButtonEventArgs e)
 		{
 			IsUserSeeking = true;
 			var but = PlayPauseButton.Glyph;
+			element.Pause();
 			while (e.ButtonState == MouseButtonState.Pressed)
-			{
 				await Task.Delay(50);
-				element.Pause();
-			}
-			PlayPauseButton.Glyph = Glyph.Play;
-			if (but == Glyph.Play)
-				PlayPauseButton.EmulateClick();
-			else
-				PlayPauseButton_Clicked(this, null);
+			if (but == Glyph.Pause)
+				element.Play();
+			else if (App.Settings.PlayOnPositionChange)
+				Play();
 			IsUserSeeking = false;
 		}
 		private void PlayPauseButton_Clicked(object sender, MouseButtonEventArgs e)
 		{
 			if (PlayPauseButton.Glyph == Glyph.Pause)
-			{
-				element.Pause();
-				PlayPauseButton.Glyph = Glyph.Play;
-				Thumb.SetPlayingState(false);
-			}
+				Pause();
 			else
-			{
-				element.Play();
-				PlayPauseButton.Glyph = Glyph.Pause;
-				Thumb.SetPlayingState(true);
-			}
+				Play();
 		}
 		private void NextButton_Clicked(object sender, MouseButtonEventArgs e) => Invoke(InfoType.NextRequest);
 		private void PreviousButton_Clicked(object sender, MouseButtonEventArgs e)
@@ -219,7 +174,8 @@ namespace Player.Controls
 		}
 		private void VisionButton_Clicked(object sender, MouseButtonEventArgs e)
 		{
-			Magnified = !Magnified;
+			if (Magnified) Minify();
+			else Magnify();
 		}
 		private void FullScreenButton_Clicked(object sender, MouseButtonEventArgs e)
 		{
@@ -283,22 +239,6 @@ namespace Player.Controls
 			}
 		}
 
-		private void Element_MediaEnded(object sender, RoutedEventArgs e)
-		{
-			PlayNext();
-		}
-
-		public void FullStop()
-		{
-			element.Stop();
-			element.Source = null;
-		}
-
-		public void Size_Changed(object sender, SizeChangedEventArgs e)
-		{
-			elementCanvas.Height = Magnified ? Double.NaN : 0;
-		}
-
 		public void Play(Media media)
 		{
 			media.Load();
@@ -307,16 +247,84 @@ namespace Player.Controls
 			FullScreenButton.Visibility = VisionButton.Visibility;
 			if (IsFullScreen && !media.IsVideo)
 				FullScreenButton.EmulateClick();
-			Magnified = media.IsVideo;
+			if (media.IsVideo && App.Settings.VisionOrientation)
+				Magnify();
+			else if (Magnified && !media.IsVideo)
+				Minify();
 			element.Source = media.Url;
-			element.Play();
-			if (PlayPauseButton.Glyph == Glyph.Play)
-				PlayPauseButton.EmulateClick();
 			PlayCountTimer.Stop();
 			PlayCountTimer.Start();
 			TitleLabel.Content = media.ToString();
+			Play();
 		}
 
 		private void Invoke(InfoType type, object obj = null) => EventHappened?.Invoke(this, new InfoExchangeArgs() { Type = type, Object = obj });
+
+		public void Play(bool emulateClick = false)
+		{
+			if (emulateClick)
+			{
+				PlayPauseButton.Glyph = Glyph.Play;
+				PlayPauseButton.EmulateClick();
+			}
+			else
+			{
+				element.Play();
+				PlayPauseButton.Glyph = Glyph.Pause;
+				Thumb.SetPlayingState(true);
+			}
+		}
+		public void Pause(bool emulateClick = false)
+		{
+			if (emulateClick)
+			{
+				PlayPauseButton.Glyph = Glyph.Pause;
+				PlayPauseButton.EmulateClick();
+			}
+			else
+			{
+				element.Pause();
+				PlayPauseButton.Glyph = Glyph.Play;
+				Thumb.SetPlayingState(false);
+			}
+		}
+		public void Stop()
+		{
+			element.Source = null;
+		}
+
+		public void Magnify()
+		{
+			ControlsGrid.VerticalAlignment = VerticalAlignment.Bottom;
+			MagnifyAnimation.From = new Thickness(ActualWidth / 2, ActualHeight, ActualWidth / 2, 0);
+			elementCanvas.Height = Double.NaN;
+			MagnifyBoard.Begin();
+			MouseMoveTimer.Start();
+			Resources["Foreground"] = Brushes.White;
+			Invoke(InfoType.Magnifiement, true);
+			Magnified = true;
+		}
+		public void Minify()
+		{
+			ControlsGrid.VerticalAlignment = VerticalAlignment.Top;
+			MinifyAnimation.To = new Thickness(ActualWidth / 2, ActualHeight, ActualWidth / 2, 0);
+			MinifyBoard.Begin();
+			Resources["Foreground"] = Brushes.Black;
+			Invoke(InfoType.Magnifiement, false);
+			Magnified = false;
+			IsTopMost = false;
+		}
+		public void HideControls()
+		{
+			if (!Magnified)
+				return;
+			FullOffBoard.Stop();
+			Dispatcher.Invoke(() => FullOnBoard.Begin());
+		}
+		public void ShowControls()
+		{
+			FullOnBoard.Stop();
+			Dispatcher.Invoke(() => FullOffBoard.Begin());
+		}
 	}
 }
