@@ -25,9 +25,23 @@ namespace Player.Controls
 				}
 			}
 		}
-		public double Volume { get => element.Volume; set { element.Volume = value; ProcessVolume(); } }
+		public double Volume
+		{
+			get => element.Volume; set
+			{
+				element.Volume = value;
+				switch (element.Volume)
+				{
+					case double n when (n <= 0.1): VolumeIcon.Glyph = Glyph.Volume0; break;
+					case double n when (n <= 0.4): VolumeIcon.Glyph = Glyph.Volume1; break;
+					case double n when (n <= 0.8): VolumeIcon.Glyph = Glyph.Volume2; break;
+					default: VolumeIcon.Glyph = Glyph.Volume3; break;
+				}
+				App.Settings.Volume = element.Volume;
+			}
+		}
 		private Media _Media = new Media();
-		public event EventHandler<InfoExchangeArgs> EventHappened;
+		public event EventHandler<InfoExchangeArgs> SomethingHappened;
 		private Timer DraggerTimer = new Timer(250) { AutoReset = false };
 		private Timer MouseMoveTimer = new Timer(App.Settings.MouseOverTimeout) { AutoReset = false };
 		private Timer PlayCountTimer = new Timer(120000) { AutoReset = false };
@@ -47,7 +61,7 @@ namespace Player.Controls
 				BackwardSmallChange = new TimeSpan(0, 0, 0, 0, -1 * (int)PositionSlider.SmallChange);
 			}
 		}
-		private bool IsUserSeeking, IsFullScreen, WasMaximized;
+		private bool IsFullScreen, WasMaximized;
 		public Window ParentWindow;
 		public Taskbar.Thumb Thumb = new Taskbar.Thumb();
 		private Storyboard MagnifyBoard, MinifyBoard, FullOnBoard, FullOffBoard;
@@ -125,6 +139,7 @@ namespace Player.Controls
 			MouseMoveTimer.Start();
 		}
 
+		bool IsUXChangingPosition = false;
 		private async void RunUX()
 		{
 			UX:
@@ -132,18 +147,19 @@ namespace Player.Controls
 			if (element.NaturalDuration.HasTimeSpan && element.NaturalDuration.TimeSpan != TimeSpan)
 				TimeSpan = element.NaturalDuration.TimeSpan;
 			TimeLabel_Current.Content = Position.ToNewString();
+			IsUXChangingPosition = true;
 			PositionSlider.Value = Position.TotalMilliseconds;
+			IsUXChangingPosition = false;
 			goto UX;
 		}
 
 		private void Position_Changed(object sender, RoutedPropertyChangedEventArgs<double> e)
 		{
-			if (IsUserSeeking)
+			if (!IsUXChangingPosition)
 				Position = new TimeSpan(0, 0, 0, 0, (int)PositionSlider.Value);
 		}
 		private async void Position_Holding(object sender, MouseButtonEventArgs e)
 		{
-			IsUserSeeking = true;
 			var but = PlayPauseButton.Glyph;
 			element.Pause();
 			while (e.ButtonState == MouseButtonState.Pressed)
@@ -152,7 +168,6 @@ namespace Player.Controls
 				element.Play();
 			else if (App.Settings.PlayOnPositionChange)
 				Play();
-			IsUserSeeking = false;
 		}
 		private void PlayPauseButton_Clicked(object sender, MouseButtonEventArgs e)
 		{
@@ -196,19 +211,7 @@ namespace Player.Controls
 				ParentWindow.WindowState = WasMaximized ? WindowState.Maximized : WindowState.Normal;
 			}
 		}
-
-		private void ProcessVolume()
-		{
-			switch (element.Volume)
-			{
-				case double n when (n <= 0.1): VolumeIcon.Glyph = Glyph.Volume0; break;
-				case double n when (n <= 0.4): VolumeIcon.Glyph = Glyph.Volume1; break;
-				case double n when (n <= 0.8): VolumeIcon.Glyph = Glyph.Volume2; break;
-				default: VolumeIcon.Glyph = Glyph.Volume3; break;
-			}
-			App.Settings.Volume = element.Volume;
-		}
-
+		
 		public void PlayNext() => NextButton.EmulateClick();
 		public void PlayPrevious() => PreviousButton.EmulateClick();
 		public void PlayPause() => PlayPauseButton.EmulateClick();
@@ -258,7 +261,7 @@ namespace Player.Controls
 			Play();
 		}
 
-		private void Invoke(InfoType type, object obj = null) => EventHappened?.Invoke(this, new InfoExchangeArgs() { Type = type, Object = obj });
+		private void Invoke(InfoType type, object obj = null) => SomethingHappened?.Invoke(this, new InfoExchangeArgs() { Type = type, Object = obj });
 
 		public void Play(bool emulateClick = false)
 		{

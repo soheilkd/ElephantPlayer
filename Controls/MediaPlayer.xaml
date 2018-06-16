@@ -14,9 +14,9 @@
 		</Grid>
 		<Grid x:Name="ControlsGrid" Background="Transparent" VerticalAlignment="Top" Height="87">
 			<Label Content="Content Title" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="67,0,0,0" FontSize="18" x:Name="TitleLabel" Foreground="{DynamicResource Foreground}"/>
-			<Slider x:Name="PositionSlider"  ValueChanged="Position_Changed" PreviewMouseDown="Position_Holding" 
+			<Slider x:Name="PositionSlider" ValueChanged="Position_Changed" PreviewMouseLeftButtonDown="Position_Holding" IsMoveToPointEnabled="True"
                VerticalAlignment="Center" Maximum="1000" Focusable="False" FocusVisualStyle="{x:Null}" Template="{DynamicResource FlatSlider}"
-                        Foreground="#FF303030" Margin="50, 62, 50, 0">
+                        Foreground="#FF101010" Margin="50, 62, 50, 0">
 			</Slider>
 			<Label Content="00:00" Style="{DynamicResource TimeLabel}" HorizontalAlignment="Left" x:Name="TimeLabel_Current" Margin="10,0,0,0"/>
 			<Label Content="00:00" Style="{DynamicResource TimeLabel}" HorizontalAlignment="Right" x:Name="TimeLabel_Full" Width="38" Margin="0,0,10,0"/>
@@ -27,7 +27,7 @@
 			<local:MaterialButton x:Name="PlayModeButton" Glyph="RepeatAll" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,197,29" EllipseType="Rectular" MouseUp="PlayMode_Click"/>
 			<local:MaterialButton x:Name="FullScreenButton" Glyph="FullScreen" HorizontalAlignment="Right" Margin="0,0,10,29" VerticalAlignment="Bottom" MouseUp="FullScreenButton_Clicked" />
 			<local:MaterialIcon x:Name="VolumeIcon" Glyph="Volume3" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0, 0, 155, 29" Foreground="{DynamicResource Foreground}" />
-			<Slider x:Name="VolumeSlider" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,28,50,26"  Template="{DynamicResource FlatSlider}" Foreground="#F444"
+			<Slider x:Name="VolumeSlider" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,28,50,26" IsMoveToPointEnabled="True"  Template="{DynamicResource FlatSlider}" Foreground="#F444"
                     Width="100" Maximum="99" SmallChange="2" LargeChange="10" AutoToolTipPlacement="TopLeft" ValueChanged="VolumeSlider_ValueChanged"/>
 			<Grid.RenderTransform>
 				<TranslateTransform x:Name="ControlsTranslation" Y="0" />
@@ -67,55 +67,41 @@
 		<ControlTemplate TargetType="Slider" x:Key="FlatSlider">
 			<Border x:Name="border" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Background="{TemplateBinding Background}" SnapsToDevicePixels="True">
 				<Grid>
-					<Border x:Name="TrackBackground" Grid.Row="1" VerticalAlignment="center">
-						<Canvas Margin="-6,-1">
-							<Rectangle x:Name="PART_SelectionRange" Fill="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}" Height="4.0" Visibility="Hidden"/>
-						</Canvas>
-					</Border>
-					<Track x:Name="PART_Track" Grid.Row="1">
+					<Track x:Name="PART_Track" Grid.Row="1" MouseDown="Position_Holding">
 						<Track.DecreaseRepeatButton>
-							<RepeatButton Height="9" Command="{x:Static Slider.DecreaseLarge}" Background="{TemplateBinding Foreground}" BorderBrush="Transparent"/>
+							<RepeatButton Height="9" Background="{TemplateBinding Foreground}" />
 						</Track.DecreaseRepeatButton>
 						<Track.IncreaseRepeatButton>
-							<RepeatButton Height="5" Command="{x:Static Slider.IncreaseLarge}" />
+							<RepeatButton Height="5"/>
 						</Track.IncreaseRepeatButton>
 						<Track.Thumb>
-							<Thumb x:Name="Thumb" Focusable="False" OverridesDefaultStyle="True" >
+							<Thumb x:Name="Thumb" OverridesDefaultStyle="True" >
 								<Thumb.Template>
 									<ControlTemplate TargetType="{x:Type Thumb}">
-										<Grid >
-											<Ellipse Width="15" Height="15" x:Name="grip"  StrokeThickness="2" Stroke="{TemplateBinding Foreground}"
-                                                             Fill="Transparent" Margin="-2, 0, 0, 0"/>
+										<Grid>
+											<Ellipse Width="15" x:Name="grip" StrokeThickness="2" Stroke="{TemplateBinding Foreground}" Fill="#01FFFFFF"
+                                                          Height="3" Margin="-2, 0, 0, 0"/>
 										</Grid>
 										<ControlTemplate.Triggers>
 											<Trigger Property="IsMouseOver" Value="true">
 												<Setter Property="StrokeThickness" TargetName="grip" Value="3"/>
-
 											</Trigger>
 											<Trigger Property="IsDragging" Value="true">
 												<Setter Property="StrokeThickness" TargetName="grip" Value="10" />
 											</Trigger>
 											<EventTrigger RoutedEvent="UIElement.MouseEnter">
 												<BeginStoryboard>
-													<Storyboard >
-														<DoubleAnimation SpeedRatio="4" AccelerationRatio="0" DecelerationRatio="1" From="15" To="20" Storyboard.TargetName="grip" Storyboard.TargetProperty="Width"/>
-													</Storyboard>
-												</BeginStoryboard>
-												<BeginStoryboard>
-													<Storyboard >
-														<DoubleAnimation SpeedRatio="4" AccelerationRatio="0" DecelerationRatio="1" From="15" To="20" Storyboard.TargetName="grip" Storyboard.TargetProperty="Height"/>
+													<Storyboard SpeedRatio="4" AccelerationRatio="0.2" DecelerationRatio="0.8" Storyboard.TargetName="grip">
+														<DoubleAnimation From="15" To="20" Storyboard.TargetProperty="Width"/>
+														<DoubleAnimation From="3" To="20" Storyboard.TargetProperty="Height"/>
 													</Storyboard>
 												</BeginStoryboard>
 											</EventTrigger>
 											<EventTrigger RoutedEvent="UIElement.MouseLeave">
 												<BeginStoryboard>
-													<Storyboard >
-														<DoubleAnimation SpeedRatio="2" AccelerationRatio="0" DecelerationRatio="1"  From="20" To="15" Storyboard.TargetName="grip" Storyboard.TargetProperty="Width"/>
-													</Storyboard>
-												</BeginStoryboard>
-												<BeginStoryboard>
-													<Storyboard >
-														<DoubleAnimation SpeedRatio="2"  AccelerationRatio="0" DecelerationRatio="1" From="20" To="15" Storyboard.TargetName="grip" Storyboard.TargetProperty="Height"/>
+													<Storyboard SpeedRatio="3" AccelerationRatio="0.2" DecelerationRatio="0.8" Storyboard.TargetName="grip">
+														<DoubleAnimation From="20" To="15" Storyboard.TargetProperty="Width"/>
+														<DoubleAnimation From="20" To="3" Storyboard.TargetProperty="Height"/>
 													</Storyboard>
 												</BeginStoryboard>
 											</EventTrigger>
