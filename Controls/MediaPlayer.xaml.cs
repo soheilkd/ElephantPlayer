@@ -61,13 +61,28 @@ namespace Player.Controls
 				BackwardSmallChange = new TimeSpan(0, 0, 0, 0, -1 * (int)PositionSlider.SmallChange);
 			}
 		}
-		private bool IsFullScreen, WasMaximized;
-		public Window ParentWindow;
-		public Taskbar.Thumb Thumb = new Taskbar.Thumb();
-		private Storyboard MagnifyBoard, MinifyBoard, FullOnBoard, FullOffBoard;
-		private ThicknessAnimation MagnifyAnimation, MinifyAnimation;
-		public TimeSpan SmallChange, BackwardSmallChange;
-		private bool isTopMost;
+		private bool isFullScreen, WasMaximized, isTopMost, Magnified, IsUXChangingPosition;
+		public bool IsFullScreen
+		{
+			get => isFullScreen;
+			set
+			{
+				isFullScreen = value;
+				ParentWindow.ResizeMode = value ? ResizeMode.NoResize : ResizeMode.CanResize;
+				FullScreenButton.Glyph = value ? Glyph.ExitFullScreen : Glyph.FullScreen;
+				VisionButton.Visibility = value ? Visibility.Hidden : Visibility.Visible;
+				ParentWindow.WindowStyle = value ? WindowStyle.None : WindowStyle.SingleBorderWindow;
+				if (value)
+				{
+					WasMaximized = ParentWindow.WindowState == WindowState.Maximized;
+					if (WasMaximized)
+						ParentWindow.WindowState = WindowState.Normal;
+					ParentWindow.WindowState = WindowState.Maximized;
+				}
+				else
+					ParentWindow.WindowState = WasMaximized ? WindowState.Maximized : WindowState.Normal;
+			}
+		}
 		public bool IsTopMost
 		{
 			get => isTopMost;
@@ -78,7 +93,11 @@ namespace Player.Controls
 				ParentWindow.WindowStyle = value ? WindowStyle.None : WindowStyle.SingleBorderWindow;
 			}
 		}
-		private bool Magnified = false;
+		public Window ParentWindow;
+		public Taskbar.Thumb Thumb = new Taskbar.Thumb();
+		private Storyboard MagnifyBoard, MinifyBoard, FullOnBoard, FullOffBoard;
+		private ThicknessAnimation MagnifyAnimation, MinifyAnimation;
+		public TimeSpan SmallChange, BackwardSmallChange;
 
 		public MediaPlayer()
 		{
@@ -138,8 +157,7 @@ namespace Player.Controls
 			ShowControls();
 			MouseMoveTimer.Start();
 		}
-
-		bool IsUXChangingPosition = false;
+		
 		private async void RunUX()
 		{
 			UX:
@@ -195,21 +213,6 @@ namespace Player.Controls
 		private void FullScreenButton_Clicked(object sender, MouseButtonEventArgs e)
 		{
 			IsFullScreen = !IsFullScreen;
-			ParentWindow.ResizeMode = IsFullScreen ? ResizeMode.NoResize : ResizeMode.CanResize;
-			FullScreenButton.Glyph = IsFullScreen ? Glyph.ExitFullScreen : Glyph.FullScreen;
-			VisionButton.Visibility = IsFullScreen ? Visibility.Hidden : Visibility.Visible;
-			ParentWindow.WindowStyle = IsFullScreen ? WindowStyle.None : WindowStyle.SingleBorderWindow;
-			if (IsFullScreen)
-			{
-				WasMaximized = ParentWindow.WindowState == WindowState.Maximized;
-				if (WasMaximized)
-					ParentWindow.WindowState = WindowState.Normal;
-				ParentWindow.WindowState = WindowState.Maximized;
-			}
-			else
-			{
-				ParentWindow.WindowState = WasMaximized ? WindowState.Maximized : WindowState.Normal;
-			}
 		}
 		
 		public void PlayNext() => NextButton.EmulateClick();
@@ -291,8 +294,14 @@ namespace Player.Controls
 				Thumb.SetPlayingState(false);
 			}
 		}
+		public void SlidePosition(bool toRight, bool small = true)
+		{
+			if (toRight) PositionSlider.Value += small ? PositionSlider.SmallChange : PositionSlider.LargeChange;
+			else PositionSlider.Value -= small ? PositionSlider.SmallChange : PositionSlider.LargeChange;
+		}
 		public void Stop()
 		{
+			element.Stop();
 			element.Source = null;
 		}
 

@@ -3,7 +3,7 @@
   <PropertyGroup>
     <ReferencePath>
     </ReferencePath>
-    <PublishUrlHistory>ftp://localhost/|publish\|D:\Users\Soheil\Desktop\ELP\</PublishUrlHistory>
+    <PublishUrlHistory>publish\|ftp://localhost/|D:\Users\Soheil\Desktop\ELP\</PublishUrlHistory>
     <InstallUrlHistory>http://localhost:8080/</InstallUrlHistory>
     <SupportUrlHistory />
     <UpdateUrlHistory />

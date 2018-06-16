@@ -17,11 +17,11 @@ namespace Player
 	[Flags]
 	public enum MediaType
 	{
-		None = 0B_0,
-		Music = 0B_10,
-		Video = 0B_100,
-		File  = 0B_1000,
-		OnlineFile = 0B_10000,
+		None = 0B0,
+		Music = 0B10,
+		Video = 0B100,
+		File  = 0B1000,
+		OnlineFile = 0B10000,
 		OnlineMusic = Music | OnlineFile,
 		OnlineVideo = Video | OnlineFile
 	}

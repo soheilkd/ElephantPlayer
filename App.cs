@@ -14,7 +14,7 @@ namespace Player
 
 		public static Preferences Settings { get; } = Preferences.Load();
 		[STAThread]
-		public static void Main(string[] args)
+		public static void Main()
 		{
 			AppDomain.CurrentDomain.UnhandledException += (sender, e) =>
 			{

@@ -117,7 +117,7 @@ namespace Player
 			BindUI();
 			var cml = Environment.GetCommandLineArgs().Where(name => !name.EndsWith(".exe")).ToArray();
 			Manager.Add(cml, true);
-			Player.EventHappened += Player_EventHappened;
+			Player.SomethingHappened += Player_EventHappened;
 		}
 
 		private void Player_EventHappened(object sender, InfoExchangeArgs e)
@@ -203,7 +203,7 @@ namespace Player
 					case Forms.Keys.M: Menu_MoveClick(new MenuItem(), null); break;
 					case Forms.Keys.P: Menu_PropertiesClick(this, null); break;
 					case Forms.Keys.L: Menu_LocationClick(this, null); break;
-					case Forms.Keys.Q:
+					case Forms.Keys.F:
 						SearchBox.IsEnabled = false;
 						SearchBox.Text = "";
 						SearchButton.EmulateClick();
@@ -219,14 +219,8 @@ namespace Player
 			{
 				switch (e.KeyCode)
 				{
-					case Forms::Keys.Left:
-						Player.Position = Player.Position.Subtract(Player.SmallChange);
-						//await Task.Delay(100);
-						break;
-					case Forms::Keys.Right:
-						Player.Position = Player.Position.Add(Player.SmallChange);
-						//await Task.Delay(100);
-						break;
+					case Forms::Keys.Left: Player.SlidePosition(false); break;
+					case Forms::Keys.Right: Player.SlidePosition(true); break;
 					case Forms::Keys.A:
 						var cb = Clipboard.GetText() ?? String.Empty;
 						if (Uri.TryCreate(cb, UriKind.Absolute, out var uri))
