@@ -233,12 +233,14 @@ namespace Player
 					break;
 				default: break;
 			}
-			Unordered = this.OrderBy(media => media.IsValid);
-			ByArtists = this.OrderBy(media => media.Artist);
-			ByAlbums = this.OrderBy(media => media.Album);
-			ByTitles = this.OrderBy(media => media.Title);
-			ByRates = this.OrderByDescending(media => media.Rate);
+			Unordered = this.Order(media => media.IsValid);
+			ByArtists = this.Order(media => media.Artist);
+			ByAlbums = this.Order(media => media.Album);
+			ByTitles = this.Order(media => media.Title);
+			ByRates = this.Order(media => media.Rate, true);
 		}
+
+
 		public MediaManager() { ActiveQueue = this; }
 
 		public IEnumerable<Media> ActiveQueue { get; set; }
@@ -246,8 +248,8 @@ namespace Player
 		public Media CurrentlyPlaying { get; set; }
 		public event EventHandler<InfoExchangeArgs> Change;
 		public int CurrentlyPlayingIndex { get; set; }
-		public IEnumerable<Media> Unordered;
-		public IOrderedEnumerable<Media>
+		public ObservableCollection<Media>
+			Unordered,
 			ByArtists,
 			ByAlbums,
 			ByTitles,
@@ -345,11 +347,11 @@ namespace Player
 		public void Search(string query)
 		{
 			if (String.IsNullOrWhiteSpace(query)) query = String.Empty;
-			Unordered = this.Where(each => each.Title.IncaseContains(query));
-			ByArtists = from each in this where each.Artist.IncaseContains(query) orderby each.Artist select each;
-			ByTitles = from each in this where each.Title.IncaseContains(query) orderby each.Title select each;
-			ByAlbums = from each in this where each.Album.IncaseContains(query) orderby each.Album select each;
-			ByRates = this.OrderByDescending(each => each.Rate);
+			Unordered = this.Those(each => each.Title.IncaseContains(query));
+			ByArtists = this.OrderThose(each => each.Artist.IncaseContains(query), each => each.Artist);
+			ByTitles = this.OrderThose(each => each.Title.IncaseContains(query), each => each.Title);
+			ByAlbums = this.OrderThose(each => each.Album.IncaseContains(query), each => each.Album);
+			ByRates = this.Order(each => each.Rate, true);
 		}
 
 		public void UpdateOnPath(Media source)

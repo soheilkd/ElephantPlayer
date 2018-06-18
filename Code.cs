@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
+using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Windows;
 using System.Windows.Media;
@@ -86,6 +88,17 @@ namespace Player
 			return -1;
 		}
 		public static bool IncaseContains(this string item, string with) => item.ToLower().Contains(with.ToLower());
+		public static ObservableCollection<Media> Order<T>(this Collection<Media> ts, Func<Media, T> keySelector, bool descending = false)
+		{
+			if (descending)
+				return new ObservableCollection<Media>(ts.OrderByDescending(keySelector));
+			else
+				return new ObservableCollection<Media>(ts.OrderBy(keySelector));
+		}
+		public static ObservableCollection<Media> Those(this Collection<Media> ts, Func<Media, bool> predicate)
+			=> new ObservableCollection<Media>(ts.Where(predicate));
+		public static ObservableCollection<Media> OrderThose<T>(this Collection<Media> ts, Func<Media, bool> predicate, Func<Media, T> keySelector, bool descending = false)
+			=> new ObservableCollection<Media>(from each in ts where predicate.Invoke(each) orderby keySelector.Invoke(each) select each);
 	}
 
 	public static class Images
