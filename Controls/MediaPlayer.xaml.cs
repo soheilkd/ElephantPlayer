@@ -264,7 +264,7 @@ namespace Player.Controls
 			Play();
 		}
 
-		private void Invoke(InfoType type, object obj = null) => SomethingHappened?.Invoke(this, new InfoExchangeArgs() { Type = type, Object = obj });
+		private void Invoke(InfoType type, object obj = null) => SomethingHappened?.Invoke(this, new InfoExchangeArgs(type, obj));
 
 		public void Play(bool emulateClick = false)
 		{

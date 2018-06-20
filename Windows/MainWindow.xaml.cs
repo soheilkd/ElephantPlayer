@@ -40,8 +40,7 @@ namespace Player
 			Manager.Change += Manager_Change;
 			App.NewInstanceRequested += (_, e) => Manager.Add(e.Args, true);
 
-			Library.Load().ForEach(each => Manager.Add(each));
-
+			Manager.OpenSeason();
 			Width = App.Settings.LastSize.Width;
 			Height = App.Settings.LastSize.Height;
 			Left = App.Settings.LastLoc.X;
@@ -58,6 +57,7 @@ namespace Player
 			Settings_LiveLibraryCheck.IsChecked = App.Settings.LiveLibrary;
 			Settings_ExplicitCheck.IsChecked = App.Settings.ExplicitContent;
 			Settings_PlayOnPosCheck.IsChecked = App.Settings.PlayOnPositionChange;
+			Settings_RevalidOnExitCheck.IsChecked = App.Settings.RevalidateOnExit;
 			Settings_TimeoutCombo.SelectedIndex = App.Settings.MouseOverTimeoutIndex;
 			Settings_AncestorCombo.SelectionChanged += (_, __) => App.Settings.MainKey = Settings_AncestorCombo.SelectedIndex;
 			Settings_TimeoutCombo.SelectionChanged += (_, __) => App.Settings.MouseOverTimeoutIndex = Settings_TimeoutCombo.SelectedIndex;
@@ -69,6 +69,8 @@ namespace Player
 			Settings_ExplicitCheck.Unchecked += (_, __) => App.Settings.ExplicitContent = false;
 			Settings_PlayOnPosCheck.Checked += (_, __) => App.Settings.PlayOnPositionChange = true;
 			Settings_PlayOnPosCheck.Unchecked += (_, __) => App.Settings.PlayOnPositionChange = false;
+			Settings_RevalidOnExitCheck.Checked += (_, __) => App.Settings.RevalidateOnExit = true;
+			Settings_RevalidOnExitCheck.Unchecked += (_, __) => App.Settings.RevalidateOnExit = false;
 
 			Player.ParentWindow = this;
 			TaskbarItemInfo = Player.Thumb.Info;
@@ -76,7 +78,6 @@ namespace Player
 			Resources["LastPath"] = App.Settings.LastPath;
 
 			RebindViews();
-			Manager.CollectionChanged += Manager_CollectionChanged;
 			ArtistsView.MouseDoubleClick += DMouseDoubleClick;
 			TitlesView.MouseDoubleClick += DMouseDoubleClick;
 			AlbumsView.MouseDoubleClick += DMouseDoubleClick;
@@ -87,9 +88,11 @@ namespace Player
 		private void RebindViews()
 		{
 			TitlesView.ItemsSource = Manager.Unordered;
-			ArtistsView.ItemsSource = Manager.ByArtists;
-			AlbumsView.ItemsSource = Manager.ByAlbums;
-			RatesView.ItemsSource = Manager.ByRates;
+			ArtistsView.ItemsSource = Manager.ByArtist;
+			AlbumsView.ItemsSource = Manager.ByAlbum;
+			TypesView.ItemsSource = Manager.ByType;
+			DirectoryView.ItemsSource = Manager.ByDirectory;
+
 
 			Views[0] = (CollectionView)CollectionViewSource.GetDefaultView(ArtistsView.ItemsSource);
 			Descriptions[0] = new PropertyGroupDescription("Artist");
@@ -98,18 +101,20 @@ namespace Player
 			Views[1] = (CollectionView)CollectionViewSource.GetDefaultView(AlbumsView.ItemsSource);
 			Descriptions[1] = new PropertyGroupDescription("Album");
 			Views[1].GroupDescriptions.Add(Descriptions[1]);
+
+			Views[2] = (CollectionView)CollectionViewSource.GetDefaultView(TypesView.ItemsSource);
+			Descriptions[2] = new PropertyGroupDescription("Type");
+			Views[2].GroupDescriptions.Add(Descriptions[2]);
+
+			Views[3] = (CollectionView)CollectionViewSource.GetDefaultView(DirectoryView.ItemsSource);
+			Descriptions[3] = new PropertyGroupDescription("Directory");
+			Views[3].GroupDescriptions.Add(Descriptions[3]);
 		}
 
 		private void DMouseDoubleClick(object sender, MouseButtonEventArgs e)
 		{
 			if (sender.As<ListView>().SelectedItem is Media med)
 				Play(med);
-		}
-
-		private void Manager_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
-		{
-			if (App.Settings.LiveLibrary)
-				Manager.DeployLibrary();
 		}
 
 		private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -139,7 +144,7 @@ namespace Player
 			App.Settings.LastLoc = new Point(Left, Top);
 			App.Settings.Volume = Player.Volume;
 			App.Settings.Save();
-			Manager.DeployLibrary();
+			Manager.CloseSeason();
 			Application.Current.Shutdown();
 
 		}
@@ -160,7 +165,7 @@ namespace Player
 		{
 			switch (e.Type)
 			{
-				case InfoType.EditingTag:
+				case InfoType.TagEdit:
 					IsEnabled = false;
 					var pos = Player.Position;
 					Player.Stop();
@@ -180,8 +185,11 @@ namespace Player
 						IsEnabled = true;
 					}
 					break;
-				case InfoType.MediaRequested:
+				case InfoType.MediaRequest:
 					Play(sender as Media);
+					break;
+				case InfoType.CollectionUpdate:
+					RebindViews();
 					break;
 				default:
 					break;
@@ -226,8 +234,8 @@ namespace Player
 						if (Uri.TryCreate(cb, UriKind.Absolute, out var uri))
 						{
 							Manager.Add(uri.AbsoluteUri);
-							if (Manager[0].Type == MediaType.OnlineFile)
-								Manager.Download(Manager[0]);
+							if (Manager.At(0).Type == MediaType.OnlineFile)
+								Manager.Download(Manager.At(0));
 						}
 						else
 							return;
@@ -247,9 +255,8 @@ namespace Player
 
 		private void Play(Media media)
 		{
-			Manager.ActiveQueue = ActiveSource;
-			Player.Stop();
 			Player.Play(Manager.Play(media));
+			Manager.ActiveQueueType = (QueueType)TabControl.SelectedIndex;
 			MiniArtworkImage.Source = media.Artwork;
 			DeepBackEnd.NativeMethods.SHAddToRecentDocs(DeepBackEnd.NativeMethods.ShellAddToRecentDocsFlags.Path,
 				media.Path);
@@ -424,21 +431,23 @@ namespace Player
 					case 0: return TitlesView;
 					case 1: return ArtistsView;
 					case 2: return AlbumsView;
-					case 3: return RatesView;
+					case 3: return TypesView;
+					case 4: return DirectoryView;
 					default: return null;
 				}
 			}
 		}
-		private IEnumerable<Media> ActiveSource
+		private ObservableCollection<Media> ActiveSource
 		{
 			get
 			{
 				switch (TabControl.SelectedIndex)
 				{
 					case 0: return Manager.Unordered;
-					case 1: return Manager.ByArtists;
-					case 2: return Manager.ByAlbums;
-					case 3: return Manager.ByRates;
+					case 1: return Manager.ByArtist;
+					case 2: return Manager.ByAlbum;
+					case 3: return Manager.ByType;
+					case 4: return Manager.ByDirectory;
 					default: return null;
 				}
 			}
@@ -446,6 +455,11 @@ namespace Player
 		private void For(Action<Media> action)
 		{
 			ActiveView.SelectedItems.Cast<Media>().ToList().ForEach(action);
+		}
+
+		private void Button_Click(object sender, RoutedEventArgs e)
+		{
+
 		}
 	}
 }

@@ -8,7 +8,7 @@ namespace Player.Controls
 	{
 		None, Music, Video, OndemandVideo, Pause, Play, Warning, FullScreen, Settings, Next, Previous, Copy, Equalizer,
 		RepeatAll, RepeatOne, Shuffle, Volume0, Volume1, Volume2, Volume3,
-		MusicQueue, Add, Cancel, Cloud, ExitFullScreen, Search, Album, Artist, Rate
+		MusicQueue, Add, Cancel, Cloud, ExitFullScreen, Search, Album, Artist, Rate, Folder, File
 	}
 	public partial class MaterialIcon : UserControl
 	{

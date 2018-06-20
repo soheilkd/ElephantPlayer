@@ -66,13 +66,13 @@ namespace Player
 			File.Tag.Copyright = CopyrightBox.Text ?? String.Empty;
 			File.Tag.Lyrics = LyricsBox.Text ?? String.Empty;
 
-			ChangeRequested?.Invoke(this, new InfoExchangeArgs() { Object = File });
+			ChangeRequested(this, new InfoExchangeArgs(InfoType.TagEdit, File));
 			Close();
 		}
 
 		private void ArtworkImage_MouseUp(object sender, MouseButtonEventArgs e)
 		{
-			if (ArtworkDialog.ShowDialog().Value)
+			if (ArtworkDialog.ShowDialog() ?? false)
 			{
 				File.Tag.Pictures = new TagLib.IPicture[] { new TagLib.Picture(ArtworkDialog.FileName) };
 				ArtworkImage.Source = new BitmapImage(new Uri(ArtworkDialog.FileName));

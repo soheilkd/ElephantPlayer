@@ -1,5 +1,6 @@
 ﻿using Player.Events;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
@@ -7,6 +8,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Threading;
 using System.Threading.Tasks;
@@ -20,7 +22,7 @@ namespace Player
 		None = 0B0,
 		Music = 0B10,
 		Video = 0B100,
-		File  = 0B1000,
+		File = 0B1000,
 		OnlineFile = 0B10000,
 		OnlineMusic = Music | OnlineFile,
 		OnlineVideo = Video | OnlineFile
@@ -29,28 +31,34 @@ namespace Player
 	[Serializable]
 	public class Media : INotifyPropertyChanged
 	{
-		private void InvokeProperty(string name) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+		protected void Set<T>(ref T field, T value, [CallerMemberName] string propertyName = null)
+		{
+			field = value;
+			PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+		}
 		public Media() { }
 		private string _Name;
-		public string Name { get => _Name; set { _Name = value; InvokeProperty(nameof(Name)); } }
+		public string Name { get => _Name; private set => Set(ref _Name, value); }
 		private string _Artist;
-		public string Artist { get => _Artist; set { _Artist = value; InvokeProperty(nameof(Artist)); } }
+		public string Artist { get => _Artist; private set => Set(ref _Artist, value); }
 		private string _Title;
-		public string Title { get => _Title; set { _Title = value; InvokeProperty(nameof(Title)); } }
+		public string Title { get => _Title; set => Set(ref _Title, value); }
 		private string _Album;
-		public string Album { get => _Album; set { _Album = value; InvokeProperty(nameof(Album)); } }
+		public string Album { get => _Album; private set => Set(ref _Album, value); }
+		private string _Directory;
+		public string Directory { get => _Directory; private set => Set(ref _Directory, value); }
 		private int _Rate;
-		public int Rate { get => _Rate; set { _Rate = value; InvokeProperty(nameof(Rate)); } }
+		public int Rate { get => _Rate; set => Set(ref _Rate, value); }
 		private TimeSpan _Len;
-		public TimeSpan Length { get => _Len; set { _Len = value; InvokeProperty(nameof(Length)); } }
+		public TimeSpan Length { get => _Len; set => Set(ref _Len, value); }
 		private int _PlayCount;
-		public int PlayCount { get => _PlayCount; set { _PlayCount = value; InvokeProperty(nameof(PlayCount)); } }
+		public int PlayCount { get => _PlayCount; set => Set(ref _PlayCount, value); }
 		public DateTime AdditionDate { get; set; }
 		public Uri Url { get; set; }
 		public bool IsOffline => Url.IsFile;
 		public MediaType Type;
 		public string Path => Url.IsFile ? Url.LocalPath : Url.AbsoluteUri;
-		[NonSerialized] public string Lyrics;
+		[NonSerialized] public string Lyrics = "";
 		[NonSerialized] public bool IsLoaded = false;
 		[NonSerialized] public bool IsPlaying = false;
 		[NonSerialized] public System.Windows.Media.Imaging.BitmapSource Artwork;
@@ -135,17 +143,7 @@ namespace Player
 			if (IsOffline)
 			{
 				if (!IsValid)
-				{
-					Name = null;
-					Title = null;
-					Artist = null;
-					Album = null;
-					Artwork = null;
-					Length = TimeSpan.Zero;
-					IsLoaded = false;
-					Type = MediaType.None;
-					return;
-				}
+					throw new InvalidDataException("Media is not valid");
 				MediaType type;
 				if (SupportedMusics.Contains(Ext))
 					type = MediaType.Music;
@@ -156,34 +154,33 @@ namespace Player
 				else
 					type = MediaType.None;
 
+				Name = Path.Substring(Path.LastIndexOf("\\") + 1);
+				Directory = Path.Substring(0, Path.LastIndexOf("\\"));
 				switch (type)
 				{
 					case MediaType.Music:
 						using (var t = TagLib.File.Create(Path))
 						{
-							Name = Path.Substring(Path.LastIndexOf("\\") + 1);
 							Artist = t.Tag.FirstPerformer ?? Path.Substring(0, Path.LastIndexOf("\\"));
 							Title = t.Tag.Title ?? Name.Substring(0, Name.LastIndexOf("."));
 							Album = t.Tag.Album ?? String.Empty;
 							Artwork = t.Tag.Pictures.Length >= 1 ? Images.GetBitmap(t.Tag.Pictures[0]) : Images.MusicArt;
 							Type = MediaType.Music;
 							Lyrics = t.Tag.Lyrics ?? String.Empty;
-							IsLoaded = true;
 						}
 						break;
 					case MediaType.Video:
-						Name = Path.Substring(Path.LastIndexOf("\\") + 1);
 						Title = Name;
 						Artist = Path.Substring(0, Path.LastIndexOf("\\"));
 						Artist = Artist.Substring(Artist.LastIndexOf("\\") + 1);
 						Album = "Video";
 						Artwork = Images.VideoArt;
 						Type = MediaType.Video;
-						IsLoaded = true;
 						Length = TimeSpan.Zero;
 						break;
 					default: break;
 				}
+				IsLoaded = true;
 			}
 			else
 			{
@@ -216,44 +213,67 @@ namespace Player
 	}
 
 	public enum PlayMode { Shuffle, RepeatOne, RepeatAll }
-	public class MediaManager : ObservableCollection<Media>
+	public enum QueueType { Unordered, Artist, Album, Type, Dir, Title }
+	public class MediaManager : ICollection<Media>
 	{
-		protected override void OnCollectionChanged(NotifyCollectionChangedEventArgs e)
-		{
-			base.OnCollectionChanged(e);
 
-			switch (e.Action)
-			{
-				case NotifyCollectionChangedAction.Remove:
-					Clients.ForEach(item =>
-					{
-						if (new Uri(item.BaseAddress).AbsoluteUri == e.OldItems[0].As<Media>().Path && item.IsBusy)
-							item.CancelAsync();
-					});
-					break;
-				default: break;
-			}
-			Unordered = this.Order(media => media.IsValid);
-			ByArtists = this.Order(media => media.Artist);
-			ByAlbums = this.Order(media => media.Album);
-			ByTitles = this.Order(media => media.Title);
-			ByRates = this.Order(media => media.Rate, true);
+		public MediaManager()
+		{
+
 		}
 
-
-		public MediaManager() { ActiveQueue = this; }
-
-		public IEnumerable<Media> ActiveQueue { get; set; }
+		private QueueType activeQueueType;
+		public QueueType ActiveQueueType
+		{
+			get => activeQueueType;
+			set
+			{
+				activeQueueType = value;
+				CurrentlyPlayingIndex = ActiveQueue.IndexOf(CurrentlyPlaying);
+			}
+		}
+		public Collection<Media> Medias = new Collection<Media>();
+		public ObservableCollection<Media> ActiveQueue
+		{
+			get
+			{
+				switch (ActiveQueueType)
+				{
+					case QueueType.Unordered: return Unordered;
+					case QueueType.Artist: return ByArtist;
+					case QueueType.Album: return ByAlbum;
+					case QueueType.Type: return ByType;
+					case QueueType.Dir: return ByDirectory;
+					case QueueType.Title: return ByTitles;
+					default: return null;
+				}
+			}
+		}
 		private Random Shuffle = new Random(DateTime.Now.Millisecond);
-		public Media CurrentlyPlaying { get; set; }
+		public Media CurrentlyPlaying;
 		public event EventHandler<InfoExchangeArgs> Change;
-		public int CurrentlyPlayingIndex { get; set; }
+		private int currentlyPlayingIndex = 0;
+		public int CurrentlyPlayingIndex
+		{
+			get => currentlyPlayingIndex;
+			set
+			{
+				currentlyPlayingIndex = value;
+				CurrentlyPlaying = ActiveQueue[value];
+			}
+		}
 		public ObservableCollection<Media>
 			Unordered,
-			ByArtists,
-			ByAlbums,
-			ByTitles,
-			ByRates;
+			ByArtist = new ObservableCollection<Media>(),
+			ByAlbum = new ObservableCollection<Media>(),
+			ByTitles = new ObservableCollection<Media>(),
+			ByDirectory = new ObservableCollection<Media>(),
+			ByType = new ObservableCollection<Media>();
+		public bool IsQueried { get; private set; } = false;
+
+		public int Count => Medias.Count;
+
+		public bool IsReadOnly => false;
 
 		public void Add(string path, bool requestPlay = false)
 		{
@@ -295,11 +315,13 @@ namespace Player
 
 		public Media Play(int index)
 		{
-			CurrentlyPlayingIndex = index;
-			CurrentlyPlaying = ActiveQueue.ElementAt(index);
-			return CurrentlyPlaying;
+			return Play(ActiveQueue[index]);
 		}
-		public Media Play(Media media) => Play(ActiveQueue.IndexOf(media));
+		public Media Play(Media media)
+		{
+			CurrentlyPlayingIndex = ActiveQueue.IndexOf(media);
+			return media;
+		}
 		public Media Next()
 		{
 			switch (App.Settings.PlayMode)
@@ -321,22 +343,26 @@ namespace Player
 			}
 		}
 
-		public void Repeat(int index, int times = 1) => Parallel.For(0, times, (i) => Insert(index, Items[index]));
+		public void Repeat(int index, int times = 1) => Parallel.For(0, times, (i) => Insert(index, At(index)));
 
-		public void DeployLibrary()
+		public void CloseSeason()
 		{
-			Library.Save(this.ToList());
+			if (App.Settings.RevalidateOnExit)
+				Revalidate();
+			LibraryOperator.Save(Unordered);
+		}
+		public void OpenSeason()
+		{
+			LibraryOperator.Load(out Unordered, out ByArtist, out ByAlbum, out ByTitles, out ByDirectory, out ByType);
 		}
 
-		public void AddCount() => this[CurrentlyPlayingIndex].PlayCount++;
+		public void AddCount() => CurrentlyPlaying.PlayCount++;
 
-		private void RequestPlay() => RequestPlay(this[0]);
+		private void RequestPlay() => RequestPlay(At(0));
 		private void RequestPlay(Media media)
 		{
-			Change?.Invoke(media, new InfoExchangeArgs()
-			{
-				Type = InfoType.MediaRequested
-			});
+			CurrentlyPlaying = media;
+			Change?.Invoke(media, new InfoExchangeArgs(InfoType.MediaRequest));
 			if (App.Settings.ExplicitContent)
 			{
 				if (media.Title.ToLower().StartsWith("spankbang"))
@@ -346,12 +372,14 @@ namespace Player
 
 		public void Search(string query)
 		{
-			if (String.IsNullOrWhiteSpace(query)) query = String.Empty;
-			Unordered = this.Those(each => each.Title.IncaseContains(query));
-			ByArtists = this.OrderThose(each => each.Artist.IncaseContains(query), each => each.Artist);
-			ByTitles = this.OrderThose(each => each.Title.IncaseContains(query), each => each.Title);
-			ByAlbums = this.OrderThose(each => each.Album.IncaseContains(query), each => each.Album);
-			ByRates = this.Order(each => each.Rate, true);
+			IsQueried = String.IsNullOrWhiteSpace(query);
+			if (!IsQueried)
+				query = String.Empty;
+			Unordered = Medias.Those(each => each.Title.IncaseContains(query));
+			ByArtist = Medias.OrderThose(each => each.Artist.IncaseContains(query), each => each.Artist);
+			ByTitles = Medias.OrderThose(each => each.Title.IncaseContains(query), each => each.Title);
+			ByAlbum = Medias.OrderThose(each => each.Album.IncaseContains(query), each => each.Album);
+			ByDirectory = Medias.OrderThose(each => each.Directory.IncaseContains(query), each => each.Directory);
 		}
 
 		public void UpdateOnPath(Media source)
@@ -362,6 +390,7 @@ namespace Player
 		{
 			Do(each => !each.IsValid, each => Remove(each));
 			Do(each => each.Reload());
+
 		}
 		public void Detergent(Media media, bool prompt = true)
 		{
@@ -467,7 +496,7 @@ namespace Player
 				}
 				else
 				{
-					Change?.Invoke(media, new InfoExchangeArgs(InfoType.EditingTag) { Object = file });
+					Change?.Invoke(media, new InfoExchangeArgs(InfoType.TagEdit, file));
 				}
 			}
 		}
@@ -490,7 +519,7 @@ namespace Player
 						zip.ExtractAll(path, Ionic.Zip.ExtractExistingFileAction.OverwriteSilently);
 					File.Delete(SavePath);
 					var d = from item in Directory.GetFiles(path, "*", SearchOption.AllDirectories) where Media.IsMedia(item) select new Media(item);
-					int index = IndexOf(media);
+					int index = Medias.IndexOf(media);
 					foreach (var item in d)
 					{
 						Detergent(item, false);
@@ -500,11 +529,11 @@ namespace Player
 				}
 				else
 				{
-					int index = IndexOf(media);
+					int index = Medias.IndexOf(media);
 					Remove(media);
 					Insert(index, new Media(SavePath));
 					if (CurrentlyPlayingIndex == index)
-						RequestPlay(this[index]);
+						RequestPlay(At(index));
 				}
 				Clients.Remove(Client);
 			};
@@ -515,32 +544,147 @@ namespace Player
 		public void Do(Func<Media, bool> condition, Action<Media> action)
 		{
 			for (int i = 0; i < Count; i++)
-				if (condition(this[i]))
-					action(this[i]);
+				if (condition(At(i)))
+					action(At(i));
 		}
 		public void Do(Action<Media> action)
 		{
 			for (int i = 0; i < Count; i++)
-				action(this[i]);
+				action(At(i));
 		}
+
+		public Media At(int index) => Medias[index];
+		public void Insert(int index, Media item)
+		{
+			Medias.Insert(index, item);
+			Unordered.Add(item);
+			ByArtist.Add(item);
+			ByAlbum.Add(item);
+			ByDirectory.Add(item);
+			ByType.Add(item);
+			InvokeCollectionUpdate();
+		}
+		public void Add(Media item)
+		{
+			Insert(0, item);
+		}
+
+		public void Clear()
+		{
+			Medias.Clear();
+			Unordered.Clear();
+			ByArtist.Clear();
+			ByAlbum.Clear();
+			ByType.Clear();
+			ByDirectory.Clear();
+			InvokeCollectionUpdate();
+		}
+
+		public bool Contains(Media item)
+		{
+			return Medias.Contains(item);
+		}
+
+		public void CopyTo(Media[] array, int arrayIndex)
+		{
+			Medias.CopyTo(array, arrayIndex);
+		}
+
+		public bool Remove(Media item)
+		{
+			InvokeCollectionUpdate();
+			if (Medias.Contains(item))
+			{
+				Clients.ForEach(each =>
+				{
+					if (new Uri(each.BaseAddress).AbsoluteUri == item.Path && each.IsBusy)
+						each.CancelAsync();
+				});
+				Medias.Remove(item);
+				Unordered.Remove(item);
+				ByArtist.Remove(item);
+				ByAlbum.Remove(item);
+				ByDirectory.Remove(item);
+				ByType.Remove(item);
+				return true;
+			}
+			else return false;
+		}
+
+		public void Move(int index, int indexTo)
+		{
+			ActiveQueue.Move(index, indexTo);
+		}
+
+		public IEnumerator<Media> GetEnumerator()
+		{
+			return Medias.GetEnumerator();
+		}
+
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return Medias.GetEnumerator();
+		}
+
+		public void InvokeCollectionUpdate()
+			=> Change?.Invoke(this, new InfoExchangeArgs(InfoType.CollectionUpdate));
 	}
 
-	[Serializable]
-	public static class Library
+	public static class LibraryOperator
 	{
 		private static string LibraryPath => $"{App.Path}\\Library.dll";
-		public static void Save(List<Media> medias)
+		public static void Save(Collection<Media> medias)
 		{
+			SerializableMediaCollection collection;
+			collection.Unordered = new ObservableCollection<Media>(medias);
+			collection.ByArtist = medias.Order(each => each.Artist);
+			collection.ByAlbum = medias.Order(each => each.Album);
+			collection.ByTitle = medias.Order(each => each.Title);
+			collection.ByDirectory = medias.Order(each => each.Directory);
+			collection.ByType = medias.Order(each => each.Type);
 			using (FileStream stream = new FileStream(LibraryPath, FileMode.Create))
-				(new BinaryFormatter()).Serialize(stream, medias);
+				(new BinaryFormatter()).Serialize(stream, collection);
 		}
-		public static List<Media> Load()
+		public static SerializableMediaCollection Load()
 		{
 			if (!File.Exists(LibraryPath))
-				return new List<Media>();
+				return new SerializableMediaCollection()
+				{
+					Unordered = new ObservableCollection<Media>(),
+					ByType = new ObservableCollection<Media>(),
+					ByDirectory = new ObservableCollection<Media>(),
+					ByAlbum = new ObservableCollection<Media>(),
+					ByArtist = new ObservableCollection<Media>(),
+					ByTitle = new ObservableCollection<Media>()
+				};
 			using (FileStream stream = new FileStream(LibraryPath, FileMode.Open))
-				return (new BinaryFormatter()).Deserialize(stream) as List<Media>;
+				return (SerializableMediaCollection)(new BinaryFormatter()).Deserialize(stream);
+		}
+		public static void Load(
+			out ObservableCollection<Media> unordered,
+			out ObservableCollection<Media> byArtist,
+			out ObservableCollection<Media> byAlbum,
+			out ObservableCollection<Media> byTitle,
+			out ObservableCollection<Media> byDir,
+			out ObservableCollection<Media> byType)
+		{
+			var p = Load();
+			unordered = p.Unordered;
+			byArtist = p.ByArtist;
+			byAlbum = p.ByAlbum;
+			byTitle = p.ByTitle;
+			byDir = p.ByDirectory;
+			byType = p.ByType;
 		}
 	}
-
+	[Serializable]
+	public struct SerializableMediaCollection
+	{
+		public ObservableCollection<Media> Unordered;
+		public ObservableCollection<Media> ByArtist;
+		public ObservableCollection<Media> ByAlbum;
+		public ObservableCollection<Media> ByTitle;
+		public ObservableCollection<Media> ByDirectory;
+		public ObservableCollection<Media> ByType;
+	}
 }

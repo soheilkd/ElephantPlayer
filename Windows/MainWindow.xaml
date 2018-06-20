@@ -89,6 +89,50 @@
 							<GridViewColumn Header="Plays" Width="50" DisplayMemberBinding="{Binding PlayCount}" />
 						</GridView>
 					</ListView.View>
+					<ListView.GroupStyle>
+						<GroupStyle>
+							<GroupStyle.ContainerStyle>
+								<Style TargetType="{x:Type GroupItem}">
+									<Setter Property="Template">
+										<Setter.Value>
+											<ControlTemplate>
+												<Expander IsExpanded="False">
+													<Expander.Header>
+														<StackPanel Orientation="Horizontal">
+															<TextBlock Text="{Binding Name}" FontWeight="SemiBold" Foreground="Black" FontSize="16" VerticalAlignment="Bottom" />
+															<TextBlock Text="{Binding ItemCount}" FontSize="18" Foreground="#F333" FontWeight="Light" FontStyle="Italic" Margin="10,0,0,0" VerticalAlignment="Bottom" />
+															<TextBlock Text=" items" FontSize="16" Foreground="Black" FontStyle="Italic" VerticalAlignment="Bottom" />
+														</StackPanel>
+													</Expander.Header>
+													<ItemsPresenter />
+												</Expander>
+											</ControlTemplate>
+										</Setter.Value>
+									</Setter>
+								</Style>
+							</GroupStyle.ContainerStyle>
+						</GroupStyle>
+					</ListView.GroupStyle>
+				</ListView>
+			</TabItem>
+			<TabItem>
+				<TabItem.Header>
+					<StackPanel Orientation="Horizontal"  Style="{DynamicResource HeaderPanel}">
+						<player:MaterialIcon Glyph="File" />
+						<TextBlock Text="  " />
+						<TextBlock Text="Types" FontSize="18" />
+					</StackPanel>
+				</TabItem.Header>
+				<ListView x:Name="TypesView" ContextMenu="{DynamicResource ContextMenu1}">
+					<ListView.View>
+						<GridView>
+							<GridViewColumn Header="Title" Width="300" CellTemplate="{DynamicResource TitleCell}"/>
+							<GridViewColumn Header="Artist" Width="100" CellTemplate="{DynamicResource ArtistCell}" />
+							<GridViewColumn Header="Album" Width="100" CellTemplate="{DynamicResource AlbumCell}" />
+							<GridViewColumn Header="Rate" Width="120" CellTemplate="{DynamicResource RateCell}" />
+							<GridViewColumn Header="Plays" Width="50" CellTemplate="{DynamicResource PlayCell}"/>
+						</GridView>
+					</ListView.View>
 
 					<ListView.GroupStyle>
 						<GroupStyle>
@@ -119,12 +163,12 @@
 			<TabItem>
 				<TabItem.Header>
 					<StackPanel Orientation="Horizontal"  Style="{DynamicResource HeaderPanel}">
-						<player:MaterialIcon Glyph="Rate" />
+						<player:MaterialIcon Glyph="Folder" />
 						<TextBlock Text="  " />
-						<TextBlock Text="Ratings" FontSize="18" />
+						<TextBlock Text="Folders" FontSize="18" />
 					</StackPanel>
 				</TabItem.Header>
-				<ListView x:Name="RatesView" ContextMenu="{DynamicResource ContextMenu1}">
+				<ListView x:Name="DirectoryView" ContextMenu="{DynamicResource ContextMenu1}">
 					<ListView.View>
 						<GridView>
 							<GridViewColumn Header="Title" Width="300" CellTemplate="{DynamicResource TitleCell}"/>
@@ -134,6 +178,30 @@
 							<GridViewColumn Header="Plays" Width="50" CellTemplate="{DynamicResource PlayCell}"/>
 						</GridView>
 					</ListView.View>
+					<ListView.GroupStyle>
+						<GroupStyle>
+							<GroupStyle.ContainerStyle>
+								<Style TargetType="{x:Type GroupItem}">
+									<Setter Property="Template">
+										<Setter.Value>
+											<ControlTemplate>
+												<Expander IsExpanded="False">
+													<Expander.Header>
+														<StackPanel Orientation="Horizontal">
+															<TextBlock Text="{Binding Name}" FontWeight="SemiBold" Foreground="Black" FontSize="16" VerticalAlignment="Bottom" />
+															<TextBlock Text="{Binding ItemCount}" FontSize="18" Foreground="#F333" FontWeight="Light" FontStyle="Italic" Margin="10,0,0,0" VerticalAlignment="Bottom" />
+															<TextBlock Text=" items" FontSize="16" Foreground="Black" FontStyle="Italic" VerticalAlignment="Bottom" />
+														</StackPanel>
+													</Expander.Header>
+													<ItemsPresenter />
+												</Expander>
+											</ControlTemplate>
+										</Setter.Value>
+									</Setter>
+								</Style>
+							</GroupStyle.ContainerStyle>
+						</GroupStyle>
+					</ListView.GroupStyle>
 				</ListView>
 			</TabItem>
 			<TabItem >
@@ -159,6 +227,7 @@
 					<CheckBox x:Name="Settings_LiveLibraryCheck" Content="Live Library" Margin="5,5,0,0" />
 					<CheckBox x:Name="Settings_ExplicitCheck" Content="Explicit Content" Margin="5,5,0,0" />
 					<CheckBox x:Name="Settings_PlayOnPosCheck" Content="Resume On Position Change" Margin="5,5,0,0" />
+					<CheckBox x:Name="Settings_RevalidOnExitCheck" Content="Always Revalidate On Exit" Margin="5,5,0,0" />
 					<Label Content="Vision Timeout"/>
 					<ComboBox x:Name="Settings_TimeoutCombo" Margin="10,0,0,0" Width="120">
 						<ComboBoxItem Content="0.5 s"/>
@@ -170,7 +239,7 @@
 						<ComboBoxItem Content="10 s"/>
 						<ComboBoxItem Content="60 s"/>
 					</ComboBox>
-					<Button Content="Revalidate Library" Height="24" Width="200" Click="Settings_RevalidateClick" Margin="20"/>
+					<Button Content="Revalidate Library" Height="24" Width="200" Click="Settings_RevalidateClick" Margin="10"/>
 					<Label Content="soheilkd" HorizontalAlignment="Right" VerticalAlignment="Bottom" FontSize="10"/>
 					<StackPanel.Resources>
 						<Style TargetType="Label" >

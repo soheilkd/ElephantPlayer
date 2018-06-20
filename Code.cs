@@ -1,6 +1,8 @@
-﻿using System;
+﻿using Player.Events;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
@@ -31,8 +33,10 @@ namespace Player
 		public bool LiveLibrary { get; set; }
 		public bool ExplicitContent { get; set; }
 		public bool PlayOnPositionChange { get; set; }
+		public bool RevalidateOnExit { get; set; }
 
 		private int _MouseOverTimeOutIndex;
+
 		public int MouseOverTimeoutIndex { get => _MouseOverTimeOutIndex; set { _MouseOverTimeOutIndex = value; Changed?.Invoke(this, null); } }
 		public int MouseOverTimeout
 		{
@@ -98,7 +102,7 @@ namespace Player
 		public static ObservableCollection<Media> Those(this Collection<Media> ts, Func<Media, bool> predicate)
 			=> new ObservableCollection<Media>(ts.Where(predicate));
 		public static ObservableCollection<Media> OrderThose<T>(this Collection<Media> ts, Func<Media, bool> predicate, Func<Media, T> keySelector, bool descending = false)
-			=> new ObservableCollection<Media>(from each in ts where predicate.Invoke(each) orderby keySelector.Invoke(each) select each);
+			=> new ObservableCollection<Media>(from each in ts where predicate(each) orderby keySelector(each) select each);
 	}
 
 	public static class Images
