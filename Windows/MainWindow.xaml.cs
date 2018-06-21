@@ -4,6 +4,7 @@ using Player.Events;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -21,6 +22,7 @@ namespace Player
 	public partial class MainWindow : Window
 	{
 		private MediaManager Manager = new MediaManager();
+		private ObservableCollection<Media>[] Collections = new ObservableCollection<Media>[5];
 		private Timer PlayCountTimer = new Timer(100000) { AutoReset = false };
 		private Gma.System.MouseKeyHook.IKeyboardMouseEvents KeyboardEvents = Gma.System.MouseKeyHook.Hook.GlobalEvents();
 		private bool ControlsNotNeededOnVisionIsVisible
@@ -37,21 +39,29 @@ namespace Player
 		public MainWindow()
 		{
 			InitializeComponent();
-			Manager.Change += Manager_Change;
-			App.NewInstanceRequested += (_, e) => Manager.Add(e.Args, true);
-
-			Manager.OpenSeason();
+			Initialize();
 			Width = App.Settings.LastSize.Width;
 			Height = App.Settings.LastSize.Height;
 			Left = App.Settings.LastLoc.X;
 			Top = App.Settings.LastLoc.Y;
 		}
 
-		private void BindUI()
+		private void Initialize()
 		{
-			PlayCountTimer.Elapsed += (_, __) => Manager.AddCount();
+			PlayCountTimer.Elapsed += (_, __) => Manager.CurrentlyPlaying.PlayCount++;
+			App.NewInstanceRequested += (_, e) => e.Args.ToList().ForEach(each => Manager.Add(each, true));
 			KeyboardEvents.KeyDown += Keyboard_KeyDown;
-
+			Manager.Change += Manager_Change;
+			Collections[0] = new ObservableCollection<Media>();
+			Collections[1] = LibraryOperator.LoadedCollection.ByArtist;
+			Collections[2] = LibraryOperator.LoadedCollection.ByAlbum;
+			Collections[3] = LibraryOperator.LoadedCollection.ByType;
+			Collections[4] = LibraryOperator.LoadedCollection.ByDirectory;
+			TitlesView.ItemsSource = Manager;
+			ArtistsView.ItemsSource = Collections[1];
+			AlbumsView.ItemsSource = Collections[2];
+			TypesView.ItemsSource = Collections[3];
+			DirectoryView.ItemsSource = Collections[4];
 			Settings_AncestorCombo.SelectedIndex = App.Settings.MainKey;
 			Settings_OrinateCheck.IsChecked = App.Settings.VisionOrientation;
 			Settings_LiveLibraryCheck.IsChecked = App.Settings.LiveLibrary;
@@ -81,19 +91,40 @@ namespace Player
 			ArtistsView.MouseDoubleClick += DMouseDoubleClick;
 			TitlesView.MouseDoubleClick += DMouseDoubleClick;
 			AlbumsView.MouseDoubleClick += DMouseDoubleClick;
+			Manager.CollectionChanged += Manager_CollectionChanged;
+		}
+
+		private void Manager_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+		{
+			switch (e.Action)
+			{
+				case NotifyCollectionChangedAction.Add:
+					Collections.For(each => each.Insert(e.NewStartingIndex, e.NewItems[0] as Media));
+					break;
+				case NotifyCollectionChangedAction.Remove:
+					Collections.For(each => each.Remove(e.OldItems[0] as Media));
+					break;
+				case NotifyCollectionChangedAction.Replace:
+					Collections.For(each => each[e.NewStartingIndex] = e.NewItems[0] as Media);
+					break;
+				case NotifyCollectionChangedAction.Move:
+					Collections.For(each => each.Move(e.OldStartingIndex, e.NewStartingIndex));
+					break;
+				case NotifyCollectionChangedAction.Reset:
+					Collections.For(each => each.Clear());
+					break;
+				default: break;
+			}
 		}
 
 		CollectionView[] Views = new CollectionView[4];
 		PropertyGroupDescription[] Descriptions = new PropertyGroupDescription[4];
 		private void RebindViews()
 		{
-			TitlesView.ItemsSource = Manager.Unordered;
-			ArtistsView.ItemsSource = Manager.ByArtist;
-			AlbumsView.ItemsSource = Manager.ByAlbum;
-			TypesView.ItemsSource = Manager.ByType;
-			DirectoryView.ItemsSource = Manager.ByDirectory;
-
-
+			ArtistsView.ItemsSource = Collections[1];
+			AlbumsView.ItemsSource = Collections[2];
+			TypesView.ItemsSource = Collections[3];
+			DirectoryView.ItemsSource = Collections[4];
 			Views[0] = (CollectionView)CollectionViewSource.GetDefaultView(ArtistsView.ItemsSource);
 			Descriptions[0] = new PropertyGroupDescription("Artist");
 			Views[0].GroupDescriptions.Add(Descriptions[0]);
@@ -103,7 +134,7 @@ namespace Player
 			Views[1].GroupDescriptions.Add(Descriptions[1]);
 
 			Views[2] = (CollectionView)CollectionViewSource.GetDefaultView(TypesView.ItemsSource);
-			Descriptions[2] = new PropertyGroupDescription("Type");
+			Descriptions[2] = new PropertyGroupDescription("Type.ToString()");
 			Views[2].GroupDescriptions.Add(Descriptions[2]);
 
 			Views[3] = (CollectionView)CollectionViewSource.GetDefaultView(DirectoryView.ItemsSource);
@@ -119,9 +150,8 @@ namespace Player
 
 		private void Window_Loaded(object sender, RoutedEventArgs e)
 		{
-			BindUI();
-			var cml = Environment.GetCommandLineArgs().Where(name => !name.EndsWith(".exe")).ToArray();
-			Manager.Add(cml, true);
+			var args = Environment.GetCommandLineArgs().Where(name => !name.EndsWith(".exe")).ToArray();
+			args.For(each => Manager.Add(each, true));
 			Player.SomethingHappened += Player_EventHappened;
 		}
 
@@ -159,7 +189,11 @@ namespace Player
 				default: break;
 			}
 		}
-		private void Window_Drop(object sender, DragEventArgs e) => Manager.Add((string[])e.Data.GetData(DataFormats.FileDrop));
+		private void Window_Drop(object sender, DragEventArgs e)
+		{
+			((string[])e.Data.GetData(DataFormats.FileDrop)).For(each => Manager.Add(each));
+		}
+
 
 		private async void Manager_Change(object sender, InfoExchangeArgs e)
 		{
@@ -234,8 +268,8 @@ namespace Player
 						if (Uri.TryCreate(cb, UriKind.Absolute, out var uri))
 						{
 							Manager.Add(uri.AbsoluteUri);
-							if (Manager.At(0).Type == MediaType.OnlineFile)
-								Manager.Download(Manager.At(0));
+							if (Manager[0].Type == MediaType.OnlineFile)
+								Manager.Download(Manager[0]);
 						}
 						else
 							return;
@@ -256,7 +290,6 @@ namespace Player
 		private void Play(Media media)
 		{
 			Player.Play(Manager.Play(media));
-			Manager.ActiveQueueType = (QueueType)TabControl.SelectedIndex;
 			MiniArtworkImage.Source = media.Artwork;
 			DeepBackEnd.NativeMethods.SHAddToRecentDocs(DeepBackEnd.NativeMethods.ShellAddToRecentDocsFlags.Path,
 				media.Path);
@@ -278,7 +311,7 @@ namespace Player
 
 		private void SearchBox_TextChanged(object sender, TextChangedEventArgs e)
 		{
-			Manager.Search(SearchBox.Text);
+
 			RebindViews();
 		}
 		private void SearchIcon_Click(object sender, MouseButtonEventArgs e)
@@ -293,7 +326,11 @@ namespace Player
 		}
 		private void Menu_PlayAfterClick(object sender, RoutedEventArgs e)
 		{
-			For(item => Manager.Move(Manager.IndexOf(item), Manager.CurrentlyPlayingIndex + 1));
+			For(item =>
+			{
+				Manager.Remove(item);
+				Manager.Insert(Manager.IndexOf(Manager.CurrentlyPlaying) + 1, item);
+			});
 		}
 		private void Menu_DuplicateClick(object sender, RoutedEventArgs e)
 		{
@@ -437,29 +474,9 @@ namespace Player
 				}
 			}
 		}
-		private ObservableCollection<Media> ActiveSource
-		{
-			get
-			{
-				switch (TabControl.SelectedIndex)
-				{
-					case 0: return Manager.Unordered;
-					case 1: return Manager.ByArtist;
-					case 2: return Manager.ByAlbum;
-					case 3: return Manager.ByType;
-					case 4: return Manager.ByDirectory;
-					default: return null;
-				}
-			}
-		}
 		private void For(Action<Media> action)
 		{
-			ActiveView.SelectedItems.Cast<Media>().ToList().ForEach(action);
-		}
-
-		private void Button_Click(object sender, RoutedEventArgs e)
-		{
-
+			ActiveView.SelectedItems.Cast<Media>().ToArray().For(action);
 		}
 	}
 }

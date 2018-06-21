@@ -92,17 +92,18 @@ namespace Player
 			return -1;
 		}
 		public static bool IncaseContains(this string item, string with) => item.ToLower().Contains(with.ToLower());
-		public static ObservableCollection<Media> Order<T>(this Collection<Media> ts, Func<Media, T> keySelector, bool descending = false)
+
+		public static void For<T>(this IList<T> collection, Action<T> action)
 		{
-			if (descending)
-				return new ObservableCollection<Media>(ts.OrderByDescending(keySelector));
-			else
-				return new ObservableCollection<Media>(ts.OrderBy(keySelector));
+			for (int i = 0; i < collection.Count; i++)
+				action(collection[i]);
 		}
-		public static ObservableCollection<Media> Those(this Collection<Media> ts, Func<Media, bool> predicate)
-			=> new ObservableCollection<Media>(ts.Where(predicate));
-		public static ObservableCollection<Media> OrderThose<T>(this Collection<Media> ts, Func<Media, bool> predicate, Func<Media, T> keySelector, bool descending = false)
-			=> new ObservableCollection<Media>(from each in ts where predicate(each) orderby keySelector(each) select each);
+		public static void For<T>(this IList<T> collection, Action<T> action, Func<T, bool> condition)
+		{
+			for (int i = 0; i < collection.Count; i++)
+				if (condition(collection[i]))
+					action(collection[i]);
+		}
 	}
 
 	public static class Images
