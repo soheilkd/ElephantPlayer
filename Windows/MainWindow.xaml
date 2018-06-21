@@ -131,9 +131,9 @@
 							<GridViewColumn Header="Album" Width="100" CellTemplate="{DynamicResource AlbumCell}" />
 							<GridViewColumn Header="Rate" Width="120" CellTemplate="{DynamicResource RateCell}" />
 							<GridViewColumn Header="Plays" Width="50" CellTemplate="{DynamicResource PlayCell}"/>
+							<GridViewColumn Header="Date Added" Width="150" CellTemplate="{DynamicResource DateCell}"/>
 						</GridView>
 					</ListView.View>
-
 					<ListView.GroupStyle>
 						<GroupStyle>
 							<GroupStyle.ContainerStyle>
@@ -176,6 +176,7 @@
 							<GridViewColumn Header="Album" Width="100" CellTemplate="{DynamicResource AlbumCell}" />
 							<GridViewColumn Header="Rate" Width="120" CellTemplate="{DynamicResource RateCell}" />
 							<GridViewColumn Header="Plays" Width="50" CellTemplate="{DynamicResource PlayCell}"/>
+							<GridViewColumn Header="Date Added" Width="150" CellTemplate="{DynamicResource DateCell}"/>
 						</GridView>
 					</ListView.View>
 					<ListView.GroupStyle>
