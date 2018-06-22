@@ -113,7 +113,16 @@ namespace Player
 			if (IsOffline)
 			{
 				if (!IsValid)
-					throw new InvalidDataException("Media is not valid");
+				{
+					Name = null;
+					Directory = null;
+					Artist = null;
+					Title = null;
+					Album = null;
+					Artwork = null;
+					Type = MediaType.None;
+					Lyrics = null;
+				}
 
 				Name = Path.Substring(Path.LastIndexOf("\\") + 1);
 				Directory = Path.Substring(0, Path.LastIndexOf("\\"));
@@ -242,7 +251,7 @@ namespace Player
 				default: return null;
 			}
 		}
-		public Media Previous(Collection<Media> coll = null, int currentlyPlayingIndex = 1)
+		public Media Previous(Collection<Media> coll = null, int currentlyPlayingIndex = -1)
 		{
 			if (currentlyPlayingIndex == -1)
 				currentlyPlayingIndex = (coll ?? this).IndexOf(CurrentlyPlaying);
