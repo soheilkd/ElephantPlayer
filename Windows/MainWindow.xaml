@@ -330,13 +330,6 @@
 			<MenuItem Header="Convert" Click="Menu_ConvertClick" />
 			<MenuItem Header="Open in VLC" Click="Menu_VLC"/>
 			<MenuItem Header="Download" Click="Menu_DownloadClick" />
-			<MenuItem Header="Duplicate...">
-				<MenuItem Header="1" Click="Menu_DuplicateClick"/>
-				<MenuItem Header="2" Click="Menu_DuplicateClick"/>
-				<MenuItem Header="3" Click="Menu_DuplicateClick"/>
-				<MenuItem Header="5" Click="Menu_DuplicateClick"/>
-				<MenuItem Header="10" Click="Menu_DuplicateClick"/>
-			</MenuItem>
 			<MenuItem Header="Move to..." >
 				<MenuItem Header="{DynamicResource LastPath}" Click="Menu_MoveClick"/>
 				<MenuItem Header="Browse..." Click="Menu_MoveClick"/>

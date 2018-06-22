@@ -12,6 +12,7 @@ namespace Player.Controls
 {
 	public partial class MediaPlayer : UserControl
 	{
+		public event EventHandler<InfoExchangeArgs> SomethingHappened;
 		public TimeSpan Position
 		{
 			get => element.Position;
@@ -41,7 +42,6 @@ namespace Player.Controls
 			}
 		}
 		private Media _Media = new Media();
-		public event EventHandler<InfoExchangeArgs> SomethingHappened;
 		private Timer DraggerTimer = new Timer(250) { AutoReset = false };
 		private Timer MouseMoveTimer = new Timer(App.Settings.MouseOverTimeout) { AutoReset = false };
 		private Timer PlayCountTimer = new Timer(120000) { AutoReset = false };
@@ -57,8 +57,6 @@ namespace Player.Controls
 				PositionSlider.LargeChange = 5 * PositionSlider.Maximum / 100;
 				TimeLabel_Full.Content = TimeSpan.ToNewString();
 				Invoke(InfoType.LengthFound, TimeSpan);
-				SmallChange = new TimeSpan(0, 0, 0, 0, (int)PositionSlider.SmallChange);
-				BackwardSmallChange = new TimeSpan(0, 0, 0, 0, -1 * (int)PositionSlider.SmallChange);
 			}
 		}
 		private bool isFullScreen, WasMaximized, isTopMost, Magnified, IsUXChangingPosition;
@@ -97,7 +95,6 @@ namespace Player.Controls
 		public Taskbar.Thumb Thumb = new Taskbar.Thumb();
 		private Storyboard MagnifyBoard, MinifyBoard, FullOnBoard, FullOffBoard;
 		private ThicknessAnimation MagnifyAnimation, MinifyAnimation;
-		public TimeSpan SmallChange, BackwardSmallChange;
 
 		public MediaPlayer()
 		{

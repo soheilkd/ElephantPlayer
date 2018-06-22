@@ -140,6 +140,7 @@
   <ItemGroup>
     <Compile Include="App.cs" />
     <Compile Include="Code.cs" />
+    <Compile Include="DownloadManager.cs" />
     <Compile Include="Windows\ConverterWindow.xaml.cs">
       <DependentUpon>ConverterWindow.xaml</DependentUpon>
     </Compile>

@@ -2,12 +2,12 @@
 {
 	public enum InfoType : byte
 	{
-		//Variable exchange
-		Integer, Double, Media, Object, StringArray,
+		//Content exchange
+		Integer, Double, Media, Object, StringArray, MediaCollection,
 		//Media Control
 		NextRequest, PrevRequest, LengthFound, Magnifiement,
 		//Media Manager
-		MediaRequest, TagEdit, CollectionUpdate
+		MediaRequest, TagEdit, CollectionUpdate,
 	}
 
 	public class InfoExchangeArgs : System.EventArgs

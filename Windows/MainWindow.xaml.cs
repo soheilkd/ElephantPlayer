@@ -269,7 +269,7 @@ namespace Player
 						{
 							Manager.Add(uri.AbsoluteUri);
 							if (Manager[0].Type == MediaType.OnlineFile)
-								Manager.Download(Manager[0]);
+								Manager.DownloadManager.Download(Manager[0]);
 						}
 						else
 							return;
@@ -322,7 +322,7 @@ namespace Player
 
 		private void Menu_TagDetergent(object sender, RoutedEventArgs e)
 		{
-			For(item => Manager.Detergent(item));
+			For(item => MediaManager.CleanTag(item));
 		}
 		private void Menu_PlayAfterClick(object sender, RoutedEventArgs e)
 		{
@@ -331,12 +331,6 @@ namespace Player
 				Manager.Remove(item);
 				Manager.Insert(Manager.IndexOf(Manager.CurrentlyPlaying) + 1, item);
 			});
-		}
-		private void Menu_DuplicateClick(object sender, RoutedEventArgs e)
-		{
-			var d = Int32.Parse(e.Source.As<MenuItem>().Header.ToString());
-			for (int i = 0; i < d; i++)
-				For(item => Manager.Insert(Manager.IndexOf(item), item.Shallow));
 		}
 		private void Menu_MoveClick(object sender, RoutedEventArgs e)
 		{
@@ -434,7 +428,7 @@ namespace Player
 		}
 		private void Menu_DownloadClick(object sender, RoutedEventArgs e)
 		{
-			For(item => Manager.Download(item));
+			For(item => Manager.DownloadManager.Download(item));
 		}
 		private void Menu_VLC(object sender, RoutedEventArgs e)
 		{
