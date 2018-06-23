@@ -1,17 +1,12 @@
 ﻿using Player.Events;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Collections.Specialized;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
-using System.Net;
 using System.Runtime.CompilerServices;
 using System.Runtime.Serialization.Formatters.Binary;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Windows;
 
 namespace Player
@@ -76,11 +71,17 @@ namespace Player
 		[NonSerialized] public bool IsPlaying = false;
 		[NonSerialized] public System.Windows.Media.Imaging.BitmapSource Artwork;
 		public bool IsVideo => Type == MediaType.Video;
-		public bool Exists => MediaManager.Exists(Url);
-
-		public bool IsValid => MediaManager.Exists(Url);
-
-
+		public bool Exists
+		{
+			get
+			{
+				if (Url.IsFile)
+					return File.Exists(Path);
+				else
+					return DownloadManager.IsDownloadable(Url, out _);
+			}
+		}
+		
 		[field: NonSerialized]
 		public event PropertyChangedEventHandler PropertyChanged;
 
@@ -110,7 +111,7 @@ namespace Player
 				return;
 			if (IsOffline)
 			{
-				if (!IsValid)
+				if (!Exists)
 				{
 					Name = null;
 					Directory = null;
@@ -208,7 +209,8 @@ namespace Player
 			if (Directory.Exists(path))
 				Directory.GetFiles(path, "*", SearchOption.AllDirectories).For(each => Add(each));
 			var media = new Media(path);
-			if (!media.IsValid) return;
+			if (!media.Exists)
+				return;
 			var duplication = this.Where(item => item.Path == path);
 			if (duplication.Count() != 0 && requestPlay)
 			{
@@ -289,7 +291,7 @@ namespace Player
 		public void Revalidate()
 		{
 			this.For(each => each.Reload());
-			this.For(each => Remove(each), each => !each.IsValid);
+			this.For(each => Remove(each), each => !each.Exists);
 		}
 
 		#region Singular Media Operations
@@ -319,13 +321,6 @@ namespace Player
 				return url.AbsolutePath.Substring((url.AbsolutePath ?? " . ").LastIndexOf('.') + 1).ToLower();
 			else
 				return url.Segments.Last().Substring(url.Segments.Last().LastIndexOf('.') + 1).ToLower();
-		}
-		public static bool Exists(Uri url)
-		{
-			if (url.IsFile)
-				return File.Exists(url.AbsolutePath);
-			else
-				return DownloadManager.IsDownloadable(url, out _);
 		}
 		public static bool IsMedia(string path) => new Media(path).Type != MediaType.None;
 

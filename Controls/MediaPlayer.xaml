@@ -12,11 +12,10 @@
                           MouseDown="Element_MouseDown" ScrubbingEnabled="True"
                           Volume="1"/>
 		</Grid>
-		<Grid x:Name="ControlsGrid" Background="Transparent" VerticalAlignment="Top" Height="87">
+		<Grid x:Name="ControlsGrid" Background="Transparent" VerticalAlignment="Bottom" Height="87">
 			<Label Content="Content Title" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="67,0,0,0" FontSize="18" x:Name="TitleLabel" Foreground="{DynamicResource Foreground}"/>
-			<Slider x:Name="PositionSlider" ValueChanged="Position_Changed" PreviewMouseLeftButtonDown="Position_Holding" IsMoveToPointEnabled="True"
-               VerticalAlignment="Center" Maximum="1000" Focusable="False" FocusVisualStyle="{x:Null}" Template="{DynamicResource FlatSlider}"
-                        Foreground="#FF101010" Margin="50, 62, 50, 0">
+			<Slider Value="100" x:Name="PositionSlider" ValueChanged="Position_Changed" PreviewMouseLeftButtonDown="Position_Holding" IsMoveToPointEnabled="True"
+               VerticalAlignment="Center" Maximum="1000" Template="{DynamicResource FlatSlider}" Margin="50, 62, 50, 0">
 			</Slider>
 			
 			<Label Content="00:00" Style="{DynamicResource TimeLabel}" HorizontalAlignment="Left" x:Name="TimeLabel_Current" Margin="10,0,0,0"/>
@@ -27,7 +26,7 @@
 			<local:MaterialButton x:Name="VisionButton" Icon="Video" HorizontalAlignment="Center" Margin="0,0,0,24" MouseUp="VisionButton_Clicked" />
 			<local:MaterialButton x:Name="PlayModeButton" Icon="Repeat" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,197,29" EllipseType="Rectular" MouseUp="PlayMode_Click"/>
 			<local:MaterialButton x:Name="FullScreenButton" Icon="FullScreen" HorizontalAlignment="Right" Margin="0,0,10,29" VerticalAlignment="Bottom" MouseUp="FullScreenButton_Clicked" />
-			<design:PackIcon x:Name="VolumeIcon" Kind="VolumeHigh" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0, 0, 155, 29" Foreground="{DynamicResource Foreground}" />
+			<design:PackIcon x:Name="VolumeIcon" Kind="VolumeHigh" Width="25" Height="25" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0, 0, 155, 29" Foreground="{DynamicResource Foreground}" />
 			<Slider x:Name="VolumeSlider" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,28,50,26" IsMoveToPointEnabled="True"  Template="{DynamicResource FlatSlider}" Foreground="#F444"
                     Width="100" Maximum="99" SmallChange="2" LargeChange="10" AutoToolTipPlacement="TopLeft" ValueChanged="VolumeSlider_ValueChanged"/>
 			<Grid.RenderTransform>
@@ -36,7 +35,7 @@
 		</Grid>
 	</Grid>
 	<UserControl.Resources>
-		<SolidColorBrush x:Key="Foreground" Color="Black" />
+		<SolidColorBrush x:Key="Foreground" Color="White" />
 		<Style TargetType="{x:Type Label}" x:Key="TimeLabel">
 			<Setter Property="Foreground" Value="{DynamicResource Foreground}" />
 			<Setter Property="VerticalAlignment" Value="Bottom"/>
@@ -66,21 +65,22 @@
 		</Storyboard>
 		<TranslateTransform x:Name="Translation1" x:Key="Translation1" Y="0" />
 		<ControlTemplate TargetType="Slider" x:Key="FlatSlider">
-			<Border x:Name="border" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Background="{TemplateBinding Background}" SnapsToDevicePixels="True">
+			<Border x:Name="border" Focusable="False" FocusVisualStyle="{x:Null}" BorderBrush="{TemplateBinding BorderBrush}" 
+					BorderThickness="{TemplateBinding BorderThickness}" Background="{TemplateBinding Background}" SnapsToDevicePixels="True">
 				<Grid>
 					<Track x:Name="PART_Track" Grid.Row="1" MouseDown="Position_Holding">
 						<Track.DecreaseRepeatButton>
-							<RepeatButton Height="9" Background="{TemplateBinding Foreground}" />
+							<RepeatButton Height="9" Background="#FCCC" />
 						</Track.DecreaseRepeatButton>
 						<Track.IncreaseRepeatButton>
-							<RepeatButton Height="5"/>
+							<RepeatButton Height="5" Background="#F333"/>
 						</Track.IncreaseRepeatButton>
 						<Track.Thumb>
 							<Thumb x:Name="Thumb" OverridesDefaultStyle="True" >
 								<Thumb.Template>
 									<ControlTemplate TargetType="{x:Type Thumb}">
 										<Grid>
-											<Ellipse Width="15" x:Name="grip" StrokeThickness="2" Stroke="{TemplateBinding Foreground}" Fill="#01FFFFFF"
+											<Ellipse Width="15" x:Name="grip" StrokeThickness="2" Stroke="#FCCC" Fill="#01FFFFFF"
                                                           Height="3" Margin="-2, 0, 0, 0"/>
 										</Grid>
 										<ControlTemplate.Triggers>

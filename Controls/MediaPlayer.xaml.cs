@@ -304,7 +304,6 @@ namespace Player.Controls
 
 		public void Magnify()
 		{
-			ControlsGrid.VerticalAlignment = VerticalAlignment.Bottom;
 			MagnifyAnimation.From = new Thickness(ActualWidth / 2, ActualHeight, ActualWidth / 2, 0);
 			elementCanvas.Height = Double.NaN;
 			MagnifyBoard.Begin();
@@ -315,7 +314,6 @@ namespace Player.Controls
 		}
 		public void Minify()
 		{
-			ControlsGrid.VerticalAlignment = VerticalAlignment.Top;
 			MinifyAnimation.To = new Thickness(ActualWidth / 2, ActualHeight, ActualWidth / 2, 0);
 			MinifyBoard.Begin();
 			Resources["Foreground"] = Brushes.Black;

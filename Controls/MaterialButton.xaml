@@ -2,11 +2,10 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 			 Width="22" Height="22" xmlns:mat="http://materialdesigninxaml.net/winfx/xaml/themes"
-			 x:Name="P"
-             Loaded="UserControl_Loaded">
+			 x:Name="P" Loaded="UserControl_Loaded">
 	<Grid>
-		<Border x:Name="MainEllipse" BorderThickness="0" Margin="-7" BorderBrush="#F444" CornerRadius="20" Background="#01FFFFFF"/>
-		<Border x:Name="ClickEllipse" BorderBrush="#F444" CornerRadius="100"  />
+		<Border x:Name="MainEllipse" BorderThickness="0" Margin="-7" BorderBrush="{Binding ElementName=P, Path=Foreground}" CornerRadius="20" Background="#1111"/>
+		<Border x:Name="ClickEllipse" BorderBrush="{Binding ElementName=P, Path=Foreground}" CornerRadius="100"  />
 		<mat:PackIcon x:Name="MainIcon" Foreground="{Binding ElementName=P, Path=Foreground}" Background="#01FFFFFF" Kind="Settings"
                             Width="{Binding Width, ElementName=P}" Height="{Binding Height, ElementName=P}" />
 	</Grid>
