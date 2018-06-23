@@ -1,6 +1,7 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using MaterialDesignThemes.Wpf;
 namespace Player.Controls
 {
 	public partial class MaterialButton : UserControl
@@ -9,8 +10,8 @@ namespace Player.Controls
 			new MouseButtonEventArgs(Mouse.PrimaryDevice, 1, MouseButton.Left) { RoutedEvent = MouseUpEvent };
 		public static readonly DependencyProperty EllipseProperty =
 			DependencyProperty.Register(nameof(EllipseType), typeof(EllipseTypes), typeof(MaterialButton), new PropertyMetadata(EllipseTypes.Circular));
-		public static readonly DependencyProperty GlyphProperty =
-			DependencyProperty.Register(nameof(Glyph), typeof(Glyph), typeof(MaterialButton), new PropertyMetadata(Glyph.Settings, new PropertyChangedCallback(OnGlyphChange)));
+		public static readonly DependencyProperty IconProperty =
+			DependencyProperty.Register(nameof(Icon), typeof(PackIconKind), typeof(MaterialButton), new PropertyMetadata(PackIconKind.Settings, new PropertyChangedCallback(OnIconChange)));
 
 		public enum EllipseTypes { Rectular, Circular }
 
@@ -24,13 +25,13 @@ namespace Player.Controls
 				ClickEllipse.CornerRadius = new CornerRadius(value == 0 ? 2 : 100);
 			}
 		}
-		public Glyph Glyph
+		public PackIconKind Icon
 		{
-			get => (Glyph)GetValue(GlyphProperty);
+			get => (PackIconKind)GetValue(IconProperty);
 			set
 			{
-				SetValue(GlyphProperty, value);
-				MainIcon.Glyph = value;
+				SetValue(IconProperty, value);
+				MainIcon.Kind = value;
 			}
 		}
 
@@ -39,10 +40,10 @@ namespace Player.Controls
 		private void UserControl_Loaded(object sender, RoutedEventArgs e)
 		{
 			EllipseType = EllipseType;
-			Glyph = Glyph;
+			Icon = Icon;
 		}
-		private static void OnGlyphChange(DependencyObject d, DependencyPropertyChangedEventArgs e) =>
-			d.SetValue(GlyphProperty, (Glyph)d.GetValue(GlyphProperty));
+		private static void OnIconChange(DependencyObject d, DependencyPropertyChangedEventArgs e) =>
+			d.SetValue(IconProperty, (PackIconKind)d.GetValue(IconProperty));
 
 		public void EmulateClick() => RaiseEvent(DefaultMouseUpArgs);
 	}

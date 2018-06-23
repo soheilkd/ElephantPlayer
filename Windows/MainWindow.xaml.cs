@@ -62,25 +62,6 @@ namespace Player
 			AlbumsView.ItemsSource = Collections[2];
 			TypesView.ItemsSource = Collections[3];
 			DirectoryView.ItemsSource = Collections[4];
-			Settings_AncestorCombo.SelectedIndex = App.Settings.MainKey;
-			Settings_OrinateCheck.IsChecked = App.Settings.VisionOrientation;
-			Settings_LiveLibraryCheck.IsChecked = App.Settings.LiveLibrary;
-			Settings_ExplicitCheck.IsChecked = App.Settings.ExplicitContent;
-			Settings_PlayOnPosCheck.IsChecked = App.Settings.PlayOnPositionChange;
-			Settings_RevalidOnExitCheck.IsChecked = App.Settings.RevalidateOnExit;
-			Settings_TimeoutCombo.SelectedIndex = App.Settings.MouseOverTimeoutIndex;
-			Settings_AncestorCombo.SelectionChanged += (_, __) => App.Settings.MainKey = Settings_AncestorCombo.SelectedIndex;
-			Settings_TimeoutCombo.SelectionChanged += (_, __) => App.Settings.MouseOverTimeoutIndex = Settings_TimeoutCombo.SelectedIndex;
-			Settings_OrinateCheck.Checked += (_, __) => App.Settings.VisionOrientation = true;
-			Settings_OrinateCheck.Unchecked += (_, __) => App.Settings.VisionOrientation = false;
-			Settings_LiveLibraryCheck.Checked += (_, __) => App.Settings.LiveLibrary = true;
-			Settings_LiveLibraryCheck.Unchecked += (_, __) => App.Settings.LiveLibrary = false;
-			Settings_ExplicitCheck.Checked += (_, __) => App.Settings.ExplicitContent = true;
-			Settings_ExplicitCheck.Unchecked += (_, __) => App.Settings.ExplicitContent = false;
-			Settings_PlayOnPosCheck.Checked += (_, __) => App.Settings.PlayOnPositionChange = true;
-			Settings_PlayOnPosCheck.Unchecked += (_, __) => App.Settings.PlayOnPositionChange = false;
-			Settings_RevalidOnExitCheck.Checked += (_, __) => App.Settings.RevalidateOnExit = true;
-			Settings_RevalidOnExitCheck.Unchecked += (_, __) => App.Settings.RevalidateOnExit = false;
 
 			Player.ParentWindow = this;
 			TaskbarItemInfo = Player.Thumb.Info;
@@ -422,10 +403,6 @@ namespace Player
 				}
 			}));
 		}
-		private void Menu_ConvertClick(object sender, RoutedEventArgs e)
-		{
-			For(item => ConverterWindow.Convert(item, media => Manager.Add(media)));
-		}
 		private void Menu_DownloadClick(object sender, RoutedEventArgs e)
 		{
 			For(item => Manager.DownloadManager.Download(item));
@@ -434,25 +411,18 @@ namespace Player
 		{
 			For(item => Process.Start(new ProcessStartInfo(@"C:\Program Files\VideoLAN\VLC\vlc.exe", $"\"{item.Path}\"")));
 		}
-
-		private void AnySettingChanged(object sender, RoutedEventArgs e)
+		
+		private Collection<Media> ActiveCollection
 		{
-			if (!IsLoaded)
-				return;
-			App.Settings.Save();
+			get
+			{
+				switch (TabControl.SelectedIndex)
+				{
+					case 0: return null;
+					default: return Collections[TabControl.SelectedIndex];
+				}
+			}
 		}
-		private async void Settings_RevalidateClick(object sender, RoutedEventArgs e)
-		{
-			sender.As<Button>().Content = "Revalidating... will restart soon";
-			IsEnabled = false;
-			await Task.Delay(2000);
-			Hide();
-			Player.Stop();
-			Manager.Revalidate();
-			Close();
-			Process.Start(App.Path + "Elephant Player.exe");
-		}
-
 		private ListView ActiveView
 		{
 			get

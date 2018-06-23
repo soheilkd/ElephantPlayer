@@ -1,4 +1,4 @@
-﻿using Player.Controls;
+﻿using MaterialDesignThemes.Wpf;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -228,22 +228,22 @@ namespace Player.Taskbar
 		public ThumbButtonInfo PlayThumb = new ThumbButtonInfo()
 		{
 			Description = "Play",
-			ImageSource = Images.GetBitmap(Glyph.Play)
+			ImageSource = Images.GetBitmap(PackIconKind.Play)
 		};
 		public ThumbButtonInfo PauseThumb = new ThumbButtonInfo()
 		{
 			Description = "Pause",
-			ImageSource = Images.GetBitmap(Glyph.Pause)
+			ImageSource = Images.GetBitmap(PackIconKind.Pause)
 		};
 		public ThumbButtonInfo PreviousThumb = new ThumbButtonInfo()
 		{
 			Description = "Previous",
-			ImageSource = Images.GetBitmap(Glyph.Previous)
+			ImageSource = Images.GetBitmap(PackIconKind.SkipPrevious)
 		};
 		public ThumbButtonInfo NextThumb = new ThumbButtonInfo()
 		{
 			Description = "Next",
-			ImageSource = Images.GetBitmap(Glyph.Next)
+			ImageSource = Images.GetBitmap(PackIconKind.SkipNext)
 		};
 
 		private Command PlayHandler = new Command();

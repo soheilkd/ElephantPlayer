@@ -1,15 +1,11 @@
-﻿using Player.Events;
+﻿using MaterialDesignThemes.Wpf;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.IO;
-using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-
 namespace Player
 {
 	[Serializable]
@@ -108,17 +104,16 @@ namespace Player
 
 	public static class Images
 	{
-		public static readonly BitmapImage MusicArt = GetBitmap(Controls.Glyph.Music);
-		public static readonly BitmapImage VideoArt = GetBitmap(Controls.Glyph.Video);
-		public static readonly BitmapImage NetArt = GetBitmap(Controls.Glyph.Cloud);
+		public static readonly BitmapImage MusicArt = GetBitmap(PackIconKind.Music);
+		public static readonly BitmapImage VideoArt = GetBitmap(PackIconKind.Video);
+		public static readonly BitmapImage NetArt = GetBitmap(PackIconKind.Cloud);
 
-		public static BitmapImage GetBitmap(Controls.Glyph glyph, Brush foreground = null, Brush border = null)
+		public static BitmapImage GetBitmap(PackIconKind icon, Brush foreground = null, Brush border = null)
 		{
-			var control = new Controls.MaterialIcon()
+			var control = new PackIcon()
 			{
-				Glyph = glyph,
-				Foreground = foreground ?? Brushes.White,
-				BorderBrush = border ?? Brushes.White
+				Kind = icon,
+				Foreground = foreground ?? Brushes.White
 			};
 			control.UpdateLayout();
 			if (Double.IsNaN(control.Height))

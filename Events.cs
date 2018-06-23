@@ -23,10 +23,4 @@
 			Object = value;
 		}
 	}
-	public class InfoExchangeArgs<T> : System.EventArgs
-	{
-		public T Info { get; set; }
-		public InfoExchangeArgs() { }
-		public InfoExchangeArgs(T info) => Info = info;
-	}
 }

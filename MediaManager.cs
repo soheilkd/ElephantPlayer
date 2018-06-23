@@ -47,8 +47,6 @@ namespace Player
 		public string Album { get => _Album; private set => Set(ref _Album, value); }
 		private string _Directory;
 		public string Directory { get => _Directory; private set => Set(ref _Directory, value); }
-		private int _Rate;
-		public int Rate { get => _Rate; set => Set(ref _Rate, value); }
 		private TimeSpan _Len;
 		public TimeSpan Length { get => _Len; set => Set(ref _Len, value); }
 		private int _PlayCount;
@@ -175,7 +173,7 @@ namespace Player
 		public Media Shallow => MemberwiseClone() as Media;
 	}
 
-	public enum PlayMode { Shuffle, RepeatOne, RepeatAll }
+	public enum PlayMode { Shuffle, RepeatOne, Repeat }
 	public enum QueueType { Unordered, Artist, Album, Type, Dir, Title }
 	public class MediaManager : ObservableCollection<Media>
 	{
@@ -199,6 +197,7 @@ namespace Player
 			}
 		}
 
+		public Collection<Media> Queue;
 		private Random Shuffle = new Random(DateTime.Now.Millisecond);
 		public Media CurrentlyPlaying;
 		public event EventHandler<InfoExchangeArgs> Change;
@@ -246,7 +245,7 @@ namespace Player
 			switch (App.Settings.PlayMode)
 			{
 				case PlayMode.Shuffle: return Play(Shuffle.Next(0, Count));
-				case PlayMode.RepeatAll: return Play(currentlyPlayingIndex == Count - 1 ? 0 : ++currentlyPlayingIndex);
+				case PlayMode.Repeat: return Play(currentlyPlayingIndex == Count - 1 ? 0 : ++currentlyPlayingIndex);
 				case PlayMode.RepeatOne: return Play(currentlyPlayingIndex);
 				default: return null;
 			}
@@ -258,7 +257,7 @@ namespace Player
 			switch (App.Settings.PlayMode)
 			{
 				case PlayMode.Shuffle: return Play(Shuffle.Next(0, Count));
-				case PlayMode.RepeatAll: return Play(currentlyPlayingIndex == 0 ? Count - 1 : --currentlyPlayingIndex);
+				case PlayMode.Repeat: return Play(currentlyPlayingIndex == 0 ? Count - 1 : --currentlyPlayingIndex);
 				case PlayMode.RepeatOne: return Play(currentlyPlayingIndex);
 				default: return null;
 			}

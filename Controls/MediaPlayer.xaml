@@ -3,8 +3,8 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" MouseMove="Element_MouseMove"
-             xmlns:local="clr-namespace:Player.Controls"
-             mc:Ignorable="d" Loaded="UserControl_Loaded" x:Name="ParentControl"
+             xmlns:local="clr-namespace:Player.Controls" xmlns:design="http://materialdesigninxaml.net/winfx/xaml/themes"
+			 mc:Ignorable="d" Loaded="UserControl_Loaded" x:Name="ParentControl"
              d:DesignHeight="300" d:DesignWidth="600">
 	<Grid>
 		<Grid Background="Black" x:Name="elementCanvas" Margin="200,500,200,0">
@@ -18,15 +18,16 @@
                VerticalAlignment="Center" Maximum="1000" Focusable="False" FocusVisualStyle="{x:Null}" Template="{DynamicResource FlatSlider}"
                         Foreground="#FF101010" Margin="50, 62, 50, 0">
 			</Slider>
+			
 			<Label Content="00:00" Style="{DynamicResource TimeLabel}" HorizontalAlignment="Left" x:Name="TimeLabel_Current" Margin="10,0,0,0"/>
 			<Label Content="00:00" Style="{DynamicResource TimeLabel}" HorizontalAlignment="Right" x:Name="TimeLabel_Full" Width="38" Margin="0,0,10,0"/>
-			<local:MaterialButton x:Name="PreviousButton" Glyph="Previous" Margin="87,0,0,25" MouseUp="PreviousButton_Clicked" />
-			<local:MaterialButton x:Name="NextButton" Glyph="Next" Margin="172,0,0,25" MouseUp="NextButton_Clicked" />
-			<local:MaterialButton x:Name="PlayPauseButton" Glyph="Play" MouseUp="PlayPauseButton_Clicked" Margin="127,0,0,24" Height="24" Width="24"/>
-			<local:MaterialButton x:Name="VisionButton" Glyph="Video" HorizontalAlignment="Center" Margin="0,0,0,24" MouseUp="VisionButton_Clicked" />
-			<local:MaterialButton x:Name="PlayModeButton" Glyph="RepeatAll" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,197,29" EllipseType="Rectular" MouseUp="PlayMode_Click"/>
-			<local:MaterialButton x:Name="FullScreenButton" Glyph="FullScreen" HorizontalAlignment="Right" Margin="0,0,10,29" VerticalAlignment="Bottom" MouseUp="FullScreenButton_Clicked" />
-			<local:MaterialIcon x:Name="VolumeIcon" Glyph="Volume3" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0, 0, 155, 29" Foreground="{DynamicResource Foreground}" />
+			<local:MaterialButton x:Name="PreviousButton" Icon="SkipPrevious" Margin="87,0,0,25" MouseUp="PreviousButton_Clicked" />
+			<local:MaterialButton x:Name="NextButton" Icon="SkipNext" Margin="172,0,0,25" MouseUp="NextButton_Clicked" />
+			<local:MaterialButton x:Name="PlayPauseButton" Icon="Play" MouseUp="PlayPauseButton_Clicked" Margin="127,0,0,24" Height="24" Width="24"/>
+			<local:MaterialButton x:Name="VisionButton" Icon="Video" HorizontalAlignment="Center" Margin="0,0,0,24" MouseUp="VisionButton_Clicked" />
+			<local:MaterialButton x:Name="PlayModeButton" Icon="Repeat" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,197,29" EllipseType="Rectular" MouseUp="PlayMode_Click"/>
+			<local:MaterialButton x:Name="FullScreenButton" Icon="FullScreen" HorizontalAlignment="Right" Margin="0,0,10,29" VerticalAlignment="Bottom" MouseUp="FullScreenButton_Clicked" />
+			<design:PackIcon x:Name="VolumeIcon" Kind="VolumeHigh" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0, 0, 155, 29" Foreground="{DynamicResource Foreground}" />
 			<Slider x:Name="VolumeSlider" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,28,50,26" IsMoveToPointEnabled="True"  Template="{DynamicResource FlatSlider}" Foreground="#F444"
                     Width="100" Maximum="99" SmallChange="2" LargeChange="10" AutoToolTipPlacement="TopLeft" ValueChanged="VolumeSlider_ValueChanged"/>
 			<Grid.RenderTransform>

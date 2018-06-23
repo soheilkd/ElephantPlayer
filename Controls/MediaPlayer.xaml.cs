@@ -7,7 +7,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
-
+using MaterialDesignThemes.Wpf;
 namespace Player.Controls
 {
 	public partial class MediaPlayer : UserControl
@@ -33,10 +33,10 @@ namespace Player.Controls
 				element.Volume = value;
 				switch (element.Volume)
 				{
-					case double n when (n <= 0.1): VolumeIcon.Glyph = Glyph.Volume0; break;
-					case double n when (n <= 0.4): VolumeIcon.Glyph = Glyph.Volume1; break;
-					case double n when (n <= 0.8): VolumeIcon.Glyph = Glyph.Volume2; break;
-					default: VolumeIcon.Glyph = Glyph.Volume3; break;
+					case double n when (n <= 0.1): VolumeIcon.Kind = PackIconKind.VolumeOff;  break;
+					case double n when (n <= 0.4): VolumeIcon.Kind = PackIconKind.VolumeLow; break;
+					case double n when (n <= 0.7): VolumeIcon.Kind = PackIconKind.VolumeMedium; break;
+					default: VolumeIcon.Kind = PackIconKind.VolumeHigh; break;
 				}
 				App.Settings.Volume = element.Volume;
 			}
@@ -67,7 +67,7 @@ namespace Player.Controls
 			{
 				isFullScreen = value;
 				ParentWindow.ResizeMode = value ? ResizeMode.NoResize : ResizeMode.CanResize;
-				FullScreenButton.Glyph = value ? Glyph.ExitFullScreen : Glyph.FullScreen;
+				FullScreenButton.Icon = value ? PackIconKind.FullscreenExit : PackIconKind.Fullscreen;
 				VisionButton.Visibility = value ? Visibility.Hidden : Visibility.Visible;
 				ParentWindow.WindowStyle = value ? WindowStyle.None : WindowStyle.SingleBorderWindow;
 				if (value)
@@ -115,7 +115,7 @@ namespace Player.Controls
 			FullOnBoard.Completed += (_, __) => Cursor = Cursors.None;
 			SizeChanged += (_,__) => elementCanvas.Height = Magnified ? Double.NaN : 0;
 			FullOffBoard.CurrentStateInvalidated += (_, __) => Cursor = Cursors.Arrow;
-			PlayModeButton.Glyph = (Glyph)Enum.Parse(typeof(Glyph), App.Settings.PlayMode.ToString());
+			PlayModeButton.Icon = (PackIconKind)Enum.Parse(typeof(PackIconKind), App.Settings.PlayMode.ToString());
 			element.MediaEnded += (_, __) => PlayNext();
 		}
 
@@ -175,18 +175,18 @@ namespace Player.Controls
 		}
 		private async void Position_Holding(object sender, MouseButtonEventArgs e)
 		{
-			var but = PlayPauseButton.Glyph;
+			var but = PlayPauseButton.Icon;
 			element.Pause();
 			while (e.ButtonState == MouseButtonState.Pressed)
 				await Task.Delay(50);
-			if (but == Glyph.Pause)
+			if (but == PackIconKind.Pause)
 				element.Play();
 			else if (App.Settings.PlayOnPositionChange)
 				Play();
 		}
 		private void PlayPauseButton_Clicked(object sender, MouseButtonEventArgs e)
 		{
-			if (PlayPauseButton.Glyph == Glyph.Pause)
+			if (PlayPauseButton.Icon == PackIconKind.Pause)
 				Pause();
 			else
 				Play();
@@ -223,19 +223,19 @@ namespace Player.Controls
 
 		private void PlayMode_Click(object sender, MouseButtonEventArgs e)
 		{
-			switch (PlayModeButton.Glyph)
+			switch (PlayModeButton.Icon)
 			{
-				case Glyph.RepeatAll:
-					PlayModeButton.Glyph = Glyph.RepeatOne;
+				case PackIconKind.Repeat:
+					PlayModeButton.Icon = PackIconKind.RepeatOnce;
 					App.Settings.PlayMode = PlayMode.RepeatOne;
 					break;
-				case Glyph.RepeatOne:
-					PlayModeButton.Glyph = Glyph.Shuffle;
+				case PackIconKind.RepeatOnce:
+					PlayModeButton.Icon = PackIconKind.Shuffle;
 					App.Settings.PlayMode = PlayMode.Shuffle;
 					break;
-				case Glyph.Shuffle:
-					PlayModeButton.Glyph = Glyph.RepeatAll;
-					App.Settings.PlayMode = PlayMode.RepeatAll;
+				case PackIconKind.Shuffle:
+					PlayModeButton.Icon = PackIconKind.Repeat;
+					App.Settings.PlayMode = PlayMode.Repeat;
 					break;
 				default:
 					break;
@@ -267,13 +267,13 @@ namespace Player.Controls
 		{
 			if (emulateClick)
 			{
-				PlayPauseButton.Glyph = Glyph.Play;
+				PlayPauseButton.Icon = PackIconKind.Play;
 				PlayPauseButton.EmulateClick();
 			}
 			else
 			{
 				element.Play();
-				PlayPauseButton.Glyph = Glyph.Pause;
+				PlayPauseButton.Icon = PackIconKind.Pause;
 				Thumb.SetPlayingState(true);
 			}
 		}
@@ -281,13 +281,13 @@ namespace Player.Controls
 		{
 			if (emulateClick)
 			{
-				PlayPauseButton.Glyph = Glyph.Pause;
+				PlayPauseButton.Icon = PackIconKind.Pause;
 				PlayPauseButton.EmulateClick();
 			}
 			else
 			{
 				element.Pause();
-				PlayPauseButton.Glyph = Glyph.Play;
+				PlayPauseButton.Icon = PackIconKind.Play;
 				Thumb.SetPlayingState(false);
 			}
 		}
