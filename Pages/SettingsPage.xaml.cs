@@ -8,9 +8,9 @@ namespace Player
 	/// <summary>
 	/// Interaction logic for SettingsPage.xaml
 	/// </summary>
-	public partial class SettingsPage : Page
+	public partial class SettingsPanel : StackPanel
 	{
-		public SettingsPage()
+		public SettingsPanel()
 		{
 			InitializeComponent();
 

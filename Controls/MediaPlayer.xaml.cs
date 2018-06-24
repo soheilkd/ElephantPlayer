@@ -308,7 +308,6 @@ namespace Player.Controls
 			elementCanvas.Height = Double.NaN;
 			MagnifyBoard.Begin();
 			MouseMoveTimer.Start();
-			Resources["Foreground"] = Brushes.White;
 			Invoke(InfoType.Magnifiement, true);
 			Magnified = true;
 		}
@@ -316,7 +315,6 @@ namespace Player.Controls
 		{
 			MinifyAnimation.To = new Thickness(ActualWidth / 2, ActualHeight, ActualWidth / 2, 0);
 			MinifyBoard.Begin();
-			Resources["Foreground"] = Brushes.Black;
 			Invoke(InfoType.Magnifiement, false);
 			Magnified = false;
 			IsTopMost = false;

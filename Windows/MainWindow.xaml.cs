@@ -22,7 +22,7 @@ namespace Player
 	public partial class MainWindow : Window
 	{
 		private MediaManager Manager = new MediaManager();
-		private ObservableCollection<Media>[] Collections = new ObservableCollection<Media>[5];
+		private ObservableCollection<Media>[] Collections = new ObservableCollection<Media>[3];
 		private Timer PlayCountTimer = new Timer(100000) { AutoReset = false };
 		private Gma.System.MouseKeyHook.IKeyboardMouseEvents KeyboardEvents = Gma.System.MouseKeyHook.Hook.GlobalEvents();
 		private bool ControlsNotNeededOnVisionIsVisible
@@ -55,14 +55,9 @@ namespace Player
 			Collections[0] = new ObservableCollection<Media>();
 			Collections[1] = LibraryOperator.LoadedCollection.ByArtist;
 			Collections[2] = LibraryOperator.LoadedCollection.ByAlbum;
-			Collections[3] = LibraryOperator.LoadedCollection.ByType;
-			Collections[4] = LibraryOperator.LoadedCollection.ByDirectory;
-			TitlesView.ItemsSource = Manager;
 			ArtistsView.ItemsSource = Collections[1];
 			AlbumsView.ItemsSource = Collections[2];
-			TypesView.ItemsSource = Collections[3];
-			DirectoryView.ItemsSource = Collections[4];
-
+			TitlesView.ItemsSource = Manager;
 			Player.ParentWindow = this;
 			TaskbarItemInfo = Player.Thumb.Info;
 
@@ -73,6 +68,7 @@ namespace Player
 			TitlesView.MouseDoubleClick += DMouseDoubleClick;
 			AlbumsView.MouseDoubleClick += DMouseDoubleClick;
 			Manager.CollectionChanged += Manager_CollectionChanged;
+			TabControl.SelectedIndex = 1;
 		}
 
 		private void Manager_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
@@ -104,8 +100,6 @@ namespace Player
 		{
 			ArtistsView.ItemsSource = Collections[1];
 			AlbumsView.ItemsSource = Collections[2];
-			TypesView.ItemsSource = Collections[3];
-			DirectoryView.ItemsSource = Collections[4];
 			Views[0] = (CollectionView)CollectionViewSource.GetDefaultView(ArtistsView.ItemsSource);
 			Descriptions[0] = new PropertyGroupDescription("Artist");
 			Views[0].GroupDescriptions.Add(Descriptions[0]);
@@ -113,14 +107,6 @@ namespace Player
 			Views[1] = (CollectionView)CollectionViewSource.GetDefaultView(AlbumsView.ItemsSource);
 			Descriptions[1] = new PropertyGroupDescription("Album");
 			Views[1].GroupDescriptions.Add(Descriptions[1]);
-
-			Views[2] = (CollectionView)CollectionViewSource.GetDefaultView(TypesView.ItemsSource);
-			Descriptions[2] = new PropertyGroupDescription("Type.ToString()");
-			Views[2].GroupDescriptions.Add(Descriptions[2]);
-
-			Views[3] = (CollectionView)CollectionViewSource.GetDefaultView(DirectoryView.ItemsSource);
-			Descriptions[3] = new PropertyGroupDescription("Directory");
-			Views[3].GroupDescriptions.Add(Descriptions[3]);
 		}
 
 		private void DMouseDoubleClick(object sender, MouseButtonEventArgs e)
@@ -157,7 +143,6 @@ namespace Player
 			App.Settings.Save();
 			Manager.CloseSeason();
 			Application.Current.Shutdown();
-
 		}
 		private void Window_KeyUp(object sender, KeyEventArgs e)
 		{
@@ -418,8 +403,8 @@ namespace Player
 			{
 				switch (TabControl.SelectedIndex)
 				{
-					case 0: return null;
-					default: return Collections[TabControl.SelectedIndex];
+					case 0: case 1: return null;
+					default: return Collections[TabControl.SelectedIndex - 1];
 				}
 			}
 		}
@@ -429,11 +414,9 @@ namespace Player
 			{
 				switch (TabControl.SelectedIndex)
 				{
-					case 0: return TitlesView;
-					case 1: return ArtistsView;
-					case 2: return AlbumsView;
-					case 3: return TypesView;
-					case 4: return DirectoryView;
+					case 1: return TitlesView;
+					case 2: return ArtistsView;
+					case 3: return AlbumsView;
 					default: return null;
 				}
 			}

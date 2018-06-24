@@ -46,6 +46,9 @@ namespace Player
 		public TimeSpan Length { get => _Len; set => Set(ref _Len, value); }
 		private int _PlayCount;
 		public int PlayCount { get => _PlayCount; set => Set(ref _PlayCount, value); }
+		[NonSerialized]
+		private bool _IsPlaying;
+		public bool IsPlaying { get => _IsPlaying; set => Set(ref _IsPlaying, value); }
 		public DateTime AdditionDate { get; set; }
 		private Uri _Url;
 		public Uri Url
@@ -68,7 +71,6 @@ namespace Player
 		public string Path => Url.IsFile ? Url.LocalPath : Url.AbsoluteUri;
 		[NonSerialized] public string Lyrics = "";
 		[NonSerialized] public bool IsLoaded = false;
-		[NonSerialized] public bool IsPlaying = false;
 		[NonSerialized] public System.Windows.Media.Imaging.BitmapSource Artwork;
 		public bool IsVideo => Type == MediaType.Video;
 		public bool Exists
@@ -237,6 +239,8 @@ namespace Player
 		}
 		public Media Play(Media media)
 		{
+			this.For(each => each.IsPlaying = false);
+			media.IsPlaying = true;
 			CurrentlyPlaying = media;
 			return media;
 		}
@@ -427,9 +431,6 @@ namespace Player
 			collection.Unordered = new ObservableCollection<Media>(medias);
 			collection.ByArtist = new ObservableCollection<Media>(medias.OrderBy(each => each.Artist));
 			collection.ByAlbum = new ObservableCollection<Media>(medias.OrderBy(each => each.Album));
-			collection.ByTitle = new ObservableCollection<Media>(medias.OrderBy(each => each.Title));
-			collection.ByDirectory = new ObservableCollection<Media>(medias.OrderBy(each => each.Directory));
-			collection.ByType = new ObservableCollection<Media>(medias.OrderBy(each => each.Type));
 			using (FileStream stream = new FileStream(LibraryPath, FileMode.Create))
 				(new BinaryFormatter()).Serialize(stream, collection);
 		}
@@ -439,11 +440,8 @@ namespace Player
 				return new SerializableMediaCollection()
 				{
 					Unordered = new ObservableCollection<Media>(),
-					ByType = new ObservableCollection<Media>(),
-					ByDirectory = new ObservableCollection<Media>(),
 					ByAlbum = new ObservableCollection<Media>(),
 					ByArtist = new ObservableCollection<Media>(),
-					ByTitle = new ObservableCollection<Media>()
 				};
 			using (FileStream stream = new FileStream(LibraryPath, FileMode.Open))
 				LoadedCollection = (SerializableMediaCollection)(new BinaryFormatter()).Deserialize(stream);
@@ -456,8 +454,5 @@ namespace Player
 		public ObservableCollection<Media> Unordered;
 		public ObservableCollection<Media> ByArtist;
 		public ObservableCollection<Media> ByAlbum;
-		public ObservableCollection<Media> ByTitle;
-		public ObservableCollection<Media> ByDirectory;
-		public ObservableCollection<Media> ByType;
 	}
 }

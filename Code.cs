@@ -67,12 +67,6 @@ namespace Player
 
 	public static class Extensions
 	{
-		/// <summary>
-		/// Casts object to specified type T
-		/// </summary>
-		/// <typeparam name="T">Destinition</typeparam>
-		/// <param name="obj">Source</param>
-		/// <returns></returns>
 		public static T To<T>(this object obj) where T : struct => (T)obj;
 		public static T As<T>(this object obj) where T : class => obj as T;
 		public static string ToNewString(this TimeSpan time) => time.ToString("c").Substring(3, 5);
@@ -108,18 +102,18 @@ namespace Player
 		public static readonly BitmapImage VideoArt = GetBitmap(PackIconKind.Video);
 		public static readonly BitmapImage NetArt = GetBitmap(PackIconKind.Cloud);
 
-		public static BitmapImage GetBitmap(PackIconKind icon, Brush foreground = null, Brush border = null)
+		public static BitmapImage GetBitmap(PackIconKind icon, Brush foreground = null)
 		{
-			var control = new PackIcon()
+			var control = new Controls.MaterialButton()
 			{
-				Kind = icon,
+				Icon = icon,
 				Foreground = foreground ?? Brushes.White
 			};
 			control.UpdateLayout();
 			if (Double.IsNaN(control.Height))
-				control.Height = 50d;
+				control.Height = 50;
 			if (Double.IsNaN(control.Width))
-				control.Width = 50d;
+				control.Width = 50;
 			PngBitmapEncoder encoder = new PngBitmapEncoder();
 			encoder.Frames.Clear();
 			Transform transform = control.LayoutTransform;

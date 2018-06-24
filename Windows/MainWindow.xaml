@@ -6,10 +6,19 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" KeyUp="Window_KeyUp"
     xmlns:player="clr-namespace:Player.Controls" xmlns:sys="clr-namespace:System;assembly=mscorlib"
     x:Name="window" xmlns:design="http://materialdesigninxaml.net/winfx/xaml/themes"
-    mc:Ignorable="d" Loaded="Window_Loaded" Closing="Window_Closing" Drop="Window_Drop" AllowDrop="True"
+	xmlns:player1="clr-namespace:Player"
+	mc:Ignorable="d" Loaded="Window_Loaded" Closing="Window_Closing" Drop="Window_Drop" AllowDrop="True"
     Title="Elephant Player" Height="544" Width="651" >
 	<Grid Background="{DynamicResource KeyOfBackground}" x:Name="ContentGrid">
 		<TabControl x:Name="TabControl" Margin="0,0,0,85" BorderThickness="0" Padding="0">
+			<TabItem>
+				<TabItem.Header>
+					<ContentControl Content="Now Playing" />
+				</TabItem.Header>
+				<Grid Background="#F333">
+
+				</Grid>
+			</TabItem>
 			<TabItem>
 				<TabItem.Header>
 					<ContentControl Content="Titles"/>
@@ -17,25 +26,26 @@
 				<ListView x:Name="TitlesView" ContextMenu="{DynamicResource ContextMenu1}">
 					<ListView.View>
 						<GridView>
+							<GridViewColumn Header="" Width="30" CellTemplate="{DynamicResource PlayIndicator}" />
 							<GridViewColumn Header="Title" Width="300" CellTemplate="{DynamicResource TitleCell}"/>
 							<GridViewColumn Header="Artist" Width="100" CellTemplate="{DynamicResource ArtistCell}" />
 							<GridViewColumn Header="Album" Width="100" CellTemplate="{DynamicResource AlbumCell}" />
 							<GridViewColumn Header="Plays" Width="50" CellTemplate="{DynamicResource PlayCell}"/>
-							<GridViewColumn Header="Date Added" Width="150" CellTemplate="{DynamicResource DateCell}"/>
 						</GridView>
 					</ListView.View>
 				</ListView>
 			</TabItem>
-			<TabItem >
+			<TabItem>
 				<TabItem.Header>
 					<ContentControl Content="Artists"/>
 				</TabItem.Header>
+
 				<ListView Name="ArtistsView" ContextMenu="{DynamicResource ContextMenu1}">
 					<ListView.View>
 						<GridView>
-							<GridViewColumn Header="Title" Width="120" DisplayMemberBinding="{Binding Title}" />
-							<GridViewColumn Header="Album" Width="50" DisplayMemberBinding="{Binding Album}" />
-							<GridViewColumn Header="Plays" Width="50" DisplayMemberBinding="{Binding PlayCount}" />
+							<GridViewColumn Header="Title" Width="120" CellTemplate="{DynamicResource TitleCell}" />
+							<GridViewColumn Header="Album" Width="50" CellTemplate="{DynamicResource AlbumCell}" />
+							<GridViewColumn Header="Plays" Width="50" CellTemplate="{DynamicResource PlayCell}" />
 						</GridView>
 					</ListView.View>
 					<ListView.GroupStyle>
@@ -71,9 +81,9 @@
 				<ListView Name="AlbumsView" ContextMenu="{DynamicResource ContextMenu1}">
 					<ListView.View>
 						<GridView>
-							<GridViewColumn Header="Artist" Width="50" DisplayMemberBinding="{Binding Artist}" />
-							<GridViewColumn Header="Title" Width="120" DisplayMemberBinding="{Binding Title}" />
-							<GridViewColumn Header="Plays" Width="50" DisplayMemberBinding="{Binding PlayCount}" />
+							<GridViewColumn Header="Artist" Width="50" CellTemplate="{DynamicResource ArtistCell}" />
+							<GridViewColumn Header="Title" Width="120" CellTemplate="{DynamicResource TitleCell}" />
+							<GridViewColumn Header="Plays" Width="50"  CellTemplate="{DynamicResource PlayCell}" />
 						</GridView>
 					</ListView.View>
 					<ListView.GroupStyle>
@@ -104,87 +114,13 @@
 			</TabItem>
 			<TabItem>
 				<TabItem.Header>
-					<ContentControl Content="Types" />
+					<ContentControl Content="Settings" />
 				</TabItem.Header>
-				<ListView x:Name="TypesView" ContextMenu="{DynamicResource ContextMenu1}">
-					<ListView.View>
-						<GridView>
-							<GridViewColumn Header="Title" Width="300" CellTemplate="{DynamicResource TitleCell}"/>
-							<GridViewColumn Header="Artist" Width="100" CellTemplate="{DynamicResource ArtistCell}" />
-							<GridViewColumn Header="Album" Width="100" CellTemplate="{DynamicResource AlbumCell}" />
-							<GridViewColumn Header="Plays" Width="50" CellTemplate="{DynamicResource PlayCell}"/>
-							<GridViewColumn Header="Date Added" Width="150" CellTemplate="{DynamicResource DateCell}"/>
-						</GridView>
-					</ListView.View>
-					<ListView.GroupStyle>
-						<GroupStyle>
-							<GroupStyle.ContainerStyle>
-								<Style TargetType="{x:Type GroupItem}">
-									<Setter Property="Template">
-										<Setter.Value>
-											<ControlTemplate>
-												<Expander IsExpanded="False">
-													<Expander.Header>
-														<StackPanel Orientation="Horizontal">
-															<TextBlock Text="{Binding Name}" FontWeight="SemiBold" Foreground="White" FontSize="16" VerticalAlignment="Bottom" />
-															<TextBlock Text="{Binding ItemCount}" FontSize="18" Foreground="White" FontWeight="Light" FontStyle="Italic" Margin="10,0,0,0" VerticalAlignment="Bottom" />
-															<TextBlock Text=" items" FontSize="16" Foreground="White" FontStyle="Italic" VerticalAlignment="Bottom" />
-														</StackPanel>
-													</Expander.Header>
-													<ItemsPresenter />
-												</Expander>
-											</ControlTemplate>
-										</Setter.Value>
-									</Setter>
-								</Style>
-							</GroupStyle.ContainerStyle>
-						</GroupStyle>
-					</ListView.GroupStyle>
-				</ListView>
-			</TabItem>
-			<TabItem>
-				<TabItem.Header>
-					<ContentControl Content="Directories" />
-				</TabItem.Header>
-				<ListView x:Name="DirectoryView" ContextMenu="{DynamicResource ContextMenu1}">
-					<ListView.View>
-						<GridView>
-							<GridViewColumn Header="Title" Width="300" CellTemplate="{DynamicResource TitleCell}"/>
-							<GridViewColumn Header="Artist" Width="100" CellTemplate="{DynamicResource ArtistCell}" />
-							<GridViewColumn Header="Album" Width="100" CellTemplate="{DynamicResource AlbumCell}" />
-							<GridViewColumn Header="Plays" Width="50" CellTemplate="{DynamicResource PlayCell}"/>
-							<GridViewColumn Header="Date Added" Width="150" CellTemplate="{DynamicResource DateCell}"/>
-						</GridView>
-					</ListView.View>
-					<ListView.GroupStyle>
-						<GroupStyle>
-							<GroupStyle.ContainerStyle>
-								<Style TargetType="{x:Type GroupItem}">
-									<Setter Property="Template">
-										<Setter.Value>
-											<ControlTemplate>
-												<Expander IsExpanded="False">
-													<Expander.Header>
-														<StackPanel Orientation="Horizontal">
-															<TextBlock Text="{Binding Name}" FontWeight="SemiBold" Foreground="White" FontSize="16" VerticalAlignment="Bottom" />
-															<TextBlock Text="{Binding ItemCount}" FontSize="18" Foreground="White" FontWeight="Light" FontStyle="Italic" Margin="10,0,0,0" VerticalAlignment="Bottom" />
-															<TextBlock Text=" items" FontSize="16" Foreground="White" FontStyle="Italic" VerticalAlignment="Bottom" />
-														</StackPanel>
-													</Expander.Header>
-													<ItemsPresenter />
-												</Expander>
-											</ControlTemplate>
-										</Setter.Value>
-									</Setter>
-								</Style>
-							</GroupStyle.ContainerStyle>
-						</GroupStyle>
-					</ListView.GroupStyle>
-				</ListView>
+				<player1:SettingsPanel />
 			</TabItem>
 		</TabControl>
 		<player:MediaPlayer x:Name="Player" />
-		<Label x:Name="SearchLabel" Content="{Binding Text, ElementName=SearchBox}" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,0,0,0"/>
+		<Label x:Name="SearchLabel" Content="{Binding Text, ElementName=SearchBox}" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,0,0"/>
 		<player:MaterialButton x:Name="SearchButton" HorizontalAlignment="Right" VerticalAlignment="Bottom" Icon="DatabaseSearch" 
                          Foreground="White" MouseUp="SearchIcon_Click" Margin="0,0,10,35" EllipseType="Rectular" Width="20" Height="20"/>
 		<Popup x:Name="SearchPopup" PlacementTarget="{Binding ElementName=SearchButton}" StaysOpen="False" 
@@ -192,7 +128,7 @@
 			<TextBox HorizontalAlignment="Right" VerticalAlignment="Top" Width="140" Height="20" x:Name="SearchBox" TextChanged="SearchBox_TextChanged" />
 		</Popup>
 
-		<Image x:Name="MiniArtworkImage" Height="55" Width="55" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="6,0,0,30">
+		<Image x:Name="MiniArtworkImage" Height="55" Width="55" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="6,0,0,28">
 			<Image.Triggers>
 				<EventTrigger RoutedEvent="UIElement.MouseDown">
 					<BeginStoryboard>
@@ -216,25 +152,48 @@
 	</Grid>
 	<Window.Resources>
 		<DataTemplate x:Key="TitleCell">
-			<TextBlock Text="{Binding Title}" FontSize="16" FontWeight="Normal" Foreground="White"/>
+			<TextBlock x:Name="block" Text="{Binding Title}" FontSize="16" FontWeight="Normal" Foreground="White"/>
+			<DataTemplate.Triggers>
+				<DataTrigger Binding="{Binding IsPlaying}" Value="True">
+					<Setter TargetName="block" Property="Foreground" Value="#FF49d4ff" />
+				</DataTrigger>
+			</DataTemplate.Triggers>
 		</DataTemplate>
 		<DataTemplate x:Key="ArtistCell">
-			<TextBlock Text="{Binding Artist}" FontSize="16" FontWeight="Light" Foreground="White" />
+			<TextBlock x:Name="block" Text="{Binding Artist}" FontSize="16" FontWeight="Light" Foreground="White" />
+			<DataTemplate.Triggers>
+				<DataTrigger Binding="{Binding IsPlaying}" Value="True">
+					<Setter TargetName="block" Property="Foreground" Value="#FF49d4ff" />
+				</DataTrigger>
+			</DataTemplate.Triggers>
 		</DataTemplate>
 		<DataTemplate x:Key="AlbumCell">
-			<TextBlock Text="{Binding Album}"  FontSize="16" FontWeight="Light" Foreground="White" />
+			<TextBlock x:Name="block" Text="{Binding Album}"  FontSize="16" FontWeight="Light" Foreground="White" />
+			<DataTemplate.Triggers>
+				<DataTrigger Binding="{Binding IsPlaying}" Value="True">
+					<Setter TargetName="block" Property="Foreground" Value="#FF49d4ff" />
+				</DataTrigger>
+			</DataTemplate.Triggers>
+		</DataTemplate>
+		<DataTemplate x:Key="PlayIndicator">
+			<design:PackIcon x:Name="kind" Kind="SetNone" Foreground="White" />
+			<DataTemplate.Triggers>
+				<DataTrigger Binding="{Binding IsPlaying}" Value="True">
+					<Setter TargetName="kind" Property="Kind" Value="CodeEqual" />
+					<Setter TargetName="kind" Property="Foreground" Value="#FF49d4ff" />
+				</DataTrigger>
+			</DataTemplate.Triggers>
 		</DataTemplate>
 		<DataTemplate x:Key="PlayCell">
-			<TextBlock Text="{Binding PlayCount}" FontSize="16" FontWeight="Light" Foreground="White" />
+			<TextBlock x:Name="block" Text="{Binding PlayCount}" FontSize="16" FontWeight="Light" Foreground="White" />
+			<DataTemplate.Triggers>
+				<DataTrigger Binding="{Binding IsPlaying}" Value="True">
+					<Setter TargetName="block" Property="Foreground" Value="#FF49d4ff" />
+				</DataTrigger>
+			</DataTemplate.Triggers>
 		</DataTemplate>
 		<DataTemplate x:Key="NameCell">
 			<TextBlock Text="{Binding Name}"  FontSize="16" FontWeight="Light"  Foreground="White"/>
-		</DataTemplate>
-		<DataTemplate x:Key="PathCell">
-			<TextBlock Text="{Binding Path}"  FontSize="16" FontWeight="Light"  Foreground="White"/>
-		</DataTemplate>
-		<DataTemplate x:Key="DateCell">
-			<TextBlock Text="{Binding AdditionDate}"  FontSize="16" FontWeight="Light"  Foreground="White"/>
 		</DataTemplate>
 		<sys:String x:Key="LastPath" >D:\\</sys:String>
 		<ContextMenu x:Key="ContextMenu1">
@@ -281,13 +240,13 @@
 									<VisualState x:Name="Selected">
 										<Storyboard>
 											<ThicknessAnimationUsingKeyFrames Storyboard.TargetProperty="(Border.BorderThickness)" Storyboard.TargetName="Border">
-												<EasingThicknessKeyFrame KeyTime="0" Value="0.7,0,0,3" />
+												<EasingThicknessKeyFrame KeyTime="0" Value="0,0,0,3" />
 											</ThicknessAnimationUsingKeyFrames>
 										</Storyboard>
 									</VisualState>
 								</VisualStateGroup>
 							</VisualStateManager.VisualStateGroups>
-							<Border x:Name="Border" Background="Transparent"  CornerRadius="3" BorderBrush="LightBlue">
+							<Border x:Name="Border" Background="Transparent"  CornerRadius="0" BorderBrush="LightBlue">
 								<ContentPresenter x:Name="ContentSite" ContentSource="Header" Margin="20,5,20,5" RecognizesAccessKey="True" />
 							</Border>
 						</Grid>
@@ -306,7 +265,20 @@
 			<Setter Property="Background" Value="Transparent" />
 			<Setter Property="Foreground" Value="White" />
 			<Setter Property="BorderThickness" Value="0" />
-			<Setter Property="BorderBrush" Value="#1000" />
+			<Setter Property="BorderBrush" Value="#0000" />
+		</Style>
+		<Style TargetType="ListViewItem">
+			<Style.Triggers>
+				<Trigger Property="IsMouseOver" Value="True">
+					<Setter Property="Background" Value="#5555" />
+				</Trigger>
+				<Trigger Property="IsSelected" Value="True">
+					<Setter Property="Background" Value="#5444" />
+				</Trigger>
+				<DataTrigger Binding="{Binding IsPlaying}" Value="True">
+					<Setter Property="Background" Value="#F555" />
+				</DataTrigger>
+			</Style.Triggers>
 		</Style>
 	</Window.Resources>
 </Window>

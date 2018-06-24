@@ -3,7 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" MouseMove="Element_MouseMove"
-             xmlns:local="clr-namespace:Player.Controls" xmlns:design="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:local="clr-namespace:Player.Controls" xmlns:design="http://materialdesigninxaml.net/winfx/xaml/themes" 
 			 mc:Ignorable="d" Loaded="UserControl_Loaded" x:Name="ParentControl"
              d:DesignHeight="300" d:DesignWidth="600">
 	<Grid>
@@ -66,7 +66,7 @@
 		<TranslateTransform x:Name="Translation1" x:Key="Translation1" Y="0" />
 		<ControlTemplate TargetType="Slider" x:Key="FlatSlider">
 			<Border x:Name="border" Focusable="False" FocusVisualStyle="{x:Null}" BorderBrush="{TemplateBinding BorderBrush}" 
-					BorderThickness="{TemplateBinding BorderThickness}" Background="{TemplateBinding Background}" SnapsToDevicePixels="True">
+					BorderThickness="{TemplateBinding BorderThickness}" Background="{TemplateBinding Background}">
 				<Grid>
 					<Track x:Name="PART_Track" Grid.Row="1" MouseDown="Position_Holding">
 						<Track.DecreaseRepeatButton>
@@ -80,8 +80,7 @@
 								<Thumb.Template>
 									<ControlTemplate TargetType="{x:Type Thumb}">
 										<Grid>
-											<Ellipse Width="15" x:Name="grip" StrokeThickness="2" Stroke="#FCCC" Fill="#01FFFFFF"
-                                                          Height="3" Margin="-2, 0, 0, 0"/>
+											<Ellipse Width="20" x:Name="grip" StrokeThickness="5" Stroke="#FCCC" Fill="#01FFFFFF" Height="4" Margin="-4, 0, 0, 0"/>
 										</Grid>
 										<ControlTemplate.Triggers>
 											<Trigger Property="IsMouseOver" Value="true">
@@ -93,16 +92,14 @@
 											<EventTrigger RoutedEvent="UIElement.MouseEnter">
 												<BeginStoryboard>
 													<Storyboard SpeedRatio="4" AccelerationRatio="0.2" DecelerationRatio="0.8" Storyboard.TargetName="grip">
-														<DoubleAnimation From="15" To="20" Storyboard.TargetProperty="Width"/>
-														<DoubleAnimation From="3" To="20" Storyboard.TargetProperty="Height"/>
+														<DoubleAnimation From="4" To="20" Storyboard.TargetProperty="Height"/>
 													</Storyboard>
 												</BeginStoryboard>
 											</EventTrigger>
 											<EventTrigger RoutedEvent="UIElement.MouseLeave">
 												<BeginStoryboard>
 													<Storyboard SpeedRatio="3" AccelerationRatio="0.2" DecelerationRatio="0.8" Storyboard.TargetName="grip">
-														<DoubleAnimation From="20" To="15" Storyboard.TargetProperty="Width"/>
-														<DoubleAnimation From="20" To="3" Storyboard.TargetProperty="Height"/>
+														<DoubleAnimation From="20" To="4" Storyboard.TargetProperty="Height"/>
 													</Storyboard>
 												</BeginStoryboard>
 											</EventTrigger>
@@ -111,6 +108,8 @@
 								</Thumb.Template>
 							</Thumb>
 						</Track.Thumb>
+						<Track.Triggers>
+						</Track.Triggers>
 					</Track>
 				</Grid>
 			</Border>
