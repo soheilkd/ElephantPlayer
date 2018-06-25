@@ -15,6 +15,7 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
 using Forms = System.Windows.Forms;
 
 namespace Player
@@ -35,13 +36,14 @@ namespace Player
 				SearchLabel.Visibility = TabControl.Visibility;
 			}
 		}
+		private bool WasMaximized;
+		private Storyboard MinimalOnBoard, MinimalOffBoard;
 
 		public MainWindow()
 		{
 			InitializeComponent();
 			Initialize();
 			Width = App.Settings.LastSize.Width;
-			Height = App.Settings.LastSize.Height;
 			Left = App.Settings.LastLoc.X;
 			Top = App.Settings.LastLoc.Y;
 		}
@@ -52,15 +54,20 @@ namespace Player
 			App.NewInstanceRequested += (_, e) => e.Args.ToList().ForEach(each => Manager.Add(each, true));
 			KeyboardEvents.KeyDown += Keyboard_KeyDown;
 			Manager.Change += Manager_Change;
+			Player.SomethingHappened += Player_EventHappened;
+			Player.UpdateLayout();
 			Collections[0] = new ObservableCollection<Media>();
 			Collections[1] = LibraryOperator.LoadedCollection.ByArtist;
 			Collections[2] = LibraryOperator.LoadedCollection.ByAlbum;
+			MinimalOnBoard = Resources["MinimalOnBoard"] as Storyboard;
+			MinimalOffBoard = Resources["MinimalOffBoard"] as Storyboard;
 			ArtistsView.ItemsSource = Collections[1];
 			AlbumsView.ItemsSource = Collections[2];
 			TitlesView.ItemsSource = Manager;
 			Player.ParentWindow = this;
 			TaskbarItemInfo = Player.Thumb.Info;
-
+			MinimalOnBoard.CurrentStateInvalidated += (_, __) => TabControl.Height = Height >= 131 ? Height - 80 : TabControl.Height;
+			MinimalOffBoard.Completed += (_, __) => TabControl.Height = Double.NaN;
 			Resources["LastPath"] = App.Settings.LastPath;
 
 			RebindViews();
@@ -117,9 +124,26 @@ namespace Player
 
 		private void Window_Loaded(object sender, RoutedEventArgs e)
 		{
+			Height = 1;
+			Resources["MinimalDoubleSys"] = App.Settings.LastSize.Height;
+			if (App.Settings.RememberMinimal && App.Settings.WasMinimalic)
+			{
+				Player.MinimalViewButton.EmulateClick();
+				Resources["MinimalDoubleSys"] = App.Settings.LastSize.Height;
+			}
+			else
+				MinimalOffBoard.Begin();
+			SemiLoad();
+		}
+
+		private async void SemiLoad()
+		{
+			while (!Player.IsFullyLoaded)
+			{
+				await Task.Delay(10);
+			}
 			var args = Environment.GetCommandLineArgs().Where(name => !name.EndsWith(".exe")).ToArray();
 			args.For(each => Manager.Add(each, true));
-			Player.SomethingHappened += Player_EventHappened;
 		}
 
 		private void Player_EventHappened(object sender, InfoExchangeArgs e)
@@ -130,15 +154,30 @@ namespace Player
 				case InfoType.PrevRequest: Play(Manager.Previous()); break;
 				case InfoType.LengthFound: Manager.CurrentlyPlaying.Length = (TimeSpan)e.Object; break;
 				case InfoType.Magnifiement: ControlsNotNeededOnVisionIsVisible = !(bool)e.Object; break;
+				case InfoType.CollapseRequest:
+					WasMaximized = WindowState == WindowState.Maximized;
+					WindowState = WindowState.Normal;
+					Resources["MinimalDoubleSys"] = ActualHeight;
+					ResizeMode = ResizeMode.CanMinimize;
+					MinimalOnBoard.Begin();
+					WindowStyle = WindowStyle.ToolWindow;
+					break;
+				case InfoType.ExpandRequest:
+					if (WasMaximized)
+						WindowState = WindowState.Maximized;
+					ResizeMode = ResizeMode.CanResize;
+					WindowStyle = WindowStyle.ThreeDBorderWindow;
+					MinimalOffBoard.Begin();
+					break;
 				default: break;
 			}
 		}
 
 		private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
 		{
-
-			App.Settings.LastSize = new Size(Width, Height);
+			App.Settings.LastSize = new Size(Width, Height <= 130 ? (double)Resources["MinimalDoubleSys"]: Height);
 			App.Settings.LastLoc = new Point(Left, Top);
+			App.Settings.WasMinimalic = Height <= 130;
 			App.Settings.Volume = Player.Volume;
 			App.Settings.Save();
 			Manager.CloseSeason();
@@ -159,8 +198,7 @@ namespace Player
 		{
 			((string[])e.Data.GetData(DataFormats.FileDrop)).For(each => Manager.Add(each));
 		}
-
-
+		
 		private async void Manager_Change(object sender, InfoExchangeArgs e)
 		{
 			switch (e.Type)

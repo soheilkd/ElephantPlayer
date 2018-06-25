@@ -8,6 +8,8 @@
 		NextRequest, PrevRequest, LengthFound, Magnifiement,
 		//Media Manager
 		MediaRequest, TagEdit, CollectionUpdate,
+		//UI
+		CollapseRequest, ExpandRequest
 	}
 
 	public class InfoExchangeArgs : System.EventArgs

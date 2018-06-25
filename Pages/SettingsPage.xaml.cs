@@ -33,6 +33,8 @@ namespace Player
 			PlayOnPosCheck.Unchecked += (_, __) => App.Settings.PlayOnPositionChange = false;
 			RevalidOnExitCheck.Checked += (_, __) => App.Settings.RevalidateOnExit = true;
 			RevalidOnExitCheck.Unchecked += (_, __) => App.Settings.RevalidateOnExit = false;
+			RememberMinimalCheck.Checked += (_, __) => App.Settings.RememberMinimal = true;
+			RememberMinimalCheck.Unchecked += (_, __) => App.Settings.RememberMinimal = false;
 		}
 
 		private async void RevalidateClick(object sender, RoutedEventArgs e)

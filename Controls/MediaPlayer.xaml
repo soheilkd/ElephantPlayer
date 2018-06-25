@@ -12,21 +12,22 @@
                           MouseDown="Element_MouseDown" ScrubbingEnabled="True"
                           Volume="1"/>
 		</Grid>
-		<Grid x:Name="ControlsGrid" Background="Transparent" VerticalAlignment="Bottom" Height="87">
+		<Grid x:Name="ControlsGrid" Background="Transparent" VerticalAlignment="Bottom" Height="94">
 			<Label Content="Content Title" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="67,0,0,0" FontSize="18" x:Name="TitleLabel" Foreground="{DynamicResource Foreground}"/>
 			<Slider Value="100" x:Name="PositionSlider" ValueChanged="Position_Changed" PreviewMouseLeftButtonDown="Position_Holding" IsMoveToPointEnabled="True"
-               VerticalAlignment="Center" Maximum="1000" Template="{DynamicResource FlatSlider}" Margin="50, 62, 50, 0">
+               VerticalAlignment="Center" Maximum="1000" Template="{DynamicResource FlatSlider}" Margin="50,71,50,0">
 			</Slider>
 			
 			<Label Content="00:00" Style="{DynamicResource TimeLabel}" HorizontalAlignment="Left" x:Name="TimeLabel_Current" Margin="10,0,0,0"/>
 			<Label Content="00:00" Style="{DynamicResource TimeLabel}" HorizontalAlignment="Right" x:Name="TimeLabel_Full" Width="38" Margin="0,0,10,0"/>
-			<local:MaterialButton x:Name="PreviousButton" Icon="SkipPrevious" Margin="87,0,0,25" MouseUp="PreviousButton_Clicked" />
-			<local:MaterialButton x:Name="NextButton" Icon="SkipNext" Margin="172,0,0,25" MouseUp="NextButton_Clicked" />
-			<local:MaterialButton x:Name="PlayPauseButton" Icon="Play" MouseUp="PlayPauseButton_Clicked" Margin="127,0,0,24" Height="24" Width="24"/>
-			<local:MaterialButton x:Name="VisionButton" Icon="Video" HorizontalAlignment="Center" Margin="0,0,0,24" MouseUp="VisionButton_Clicked" />
-			<local:MaterialButton x:Name="PlayModeButton" Icon="Repeat" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,197,29" EllipseType="Rectular" MouseUp="PlayMode_Click"/>
+			<local:MaterialButton x:Name="PreviousButton" Icon="SkipPrevious" Margin="87,0,0,29" MouseUp="PreviousButton_Clicked" />
+			<local:MaterialButton x:Name="NextButton" Icon="SkipNext" Margin="172,0,0,29" MouseUp="NextButton_Clicked" />
+			<local:MaterialButton x:Name="PlayPauseButton" Icon="Play" MouseUp="PlayPauseButton_Clicked" Margin="127,0,0,29" Height="24" Width="24"/>
+			<local:MaterialButton x:Name="VisionButton" Icon="Video" HorizontalAlignment="Center" Margin="0,0,0,30" MouseUp="VisionButton_Clicked" />
+			<local:MaterialButton x:Name="PlayModeButton" Icon="Repeat" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,197,30" EllipseType="Rectular" MouseUp="PlayMode_Click"/>
 			<local:MaterialButton x:Name="FullScreenButton" Icon="FullScreen" HorizontalAlignment="Right" Margin="0,0,10,29" VerticalAlignment="Bottom" MouseUp="FullScreenButton_Clicked" />
-			<design:PackIcon x:Name="VolumeIcon" Kind="VolumeHigh" Width="25" Height="25" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0, 0, 155, 29" Foreground="{DynamicResource Foreground}" />
+			<local:MaterialButton x:Name="MinimalViewButton" Icon="ChevronDoubleUp" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,240,30" EllipseType="Rectular" MouseUp="MinimalViewButton_MouseUp" />
+			<design:PackIcon x:Name="VolumeIcon" Kind="VolumeHigh" Width="25" Height="25" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0, 0, 155, 33" Foreground="{DynamicResource Foreground}" />
 			<Slider x:Name="VolumeSlider" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,28,50,26" IsMoveToPointEnabled="True"  Template="{DynamicResource FlatSlider}" Foreground="#F444"
                     Width="100" Maximum="99" SmallChange="2" LargeChange="10" AutoToolTipPlacement="TopLeft" ValueChanged="VolumeSlider_ValueChanged"/>
 			<Grid.RenderTransform>
@@ -63,6 +64,8 @@
 		<Storyboard x:Key="FullOffBoard" Storyboard.TargetProperty="Y" Storyboard.TargetName="ControlsTranslation" AccelerationRatio="0.1" DecelerationRatio="0.9">
 			<DoubleAnimation From="{Binding ElementName=ControlsTranslation, Path=Y}" To="0" />
 		</Storyboard>
+		
+		
 		<TranslateTransform x:Name="Translation1" x:Key="Translation1" Y="0" />
 		<ControlTemplate TargetType="Slider" x:Key="FlatSlider">
 			<Border x:Name="border" Focusable="False" FocusVisualStyle="{x:Null}" BorderBrush="{TemplateBinding BorderBrush}" 

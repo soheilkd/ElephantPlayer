@@ -30,7 +30,8 @@ namespace Player
 		public bool ExplicitContent { get; set; }
 		public bool PlayOnPositionChange { get; set; }
 		public bool RevalidateOnExit { get; set; }
-
+		public bool RememberMinimal { get; set; }
+		public bool WasMinimalic { get; set; }
 		private int _MouseOverTimeOutIndex;
 
 		public int MouseOverTimeoutIndex { get => _MouseOverTimeOutIndex; set { _MouseOverTimeOutIndex = value; Changed?.Invoke(this, null); } }

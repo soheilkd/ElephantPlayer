@@ -59,7 +59,8 @@ namespace Player.Controls
 				Invoke(InfoType.LengthFound, TimeSpan);
 			}
 		}
-		private bool isFullScreen, WasMaximized, isTopMost, Magnified, IsUXChangingPosition;
+		private bool isFullScreen, WasMaximized, isTopMost, Magnified, IsUXChangingPosition, WasMinimal;
+		public bool IsFullyLoaded;
 		public bool IsFullScreen
 		{
 			get => isFullScreen;
@@ -125,6 +126,7 @@ namespace Player.Controls
 			Volume = App.Settings.Volume;
 			App.Settings.Changed += (_, __) => MouseMoveTimer = new Timer(App.Settings.MouseOverTimeout) { AutoReset = false };
 			VolumeSlider.Value = Volume * 100;
+			IsFullyLoaded = true;
 		}
 
 		private void PlayCountTimer_Elapsed(object sender, ElapsedEventArgs e)
@@ -241,7 +243,6 @@ namespace Player.Controls
 					break;
 			}
 		}
-
 		public void Play(Media media)
 		{
 			media.Load();
@@ -259,9 +260,42 @@ namespace Player.Controls
 			PlayCountTimer.Start();
 			TitleLabel.Content = media.ToString();
 			Play();
+			if (media.IsVideo)
+			{
+				if (WasMinimal)
+					return;
+				if (ParentWindow.ActualHeight <= 131)
+				{
+					MinimalViewButton.EmulateClick();
+					MinimalViewButton.Visibility = Visibility.Hidden;
+					WasMinimal = true;
+				}
+				else
+					WasMinimal = false;
+			}
+			else if (WasMinimal && ParentWindow.ActualHeight > 131)
+			{
+				MinimalViewButton.EmulateClick();
+				WasMinimal = false;
+				MinimalViewButton.Visibility = Visibility.Visible;
+			}
 		}
 
 		private void Invoke(InfoType type, object obj = null) => SomethingHappened?.Invoke(this, new InfoExchangeArgs(type, obj));
+
+		private void MinimalViewButton_MouseUp(object sender, MouseButtonEventArgs e)
+		{
+			if (MinimalViewButton.Icon != PackIconKind.ChevronDoubleDown)
+			{
+				Invoke(InfoType.CollapseRequest);
+				MinimalViewButton.Icon = PackIconKind.ChevronDoubleDown;
+			}
+			else
+			{
+				Invoke(InfoType.ExpandRequest);
+				MinimalViewButton.Icon = PackIconKind.ChevronDoubleUp;
+			}
+		}
 
 		public void Play(bool emulateClick = false)
 		{

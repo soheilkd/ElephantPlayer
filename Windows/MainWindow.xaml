@@ -6,11 +6,11 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" KeyUp="Window_KeyUp"
     xmlns:player="clr-namespace:Player.Controls" xmlns:sys="clr-namespace:System;assembly=mscorlib"
     x:Name="window" xmlns:design="http://materialdesigninxaml.net/winfx/xaml/themes"
-	xmlns:player1="clr-namespace:Player"
+	xmlns:player1="clr-namespace:Player" d:DesignHeight="554"
 	mc:Ignorable="d" Loaded="Window_Loaded" Closing="Window_Closing" Drop="Window_Drop" AllowDrop="True"
-    Title="Elephant Player" Height="544" Width="651" >
+    Title="Elephant Player" Width="651" >
 	<Grid Background="{DynamicResource KeyOfBackground}" x:Name="ContentGrid">
-		<TabControl x:Name="TabControl" Margin="0,0,0,85" BorderThickness="0" Padding="0">
+		<TabControl x:Name="TabControl" Margin="0,0,0,90" BorderThickness="0" Padding="0">
 			<TabItem>
 				<TabItem.Header>
 					<ContentControl Content="Now Playing" />
@@ -26,7 +26,7 @@
 				<ListView x:Name="TitlesView" ContextMenu="{DynamicResource ContextMenu1}">
 					<ListView.View>
 						<GridView>
-							<GridViewColumn Header="" Width="30" CellTemplate="{DynamicResource PlayIndicator}" />
+							<GridViewColumn Header="" Width="35" CellTemplate="{DynamicResource PlayIndicator}" />
 							<GridViewColumn Header="Title" Width="300" CellTemplate="{DynamicResource TitleCell}"/>
 							<GridViewColumn Header="Artist" Width="100" CellTemplate="{DynamicResource ArtistCell}" />
 							<GridViewColumn Header="Album" Width="100" CellTemplate="{DynamicResource AlbumCell}" />
@@ -151,6 +151,16 @@
 
 	</Grid>
 	<Window.Resources>
+		<sys:Double x:Key="MinimalDoubleSys" />
+		<Storyboard x:Key="MinimalOnBoard" Storyboard.TargetName="window" Storyboard.TargetProperty="Height">
+			<DoubleAnimation From="{Binding ActualHeight, ElementName=window}" To="130"
+							 AccelerationRatio="0.6" DecelerationRatio="0.4" By="1"/>
+		</Storyboard>
+		<Storyboard x:Key="MinimalOffBoard" Storyboard.TargetName="window" Storyboard.TargetProperty="Height">
+			<DoubleAnimation From="{Binding ActualHeight, ElementName=window}" To="{DynamicResource MinimalDoubleSys}"
+							 AccelerationRatio="0.4" DecelerationRatio="0.6" By="1"/>
+		</Storyboard>
+		
 		<DataTemplate x:Key="TitleCell">
 			<TextBlock x:Name="block" Text="{Binding Title}" FontSize="16" FontWeight="Normal" Foreground="White"/>
 			<DataTemplate.Triggers>
@@ -176,10 +186,10 @@
 			</DataTemplate.Triggers>
 		</DataTemplate>
 		<DataTemplate x:Key="PlayIndicator">
-			<design:PackIcon x:Name="kind" Kind="SetNone" Foreground="White" />
+			<design:PackIcon x:Name="kind" Kind="Speaker" Height="25" Width="0" Foreground="White" />
 			<DataTemplate.Triggers>
 				<DataTrigger Binding="{Binding IsPlaying}" Value="True">
-					<Setter TargetName="kind" Property="Kind" Value="CodeEqual" />
+					<Setter TargetName="kind" Property="Width" Value="25" />
 					<Setter TargetName="kind" Property="Foreground" Value="#FF49d4ff" />
 				</DataTrigger>
 			</DataTemplate.Triggers>
@@ -268,12 +278,12 @@
 			<Setter Property="BorderBrush" Value="#0000" />
 		</Style>
 		<Style TargetType="ListViewItem">
-			<Style.Triggers>
+			<Style.Triggers> 
 				<Trigger Property="IsMouseOver" Value="True">
-					<Setter Property="Background" Value="#5555" />
+					<Setter Property="Background" Value="#0000" />
 				</Trigger>
 				<Trigger Property="IsSelected" Value="True">
-					<Setter Property="Background" Value="#5444" />
+					<Setter Property="Background" Value="#0000" />
 				</Trigger>
 				<DataTrigger Binding="{Binding IsPlaying}" Value="True">
 					<Setter Property="Background" Value="#F555" />
