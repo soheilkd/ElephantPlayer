@@ -22,7 +22,7 @@ namespace Player
 				MessageBox.Show($"Unhandled {e.ExceptionObject}\r\n" +
 					$"Terminating: {e.IsTerminating}", "Exception", MessageBoxButton.OK, MessageBoxImage.Error);
 #if !DEBUG
-				Current.Shutdown(-1);
+				System.Threading.Thread.CurrentThread.Abort();
 #endif
 			};
 			if (Instance<App>.InitializeAsFirstInstance("ElephantIPC_soheilkd"))
