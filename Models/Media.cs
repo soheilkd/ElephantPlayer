@@ -10,9 +10,9 @@ namespace Player
 	{
 		None = 0B0,
 		File = 0B10,
-		Music = 0B100 | File,
-		Video = 0B1000 | File,
-		OnlineFile = 0B10000 | File,
+		Music = File | 0B100,
+		Video = File | 0B1000,
+		OnlineFile = File | 0B10000,
 		OnlineMusic = Music | OnlineFile,
 		OnlineVideo = Video | OnlineFile
 	}

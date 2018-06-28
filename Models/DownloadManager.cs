@@ -30,7 +30,7 @@ namespace Player
 					using (var zip = new Ionic.Zip.ZipFile(SavePath))
 						zip.ExtractAll(path, Ionic.Zip.ExtractExistingFileAction.OverwriteSilently);
 					File.Delete(SavePath);
-					var d = from item in Directory.GetFiles(path, "*", SearchOption.AllDirectories) where MediaManager.IsMedia(item) select new Media(item);
+					var d = from item in Directory.GetFiles(path, "*", SearchOption.AllDirectories) where MediaManager.IsMedia(item) select MediaManager.CreateMedia(item);
 					foreach (var item in d)
 						MediaManager.CleanTag(item, false);
 					DownloadCompleted?.Invoke(media, new InfoExchangeArgs(InfoType.MediaCollection, d.ToArray()));
@@ -46,7 +46,7 @@ namespace Player
 		{
 			Pairs[media].CancelAsync();
 			Pairs.Remove(media);
-			media.Reload();
+			MediaManager.Reload(media);
 			if (File.Exists(GetProperPath(media)))
 				File.Delete(GetProperPath(media));
 		}
