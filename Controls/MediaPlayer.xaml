@@ -58,11 +58,11 @@
 		<Storyboard x:Key="MagnifyBoard" Storyboard.TargetName="elementCanvas" AccelerationRatio="0.4" DecelerationRatio="0.6" SpeedRatio="1">
 			<ThicknessAnimation From="{Binding ElementName=elementCanvas, Path=Margin}" To="0" Storyboard.TargetProperty="Margin" />
 		</Storyboard>
-		<Storyboard x:Key="FullOnBoard" Storyboard.TargetProperty="Y" Storyboard.TargetName="ControlsTranslation" AccelerationRatio="0.9" DecelerationRatio="0.1">
-			<DoubleAnimation From="{Binding ElementName=ControlsTranslation, Path=Y}" To="80" />
+		<Storyboard x:Key="FullOnBoard" Storyboard.TargetProperty="Y" Storyboard.TargetName="ControlsTranslation" AccelerationRatio="0.4" DecelerationRatio="0.6">
+			<DoubleAnimation From="{Binding ElementName=ControlsTranslation, Path=Y}" To="90" SpeedRatio="1.5"/>
 		</Storyboard>
-		<Storyboard x:Key="FullOffBoard" Storyboard.TargetProperty="Y" Storyboard.TargetName="ControlsTranslation" AccelerationRatio="0.1" DecelerationRatio="0.9">
-			<DoubleAnimation From="{Binding ElementName=ControlsTranslation, Path=Y}" To="0" />
+		<Storyboard x:Key="FullOffBoard" Storyboard.TargetProperty="Y" Storyboard.TargetName="ControlsTranslation" AccelerationRatio="0.4" DecelerationRatio="0.6">
+			<DoubleAnimation From="{Binding ElementName=ControlsTranslation, Path=Y}" To="0" SpeedRatio="1.5"/>
 		</Storyboard>
 		
 		

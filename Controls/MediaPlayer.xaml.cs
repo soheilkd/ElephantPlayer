@@ -12,6 +12,13 @@ namespace Player.Controls
 {
 	public partial class MediaPlayer : UserControl
 	{
+		public static DependencyProperty IsMagnifiedProperty =
+			DependencyProperty.Register(nameof(IsMagnified), typeof(bool), typeof(MediaPlayer), new PropertyMetadata(false));
+		public static DependencyProperty AreControlsVisibleProperty =
+			DependencyProperty.Register(nameof(AreControlsVisible), typeof(bool), typeof(MediaPlayer), new PropertyMetadata(true));
+		public static DependencyProperty IsFullScreenProperty =
+			DependencyProperty.Register(nameof(IsFullScreen), typeof(bool), typeof(MediaPlayer), new PropertyMetadata(false));
+
 		public event EventHandler<InfoExchangeArgs> SomethingHappened;
 		public TimeSpan Position
 		{
@@ -59,14 +66,14 @@ namespace Player.Controls
 				Invoke(InfoType.LengthFound, TimeSpan);
 			}
 		}
-		private bool isFullScreen, WasMaximized, isTopMost, Magnified, IsUXChangingPosition, WasMinimal;
+		private bool WasMaximized, isTopMost, IsUXChangingPosition, WasMinimal;
 		public bool IsFullyLoaded;
 		public bool IsFullScreen
 		{
-			get => isFullScreen;
+			get => (bool)GetValue(IsFullScreenProperty);
 			set
 			{
-				isFullScreen = value;
+				SetValue(IsFullScreenProperty, value);
 				ParentWindow.ResizeMode = value ? ResizeMode.NoResize : ResizeMode.CanResize;
 				FullScreenButton.Icon = value ? PackIconKind.FullscreenExit : PackIconKind.Fullscreen;
 				VisionButton.Visibility = value ? Visibility.Hidden : Visibility.Visible;
@@ -92,6 +99,48 @@ namespace Player.Controls
 				ParentWindow.WindowStyle = value ? WindowStyle.None : WindowStyle.SingleBorderWindow;
 			}
 		}
+		public bool IsMagnified
+		{
+			get => (bool)GetValue(IsMagnifiedProperty);
+			set
+			{
+				SetValue(IsMagnifiedProperty, value);
+				if (value)
+				{
+					MagnifyAnimation.From = new Thickness(ActualWidth / 2, ActualHeight, ActualWidth / 2, 0);
+					elementCanvas.Height = Double.NaN;
+					MagnifyBoard.Begin();
+					MouseMoveTimer.Start();
+				}
+				else
+				{
+					MinifyAnimation.To = new Thickness(ActualWidth / 2, ActualHeight, ActualWidth / 2, 0);
+					MinifyBoard.Begin();
+					IsTopMost = false;
+				}
+				Invoke(InfoType.Magnifiement, value);
+			}
+		}
+		public bool AreControlsVisible
+		{
+			get => (bool)GetValue(AreControlsVisibleProperty);
+			set
+			{
+				SetValue(AreControlsVisibleProperty, value);
+				if (value)
+				{
+					FullOnBoard.Stop();
+					Dispatcher.Invoke(() => FullOffBoard.Begin());
+				}
+				else
+				{
+					if (!IsMagnified || ControlsGrid.IsMouseOver)
+						return;
+					FullOffBoard.Stop();
+					Dispatcher.Invoke(() => FullOnBoard.Begin());
+				}
+			}
+		}
 		public Window ParentWindow;
 		public Taskbar.Thumb Thumb = new Taskbar.Thumb();
 		private Storyboard MagnifyBoard, MinifyBoard, FullOnBoard, FullOffBoard;
@@ -107,17 +156,20 @@ namespace Player.Controls
 			MagnifyAnimation = MagnifyBoard.Children[0] as ThicknessAnimation;
 			MinifyAnimation = MinifyBoard.Children[0] as ThicknessAnimation;
 
-			Thumb.NextPressed += (obj, f) => PlayNext();
+			Thumb.NextPressed += (obj, f) => Next();
 			Thumb.PausePressed += (obj, f) => PlayPause();
 			Thumb.PlayPressed += (obj, f) => PlayPause();
-			Thumb.PrevPressed += (obj, f) => PlayPrevious();
-			MouseMoveTimer.Elapsed += (_, __) => HideControls();
+			Thumb.PrevPressed += (obj, f) => Previous();
+			MouseMoveTimer.Elapsed += (_, __) => AreControlsVisible = false;
 			PlayCountTimer.Elapsed += PlayCountTimer_Elapsed;
 			FullOnBoard.Completed += (_, __) => Cursor = Cursors.None;
-			SizeChanged += (_,__) => elementCanvas.Height = Magnified ? Double.NaN : 0;
+			SizeChanged += (_,__) => elementCanvas.Height = IsMagnified ? Double.NaN : 0;
 			FullOffBoard.CurrentStateInvalidated += (_, __) => Cursor = Cursors.Arrow;
 			PlayModeButton.Icon = (PackIconKind)Enum.Parse(typeof(PackIconKind), App.Settings.PlayMode.ToString());
-			element.MediaEnded += (_, __) => PlayNext();
+			element.MediaEnded += (_, __) => Next();
+
+			FullScreenButton.MouseUp += (_, __) => IsFullScreen = !IsFullScreen;
+			VisionButton.MouseUp += (_, __) => IsMagnified = !IsMagnified;
 		}
 
 		private void UserControl_Loaded(object sender, RoutedEventArgs e)
@@ -153,7 +205,7 @@ namespace Player.Controls
 			await Task.Delay(50);
 			if (ControlsTranslation.Y < y)
 				return;
-			ShowControls();
+			AreControlsVisible = true;
 			MouseMoveTimer.Start();
 		}
 		
@@ -204,19 +256,19 @@ namespace Player.Controls
 			else
 				Invoke(InfoType.PrevRequest);
 		}
-		private void VisionButton_Clicked(object sender, MouseButtonEventArgs e)
+		private void MinimalButton_Clicked(object sender, MouseButtonEventArgs e)
 		{
-			if (Magnified) Minify();
-			else Magnify();
+			if (MinimalViewButton.Icon != PackIconKind.ChevronDoubleDown)
+			{
+				Invoke(InfoType.CollapseRequest);
+				MinimalViewButton.Icon = PackIconKind.ChevronDoubleDown;
+			}
+			else
+			{
+				Invoke(InfoType.ExpandRequest);
+				MinimalViewButton.Icon = PackIconKind.ChevronDoubleUp;
+			}
 		}
-		private void FullScreenButton_Clicked(object sender, MouseButtonEventArgs e)
-		{
-			IsFullScreen = !IsFullScreen;
-		}
-		
-		public void PlayNext() => NextButton.EmulateClick();
-		public void PlayPrevious() => PreviousButton.EmulateClick();
-		public void PlayPause() => PlayPauseButton.EmulateClick();
 
 		private void VolumeSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
 		{
@@ -245,21 +297,19 @@ namespace Player.Controls
 		}
 		public void Play(Media media)
 		{
-			media.Load();
+			MediaManager.Load(media);
 			_Media = media;
 			VisionButton.Visibility = media.IsVideo ? Visibility.Visible : Visibility.Hidden;
 			FullScreenButton.Visibility = VisionButton.Visibility;
 			if (IsFullScreen && !media.IsVideo)
 				FullScreenButton.EmulateClick();
-			if (media.IsVideo && App.Settings.VisionOrientation)
-				Magnify();
-			else if (Magnified && !media.IsVideo)
-				Minify();
+			IsMagnified = media.IsVideo && App.Settings.VisionOrientation;
 			element.Source = media.Url;
 			PlayCountTimer.Stop();
 			PlayCountTimer.Start();
 			TitleLabel.Content = media.ToString();
 			Play();
+			MinimalViewButton.Visibility = media.IsVideo ? Visibility.Hidden : Visibility.Visible;
 			if (media.IsVideo)
 			{
 				if (WasMinimal)
@@ -267,7 +317,6 @@ namespace Player.Controls
 				if (ParentWindow.ActualHeight <= 131)
 				{
 					MinimalViewButton.EmulateClick();
-					MinimalViewButton.Visibility = Visibility.Hidden;
 					WasMinimal = true;
 				}
 				else
@@ -277,26 +326,11 @@ namespace Player.Controls
 			{
 				MinimalViewButton.EmulateClick();
 				WasMinimal = false;
-				MinimalViewButton.Visibility = Visibility.Visible;
 			}
 		}
 
 		private void Invoke(InfoType type, object obj = null) => SomethingHappened?.Invoke(this, new InfoExchangeArgs(type, obj));
-
-		private void MinimalViewButton_MouseUp(object sender, MouseButtonEventArgs e)
-		{
-			if (MinimalViewButton.Icon != PackIconKind.ChevronDoubleDown)
-			{
-				Invoke(InfoType.CollapseRequest);
-				MinimalViewButton.Icon = PackIconKind.ChevronDoubleDown;
-			}
-			else
-			{
-				Invoke(InfoType.ExpandRequest);
-				MinimalViewButton.Icon = PackIconKind.ChevronDoubleUp;
-			}
-		}
-
+		
 		public void Play(bool emulateClick = false)
 		{
 			if (emulateClick)
@@ -335,35 +369,9 @@ namespace Player.Controls
 			element.Stop();
 			element.Source = null;
 		}
+		public void Next() => NextButton.EmulateClick();
+		public void Previous() => PreviousButton.EmulateClick();
+		public void PlayPause() => PlayPauseButton.EmulateClick();
 
-		public void Magnify()
-		{
-			MagnifyAnimation.From = new Thickness(ActualWidth / 2, ActualHeight, ActualWidth / 2, 0);
-			elementCanvas.Height = Double.NaN;
-			MagnifyBoard.Begin();
-			MouseMoveTimer.Start();
-			Invoke(InfoType.Magnifiement, true);
-			Magnified = true;
-		}
-		public void Minify()
-		{
-			MinifyAnimation.To = new Thickness(ActualWidth / 2, ActualHeight, ActualWidth / 2, 0);
-			MinifyBoard.Begin();
-			Invoke(InfoType.Magnifiement, false);
-			Magnified = false;
-			IsTopMost = false;
-		}
-		public void HideControls()
-		{
-			if (!Magnified)
-				return;
-			FullOffBoard.Stop();
-			Dispatcher.Invoke(() => FullOnBoard.Begin());
-		}
-		public void ShowControls()
-		{
-			FullOnBoard.Stop();
-			Dispatcher.Invoke(() => FullOffBoard.Begin());
-		}
 	}
 }
