@@ -29,7 +29,7 @@ namespace Player
 				File = TagLib.File.Create(media.Path)
 			};
 			var tag = ui.File.Tag;
-			ui.Media.Load();
+			MediaManager.Load(ui.Media);
 			ui.TitleBox.Text = tag.Title ?? String.Empty;
 			ui.ArtistBox.Text = tag.FirstPerformer ?? String.Empty;
 			ui.AlbumArtistBox.Text = tag.FirstAlbumArtist ?? String.Empty;

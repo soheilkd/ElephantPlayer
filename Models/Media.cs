@@ -63,7 +63,7 @@ namespace Player
 			Url = url;
 			AdditionDate = DateTime.Now;
 		}
-		public Media(string path) : this(new Uri(path)) { }
+		public Media(string path) : this(new Uri(path, true)) { }
 
 		public override string ToString() => $"{Artist} - {Title}";
 	}

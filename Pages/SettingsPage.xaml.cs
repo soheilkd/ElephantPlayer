@@ -20,9 +20,9 @@ namespace Player
 			ExplicitCheck.IsChecked = App.Settings.ExplicitContent;
 			PlayOnPosCheck.IsChecked = App.Settings.PlayOnPositionChange;
 			RevalidOnExitCheck.IsChecked = App.Settings.RevalidateOnExit;
-			TimeoutCombo.SelectedIndex = App.Settings.MouseOverTimeoutIndex;
+			TimeoutCombo.SelectedIndex = App.Settings.MouseTimeoutIndex;
 			AncestorCombo.SelectionChanged += (_, __) => App.Settings.MainKey = AncestorCombo.SelectedIndex;
-			TimeoutCombo.SelectionChanged += (_, __) => App.Settings.MouseOverTimeoutIndex = TimeoutCombo.SelectedIndex;
+			TimeoutCombo.SelectionChanged += (_, __) => App.Settings.MouseTimeoutIndex = TimeoutCombo.SelectedIndex;
 			OrinateCheck.Checked += (_, __) => App.Settings.VisionOrientation = true;
 			OrinateCheck.Unchecked += (_, __) => App.Settings.VisionOrientation = false;
 			LiveLibraryCheck.Checked += (_, __) => App.Settings.LiveLibrary = true;

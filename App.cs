@@ -13,17 +13,15 @@ namespace Player
 		public static readonly string Path =
 			Environment.GetCommandLineArgs()[0].Substring(0, Environment.GetCommandLineArgs()[0].LastIndexOf("\\") + 1);
 
-		public static Preferences Settings { get; } = Preferences.Load();
+		public static Settings Settings { get; } = new Settings();
 		[STAThread]
 		public static void Main()
 		{
+			
 			AppDomain.CurrentDomain.UnhandledException += (sender, e) =>
 			{
 				MessageBox.Show($"Unhandled {e.ExceptionObject}\r\n" +
 					$"Terminating: {e.IsTerminating}", "Exception", MessageBoxButton.OK, MessageBoxImage.Error);
-#if !DEBUG
-				System.Threading.Thread.CurrentThread.Abort();
-#endif
 			};
 			if (Instance<App>.InitializeAsFirstInstance("ElephantIPC_soheilkd"))
 			{

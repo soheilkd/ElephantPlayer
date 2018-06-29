@@ -142,16 +142,21 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="App.cs" />
-    <Compile Include="Code.cs" />
-    <Compile Include="DownloadManager.cs" />
+    <Compile Include="Base\Extensions.cs" />
+    <Compile Include="Base\Images.cs" />
+    <Compile Include="Base\Settings.cs" />
+    <Compile Include="Models\DownloadManager.cs" />
     <Compile Include="Controls\MediaPlayer.xaml.cs">
       <DependentUpon>MediaPlayer.xaml</DependentUpon>
     </Compile>
     <Compile Include="Controls\MaterialButton.xaml.cs">
       <DependentUpon>MaterialButton.xaml</DependentUpon>
     </Compile>
-    <Compile Include="DeepBackEnd.cs" />
-    <Compile Include="Events.cs" />
+    <Compile Include="Base\DeepBackEnd.cs" />
+    <Compile Include="Models\Events.cs" />
+    <Compile Include="Models\LibraryManager.cs" />
+    <Compile Include="Models\Media.cs" />
+    <Compile Include="Models\SerializableMediaCollection.cs" />
     <Compile Include="Pages\NowPlayingPage.xaml.cs">
       <DependentUpon>NowPlayingPage.xaml</DependentUpon>
     </Compile>
@@ -161,7 +166,7 @@
     <Compile Include="Windows\MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="MediaManager.cs" />
+    <Compile Include="Models\MediaManager.cs" />
     <Compile Include="Windows\PropertiesWindow.xaml.cs">
       <DependentUpon>PropertiesWindow.xaml</DependentUpon>
     </Compile>
@@ -236,6 +241,7 @@
   <ItemGroup>
     <WCFMetadata Include="Connected Services\" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PreBuildEvent>

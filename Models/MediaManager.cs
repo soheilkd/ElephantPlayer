@@ -29,8 +29,12 @@ namespace Player
 			if (Directory.Exists(path))
 				Directory.GetFiles(path, "*", SearchOption.AllDirectories).For(each => Add(each));
 			var media = new Media(path);
-			if (DoesExists(media))
+			if (!DoesExists(media))
+			{
+				Console.WriteLine(path);
 				return;
+			}
+			Load(media);
 			var duplication = this.Where(item => item.Path == path);
 			if (duplication.Count() != 0 && requestPlay)
 			{
@@ -249,7 +253,7 @@ namespace Player
 			{
 				media.Name = media.Path.Substring(media.Path.LastIndexOf("\\") + 1);
 				media.Directory = media.Path.Substring(0, media.Path.LastIndexOf("\\"));
-				switch (MediaManager.GetMediaType(media.Url))
+				switch (GetMediaType(media.Url))
 				{
 					case MediaType.Music:
 						using (var t = TagLib.File.Create(media.Path))
@@ -307,7 +311,11 @@ namespace Player
 		public static bool DoesExists(Uri url)
 		{
 			if (url.IsFile)
+			{
+				if (!File.Exists(url.AbsolutePath))
+					return false;
 				return File.Exists(url.AbsolutePath);
+			}
 			else
 				return DownloadManager.IsDownloadable(url, out _);
 		}

@@ -57,8 +57,8 @@ namespace Player
 			Player.SomethingHappened += Player_EventHappened;
 			Player.UpdateLayout();
 			Collections[0] = new ObservableCollection<Media>();
-			Collections[1] = LibraryOperator.LoadedCollection.ByArtist;
-			Collections[2] = LibraryOperator.LoadedCollection.ByAlbum;
+			Collections[1] = LibraryManager.LoadedCollection.ByArtist;
+			Collections[2] = LibraryManager.LoadedCollection.ByAlbum;
 			MinimalOnBoard = Resources["MinimalOnBoard"] as Storyboard;
 			MinimalOffBoard = Resources["MinimalOffBoard"] as Storyboard;
 			ArtistsView.ItemsSource = Collections[1];
@@ -126,7 +126,7 @@ namespace Player
 		{
 			Height = 1;
 			Resources["MinimalDoubleSys"] = App.Settings.LastSize.Height;
-			if (App.Settings.RememberMinimal && App.Settings.WasMinimalic)
+			if (App.Settings.RememberMinimal && App.Settings.WasMinimal)
 			{
 				Player.MinimalViewButton.EmulateClick();
 				Resources["MinimalDoubleSys"] = App.Settings.LastSize.Height;
@@ -161,6 +161,7 @@ namespace Player
 					ResizeMode = ResizeMode.CanMinimize;
 					MinimalOnBoard.Begin();
 					WindowStyle = WindowStyle.ToolWindow;
+					Player.MinimalViewButton.Icon = MaterialDesignThemes.Wpf.PackIconKind.ChevronDoubleDown;
 					break;
 				case InfoType.ExpandRequest:
 					if (WasMaximized)
@@ -168,6 +169,7 @@ namespace Player
 					ResizeMode = ResizeMode.CanResize;
 					WindowStyle = WindowStyle.ThreeDBorderWindow;
 					MinimalOffBoard.Begin();
+					Player.MinimalViewButton.Icon = MaterialDesignThemes.Wpf.PackIconKind.ChevronDoubleUp;
 					break;
 				default: break;
 			}
@@ -177,9 +179,8 @@ namespace Player
 		{
 			App.Settings.LastSize = new Size(Width, Height <= 130 ? (double)Resources["MinimalDoubleSys"]: Height);
 			App.Settings.LastLoc = new Point(Left, Top);
-			App.Settings.WasMinimalic = Height <= 130;
+			App.Settings.WasMinimal = Height <= 131;
 			App.Settings.Volume = Player.Volume;
-			App.Settings.Save();
 			Manager.CloseSeason();
 			Application.Current.Shutdown();
 		}
@@ -284,8 +285,8 @@ namespace Player
 			//Key shortcuts always invokable
 			switch (e.KeyCode)
 			{
-				case Forms::Keys.MediaNextTrack: Player.PlayNext(); break;
-				case Forms::Keys.MediaPreviousTrack: Player.PlayPrevious(); break;
+				case Forms::Keys.MediaNextTrack: Player.Next(); break;
+				case Forms::Keys.MediaPreviousTrack: Player.Previous(); break;
 				case Forms::Keys.MediaPlayPause: Player.PlayPause(); break;
 				default: break;
 			}
@@ -358,7 +359,7 @@ namespace Player
 					}
 					break;
 				default:
-					For(item => item.MoveTo(Resources["LastPath"].ToString()));
+					For(item => MediaManager.Move(item, toDir: Resources["LastPath"].ToString()));
 					break;
 			}
 		}
@@ -384,7 +385,7 @@ namespace Player
 					}
 					break;
 				default:
-					For(item => item.CopyTo(Resources["LastPath"].ToString()));
+					For(item => MediaManager.Copy(item, toDir: Resources["LastPath"].ToString()));
 					break;
 			}
 		}
@@ -414,7 +415,7 @@ namespace Player
 					var pos = Player.Position;
 					Player.Stop();
 					file.Save();
-					Manager.CurrentlyPlaying.Reload();
+					MediaManager.Reload(Manager.CurrentlyPlaying);
 					Play(Manager.CurrentlyPlaying);
 					Player.Position = pos;
 					Manager.UpdateOnPath(item);

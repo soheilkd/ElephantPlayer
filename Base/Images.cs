@@ -56,6 +56,8 @@ namespace Player
 
 		public static BitmapImage GetBitmap(TagLib.IPicture picture)
 		{
+			if (picture.Data.Count == 0)
+				return GetBitmap(PackIconKind.FileMusic);
 			byte[] pixels = new byte[picture.Data.Count];
 			picture.Data.CopyTo(pixels, 0);
 			var image = new BitmapImage();

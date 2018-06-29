@@ -167,16 +167,12 @@ namespace Player.Controls
 			FullOffBoard.CurrentStateInvalidated += (_, __) => Cursor = Cursors.Arrow;
 			PlayModeButton.Icon = (PackIconKind)Enum.Parse(typeof(PackIconKind), App.Settings.PlayMode.ToString());
 			element.MediaEnded += (_, __) => Next();
-
-			FullScreenButton.MouseUp += (_, __) => IsFullScreen = !IsFullScreen;
-			VisionButton.MouseUp += (_, __) => IsMagnified = !IsMagnified;
 		}
 
 		private void UserControl_Loaded(object sender, RoutedEventArgs e)
 		{
 			RunUX();
 			Volume = App.Settings.Volume;
-			App.Settings.Changed += (_, __) => MouseMoveTimer = new Timer(App.Settings.MouseOverTimeout) { AutoReset = false };
 			VolumeSlider.Value = Volume * 100;
 			IsFullyLoaded = true;
 		}
@@ -222,11 +218,6 @@ namespace Player.Controls
 			goto UX;
 		}
 
-		private void Position_Changed(object sender, RoutedPropertyChangedEventArgs<double> e)
-		{
-			if (!IsUXChangingPosition)
-				Position = new TimeSpan(0, 0, 0, 0, (int)PositionSlider.Value);
-		}
 		private async void Position_Holding(object sender, MouseButtonEventArgs e)
 		{
 			var but = PlayPauseButton.Icon;
@@ -237,6 +228,11 @@ namespace Player.Controls
 				element.Play();
 			else if (App.Settings.PlayOnPositionChange)
 				Play();
+		}
+		private void Position_Changed(object sender, RoutedPropertyChangedEventArgs<double> e)
+		{
+			if (!IsUXChangingPosition)
+				Position = new TimeSpan(0, 0, 0, 0, (int)PositionSlider.Value);
 		}
 		private void PlayPauseButton_Clicked(object sender, MouseButtonEventArgs e)
 		{
@@ -256,23 +252,21 @@ namespace Player.Controls
 			else
 				Invoke(InfoType.PrevRequest);
 		}
-		private void MinimalButton_Clicked(object sender, MouseButtonEventArgs e)
+		private void FullScreenButton_Clicked(object sender, MouseButtonEventArgs e)
 		{
-			if (MinimalViewButton.Icon != PackIconKind.ChevronDoubleDown)
-			{
-				Invoke(InfoType.CollapseRequest);
-				MinimalViewButton.Icon = PackIconKind.ChevronDoubleDown;
-			}
-			else
-			{
-				Invoke(InfoType.ExpandRequest);
-				MinimalViewButton.Icon = PackIconKind.ChevronDoubleUp;
-			}
+			IsFullScreen = !IsFullScreen;
 		}
-
-		private void VolumeSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+		private void VisionButton_Clicked(object sender, MouseButtonEventArgs e)
+		{
+			IsMagnified = !IsMagnified;
+		}
+		private void VolumeSlider_Changed(object sender, RoutedPropertyChangedEventArgs<double> e)
 		{
 			Volume = VolumeSlider.Value / 100;
+		}
+		private void MinimalButton_Clicked(object sender, MouseButtonEventArgs e)
+		{
+			SomethingHappened?.Invoke(this, new InfoExchangeArgs((int)MinimalViewButton.Icon == 449 ? InfoType.ExpandRequest : InfoType.CollapseRequest));
 		}
 
 		private void PlayMode_Click(object sender, MouseButtonEventArgs e)
@@ -330,7 +324,7 @@ namespace Player.Controls
 		}
 
 		private void Invoke(InfoType type, object obj = null) => SomethingHappened?.Invoke(this, new InfoExchangeArgs(type, obj));
-		
+
 		public void Play(bool emulateClick = false)
 		{
 			if (emulateClick)
