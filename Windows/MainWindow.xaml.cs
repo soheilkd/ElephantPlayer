@@ -148,7 +148,7 @@ namespace Player
 				Play(med);
 		}
 
-		private void Window_Loaded(object sender, RoutedEventArgs e)
+		private async void Window_Loaded(object sender, RoutedEventArgs e)
 		{
 			Height = 1;
 			TempHeight = App.Settings.LastSize.Height;
@@ -159,17 +159,9 @@ namespace Player
 			}
 			else
 				Height = TempHeight;
-			SemiLoad();
-		}
-
-		private async void SemiLoad()
-		{
 			while (!Player.IsFullyLoaded)
-			{
 				await Task.Delay(10);
-			}
-			var args = Environment.GetCommandLineArgs().Where(name => MediaManager.IsMedia(name)).ToArray();
-			args.For(each => Manager.Add(each, true));
+			Environment.GetCommandLineArgs().For(each => Manager.Add(each, true));
 		}
 
 		private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)

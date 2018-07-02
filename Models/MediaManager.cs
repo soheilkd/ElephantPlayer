@@ -30,11 +30,8 @@ namespace Player
 			if (Directory.Exists(path))
 				Directory.GetFiles(path, "*", SearchOption.AllDirectories).For(each => Add(each));
 			var media = new Media(path);
-			if (!DoesExists(media))
-			{
-				Console.WriteLine(path);
+			if (!DoesExists(media) || !IsMedia(media.StringUrl))
 				return;
-			}
 			Load(media);
 			var duplication = this.Where(item => item.StringUrl == path);
 			if (duplication.Count() != 0 && requestPlay)
@@ -141,7 +138,7 @@ namespace Player
 		public static string GetExt(Uri url)
 		{
 			if (url.IsFile)
-				return url.AbsolutePath.Substring((url.AbsolutePath ?? " . ").LastIndexOf('.') + 1).ToLower();
+				return url.LocalPath.Substring((url.LocalPath ?? " . ").LastIndexOf('.') + 1).ToLower();
 			else
 				return url.Segments.Last().Substring(url.Segments.Last().LastIndexOf('.') + 1).ToLower();
 		}
@@ -317,7 +314,7 @@ namespace Player
 		}
 		public static bool IsMedia(string path)
 		{
-			return GetMediaType(new Uri(path)) == MediaType.File;
+			return GetMediaType(new Uri(path)).HasFlag(MediaType.File);
 		}
 		#endregion
 	}
