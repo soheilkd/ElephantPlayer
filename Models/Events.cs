@@ -1,28 +1,22 @@
 ﻿namespace Player.Events
 {
-	public enum InfoType : byte
+	public enum RequestType
 	{
-		//Content exchange
-		Integer, Double, Media, Object, StringArray, MediaCollection,
-		//Media Control
-		NextRequest, PrevRequest, LengthFound, Magnifiement,
-		//Media Manager
-		MediaRequest, TagEdit, CollectionUpdate,
-		//UI
-		CollapseRequest, ExpandRequest
+		Media, Sync,
+		Next, Previous, Magnifiement, Collapse, Expand
 	}
 
-	public class InfoExchangeArgs : System.EventArgs
+	public class RequestArgs: System.EventArgs
 	{
-		public InfoType Type { get; private set; }
-		public object Object { get; set; }
+		public RequestType Request { get; set; }
+		public RequestArgs(RequestType request) => Request = request;
+	}
+	
+	public class InfoExchangeArgs<T>: System.EventArgs
+	{
+		public T Parameter { get; set; }
 
 		public InfoExchangeArgs() { }
-		public InfoExchangeArgs(InfoType type) => Type = type;
-		public InfoExchangeArgs(InfoType type, object value)
-		{
-			Type = type;
-			Object = value;
-		}
+		public InfoExchangeArgs(T para) => Parameter = para;
 	}
 }

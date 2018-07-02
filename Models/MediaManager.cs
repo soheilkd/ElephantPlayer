@@ -15,13 +15,14 @@ namespace Player
 		public MediaManager()
 		{
 			LibraryManager.Load().Unordered.For(each => Add(each));
-			DownloadManager.DownloadCompleted += DownloadCompleted;
+			DownloadManager.MediaDownloaded += (_, e) => Add(e.Parameter);
+			DownloadManager.CollectionDownloaded += (_, e) => e.Parameter.For(each => Add(each));
 		}
 
 		public Collection<Media> Queue;
 		private Random Shuffle = new Random(DateTime.Now.Millisecond);
 		public Media CurrentlyPlaying;
-		public event EventHandler<InfoExchangeArgs> Change;
+		public event EventHandler<InfoExchangeArgs<Media>> RequestReceived;
 		public readonly DownloadManager DownloadManager = new DownloadManager();
 
 		public void Add(string path, bool requestPlay = false)
@@ -35,7 +36,7 @@ namespace Player
 				return;
 			}
 			Load(media);
-			var duplication = this.Where(item => item.Path == path);
+			var duplication = this.Where(item => item.StringUrl == path);
 			if (duplication.Count() != 0 && requestPlay)
 			{
 				RequestPlay(duplication.First());
@@ -49,8 +50,8 @@ namespace Player
 		public void Delete(Media media)
 		{
 			bool reqNext = CurrentlyPlaying == media;
-			File.Delete(media.Path);
-			this.Where(each => each.Path == media.Path).ToArray().For(each => Remove(each));
+			File.Delete(media.StringUrl);
+			this.Where(each => each.StringUrl == media.StringUrl).ToArray().For(each => Remove(each));
 			if (reqNext)
 				RequestPlay(Next());
 		}
@@ -102,7 +103,7 @@ namespace Player
 		private void RequestPlay(Media media)
 		{
 			CurrentlyPlaying = media;
-			Change?.Invoke(media, new InfoExchangeArgs(InfoType.MediaRequest));
+			RequestReceived?.Invoke(this, new InfoExchangeArgs<Media>(media));
 			if (App.Settings.ExplicitContent)
 			{
 				if (media.Title.ToLower().StartsWith("spankbang"))
@@ -110,21 +111,12 @@ namespace Player
 			}
 		}
 
-		public void UpdateOnPath(Media source)
-		{
-			this.For(each => Reload(each), each => each.Path == source.Path);
-		}
 		public void Revalidate()
 		{
 			this.For(each => Reload(each));
 			this.For(each => Remove(each), each => !DoesExists(each));
 		}
-		
-		private void DownloadCompleted(object sender, InfoExchangeArgs e)
-		{
-			if (e.Type == InfoType.Media) Add(e.Object as Media);
-			else e.Object.As<Media[]>().For(each => Add(each));
-		}
+
 		#region Singular Media Operations
 		private static readonly string[] SupportedMusics = "mp3;wma;aac;m4a".Split(';');
 		private static readonly string[] SupportedVideos = "mp4;mpg;mkv;wmv;mov;avi;m4v;ts;wav;mpeg;webm".Split(';');
@@ -192,7 +184,7 @@ namespace Player
 				return target;
 			}
 
-			using (var file = TagLib.File.Create(media.Path))
+			using (var file = TagLib.File.Create(media.StringUrl))
 			{
 				string[] form(TagLib.Tag tag2)
 				{
@@ -251,14 +243,14 @@ namespace Player
 				return;
 			if (media.IsOffline)
 			{
-				media.Name = media.Path.Substring(media.Path.LastIndexOf("\\") + 1);
-				media.Directory = media.Path.Substring(0, media.Path.LastIndexOf("\\"));
+				media.Name = media.StringUrl.Substring(media.StringUrl.LastIndexOf("\\") + 1);
+				media.Directory = media.StringUrl.Substring(0, media.StringUrl.LastIndexOf("\\"));
 				switch (GetMediaType(media.Url))
 				{
 					case MediaType.Music:
-						using (var t = TagLib.File.Create(media.Path))
+						using (var t = TagLib.File.Create(media.StringUrl))
 						{
-							media.Artist = t.Tag.FirstPerformer ?? media.Path.Substring(0, media.Path.LastIndexOf("\\"));
+							media.Artist = t.Tag.FirstPerformer ?? media.StringUrl.Substring(0, media.StringUrl.LastIndexOf("\\"));
 							media.Title = t.Tag.Title ?? media.Name.Substring(0, media.Name.LastIndexOf("."));
 							media.Album = t.Tag.Album ?? String.Empty;
 							media.Artwork = t.Tag.Pictures.Length >= 1 ? Images.GetBitmap(t.Tag.Pictures[0]) : Images.MusicArt;
@@ -268,7 +260,7 @@ namespace Player
 						break;
 					case MediaType.Video:
 						media.Title = media.Name;
-						media.Artist = media.Path.Substring(0, media.Path.LastIndexOf("\\"));
+						media.Artist = media.StringUrl.Substring(0, media.StringUrl.LastIndexOf("\\"));
 						media.Artist = media.Artist.Substring(media.Artist.LastIndexOf("\\") + 1);
 						media.Album = "Video";
 						media.Artwork = Images.VideoArt;
@@ -300,22 +292,18 @@ namespace Player
 		public static void Move(Media media, string toDir)
 		{
 			toDir += media.Name;
-			File.Move(media.Path, toDir);
+			File.Move(media.StringUrl, toDir);
 			media.Url = new Uri(toDir);
 		}
 		public static void Copy(Media media, string toDir)
 		{
 			toDir += media.Name;
-			File.Copy(media.Path, toDir, true);
+			File.Copy(media.StringUrl, toDir, true);
 		}
 		public static bool DoesExists(Uri url)
 		{
 			if (url.IsFile)
-			{
-				if (!File.Exists(url.AbsolutePath))
-					return false;
-				return File.Exists(url.AbsolutePath);
-			}
+				return File.Exists(url.LocalPath);
 			else
 				return DownloadManager.IsDownloadable(url, out _);
 		}

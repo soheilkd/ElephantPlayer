@@ -17,16 +17,16 @@ namespace Player
 		};
 		private Media Media;
 		private TagLib.File File;
-		public event EventHandler<InfoExchangeArgs> ChangeRequested;
+		public event EventHandler<InfoExchangeArgs<TagLib.File>> SaveRequested;
 
 		public PropertiesUI() => InitializeComponent();
 
-		public static void OpenFor(Media media, EventHandler<InfoExchangeArgs> onSave)
+		public void LoadFor(Media media)
 		{
 			var ui = new PropertiesUI
 			{
 				Media = media,
-				File = TagLib.File.Create(media.Path)
+				File = TagLib.File.Create(media.StringUrl)
 			};
 			var tag = ui.File.Tag;
 			MediaManager.Load(ui.Media);
@@ -42,7 +42,6 @@ namespace Player
 			ui.CopyrightBox.Text = tag.Copyright ?? String.Empty;
 			ui.LyricsBox.Text = tag.Lyrics ?? String.Empty;
 			ui.ArtworkImage.Source = media.Artwork;
-			ui.ChangeRequested += onSave;
 			ui.Show();
 		}
 
@@ -51,7 +50,6 @@ namespace Player
 			File.Tag.Pictures = new TagLib.IPicture[0];
 			ArtworkImage.Source = Media.IsVideo ? Images.VideoArt : Images.MusicArt;
 		}
-
 		private void SaveButtonClick(object sender, MouseButtonEventArgs e)
 		{
 			File.Tag.Title = TitleBox.Text ?? String.Empty;
@@ -66,10 +64,9 @@ namespace Player
 			File.Tag.Copyright = CopyrightBox.Text ?? String.Empty;
 			File.Tag.Lyrics = LyricsBox.Text ?? String.Empty;
 
-			ChangeRequested(this, new InfoExchangeArgs(InfoType.TagEdit, File));
+			SaveRequested?.Invoke(this, new InfoExchangeArgs<TagLib.File>(File));
 			Close();
 		}
-
 		private void ArtworkImage_MouseUp(object sender, MouseButtonEventArgs e)
 		{
 			if (ArtworkDialog.ShowDialog() ?? false)
@@ -78,9 +75,7 @@ namespace Player
 				ArtworkImage.Source = new BitmapImage(new Uri(ArtworkDialog.FileName));
 			}
 		}
-
 		private void Grid_MouseDown(object sender, MouseButtonEventArgs e) { try { DragMove(); } catch (Exception) { } }
-
 		private void CancelButton_Click(object sender, MouseButtonEventArgs e) => Close();
 	}
 }

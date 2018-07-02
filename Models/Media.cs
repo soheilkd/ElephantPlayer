@@ -20,12 +20,6 @@ namespace Player
 	[Serializable]
 	public class Media : INotifyPropertyChanged
 	{
-		protected void Set<T>(ref T field, T value, [CallerMemberName] string propertyName = null)
-		{
-			field = value;
-			PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-		}
-
 		private string _Name;
 		private string _Artist;
 		private string _Title;
@@ -34,6 +28,12 @@ namespace Player
 		private int _PlayCount;
 		private bool _IsPlaying;
 		private TimeSpan _Len;
+		public MediaType Type;
+		[field: NonSerialized] public string Lyrics = "";
+		[field: NonSerialized] public bool IsLoaded = false;
+		[field: NonSerialized] public BitmapSource Artwork;
+		[field: NonSerialized] public event PropertyChangedEventHandler PropertyChanged;
+
 		public string Name { get => _Name; set => Set(ref _Name, value); }
 		public string Artist { get => _Artist; set => Set(ref _Artist, value); }
 		public string Title { get => _Title; set => Set(ref _Title, value); }
@@ -44,14 +44,10 @@ namespace Player
 		public TimeSpan Length { get => _Len; set => Set(ref _Len, value); }
 		public DateTime AdditionDate { get; private set; }
 		public Uri Url { get; set; }
+
 		public bool IsOffline => Url.IsFile;
-		public MediaType Type;
-		public string Path => Url.IsFile ? Url.LocalPath : Url.AbsoluteUri;
+		public string StringUrl => Url.IsFile ? Url.LocalPath : Url.AbsoluteUri;
 		public bool IsVideo => Type == MediaType.Video;
-		[field: NonSerialized] public string Lyrics = "";
-		[field: NonSerialized] public bool IsLoaded = false;
-		[field: NonSerialized] public BitmapSource Artwork;
-		[field: NonSerialized] public event PropertyChangedEventHandler PropertyChanged;
 
 		public Media() { }
 		public Media(Uri url)
@@ -63,8 +59,14 @@ namespace Player
 			Url = url;
 			AdditionDate = DateTime.Now;
 		}
-		public Media(string path) : this(new Uri(path, true)) { }
+		public Media(string path) : this(new Uri(Uri.UnescapeDataString(path))) { }
 
 		public override string ToString() => $"{Artist} - {Title}";
+
+		protected void Set<T>(ref T field, T value, [CallerMemberName] string propertyName = null)
+		{
+			field = value;
+			PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+		}
 	}
 }

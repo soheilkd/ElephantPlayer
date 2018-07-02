@@ -9,7 +9,9 @@ namespace Player
 {
 	public class DownloadManager
 	{
-		public event EventHandler<InfoExchangeArgs> DownloadCompleted;
+		public event EventHandler<InfoExchangeArgs<Media>> MediaDownloaded;
+		public event EventHandler<InfoExchangeArgs<Media[]>> CollectionDownloaded;
+
 		internal Dictionary<Media, WebClient> Pairs = new Dictionary<Media, WebClient>();
 
 		public DownloadManager()
@@ -33,10 +35,10 @@ namespace Player
 					var d = from item in Directory.GetFiles(path, "*", SearchOption.AllDirectories) where MediaManager.IsMedia(item) select MediaManager.CreateMedia(item);
 					foreach (var item in d)
 						MediaManager.CleanTag(item, false);
-					DownloadCompleted?.Invoke(media, new InfoExchangeArgs(InfoType.MediaCollection, d.ToArray()));
+					CollectionDownloaded?.Invoke(this, new InfoExchangeArgs<Media[]>(d.ToArray()));
 				}
 				else
-					DownloadCompleted?.Invoke(media, new InfoExchangeArgs(InfoType.Media, new Media(SavePath)));
+					MediaDownloaded?.Invoke(this, new InfoExchangeArgs<Media>(new Media(SavePath)));
 				Pairs.Remove(media);
 			};
 			Pairs[media].DownloadFileAsync(media.Url, SavePath);

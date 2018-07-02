@@ -1,12 +1,9 @@
 ﻿using Microsoft.Win32;
-using Player.Controls;
 using Player.Events;
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Timers;
@@ -14,14 +11,19 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Animation;
 using Forms = System.Windows.Forms;
 
 namespace Player
 {
 	public partial class MainWindow : Window
 	{
+		private const int HeightOnMinimal = 130;
+		private double TempHeight
+		{
+			get => (double)Resources["MinimalDoubleSys"];
+			set => Resources["MinimalDoubleSys"] = value;
+		}
+
 		private MediaManager Manager = new MediaManager();
 		private ObservableCollection<Media>[] Collections = new ObservableCollection<Media>[3];
 		private Timer PlayCountTimer = new Timer(100000) { AutoReset = false };
@@ -37,7 +39,6 @@ namespace Player
 			}
 		}
 		private bool WasMaximized;
-		private Storyboard MinimalOnBoard, MinimalOffBoard;
 
 		public MainWindow()
 		{
@@ -53,21 +54,18 @@ namespace Player
 			PlayCountTimer.Elapsed += (_, __) => Manager.CurrentlyPlaying.PlayCount++;
 			App.NewInstanceRequested += (_, e) => e.Args.ToList().ForEach(each => Manager.Add(each, true));
 			KeyboardEvents.KeyDown += Keyboard_KeyDown;
-			Manager.Change += Manager_Change;
-			Player.SomethingHappened += Player_EventHappened;
+			Manager.RequestReceived += (_, e) => Play(e.Parameter);
+			Player.RequestReceived += Player_RequestReceived;
+			Player.LengthFound += (_, e) => Manager.CurrentlyPlaying.Length = e.Parameter;
 			Player.UpdateLayout();
 			Collections[0] = new ObservableCollection<Media>();
 			Collections[1] = LibraryManager.LoadedCollection.ByArtist;
 			Collections[2] = LibraryManager.LoadedCollection.ByAlbum;
-			MinimalOnBoard = Resources["MinimalOnBoard"] as Storyboard;
-			MinimalOffBoard = Resources["MinimalOffBoard"] as Storyboard;
 			ArtistsView.ItemsSource = Collections[1];
 			AlbumsView.ItemsSource = Collections[2];
 			TitlesView.ItemsSource = Manager;
 			Player.ParentWindow = this;
 			TaskbarItemInfo = Player.Thumb.Info;
-			MinimalOnBoard.CurrentStateInvalidated += (_, __) => TabControl.Height = Height >= 131 ? Height - 80 : TabControl.Height;
-			MinimalOffBoard.Completed += (_, __) => TabControl.Height = Double.NaN;
 			Resources["LastPath"] = App.Settings.LastPath;
 
 			RebindViews();
@@ -76,6 +74,34 @@ namespace Player
 			AlbumsView.MouseDoubleClick += DMouseDoubleClick;
 			Manager.CollectionChanged += Manager_CollectionChanged;
 			TabControl.SelectedIndex = 1;
+		}
+		
+		private void Player_RequestReceived(object sender, RequestArgs e)
+		{
+			switch (e.Request)
+			{
+				case RequestType.Next: Play(Manager.Next()); break;
+				case RequestType.Previous: Play(Manager.Previous()); break;
+				case RequestType.Magnifiement: ControlsNotNeededOnVisionIsVisible = !Player.IsMagnified; break;
+				case RequestType.Collapse:
+					WasMaximized = WindowState == WindowState.Maximized;
+					WindowState = WindowState.Normal;
+					TempHeight = ActualHeight;
+					ResizeMode = ResizeMode.CanMinimize;
+					Height = HeightOnMinimal;
+					WindowStyle = WindowStyle.ToolWindow;
+					Player.MinimalViewButton.Icon = MaterialDesignThemes.Wpf.PackIconKind.ChevronDoubleDown;
+					break;
+				case RequestType.Expand:
+					if (WasMaximized)
+						WindowState = WindowState.Maximized;
+					ResizeMode = ResizeMode.CanResize;
+					WindowStyle = WindowStyle.ThreeDBorderWindow;
+					Height = TempHeight;
+					Player.MinimalViewButton.Icon = MaterialDesignThemes.Wpf.PackIconKind.ChevronDoubleUp;
+					break;
+				default: break;
+			}
 		}
 
 		private void Manager_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
@@ -125,14 +151,14 @@ namespace Player
 		private void Window_Loaded(object sender, RoutedEventArgs e)
 		{
 			Height = 1;
-			Resources["MinimalDoubleSys"] = App.Settings.LastSize.Height;
+			TempHeight = App.Settings.LastSize.Height;
 			if (App.Settings.RememberMinimal && App.Settings.WasMinimal)
 			{
 				Player.MinimalViewButton.EmulateClick();
-				Resources["MinimalDoubleSys"] = App.Settings.LastSize.Height;
+				TempHeight = App.Settings.LastSize.Height;
 			}
 			else
-				MinimalOffBoard.Begin();
+				Height = TempHeight;
 			SemiLoad();
 		}
 
@@ -142,42 +168,13 @@ namespace Player
 			{
 				await Task.Delay(10);
 			}
-			var args = Environment.GetCommandLineArgs().Where(name => !name.EndsWith(".exe")).ToArray();
+			var args = Environment.GetCommandLineArgs().Where(name => MediaManager.IsMedia(name)).ToArray();
 			args.For(each => Manager.Add(each, true));
-		}
-
-		private void Player_EventHappened(object sender, InfoExchangeArgs e)
-		{
-			switch (e.Type)
-			{
-				case InfoType.NextRequest: Play(Manager.Next()); break;
-				case InfoType.PrevRequest: Play(Manager.Previous()); break;
-				case InfoType.LengthFound: Manager.CurrentlyPlaying.Length = (TimeSpan)e.Object; break;
-				case InfoType.Magnifiement: ControlsNotNeededOnVisionIsVisible = !(bool)e.Object; break;
-				case InfoType.CollapseRequest:
-					WasMaximized = WindowState == WindowState.Maximized;
-					WindowState = WindowState.Normal;
-					Resources["MinimalDoubleSys"] = ActualHeight;
-					ResizeMode = ResizeMode.CanMinimize;
-					MinimalOnBoard.Begin();
-					WindowStyle = WindowStyle.ToolWindow;
-					Player.MinimalViewButton.Icon = MaterialDesignThemes.Wpf.PackIconKind.ChevronDoubleDown;
-					break;
-				case InfoType.ExpandRequest:
-					if (WasMaximized)
-						WindowState = WindowState.Maximized;
-					ResizeMode = ResizeMode.CanResize;
-					WindowStyle = WindowStyle.ThreeDBorderWindow;
-					MinimalOffBoard.Begin();
-					Player.MinimalViewButton.Icon = MaterialDesignThemes.Wpf.PackIconKind.ChevronDoubleUp;
-					break;
-				default: break;
-			}
 		}
 
 		private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
 		{
-			App.Settings.LastSize = new Size(Width, Height <= 130 ? (double)Resources["MinimalDoubleSys"]: Height);
+			App.Settings.LastSize = new Size(Width, Height <= 130 ? TempHeight: Height);
 			App.Settings.LastLoc = new Point(Left, Top);
 			App.Settings.WasMinimal = Height <= 131;
 			App.Settings.Volume = Player.Volume;
@@ -198,41 +195,6 @@ namespace Player
 		private void Window_Drop(object sender, DragEventArgs e)
 		{
 			((string[])e.Data.GetData(DataFormats.FileDrop)).For(each => Manager.Add(each));
-		}
-		
-		private async void Manager_Change(object sender, InfoExchangeArgs e)
-		{
-			switch (e.Type)
-			{
-				case InfoType.TagEdit:
-					IsEnabled = false;
-					var pos = Player.Position;
-					Player.Stop();
-					await Task.Delay(500);
-					try
-					{
-						(e.Object as TagLib.File).Save();
-					}
-					catch (IOException)
-					{
-						MessageBox.Show("I/O Exception occured, try again");
-					}
-					finally
-					{
-						Play(sender as Media);
-						Player.Position = pos;
-						IsEnabled = true;
-					}
-					break;
-				case InfoType.MediaRequest:
-					Play(sender as Media);
-					break;
-				case InfoType.CollectionUpdate:
-					RebindViews();
-					break;
-				default:
-					break;
-			}
 		}
 
 		private async void Keyboard_KeyDown(object sender, Forms::KeyEventArgs e)
@@ -297,7 +259,7 @@ namespace Player
 			Player.Play(Manager.Play(media));
 			MiniArtworkImage.Source = media.Artwork;
 			DeepBackEnd.NativeMethods.SHAddToRecentDocs(DeepBackEnd.NativeMethods.ShellAddToRecentDocsFlags.Path,
-				media.Path);
+				media.StringUrl);
 		}
 		private bool IsAncestorKeyDown(Forms::KeyEventArgs e)
 		{
@@ -316,7 +278,6 @@ namespace Player
 
 		private void SearchBox_TextChanged(object sender, TextChangedEventArgs e)
 		{
-
 			RebindViews();
 		}
 		private void SearchIcon_Click(object sender, MouseButtonEventArgs e)
@@ -327,7 +288,7 @@ namespace Player
 
 		private void Menu_TagDetergent(object sender, RoutedEventArgs e)
 		{
-			For(item => MediaManager.CleanTag(item));
+			For(item => { if (item.IsOffline) MediaManager.CleanTag(item); });
 		}
 		private void Menu_PlayAfterClick(object sender, RoutedEventArgs e)
 		{
@@ -396,44 +357,46 @@ namespace Player
 		private void Menu_DeleteClick(object sender, RoutedEventArgs e)
 		{
 			string msg = "Sure? These will be deleted:\r\n";
-			For(item => msg += $"{item.Path}\r\n");
+			For(item => msg += $"{item.StringUrl}\r\n");
 			if (MessageBox.Show(msg, "Sure?", MessageBoxButton.OKCancel, MessageBoxImage.Warning) != MessageBoxResult.OK)
 				return;
 			For(item => Manager.Delete(item));
 		}
 		private void Menu_LocationClick(object sender, RoutedEventArgs e)
 		{
-			For(item => Process.Start("explorer.exe", "/select," + item.Path));
+			For(item => Process.Start("explorer.exe", "/select," + item.StringUrl));
 		}
 		private void Menu_PropertiesClick(object sender, RoutedEventArgs e)
 		{
-			For(item => PropertiesUI.OpenFor(item, (_, f) =>
+			For(each =>
 			{
-				var file = f.Object as TagLib.File;
-				if (file.Name == Manager.CurrentlyPlaying.Path)
+				if (!each.IsOffline)
+					return;
+				var pro = new PropertiesUI();
+				pro.SaveRequested += (_, f) =>
 				{
-					var pos = Player.Position;
-					Player.Stop();
-					file.Save();
-					MediaManager.Reload(Manager.CurrentlyPlaying);
-					Play(Manager.CurrentlyPlaying);
-					Player.Position = pos;
-					Manager.UpdateOnPath(item);
-				}
-				else
-				{
-					f.Object.As<TagLib.File>().Save();
-					Manager.UpdateOnPath(item);
-				}
-			}));
+					if (f.Parameter.Name == Manager.CurrentlyPlaying.StringUrl)
+					{
+						var pos = Player.Position;
+						Player.Stop();
+						f.Parameter.Save();
+						MediaManager.Reload(Manager.CurrentlyPlaying);
+						Play(Manager.CurrentlyPlaying);
+						Player.Position = pos;
+						MediaManager.Reload(each);
+					}
+					else
+					{
+						f.Parameter.Save();
+						MediaManager.Reload(each);
+					}
+				};
+				pro.LoadFor(each);
+			});
 		}
 		private void Menu_DownloadClick(object sender, RoutedEventArgs e)
 		{
-			For(item => Manager.DownloadManager.Download(item));
-		}
-		private void Menu_VLC(object sender, RoutedEventArgs e)
-		{
-			For(item => Process.Start(new ProcessStartInfo(@"C:\Program Files\VideoLAN\VLC\vlc.exe", $"\"{item.Path}\"")));
+			For(item => { if (!item.IsOffline) Manager.DownloadManager.Download(item); });
 		}
 		
 		private Collection<Media> ActiveCollection
@@ -464,5 +427,7 @@ namespace Player
 		{
 			ActiveView.SelectedItems.Cast<Media>().ToArray().For(action);
 		}
+
+
 	}
 }

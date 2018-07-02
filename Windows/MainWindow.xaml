@@ -152,15 +152,7 @@
 	</Grid>
 	<Window.Resources>
 		<sys:Double x:Key="MinimalDoubleSys" />
-		<Storyboard x:Key="MinimalOnBoard" Storyboard.TargetName="window" Storyboard.TargetProperty="Height">
-			<DoubleAnimation From="{Binding ActualHeight, ElementName=window}" To="130"
-							 AccelerationRatio="0.6" DecelerationRatio="0.4" By="1"/>
-		</Storyboard>
-		<Storyboard x:Key="MinimalOffBoard" Storyboard.TargetName="window" Storyboard.TargetProperty="Height">
-			<DoubleAnimation From="{Binding ActualHeight, ElementName=window}" To="{DynamicResource MinimalDoubleSys}"
-							 AccelerationRatio="0.4" DecelerationRatio="0.6" By="1"/>
-		</Storyboard>
-		
+
 		<DataTemplate x:Key="TitleCell">
 			<TextBlock x:Name="block" Text="{Binding Title}" FontSize="16" FontWeight="Normal" Foreground="White"/>
 			<DataTemplate.Triggers>
@@ -209,7 +201,6 @@
 		<ContextMenu x:Key="ContextMenu1">
 			<MenuItem Header="Detergent Meta" Click="Menu_TagDetergent" />
 			<MenuItem Header="Play after current" Click="Menu_PlayAfterClick" />
-			<MenuItem Header="Open in VLC" Click="Menu_VLC"/>
 			<MenuItem Header="Download" Click="Menu_DownloadClick" />
 			<MenuItem Header="Move to..." >
 				<MenuItem Header="{DynamicResource LastPath}" Click="Menu_MoveClick"/>

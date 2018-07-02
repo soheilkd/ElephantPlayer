@@ -1,13 +1,12 @@
-﻿using Player.Events;
+﻿using MaterialDesignThemes.Wpf;
+using Player.Events;
 using System;
 using System.Threading.Tasks;
 using System.Timers;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using System.Windows.Media;
 using System.Windows.Media.Animation;
-using MaterialDesignThemes.Wpf;
 namespace Player.Controls
 {
 	public partial class MediaPlayer : UserControl
@@ -19,7 +18,9 @@ namespace Player.Controls
 		public static DependencyProperty IsFullScreenProperty =
 			DependencyProperty.Register(nameof(IsFullScreen), typeof(bool), typeof(MediaPlayer), new PropertyMetadata(false));
 
-		public event EventHandler<InfoExchangeArgs> SomethingHappened;
+		public event EventHandler<RequestArgs> RequestReceived;
+		public event EventHandler<InfoExchangeArgs<TimeSpan>> LengthFound;
+
 		public TimeSpan Position
 		{
 			get => element.Position;
@@ -63,7 +64,7 @@ namespace Player.Controls
 				PositionSlider.SmallChange = 1 * PositionSlider.Maximum / 100;
 				PositionSlider.LargeChange = 5 * PositionSlider.Maximum / 100;
 				TimeLabel_Full.Content = TimeSpan.ToNewString();
-				Invoke(InfoType.LengthFound, TimeSpan);
+				LengthFound?.Invoke(this, new InfoExchangeArgs<TimeSpan>(TimeSpan));
 			}
 		}
 		private bool WasMaximized, isTopMost, IsUXChangingPosition, WasMinimal;
@@ -118,7 +119,7 @@ namespace Player.Controls
 					MinifyBoard.Begin();
 					IsTopMost = false;
 				}
-				Invoke(InfoType.Magnifiement, value);
+				Request(RequestType.Magnifiement);
 			}
 		}
 		public bool AreControlsVisible
@@ -241,7 +242,10 @@ namespace Player.Controls
 			else
 				Play();
 		}
-		private void NextButton_Clicked(object sender, MouseButtonEventArgs e) => Invoke(InfoType.NextRequest);
+		private void NextButton_Clicked(object sender, MouseButtonEventArgs e)
+		{
+			Request(RequestType.Next);
+		}
 		private void PreviousButton_Clicked(object sender, MouseButtonEventArgs e)
 		{
 			if (PositionSlider.Value > PositionSlider.Maximum / 100 * 10)
@@ -250,7 +254,7 @@ namespace Player.Controls
 				element.Play();
 			}
 			else
-				Invoke(InfoType.PrevRequest);
+				Request(RequestType.Previous);
 		}
 		private void FullScreenButton_Clicked(object sender, MouseButtonEventArgs e)
 		{
@@ -266,7 +270,7 @@ namespace Player.Controls
 		}
 		private void MinimalButton_Clicked(object sender, MouseButtonEventArgs e)
 		{
-			SomethingHappened?.Invoke(this, new InfoExchangeArgs((int)MinimalViewButton.Icon == 449 ? InfoType.ExpandRequest : InfoType.CollapseRequest));
+			Request((int)MinimalViewButton.Icon == 449 ? RequestType.Expand : RequestType.Collapse);
 		}
 
 		private void PlayMode_Click(object sender, MouseButtonEventArgs e)
@@ -323,7 +327,8 @@ namespace Player.Controls
 			}
 		}
 
-		private void Invoke(InfoType type, object obj = null) => SomethingHappened?.Invoke(this, new InfoExchangeArgs(type, obj));
+		private void Request(RequestType requestType) 
+			=> RequestReceived?.Invoke(this, new RequestArgs(requestType));
 
 		public void Play(bool emulateClick = false)
 		{
