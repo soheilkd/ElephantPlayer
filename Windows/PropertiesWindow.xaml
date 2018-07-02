@@ -36,8 +36,8 @@
 		<TextBox x:Name="CopyrightBox" Margin="92,450,7,0" />
 		<Image x:Name="ArtworkImage" Height="150" Width="150"  VerticalAlignment="Top" HorizontalAlignment="Left" MouseUp="ArtworkImage_MouseUp" Margin="4,42,0,0"/>
 		<controls:MaterialButton Margin="166,166,0,0" MouseUp="RemoveArtworkClick" Icon="Delete" EllipseType="Rectular" />
-		<controls:MaterialButton Margin="0,8,48,0" HorizontalAlignment="Right" MouseUp="SaveButtonClick" Icon="Save" EllipseType="Rectular"/>
-		<controls:MaterialButton Margin="0,8,8,0" HorizontalAlignment="Right" MouseUp="CancelButton_Click" Icon="Cancel" EllipseType="Rectular"/>
+		<controls:MaterialButton Margin="0,8,48,0" HorizontalAlignment="Right" MouseUp="SaveButtonClick" Icon="ContentSave" EllipseType="Rectular"/>
+		<controls:MaterialButton Margin="0,8,8,0" HorizontalAlignment="Right" MouseUp="CancelButton_Click" Icon="Close" EllipseType="Rectular"/>
 		<Grid.Resources>
 			<Style TargetType="{x:Type controls:MaterialButton}">
 				<Setter Property="HorizontalAlignment" Value="Left"/>

@@ -4,7 +4,7 @@
 			 Width="20" Height="20" xmlns:mat="http://materialdesigninxaml.net/winfx/xaml/themes"
 			 x:Name="P" Loaded="UserControl_Loaded">
 	<Grid>
-		<Border x:Name="MainEllipse" BorderThickness="0" Margin="-7" BorderBrush="{Binding ElementName=P, Path=Foreground}" CornerRadius="20" Background="#4111"/>
+		<Border x:Name="MainEllipse" BorderThickness="0" Margin="-7" BorderBrush="{Binding ElementName=P, Path=Foreground}" CornerRadius="20" Background="#1FFF"/>
 		<Border x:Name="ClickEllipse" BorderBrush="{Binding ElementName=P, Path=Foreground}" CornerRadius="100"  />
 		<mat:PackIcon x:Name="MainIcon" Foreground="{Binding ElementName=P, Path=Foreground}" Background="#01FFFFFF" Kind="Settings"
                             Width="{Binding Width, ElementName=P}" Height="{Binding Height, ElementName=P}" />
