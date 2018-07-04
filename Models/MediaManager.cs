@@ -22,10 +22,10 @@ namespace Player
 		public Media CurrentlyPlaying;
 		public event EventHandler<InfoExchangeArgs<Media>> RequestReceived;
 
-		public void Add(string path, bool requestPlay = false)
+		public void AddFromPath(string path, bool requestPlay = false)
 		{
 			if (Directory.Exists(path))
-				Directory.GetFiles(path, "*", SearchOption.AllDirectories).For(each => Add(each));
+				Directory.GetFiles(path, "*", SearchOption.AllDirectories).For(each => AddFromPath(each));
 			var media = new Media(path);
 			if (!DoesExists(media))
 				return;
