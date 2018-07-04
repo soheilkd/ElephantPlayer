@@ -13,7 +13,6 @@
                           Volume="1"/>
 		</Grid>
 		<Grid x:Name="ControlsGrid" Background="Transparent" VerticalAlignment="Bottom" Height="94">
-			<Label Content="Content Title" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="67,0,0,0" FontSize="18" x:Name="TitleLabel" Foreground="{DynamicResource Foreground}"/>
 			<Slider Value="100" x:Name="PositionSlider" ValueChanged="Position_Changed" PreviewMouseLeftButtonDown="Position_Holding" IsMoveToPointEnabled="True"
                VerticalAlignment="Center" Maximum="1000" Template="{DynamicResource FlatSlider}" Margin="50,71,50,0">
 			</Slider>

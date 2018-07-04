@@ -302,10 +302,9 @@ namespace Player.Controls
 			if (IsFullScreen && !media.IsVideo)
 				FullScreenButton.EmulateClick();
 			IsMagnified = media.IsVideo && App.Settings.VisionOrientation;
-			element.Source = media.Url;
+			element.Source = media;
 			PlayCountTimer.Stop();
 			PlayCountTimer.Start();
-			TitleLabel.Content = media.ToString();
 			Play();
 			MinimalViewButton.Visibility = media.IsVideo ? Visibility.Hidden : Visibility.Visible;
 			if (media.IsVideo)

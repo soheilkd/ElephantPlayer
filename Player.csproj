@@ -145,7 +145,6 @@
     <Compile Include="Base\Extensions.cs" />
     <Compile Include="Base\Images.cs" />
     <Compile Include="Base\Settings.cs" />
-    <Compile Include="Models\DownloadManager.cs" />
     <Compile Include="Controls\MediaPlayer.xaml.cs">
       <DependentUpon>MediaPlayer.xaml</DependentUpon>
     </Compile>

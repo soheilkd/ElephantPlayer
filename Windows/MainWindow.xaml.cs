@@ -222,17 +222,6 @@ namespace Player
 				{
 					case Forms::Keys.Left: Player.SlidePosition(false); break;
 					case Forms::Keys.Right: Player.SlidePosition(true); break;
-					case Forms::Keys.A:
-						var cb = Clipboard.GetText() ?? String.Empty;
-						if (Uri.TryCreate(cb, UriKind.Absolute, out var uri))
-						{
-							Manager.Add(uri.AbsoluteUri);
-							if (Manager[0].Type == MediaType.OnlineFile)
-								Manager.DownloadManager.Download(Manager[0]);
-						}
-						else
-							return;
-						break;
 					default: break;
 				}
 			}
@@ -250,8 +239,8 @@ namespace Player
 		{
 			Player.Play(Manager.Play(media));
 			MiniArtworkImage.Source = media.Artwork;
-			DeepBackEnd.NativeMethods.SHAddToRecentDocs(DeepBackEnd.NativeMethods.ShellAddToRecentDocsFlags.Path,
-				media.StringUrl);
+			DeepBackEnd.NativeMethods.SHAddToRecentDocs(DeepBackEnd.NativeMethods.ShellAddToRecentDocsFlags.Path, media);
+			Title = $"Elephant Player| {media.Artist} - {media.Title}";
 		}
 		private bool IsAncestorKeyDown(Forms::KeyEventArgs e)
 		{
@@ -280,7 +269,7 @@ namespace Player
 
 		private void Menu_TagDetergent(object sender, RoutedEventArgs e)
 		{
-			For(item => { if (item.IsOffline) MediaManager.CleanTag(item); });
+			For(item => MediaManager.CleanTag(item));
 		}
 		private void Menu_PlayAfterClick(object sender, RoutedEventArgs e)
 		{
@@ -349,25 +338,23 @@ namespace Player
 		private void Menu_DeleteClick(object sender, RoutedEventArgs e)
 		{
 			string msg = "Sure? These will be deleted:\r\n";
-			For(item => msg += $"{item.StringUrl}\r\n");
+			For(item => msg += $"{item.Path}\r\n");
 			if (MessageBox.Show(msg, "Sure?", MessageBoxButton.OKCancel, MessageBoxImage.Warning) != MessageBoxResult.OK)
 				return;
 			For(item => Manager.Delete(item));
 		}
 		private void Menu_LocationClick(object sender, RoutedEventArgs e)
 		{
-			For(item => Process.Start("explorer.exe", "/select," + item.StringUrl));
+			For(item => Process.Start("explorer.exe", "/select," + item.Path));
 		}
 		private void Menu_PropertiesClick(object sender, RoutedEventArgs e)
 		{
 			For(each =>
 			{
-				if (!each.IsOffline)
-					return;
 				var pro = new PropertiesUI();
 				pro.SaveRequested += (_, f) =>
 				{
-					if (f.Parameter.Name == Manager.CurrentlyPlaying.StringUrl)
+					if (f.Parameter.Name == Manager.CurrentlyPlaying.Path)
 					{
 						var pos = Player.Position;
 						Player.Stop();
@@ -386,11 +373,7 @@ namespace Player
 				pro.LoadFor(each);
 			});
 		}
-		private void Menu_DownloadClick(object sender, RoutedEventArgs e)
-		{
-			For(item => { if (!item.IsOffline) Manager.DownloadManager.Download(item); });
-		}
-		
+
 		private Collection<Media> ActiveCollection
 		{
 			get
@@ -419,7 +402,6 @@ namespace Player
 		{
 			ActiveView.SelectedItems.Cast<Media>().ToArray().For(action);
 		}
-
-
+		
 	}
 }

@@ -201,7 +201,6 @@
 		<ContextMenu x:Key="ContextMenu1">
 			<MenuItem Header="Detergent Meta" Click="Menu_TagDetergent" />
 			<MenuItem Header="Play after current" Click="Menu_PlayAfterClick" />
-			<MenuItem Header="Download" Click="Menu_DownloadClick" />
 			<MenuItem Header="Move to..." >
 				<MenuItem Header="{DynamicResource LastPath}" Click="Menu_MoveClick"/>
 				<MenuItem Header="Browse..." Click="Menu_MoveClick"/>

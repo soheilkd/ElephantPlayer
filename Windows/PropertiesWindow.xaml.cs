@@ -26,7 +26,7 @@ namespace Player
 			var ui = new PropertiesUI
 			{
 				Media = media,
-				File = TagLib.File.Create(media.StringUrl)
+				File = TagLib.File.Create(media)
 			};
 			var tag = ui.File.Tag;
 			MediaManager.Load(ui.Media);

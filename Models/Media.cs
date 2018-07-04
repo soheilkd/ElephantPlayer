@@ -11,10 +11,7 @@ namespace Player
 		None = 0B0,
 		File = 0B10,
 		Music = File | 0B100,
-		Video = File | 0B1000,
-		OnlineFile = File | 0B10000,
-		OnlineMusic = Music | OnlineFile,
-		OnlineVideo = Video | OnlineFile
+		Video = File | 0B1000
 	}
 
 	[Serializable]
@@ -43,30 +40,26 @@ namespace Player
 		public bool IsPlaying { get => _IsPlaying; set => Set(ref _IsPlaying, value); }
 		public TimeSpan Length { get => _Len; set => Set(ref _Len, value); }
 		public DateTime AdditionDate { get; private set; }
-		public Uri Url { get; set; }
-
-		public bool IsOffline => Url.IsFile;
-		public string StringUrl => Url.IsFile ? Url.LocalPath : Url.AbsoluteUri;
+		public string Path { get; set; }
 		public bool IsVideo => Type == MediaType.Video;
 
 		public Media() { }
-		public Media(Uri url)
+		public Media(string path)
 		{
-			//Just because defualt .Net webClient doesn't support https protocol
-			if (!url.IsFile && url.AbsoluteUri[4] == 's')
-				Url = new Uri(url.AbsoluteUri.Remove(4, 1));
-			else Url = url;
-			Url = url;
+			Path = path;
 			AdditionDate = DateTime.Now;
 		}
-		public Media(string path) : this(new Uri(Uri.UnescapeDataString(path))) { }
 
-		public override string ToString() => $"{Artist} - {Title}";
-
+		public override string ToString() => Path;
+		
 		protected void Set<T>(ref T field, T value, [CallerMemberName] string propertyName = null)
 		{
 			field = value;
 			PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 		}
+
+		public static implicit operator string(Media media) => media.Path;
+		public static implicit operator Uri(Media media) => new Uri(media.Path);
+		public static implicit operator MediaType(Media media) => media.Type;
 	}
 }

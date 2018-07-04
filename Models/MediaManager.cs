@@ -15,25 +15,24 @@ namespace Player
 		public MediaManager()
 		{
 			LibraryManager.Load().Unordered.For(each => Add(each));
-			DownloadManager.MediaDownloaded += (_, e) => Add(e.Parameter);
-			DownloadManager.CollectionDownloaded += (_, e) => e.Parameter.For(each => Add(each));
 		}
 
 		public Collection<Media> Queue;
 		private Random Shuffle = new Random(DateTime.Now.Millisecond);
 		public Media CurrentlyPlaying;
 		public event EventHandler<InfoExchangeArgs<Media>> RequestReceived;
-		public readonly DownloadManager DownloadManager = new DownloadManager();
 
 		public void Add(string path, bool requestPlay = false)
 		{
 			if (Directory.Exists(path))
 				Directory.GetFiles(path, "*", SearchOption.AllDirectories).For(each => Add(each));
 			var media = new Media(path);
-			if (!DoesExists(media) || !IsMedia(media.StringUrl))
+			if (!DoesExists(media))
 				return;
 			Load(media);
-			var duplication = this.Where(item => item.StringUrl == path);
+			if (!media.Type.HasFlag(MediaType.File))
+				return;
+			var duplication = this.Where(item => item.Path == path);
 			if (duplication.Count() != 0 && requestPlay)
 			{
 				RequestPlay(duplication.First());
@@ -47,8 +46,8 @@ namespace Player
 		public void Delete(Media media)
 		{
 			bool reqNext = CurrentlyPlaying == media;
-			File.Delete(media.StringUrl);
-			this.Where(each => each.StringUrl == media.StringUrl).ToArray().For(each => Remove(each));
+			File.Delete(media);
+			this.Where(each => each.Path == media.Path).ToArray().For(each => Remove(each));
 			if (reqNext)
 				RequestPlay(Next());
 		}
@@ -119,37 +118,17 @@ namespace Player
 		private static readonly string[] SupportedVideos = "mp4;mpg;mkv;wmv;mov;avi;m4v;ts;wav;mpeg;webm".Split(';');
 		private static readonly string[] SupportedFiles = "zip;rar;bin;dat".Split(';');
 
-		public static MediaType GetMediaType(Uri url)
+		public static MediaType GetMediaType(string path)
 		{
-			var ext = GetExt(url);
-			if (url.IsFile)
-			{
-				if (SupportedMusics.Contains(ext)) return MediaType.Music;
-				else if (SupportedVideos.Contains(ext)) return MediaType.Video;
-				else if (SupportedFiles.Contains(ext)) return MediaType.File;
-				else return MediaType.None;
-			}
-			else
-			{
-				if (DownloadManager.IsDownloadable(url, out var type)) return type;
-				else return MediaType.None;
-			}
-		}
-		public static string GetExt(Uri url)
-		{
-			if (url.IsFile)
-				return url.LocalPath.Substring((url.LocalPath ?? " . ").LastIndexOf('.') + 1).ToLower();
-			else
-				return url.Segments.Last().Substring(url.Segments.Last().LastIndexOf('.') + 1).ToLower();
+			var ext = path.Substring(path.LastIndexOf('.') + 1).ToLower();
+			if (SupportedMusics.Contains(ext)) return MediaType.Music;
+			else if (SupportedVideos.Contains(ext)) return MediaType.Video;
+			else if (SupportedFiles.Contains(ext)) return MediaType.File;
+			else return MediaType.None;
 		}
 
 		public static void CleanTag(Media media, bool prompt = true)
 		{
-			if (media.Type != MediaType.Music)
-			{
-				MessageBox.Show("Not supported on this type of media", "", MessageBoxButton.OK, MessageBoxImage.Error);
-				return;
-			}
 			string deleteWord(string target, string word)
 			{
 				string output = "";
@@ -181,7 +160,7 @@ namespace Player
 				return target;
 			}
 
-			using (var file = TagLib.File.Create(media.StringUrl))
+			using (var file = TagLib.File.Create(media))
 			{
 				string[] form(TagLib.Tag tag2)
 				{
@@ -238,48 +217,33 @@ namespace Player
 		{
 			if (media.IsLoaded)
 				return;
-			if (media.IsOffline)
+			media.Name = media.Path.Substring(media.Path.LastIndexOf("\\") + 1);
+			media.Directory = media.Path.Substring(0, media.Path.LastIndexOf("\\"));
+			switch (GetMediaType(media))
 			{
-				media.Name = media.StringUrl.Substring(media.StringUrl.LastIndexOf("\\") + 1);
-				media.Directory = media.StringUrl.Substring(0, media.StringUrl.LastIndexOf("\\"));
-				switch (GetMediaType(media.Url))
-				{
-					case MediaType.Music:
-						using (var t = TagLib.File.Create(media.StringUrl))
-						{
-							media.Artist = t.Tag.FirstPerformer ?? media.StringUrl.Substring(0, media.StringUrl.LastIndexOf("\\"));
-							media.Title = t.Tag.Title ?? media.Name.Substring(0, media.Name.LastIndexOf("."));
-							media.Album = t.Tag.Album ?? String.Empty;
-							media.Artwork = t.Tag.Pictures.Length >= 1 ? Images.GetBitmap(t.Tag.Pictures[0]) : Images.MusicArt;
-							media.Type = MediaType.Music;
-							media.Lyrics = t.Tag.Lyrics ?? String.Empty;
-						}
-						break;
-					case MediaType.Video:
-						media.Title = media.Name;
-						media.Artist = media.StringUrl.Substring(0, media.StringUrl.LastIndexOf("\\"));
-						media.Artist = media.Artist.Substring(media.Artist.LastIndexOf("\\") + 1);
-						media.Album = "Video";
-						media.Artwork = Images.VideoArt;
-						media.Type = MediaType.Video;
-						media.Length = TimeSpan.Zero;
-						break;
-					default: break;
-				}
-				media.IsLoaded = true;
-			}
-			else
-			{
-				if (DownloadManager.IsDownloadable(media.Url, out media.Type))
-				{
-					media.Name = Uri.UnescapeDataString(media.Url.Segments.Last());
+				case MediaType.Music:
+					using (var t = TagLib.File.Create(media))
+					{
+						media.Artist = t.Tag.FirstPerformer ?? media.Path.Substring(0, media.Path.LastIndexOf("\\"));
+						media.Title = t.Tag.Title ?? media.Name.Substring(0, media.Name.LastIndexOf("."));
+						media.Album = t.Tag.Album ?? String.Empty;
+						media.Artwork = t.Tag.Pictures.Length >= 1 ? Images.GetBitmap(t.Tag.Pictures[0]) : Images.MusicArt;
+						media.Type = MediaType.Music;
+						media.Lyrics = t.Tag.Lyrics ?? String.Empty;
+					}
+					break;
+				case MediaType.Video:
 					media.Title = media.Name;
-					media.Artist = media.Url.Host;
-					media.Album = "Cloud";
-					media.Artwork = Images.NetArt;
-					media.IsLoaded = true;
-				}
+					media.Artist = media.Path.Substring(0, media.Path.LastIndexOf("\\"));
+					media.Artist = media.Artist.Substring(media.Artist.LastIndexOf("\\") + 1);
+					media.Album = "Video";
+					media.Artwork = Images.VideoArt;
+					media.Type = MediaType.Video;
+					media.Length = TimeSpan.Zero;
+					break;
+				default: break;
 			}
+			media.IsLoaded = true;
 		}
 		public static void Reload(Media media)
 		{
@@ -289,33 +253,15 @@ namespace Player
 		public static void Move(Media media, string toDir)
 		{
 			toDir += media.Name;
-			File.Move(media.StringUrl, toDir);
-			media.Url = new Uri(toDir);
+			File.Move(media, toDir);
+			media.Path = toDir;
 		}
 		public static void Copy(Media media, string toDir)
 		{
 			toDir += media.Name;
-			File.Copy(media.StringUrl, toDir, true);
+			File.Copy(media, toDir, true);
 		}
-		public static bool DoesExists(Uri url)
-		{
-			if (url.IsFile)
-				return File.Exists(url.LocalPath);
-			else
-				return DownloadManager.IsDownloadable(url, out _);
-		}
-		public static bool DoesExists(Media media) => DoesExists(media.Url);
-
-		public static Media CreateMedia(string path)
-		{
-			var m = new Media(path);
-			Load(m);
-			return m;
-		}
-		public static bool IsMedia(string path)
-		{
-			return GetMediaType(new Uri(path)).HasFlag(MediaType.File);
-		}
+		public static bool DoesExists(Media media) => File.Exists(media);
 		#endregion
 	}
 }

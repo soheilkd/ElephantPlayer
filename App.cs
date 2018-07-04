@@ -17,7 +17,6 @@ namespace Player
 		[STAThread]
 		public static void Main()
 		{
-			
 			AppDomain.CurrentDomain.UnhandledException += (sender, e) =>
 			{
 				MessageBox.Show($"Unhandled {e.ExceptionObject}\r\n" +
