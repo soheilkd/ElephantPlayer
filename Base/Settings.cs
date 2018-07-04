@@ -9,14 +9,17 @@ namespace Player
 		private Configuration Config;
 		public Settings()
 		{
-			Config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
+			Config = ConfigurationManager.OpenExeConfiguration(0);
 		}
 
+		public void Save()
+		{
+			Config.Save(0, true);
+			ConfigurationManager.RefreshSection("appSettings");
+		}
 		protected void Set<T>(T value, [CallerMemberName] string propertyName = null)
 		{
 			Config.AppSettings.Settings[propertyName].Value = value.ToString();
-			Config.Save(ConfigurationSaveMode.Modified, true);
-			ConfigurationManager.RefreshSection("appSettings");
 		}
 		protected string Get([CallerMemberName] string propertyName = null)
 		{

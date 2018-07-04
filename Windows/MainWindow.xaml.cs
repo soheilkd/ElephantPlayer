@@ -163,13 +163,13 @@ namespace Player
 				await Task.Delay(10);
 			Environment.GetCommandLineArgs().For(each => Manager.Add(each, true));
 		}
-
 		private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
 		{
 			App.Settings.LastSize = new Size(Width, Height <= 130 ? TempHeight: Height);
 			App.Settings.LastLoc = new Point(Left, Top);
 			App.Settings.WasMinimal = Height <= 131;
 			App.Settings.Volume = Player.Volume;
+			App.Settings.Save();
 			Manager.CloseSeason();
 			Application.Current.Shutdown();
 		}
