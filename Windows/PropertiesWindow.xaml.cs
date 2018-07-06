@@ -23,6 +23,12 @@ namespace Player
 
 		public void LoadFor(Media media)
 		{
+			if (media.Type != MediaType.Music)
+			{
+				MessageBox.Show("Cannot edit properties of this type of media", "", MessageBoxButton.OK, MessageBoxImage.Warning);
+				Close();
+				return;
+			}
 			var ui = new PropertiesUI
 			{
 				Media = media,
