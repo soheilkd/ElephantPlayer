@@ -3,7 +3,7 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows.Media.Imaging;
 
-namespace Player
+namespace Player.Models
 {
 	[Flags]
 	public enum MediaType
