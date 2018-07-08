@@ -19,12 +19,12 @@
 			
 			<Label Content="00:00" Style="{DynamicResource TimeLabel}" HorizontalAlignment="Left" x:Name="TimeLabel_Current" Margin="10,0,0,0"/>
 			<Label Content="00:00" Style="{DynamicResource TimeLabel}" HorizontalAlignment="Right" x:Name="TimeLabel_Full" Width="38" Margin="0,0,10,0"/>
-			<local:MaterialButton x:Name="PreviousButton" Icon="SkipPrevious" Margin="87,0,0,29" MouseUp="PreviousButton_Clicked" />
-			<local:MaterialButton x:Name="NextButton" Icon="SkipNext" Margin="172,0,0,29" MouseUp="NextButton_Clicked" />
-			<local:MaterialButton x:Name="PlayPauseButton" Icon="Play" MouseUp="PlayPauseButton_Clicked" Margin="127,0,0,29" Height="24" Width="24"/>
-			<local:MaterialButton x:Name="VisionButton" Icon="Television" HorizontalAlignment="Center" Margin="0,0,0,30" MouseUp="VisionButton_Clicked" />
+			<local:MaterialButton x:Name="PreviousButton" Icon="SkipPrevious" Margin="87,0,0,35" MouseUp="PreviousButton_Clicked" />
+			<local:MaterialButton x:Name="NextButton" Icon="SkipNext" Margin="172,0,0,35" MouseUp="NextButton_Clicked" />
+			<local:MaterialButton x:Name="PlayPauseButton" Icon="Play" MouseUp="PlayPauseButton_Clicked" Margin="127,0,0,35" Height="24" Width="24"/>
+			<local:MaterialButton x:Name="VisionButton" Icon="Television" HorizontalAlignment="Center" Margin="0,0,0,35" MouseUp="VisionButton_Clicked" />
 			<local:MaterialButton x:Name="PlayModeButton" Icon="Repeat" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,197,30" EllipseType="Rectular" MouseUp="PlayMode_Click"/>
-			<local:MaterialButton x:Name="FullScreenButton" Icon="FullScreen" HorizontalAlignment="Right" Margin="0,0,10,29" VerticalAlignment="Bottom" MouseUp="FullScreenButton_Clicked"/>
+			<local:MaterialButton x:Name="FullScreenButton" Icon="FullScreen" HorizontalAlignment="Right" Margin="0,0,10,35" VerticalAlignment="Bottom" MouseUp="FullScreenButton_Clicked"/>
 			<local:MaterialButton x:Name="MinimalViewButton" Icon="ChevronDoubleUp" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,240,30" EllipseType="Rectular" MouseUp="MinimalButton_Clicked"/>
 			<design:PackIcon x:Name="VolumeIcon" Kind="VolumeHigh" Width="25" Height="25" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0, 0, 155, 33" Foreground="{DynamicResource Foreground}" />
 			<Slider x:Name="VolumeSlider" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,28,50,26" IsMoveToPointEnabled="True" Template="{DynamicResource FlatSlider}" Foreground="#F444"

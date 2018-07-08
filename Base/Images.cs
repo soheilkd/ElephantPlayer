@@ -20,10 +20,8 @@ namespace Player
 				Foreground = foreground ?? Brushes.White
 			};
 			control.UpdateLayout();
-			if (Double.IsNaN(control.Height))
-				control.Height = 50;
-			if (Double.IsNaN(control.Width))
-				control.Width = 50;
+			control.Height = 200;
+			control.Width = 200;
 			PngBitmapEncoder encoder = new PngBitmapEncoder();
 			encoder.Frames.Clear();
 			Transform transform = control.LayoutTransform;
@@ -50,7 +48,6 @@ namespace Player
 			output.BeginInit();
 			output.StreamSource = memStream;
 			output.EndInit();
-
 			return output;
 		}
 
