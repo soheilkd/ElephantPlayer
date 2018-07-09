@@ -4,9 +4,9 @@ using System.IO;
 using System.Linq;
 using System.Windows;
 
-namespace Player.Models
+namespace Player
 {
-	public static class Operator
+	public static class MediaOperator
 	{
 		private static readonly string[] SupportedMusics = "mp3;wma;aac;m4a".Split(';');
 		private static readonly string[] SupportedVideos = "mp4;mpg;mkv;wmv;mov;avi;m4v;ts;wav;mpeg;webm".Split(';');
@@ -156,5 +156,14 @@ namespace Player.Models
 			File.Copy(media, toDir, true);
 		}
 		public static bool DoesExists(Media media) => File.Exists(media);
+
+		public static bool TryLoadFromPath(string path, out Media media)
+		{
+			media = new Media(path);
+			if (!DoesExists(media))
+				return false;
+			Load(media);
+			return media.Type.HasFlag(MediaType.File);
+		}
 	}
 }

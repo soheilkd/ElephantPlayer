@@ -194,7 +194,7 @@ namespace Player.Controls
 				if (DraggerTimer.Enabled && !IsFullScreen)
 					IsTopMost = !IsTopMost;
 			}
-			catch (Exception) { }
+			catch { }
 		}
 		private async void Element_MouseMove(object sender, MouseEventArgs e)
 		{
@@ -295,7 +295,7 @@ namespace Player.Controls
 		}
 		public void Play(Media media)
 		{
-			MediaManager.Load(media);
+			MediaOperator.Load(media);
 			_Media = media;
 			VisionButton.Visibility = media.IsVideo ? Visibility.Visible : Visibility.Hidden;
 			FullScreenButton.Visibility = VisionButton.Visibility;

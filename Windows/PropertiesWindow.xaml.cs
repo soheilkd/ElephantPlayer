@@ -35,7 +35,7 @@ namespace Player
 				File = TagLib.File.Create(media)
 			};
 			var tag = ui.File.Tag;
-			MediaManager.Load(ui.Media);
+			MediaOperator.Load(ui.Media);
 			ui.TitleBox.Text = tag.Title ?? String.Empty;
 			ui.ArtistBox.Text = tag.FirstPerformer ?? String.Empty;
 			ui.AlbumArtistBox.Text = tag.FirstAlbumArtist ?? String.Empty;
@@ -81,7 +81,7 @@ namespace Player
 				ArtworkImage.Source = new BitmapImage(new Uri(ArtworkDialog.FileName));
 			}
 		}
-		private void Grid_MouseDown(object sender, MouseButtonEventArgs e) { try { DragMove(); } catch (Exception) { } }
+		private void Grid_MouseDown(object sender, MouseButtonEventArgs e) { try { DragMove(); } catch { } }
 		private void CancelButton_Click(object sender, MouseButtonEventArgs e) => Close();
 	}
 }

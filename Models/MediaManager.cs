@@ -4,13 +4,13 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 
-namespace Player.Models
+namespace Player
 {
 	public enum PlayMode { Shuffle, RepeatOne, Repeat }
 
-	public class Manager : ObservableCollection<Media>
+	public class MediaManager : ObservableCollection<Media>
 	{ 
-		public Manager()
+		public MediaManager()
 		{
 			LibraryManager.Load().Unordered.For(each => Add(each));
 		}
@@ -24,21 +24,18 @@ namespace Player.Models
 		{
 			if (Directory.Exists(path))
 				Directory.GetFiles(path, "*", SearchOption.AllDirectories).For(each => AddFromPath(each));
-			var media = new Media(path);
-			if (!Operator.DoesExists(media))
-				return;
-			Operator.Load(media);
-			if (!media.Type.HasFlag(MediaType.File))
-				return;
-			var duplication = this.Where(item => item.Path == path);
-			if (duplication.Count() != 0 && requestPlay)
+			if (MediaOperator.TryLoadFromPath(path, out var media))
 			{
-				RequestPlay(duplication.First());
-				return;
+				var duplication = this.Where(item => item.Path == path);
+				if (duplication.Count() != 0 && requestPlay)
+				{
+					RequestPlay(duplication.First());
+					return;
+				}
+				Insert(0, media);
+				if (requestPlay)
+					RequestPlay();
 			}
-			Insert(0, media);
-			if (requestPlay)
-				RequestPlay();
 		}
 
 		public void Delete(Media media)
@@ -107,8 +104,8 @@ namespace Player.Models
 
 		public void Revalidate()
 		{
-			this.For(each => Operator.Reload(each));
-			this.For(each => Remove(each), each => !Operator.DoesExists(each));
+			this.For(each => MediaOperator.Reload(each));
+			this.For(each => Remove(each), each => !MediaOperator.DoesExists(each));
 		}
 
 	}
