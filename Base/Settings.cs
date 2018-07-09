@@ -2,6 +2,8 @@
 using System.Configuration;
 using System.Runtime.CompilerServices;
 using System.Windows;
+using System.Windows.Input;
+
 namespace Player
 {
 	public class Settings
@@ -27,9 +29,10 @@ namespace Player
 		}
 		protected int GetInt([CallerMemberName] string propertyName = null) => Int32.Parse(Get(propertyName));
 		protected bool GetBool([CallerMemberName] string propertyName = null) => Get(propertyName) == Boolean.TrueString;
+		protected TEnum GetEnum<TEnum>([CallerMemberName] string propertyName = null) 
+			where TEnum: Enum => (TEnum)Enum.Parse(typeof(TEnum), Get(propertyName));
 
-		public PlayMode PlayMode { get => (PlayMode)GetInt(); set => Set((int)value); }
-		public int MainKey { get => GetInt(); set => Set(value); }
+		public PlayMode PlayMode { get => GetEnum<PlayMode>(); set => Set(value); }
 		public double Volume { get => Double.Parse(Get()); set => Set(value); }
 		public bool VisionOrientation { get => GetBool(); set => Set(value); }
 		public string LastPath { get => Get(); set => Set(value); }
@@ -40,6 +43,27 @@ namespace Player
 		public bool RememberMinimal { get => GetBool(); set => Set(value); }
 		public bool WasMinimal { get => GetBool(); set => Set(value); }
 		public int MouseTimeoutIndex { get => GetInt(); set => Set(value); }
+
+		#region Shortcut Keys
+		public Key AncestorKey { get => GetEnum<Key>(); set => Set(value); }
+		public Key PreviousKey { get => GetEnum<Key>(); set => Set(value); }
+		public Key PrivatePlayPauseKey { get => GetEnum<Key>(); set => Set(value); }
+		public Key PublicPlayPauseKey { get => GetEnum<Key>(); set => Set(value); }
+		public Key NextKey { get => GetEnum<Key>(); set => Set(value); }
+		public Key PlayModeKey { get => GetEnum<Key>(); set => Set(value); }
+		public Key VolumeIncreaseKey { get => GetEnum<Key>(); set => Set(value); }
+		public Key VolumeDecreaseKey { get => GetEnum<Key>(); set => Set(value); }
+		public Key CopyKey { get => GetEnum<Key>(); set => Set(value); }
+		public Key MoveKey { get => GetEnum<Key>(); set => Set(value); }
+		public Key RemoveKey { get => GetEnum<Key>(); set => Set(value); }
+		public Key DeleteKey { get => GetEnum<Key>(); set => Set(value); }
+		public Key MediaPlayKey { get => GetEnum<Key>(); set => Set(value); }
+		public Key PropertiesKey { get => GetEnum<Key>(); set => Set(value); }
+		public Key FindKey { get => GetEnum<Key>(); set => Set(value); }
+		public Key BackwardKey { get => GetEnum<Key>(); set => Set(value); }
+		public Key ForwardKey { get => GetEnum<Key>(); set => Set(value); }
+		#endregion
+
 		public int MouseOverTimeout
 		{
 			get
@@ -75,6 +99,42 @@ namespace Player
 				return new Point(Double.Parse(b[0]), Double.Parse(b[1]));
 			}
 			set => Set($"{value.X},{value.Y}");
+		}
+
+		public static Settings GetDefaults()
+		{
+			return new Settings
+			{
+				AncestorKey = Key.LeftShift,
+				BackwardKey = Key.Left,
+				CopyKey = Key.C,
+				DeleteKey = Key.Delete,
+				FindKey = Key.F,
+				ForwardKey = Key.Right,
+				MediaPlayKey = Key.Enter,
+				MoveKey = Key.M,
+				NextKey = Key.MediaNextTrack,
+				PlayModeKey = Key.P,
+				PreviousKey = Key.MediaPreviousTrack,
+				PrivatePlayPauseKey = Key.Space,
+				PublicPlayPauseKey = Key.MediaPlayPause,
+				RemoveKey = Key.R,
+				VolumeDecreaseKey = Key.Down,
+				VolumeIncreaseKey = Key.Up,
+				ExplicitContent = true,
+				LastLoc = new Point(0, 0),
+				LastPath = @"D:\",
+				LastSize = new Size(600, 700),
+				LiveLibrary = true,
+				MouseTimeoutIndex = 2,
+				PlayMode = PlayMode.Repeat,
+				PlayOnPositionChange = true,
+				RememberMinimal = true,
+				RevalidateOnExit = false,
+				VisionOrientation = true,
+				Volume = 0.99,
+				WasMinimal = false
+			};
 		}
 	}
 }
