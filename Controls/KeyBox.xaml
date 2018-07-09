@@ -1,0 +1,29 @@
+﻿<UserControl x:Class="Player.Controls.KeyBox"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+			 Loaded="UserControl_Loaded"
+             mc:Ignorable="d">
+	<StackPanel Orientation="Horizontal">
+		<TextBox x:Name="MainBox"
+				 Background="Transparent"
+				 BorderThickness="1"
+				 BorderBrush="Azure"
+				 IsReadOnly="True"
+				 Text="Key" 
+				 GotFocus="TextBox_GotFocus"
+				 KeyUp="TextBox_KeyUp" 
+				 LostFocus="MainBox_LostFocus"
+				 Width="150"
+				 Height="26"
+				 FontSize="17"
+				 Foreground="White"/>
+
+		<CheckBox x:Name="GlobalCheckBox"
+				  Foreground="White"
+				  Content="Call only with ancestor"
+				  Checked="GlobalCheckBox_Checked"
+				  Unchecked="GlobalCheckBox_Unchecked"/>
+	</StackPanel>
+</UserControl>

@@ -1,5 +1,6 @@
 ﻿using Microsoft.Win32;
 using Player.Events;
+using Player.Hook;
 using System;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
@@ -11,7 +12,6 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
-using Forms = System.Windows.Forms;
 
 namespace Player
 {
@@ -27,7 +27,6 @@ namespace Player
 		private MediaManager Manager = new MediaManager();
 		private ObservableCollection<Media>[] Collections = new ObservableCollection<Media>[3];
 		private Timer PlayCountTimer = new Timer(100000) { AutoReset = false };
-		private Gma.System.MouseKeyHook.IKeyboardMouseEvents KeyboardEvents = Gma.System.MouseKeyHook.Hook.GlobalEvents();
 		private bool ControlsNotNeededOnVisionIsVisible
 		{
 			set
@@ -39,7 +38,6 @@ namespace Player
 			}
 		}
 		private bool WasMaximized;
-
 		public MainWindow()
 		{
 			InitializeComponent();
@@ -52,8 +50,9 @@ namespace Player
 		private void Initialize()
 		{
 			PlayCountTimer.Elapsed += (_, __) => Manager.CurrentlyPlaying.PlayCount++;
-			App.NewInstanceRequested += (_, e) => e.Args.ToList().ForEach(each => Manager.Add(each, true));
-			KeyboardEvents.KeyDown += Keyboard_KeyDown;
+			App.NewInstanceRequested += (_, e) => e.Args.ToList().ForEach(each => Manager.AddFromPath(each, true));
+			App.KeyDown += KeyboardListener_KeyDown;
+
 			Manager.RequestReceived += (_, e) => Play(e.Parameter);
 			Player.RequestReceived += Player_RequestReceived;
 			Player.LengthFound += (_, e) => Manager.CurrentlyPlaying.Length = e.Parameter;
@@ -75,7 +74,43 @@ namespace Player
 			Manager.CollectionChanged += Manager_CollectionChanged;
 			TabControl.SelectedIndex = 1;
 		}
-		
+
+		private async void KeyboardListener_KeyDown(object sender, RawKeyEventArgs e)
+		{
+			if (TabControl.SelectedIndex == TabControl.Items.Count - 1)
+				return;
+			if (IsActive && SearchBox.IsFocused)
+				return;
+			//Key shortcuts when window is active and main key is down (default: alt)
+			if (IsActive && e.Key.HasFlag(App.Settings.AncestorKey))
+			{
+				if (e.Key == App.Settings.RemoveKey) Menu_RemoveClick(this, null);
+				if (e.Key == App.Settings.MediaPlayKey) DMouseDoubleClick(ActiveView, null);
+				if (e.Key == App.Settings.CopyKey) Menu_CopyClick(new MenuItem(), null);
+				if (e.Key == App.Settings.MoveKey) Menu_MoveClick(new MenuItem(), null);
+				if (e.Key == App.Settings.PropertiesKey) Menu_PropertiesClick(this, null);
+				if (e.Key == App.Settings.FindKey)
+				{
+					SearchBox.IsEnabled = false;
+					SearchBox.Text = "";
+					SearchButton.EmulateClick();
+					await Task.Delay(100);
+					SearchBox.IsEnabled = true;
+					SearchBox.Focus();
+				}
+			}
+			//Key shortcuts whether window is active or main key is down (default: alt)
+			if (IsActive || e.Key.HasFlag(App.Settings.AncestorKey))
+			{
+				if (e.Key == App.Settings.BackwardKey) Player.SlidePosition(false);
+				if (e.Key == App.Settings.ForwardKey) Player.SlidePosition(true);
+			}
+			//Key shortcuts always invokable
+			if (e.Key == App.Settings.PublicPlayPauseKey) Player.PlayPause();
+			if (e.Key == App.Settings.NextKey) Player.Next();
+			if (e.Key == App.Settings.PreviousKey) Player.Previous();
+		}
+
 		private void Player_RequestReceived(object sender, RequestArgs e)
 		{
 			switch (e.Request)
@@ -127,8 +162,8 @@ namespace Player
 			}
 		}
 
-		CollectionView[] Views = new CollectionView[4];
-		PropertyGroupDescription[] Descriptions = new PropertyGroupDescription[4];
+		private CollectionView[] Views = new CollectionView[4];
+		private PropertyGroupDescription[] Descriptions = new PropertyGroupDescription[4];
 		private void RebindViews()
 		{
 			ArtistsView.ItemsSource = Collections[1];
@@ -161,7 +196,7 @@ namespace Player
 				Height = TempHeight;
 			while (!Player.IsFullyLoaded)
 				await Task.Delay(10);
-			Environment.GetCommandLineArgs().For(each => Manager.Add(each, true));
+			Environment.GetCommandLineArgs().For(each => Manager.AddFromPath(each, true));
 		}
 		private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
 		{
@@ -175,65 +210,15 @@ namespace Player
 		}
 		private void Window_KeyUp(object sender, KeyEventArgs e)
 		{
-			switch (e.Key)
-			{
-				case Key.Space:
-					if (!SearchBox.IsFocused)
-						Player.PlayPause();
-					break;
-				default: break;
-			}
+			if (e.Key == (Key)Enum.Parse(typeof(Key), App.Settings.PrivatePlayPauseKey.ToString()))
+				if (!SearchBox.IsFocused)
+					Player.PlayPause();
 		}
 		private void Window_Drop(object sender, DragEventArgs e)
 		{
-			((string[])e.Data.GetData(DataFormats.FileDrop)).For(each => Manager.Add(each));
+			((string[])e.Data.GetData(DataFormats.FileDrop)).For(each => Manager.AddFromPath(each));
 		}
-
-		private async void Keyboard_KeyDown(object sender, Forms::KeyEventArgs e)
-		{
-			if (IsActive && SearchBox.IsFocused)
-				return;
-			//Key shortcuts when window is active and main key is down (default: alt)
-			if (IsActive && IsAncestorKeyDown(e))
-			{
-				switch (e.KeyCode)
-				{
-					case Forms.Keys.Delete: Menu_RemoveClick(this, null); break;
-					case Forms.Keys.Enter: DMouseDoubleClick(ActiveView, null); break;
-					case Forms.Keys.C: Menu_CopyClick(new MenuItem(), null); break;
-					case Forms.Keys.M: Menu_MoveClick(new MenuItem(), null); break;
-					case Forms.Keys.P: Menu_PropertiesClick(this, null); break;
-					case Forms.Keys.L: Menu_LocationClick(this, null); break;
-					case Forms.Keys.F:
-						SearchBox.IsEnabled = false;
-						SearchBox.Text = "";
-						SearchButton.EmulateClick();
-						await Task.Delay(100);
-						SearchBox.IsEnabled = true;
-						SearchBox.Focus();
-						break;
-					default: break;
-				}
-			}
-			//Key shortcuts whether window is active or main key is down (default: alt)
-			if (IsActive || IsAncestorKeyDown(e))
-			{
-				switch (e.KeyCode)
-				{
-					case Forms::Keys.Left: Player.SlidePosition(false); break;
-					case Forms::Keys.Right: Player.SlidePosition(true); break;
-					default: break;
-				}
-			}
-			//Key shortcuts always invokable
-			switch (e.KeyCode)
-			{
-				case Forms::Keys.MediaNextTrack: Player.Next(); break;
-				case Forms::Keys.MediaPreviousTrack: Player.Previous(); break;
-				case Forms::Keys.MediaPlayPause: Player.PlayPause(); break;
-				default: break;
-			}
-		}
+		
 
 		private void Play(Media media)
 		{
@@ -241,20 +226,6 @@ namespace Player
 			MiniArtworkImage.Source = media.Artwork;
 			DeepBackEnd.NativeMethods.SHAddToRecentDocs(DeepBackEnd.NativeMethods.ShellAddToRecentDocsFlags.Path, media);
 			Title = $"Elephant Player| {media.Artist} - {media.Title}";
-		}
-		private bool IsAncestorKeyDown(Forms::KeyEventArgs e)
-		{
-			switch (App.Settings.MainKey)
-			{
-				case 0: return e.Control;
-				case 1: return e.Alt;
-				case 2: return e.Shift;
-				case 3: return e.Control && e.Alt;
-				case 4: return e.Control && e.Shift;
-				case 5: return e.Shift && e.Alt;
-				case 6: return e.Control && e.Shift && e.Alt;
-				default: return false;
-			}
 		}
 
 		private void SearchBox_TextChanged(object sender, TextChangedEventArgs e)
@@ -269,7 +240,7 @@ namespace Player
 
 		private void Menu_TagDetergent(object sender, RoutedEventArgs e)
 		{
-			For(item => MediaManager.CleanTag(item));
+			For(item => MediaOperator.CleanTag(item));
 		}
 		private void Menu_PlayAfterClick(object sender, RoutedEventArgs e)
 		{
@@ -301,7 +272,7 @@ namespace Player
 					}
 					break;
 				default:
-					For(item => MediaManager.Move(item, toDir: Resources["LastPath"].ToString()));
+					For(item => MediaOperator.Move(item, toDir: Resources["LastPath"].ToString()));
 					break;
 			}
 		}
@@ -327,7 +298,7 @@ namespace Player
 					}
 					break;
 				default:
-					For(item => MediaManager.Copy(item, toDir: Resources["LastPath"].ToString()));
+					For(item => MediaOperator.Copy(item, toDir: Resources["LastPath"].ToString()));
 					break;
 			}
 		}
@@ -359,15 +330,15 @@ namespace Player
 						var pos = Player.Position;
 						Player.Stop();
 						f.Parameter.Save();
-						MediaManager.Reload(Manager.CurrentlyPlaying);
+						MediaOperator.Reload(Manager.CurrentlyPlaying);
 						Play(Manager.CurrentlyPlaying);
 						Player.Position = pos;
-						MediaManager.Reload(each);
+						MediaOperator.Reload(each);
 					}
 					else
 					{
 						f.Parameter.Save();
-						MediaManager.Reload(each);
+						MediaOperator.Reload(each);
 					}
 				};
 				pro.LoadFor(each);
