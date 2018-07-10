@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Player.Models;
+using System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows.Media.Imaging;
@@ -26,9 +27,9 @@ namespace Player
 		private bool _IsPlaying;
 		private TimeSpan _Len;
 		public MediaType Type;
+		public SerializableBitmap Artwork;
 		[field: NonSerialized] public string Lyrics = "";
 		[field: NonSerialized] public bool IsLoaded = false;
-		[field: NonSerialized] public BitmapSource Artwork;
 		[field: NonSerialized] public event PropertyChangedEventHandler PropertyChanged;
 
 		public string Name { get => _Name; set => Set(ref _Name, value); }
