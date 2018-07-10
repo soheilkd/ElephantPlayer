@@ -127,19 +127,22 @@ namespace Player.Controls
 			get => (bool)GetValue(AreControlsVisibleProperty);
 			set
 			{
-				SetValue(AreControlsVisibleProperty, value);
-				if (value)
+				Dispatcher.Invoke(() =>
 				{
-					FullOnBoard.Stop();
-					Dispatcher.Invoke(() => FullOffBoard.Begin());
-				}
-				else
-				{
-					if (!IsMagnified || ControlsGrid.IsMouseOver)
-						return;
-					FullOffBoard.Stop();
-					Dispatcher.Invoke(() => FullOnBoard.Begin());
-				}
+					SetValue(AreControlsVisibleProperty, value);
+					if (value)
+					{
+						FullOnBoard.Stop();
+						FullOffBoard.Begin();
+					}
+					else
+					{
+						if (!IsMagnified || ControlsGrid.IsMouseOver)
+							return;
+						FullOffBoard.Stop();
+						FullOnBoard.Begin();
+					}
+				});
 			}
 		}
 		public Window ParentWindow;

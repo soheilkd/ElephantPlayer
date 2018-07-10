@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+
 namespace Player
 {
 	public static class Extensions
@@ -30,6 +31,12 @@ namespace Player
 			for (int i = 0; i < collection.Count; i++)
 				if (condition(collection[i]))
 					action(collection[i]);
+		}
+
+		public static void Do(Action action, int times)
+		{
+			for (int i = 0; i < times; i++)
+				action();
 		}
 	}
 }

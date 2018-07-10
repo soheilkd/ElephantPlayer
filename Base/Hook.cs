@@ -11,41 +11,27 @@ namespace Player.Hook
 		public static KeyboardListener Create() => new KeyboardListener();
 
 		private static IntPtr hookId = IntPtr.Zero;
+		
+		public event EventHandler<RawKeyEventArgs> KeyDown;
+		public event EventHandler<RawKeyEventArgs> KeyUp;
 
 		[MethodImpl(MethodImplOptions.NoInlining)]
 		private IntPtr HookCallback(int nCode, IntPtr wParam, IntPtr lParam)
 		{
-			try
-			{
-				return HookCallbackInner(nCode, wParam, lParam);
-			}
-			catch
-			{
-				Console.WriteLine("There was some error somewhere...");
-			}
-			return InterceptKeys.CallNextHookEx(hookId, nCode, wParam, lParam);
+			try { return HookCallbackInner(nCode, wParam, lParam); }
+			catch { return InterceptKeys.CallNextHookEx(hookId, nCode, wParam, lParam); }
 		}
 
 		private IntPtr HookCallbackInner(int nCode, IntPtr wParam, IntPtr lParam)
 		{
 			if (nCode >= 0)
 			{
-				if (wParam == (IntPtr)InterceptKeys.WM_KEYDOWN)
-				{
-					int vkCode = Marshal.ReadInt32(lParam);
-					KeyDown?.Invoke(this, new RawKeyEventArgs(vkCode, false));
-				}
-				else if (wParam == (IntPtr)InterceptKeys.WM_KEYUP)
-				{
-					int vkCode = Marshal.ReadInt32(lParam);
-					KeyUp?.Invoke(this, new RawKeyEventArgs(vkCode, false));
-				}
+				int vkCode = Marshal.ReadInt32(lParam);
+				if (wParam == (IntPtr)InterceptKeys.WM_KEYDOWN) KeyDown?.Invoke(this, new RawKeyEventArgs(vkCode, false));
+				else if (wParam == (IntPtr)InterceptKeys.WM_KEYUP) KeyUp?.Invoke(this, new RawKeyEventArgs(vkCode, false));
 			}
 			return InterceptKeys.CallNextHookEx(hookId, nCode, wParam, lParam);
 		}
-
-		public event EventHandler<RawKeyEventArgs> KeyDown;
-		public event EventHandler<RawKeyEventArgs> KeyUp;
 
 		KeyboardListener() => hookId = InterceptKeys.SetHook(HookCallback);
 		~KeyboardListener() => Dispose();
@@ -57,8 +43,7 @@ namespace Player.Hook
 	{
 		public delegate IntPtr LowLevelKeyboardProc(int nCode, IntPtr wParam, IntPtr lParam);
 
-		private static LowLevelKeyboardProc lowLevelDelegate;
-		//This will prevent proc in SetHook not to get garbage collected
+		private static LowLevelKeyboardProc lowLevelDelegate; //This will prevent proc in SetHook not to get garbage collected
 
 		public const int WH_KEYBOARD_LL = 13;
 		public const int WM_KEYDOWN = 0x0100;
@@ -69,9 +54,7 @@ namespace Player.Hook
 			lowLevelDelegate = proc;
 			using (Process curProcess = Process.GetCurrentProcess())
 			using (ProcessModule curModule = curProcess.MainModule)
-			{
 				return SetWindowsHookEx(WH_KEYBOARD_LL, proc, GetModuleHandle(curModule.ModuleName), 0);
-			}
 		}
 
 		[DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
@@ -101,5 +84,4 @@ namespace Player.Hook
 			Key = KeyInterop.KeyFromVirtualKey(VKCode);
 		}
 	}
-
 }

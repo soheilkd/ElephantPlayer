@@ -6,7 +6,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" KeyUp="Window_KeyUp"
     xmlns:player="clr-namespace:Player.Controls" xmlns:sys="clr-namespace:System;assembly=mscorlib"
     x:Name="window" xmlns:design="http://materialdesigninxaml.net/winfx/xaml/themes"
-	xmlns:player1="clr-namespace:Player" d:DesignHeight="554"
+	xmlns:local="clr-namespace:Player" d:DesignHeight="554"
 	mc:Ignorable="d" Loaded="Window_Loaded" Closing="Window_Closing" Drop="Window_Drop" AllowDrop="True"
     Title="Elephant Player" Width="651" >
 	<Grid Background="{DynamicResource KeyOfBackground}" x:Name="ContentGrid">
@@ -24,15 +24,30 @@
 					<ContentControl Content="Titles"/>
 				</TabItem.Header>
 				<ListView x:Name="TitlesView" ContextMenu="{DynamicResource ContextMenu1}">
-					<ListView.View>
-						<GridView>
-							<GridViewColumn Header="" Width="35" CellTemplate="{DynamicResource PlayIndicator}" />
-							<GridViewColumn Header="Title" Width="300" CellTemplate="{DynamicResource TitleCell}"/>
-							<GridViewColumn Header="Artist" Width="100" CellTemplate="{DynamicResource ArtistCell}" />
-							<GridViewColumn Header="Album" Width="100" CellTemplate="{DynamicResource AlbumCell}" />
-							<GridViewColumn Header="Plays" Width="50" CellTemplate="{DynamicResource PlayCell}"/>
-						</GridView>
-					</ListView.View>
+					<ListView.IsTextSearchEnabled>true</ListView.IsTextSearchEnabled>
+					<ListView.ItemTemplate>
+						<DataTemplate x:Name="DoubleLineDataTemplate">
+							<Grid Height="45">
+								<Grid.ColumnDefinitions>
+									<ColumnDefinition Width="300"/>
+									<ColumnDefinition Width="20" />
+									<ColumnDefinition Width="120"/>
+									<ColumnDefinition Width="20" />
+									<ColumnDefinition />
+								</Grid.ColumnDefinitions>
+								<Image Source="{Binding Artwork}" Width="40" Height="40"/>
+								<TextBlock x:Name="titleBox" Text="{Binding Title}" FontSize="16" Foreground="White" FontWeight="SemiBold" Margin="40,0,0,0" VerticalAlignment="Center"/>
+								<TextBlock x:Name="artistBox" Text="{Binding Artist}" FontSize="13" Foreground="White" VerticalAlignment="Center" Grid.Column="2"/>
+								<TextBlock Text="{Binding PlayCount}" FontSize="17" FontWeight="Bold" Foreground="White" VerticalAlignment="Center" Grid.Column="4" />
+							</Grid>
+							<DataTemplate.Triggers>
+								<DataTrigger Binding="{Binding IsPlaying}" Value="True">
+									<Setter TargetName="titleBox" Property="Foreground" Value="#FF49d4ff" />
+									<Setter TargetName="artistBox" Property="Foreground" Value="#FF49d4ff" />
+								</DataTrigger>
+							</DataTemplate.Triggers>
+						</DataTemplate>
+					</ListView.ItemTemplate>
 				</ListView>
 			</TabItem>
 			<TabItem>
@@ -116,7 +131,7 @@
 				<TabItem.Header>
 					<ContentControl Content="Settings" />
 				</TabItem.Header>
-				<player1:SettingsPanel />
+				<local:SettingsPanel />
 			</TabItem>
 		</TabControl>
 		<player:MediaPlayer x:Name="Player" />
