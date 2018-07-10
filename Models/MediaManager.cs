@@ -1,5 +1,8 @@
 ﻿using Player.Events;
+using Player.Models;
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
@@ -9,16 +12,20 @@ namespace Player
 	public enum PlayMode { Shuffle, RepeatOne, Repeat }
 
 	public class MediaManager : ObservableCollection<Media>
-	{ 
+	{
+		public event EventHandler<InfoExchangeArgs<Media>> RequestReceived;
 		public MediaManager()
 		{
-			LibraryManager.Load().Unordered.For(each => Add(each));
+			LibraryManager.Load().Unordered.For(each =>
+			{
+				Add(each);
+				QueueEnumerator.Add(each);
+			});
 		}
 
-		public Collection<Media> Queue;
-		private Random Shuffle = new Random(DateTime.Now.Millisecond);
-		public Media CurrentlyPlaying;
-		public event EventHandler<InfoExchangeArgs<Media>> RequestReceived;
+		MediaEnumerator QueueEnumerator = new MediaEnumerator();
+
+		public Media Current { get => QueueEnumerator.Current; }
 
 		public void AddFromPath(string path, bool requestPlay = false)
 		{
@@ -40,47 +47,28 @@ namespace Player
 
 		public void Delete(Media media)
 		{
-			bool reqNext = CurrentlyPlaying == media;
+			bool reqNext = Current == media;
 			File.Delete(media);
 			this.Where(each => each.Path == media.Path).ToArray().For(each => Remove(each));
 			if (reqNext)
 				RequestPlay(Next());
 		}
-
-		public Media Play(int index = 0, Collection<Media> collection = null)
-		{
-			return Play((collection ?? this)[index]);
-		}
-		public Media Play(Media media)
+		
+		public Media Play(Media media, bool isFromQueue = false)
 		{
 			this.For(each => each.IsPlaying = false);
 			media.IsPlaying = true;
-			CurrentlyPlaying = media;
-			return media;
+			if (!isFromQueue)
+				Requeue();
+			return QueueEnumerator.Get(media);
 		}
-		public Media Next(Collection<Media> coll = null, int currentlyPlayingIndex = -1)
+		public Media Next()
 		{
-			if (currentlyPlayingIndex == -1)
-				currentlyPlayingIndex = (coll ?? this).IndexOf(CurrentlyPlaying);
-			switch (App.Settings.PlayMode)
-			{
-				case PlayMode.Shuffle: return Play(Shuffle.Next(0, Count));
-				case PlayMode.Repeat: return Play(currentlyPlayingIndex == Count - 1 ? 0 : ++currentlyPlayingIndex);
-				case PlayMode.RepeatOne: return Play(currentlyPlayingIndex);
-				default: return null;
-			}
+			return Play(QueueEnumerator.GetNext(), true);
 		}
-		public Media Previous(Collection<Media> coll = null, int currentlyPlayingIndex = -1)
+		public Media Previous()
 		{
-			if (currentlyPlayingIndex == -1)
-				currentlyPlayingIndex = (coll ?? this).IndexOf(CurrentlyPlaying);
-			switch (App.Settings.PlayMode)
-			{
-				case PlayMode.Shuffle: return Play(Shuffle.Next(0, Count));
-				case PlayMode.Repeat: return Play(currentlyPlayingIndex == 0 ? Count - 1 : --currentlyPlayingIndex);
-				case PlayMode.RepeatOne: return Play(currentlyPlayingIndex);
-				default: return null;
-			}
+			return Play(QueueEnumerator.GetPrevious(), true);
 		}
 
 		public void CloseSeason()
@@ -93,13 +81,7 @@ namespace Player
 		private void RequestPlay() => RequestPlay(this[0]);
 		private void RequestPlay(Media media)
 		{
-			CurrentlyPlaying = media;
 			RequestReceived?.Invoke(this, new InfoExchangeArgs<Media>(media));
-			if (App.Settings.ExplicitContent)
-			{
-				if (media.Title.ToLower().StartsWith("spankbang"))
-					Remove(media);
-			}
 		}
 
 		public void Revalidate()
@@ -108,5 +90,24 @@ namespace Player
 			this.For(each => Remove(each), each => !MediaOperator.DoesExists(each));
 		}
 
+		public void Requeue(PlayMode playMode = PlayMode.Repeat)
+		{
+			QueueEnumerator.Clear();
+			switch (playMode)
+			{
+				case PlayMode.Shuffle:
+					Requeue(PlayMode.Repeat);
+					QueueEnumerator.Shuffle();
+					break;
+				case PlayMode.RepeatOne:
+					Extensions.Do(() => QueueEnumerator.Add(Current), 10);
+					break;
+				case PlayMode.Repeat:
+					QueueEnumerator.Reset();
+					this.For(each => QueueEnumerator.Add(each));
+					break;
+				default: break;
+			}
+		}
 	}
 }

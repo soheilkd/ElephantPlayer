@@ -49,13 +49,13 @@ namespace Player
 
 		private void Initialize()
 		{
-			PlayCountTimer.Elapsed += (_, __) => Manager.CurrentlyPlaying.PlayCount++;
+			PlayCountTimer.Elapsed += (_, __) => Manager.Current.PlayCount++;
 			App.NewInstanceRequested += (_, e) => e.Args.ToList().ForEach(each => Manager.AddFromPath(each, true));
 			App.KeyDown += KeyboardListener_KeyDown;
 
 			Manager.RequestReceived += (_, e) => Play(e.Parameter);
 			Player.RequestReceived += Player_RequestReceived;
-			Player.LengthFound += (_, e) => Manager.CurrentlyPlaying.Length = e.Parameter;
+			Player.LengthFound += (_, e) => Manager.Current.Length = e.Parameter;
 			Player.UpdateLayout();
 			Collections[0] = new ObservableCollection<Media>();
 			Collections[1] = LibraryManager.LoadedCollection.ByArtist;
@@ -180,7 +180,7 @@ namespace Player
 		private void DMouseDoubleClick(object sender, MouseButtonEventArgs e)
 		{
 			if (sender.As<ListView>().SelectedItem is Media med)
-				Play(med);
+				Play(med, false);
 		}
 
 		private async void Window_Loaded(object sender, RoutedEventArgs e)
@@ -218,11 +218,15 @@ namespace Player
 		{
 			((string[])e.Data.GetData(DataFormats.FileDrop)).For(each => Manager.AddFromPath(each));
 		}
-		
 
-		private void Play(Media media)
+
+		private void Play(Media media, bool inQueueImpl = true)
 		{
-			Player.Play(Manager.Play(media));
+			if (!inQueueImpl)
+			{
+				Manager.Play(media);
+			}
+			Player.Play(media);
 			MiniArtworkImage.Source = media.Artwork;
 			DeepBackEnd.NativeMethods.SHAddToRecentDocs(DeepBackEnd.NativeMethods.ShellAddToRecentDocsFlags.Path, media);
 			Title = $"Elephant Player| {media.Artist} - {media.Title}";
@@ -247,7 +251,7 @@ namespace Player
 			For(item =>
 			{
 				Manager.Remove(item);
-				Manager.Insert(Manager.IndexOf(Manager.CurrentlyPlaying) + 1, item);
+				Manager.Insert(Manager.IndexOf(Manager.Current) + 1, item);
 			});
 		}
 		private void Menu_MoveClick(object sender, RoutedEventArgs e)
@@ -325,13 +329,13 @@ namespace Player
 				var pro = new PropertiesUI();
 				pro.SaveRequested += (_, f) =>
 				{
-					if (f.Parameter.Name == Manager.CurrentlyPlaying.Path)
+					if (f.Parameter.Name == Manager.Current.Path)
 					{
 						var pos = Player.Position;
 						Player.Stop();
 						f.Parameter.Save();
-						MediaOperator.Reload(Manager.CurrentlyPlaying);
-						Play(Manager.CurrentlyPlaying);
+						MediaOperator.Reload(Manager.Current);
+						Play(Manager.Current);
 						Player.Position = pos;
 						MediaOperator.Reload(each);
 					}
@@ -373,6 +377,5 @@ namespace Player
 		{
 			ActiveView.SelectedItems.Cast<Media>().ToArray().For(action);
 		}
-		
 	}
 }
