@@ -1,34 +1,26 @@
 ﻿using System.Collections.ObjectModel;
 using System.IO;
-using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
 
 namespace Player
 {
 	public static class LibraryManager
 	{
-		private static string LibraryPath => $"{App.Path}\\Library.dll";
-		public static SerializableMediaCollection LoadedCollection;
+		private static string LibraryPath => $"{App.Path}\\Library.bin";
+		public static Collection<Media> LoadedCollection;
+
 		public static void Save(Collection<Media> medias)
 		{
-			SerializableMediaCollection collection;
-			collection.Unordered = new ObservableCollection<Media>(medias);
-			collection.ByArtist = new ObservableCollection<Media>(medias.OrderBy(each => each.Artist));
-			collection.ByAlbum = new ObservableCollection<Media>(medias.OrderBy(each => each.Album));
+			var coli = new ObservableCollection<Media>(medias);
 			using (FileStream stream = new FileStream(LibraryPath, FileMode.Create))
-				(new BinaryFormatter()).Serialize(stream, collection);
+				(new BinaryFormatter()).Serialize(stream, coli);
 		}
-		public static SerializableMediaCollection Load()
+		public static Collection<Media> Load()
 		{
 			if (!File.Exists(LibraryPath))
-				return new SerializableMediaCollection()
-				{
-					Unordered = new ObservableCollection<Media>(),
-					ByAlbum = new ObservableCollection<Media>(),
-					ByArtist = new ObservableCollection<Media>(),
-				};
+				return new Collection<Media>();
 			using (FileStream stream = new FileStream(LibraryPath, FileMode.Open))
-				LoadedCollection = (SerializableMediaCollection)(new BinaryFormatter()).Deserialize(stream);
+				LoadedCollection = (Collection<Media>)(new BinaryFormatter()).Deserialize(stream);
 			return LoadedCollection;
 		}
 	}
