@@ -27,7 +27,7 @@ namespace Player
 		private bool _IsPlaying;
 		private TimeSpan _Len;
 		public MediaType Type;
-		public SerializableBitmap Artwork;
+		[field: NonSerialized] public BitmapImage _Artwork;
 		[field: NonSerialized] public string Lyrics = "";
 		[field: NonSerialized] public bool IsLoaded = false;
 		[field: NonSerialized] public event PropertyChangedEventHandler PropertyChanged;
@@ -40,6 +40,7 @@ namespace Player
 		public int PlayCount { get => _PlayCount; set => Set(ref _PlayCount, value); }
 		public bool IsPlaying { get => _IsPlaying; set => Set(ref _IsPlaying, value); }
 		public TimeSpan Length { get => _Len; set => Set(ref _Len, value); }
+		public BitmapImage Artwork { get => _Artwork; set => Set(ref _Artwork, value); }
 		public DateTime AdditionDate { get; private set; }
 		public string Path { get; set; }
 		public bool IsVideo => Type == MediaType.Video;

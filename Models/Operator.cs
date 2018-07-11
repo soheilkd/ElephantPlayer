@@ -108,10 +108,15 @@ namespace Player
 			}
 		}
 
-		public static void Load(Media media)
+		public static Media Load(Media media)
 		{
 			if (media.IsLoaded)
-				return;
+				return media;
+			if (!DoesExists(media))
+			{
+				media = new Media() { Type = MediaType.None };
+				return new Media() { Type = MediaType.None };
+			}
 			media.Name = media.Path.Substring(media.Path.LastIndexOf("\\") + 1);
 			media.Directory = media.Path.Substring(0, media.Path.LastIndexOf("\\"));
 			switch (GetMediaType(media))
@@ -122,7 +127,7 @@ namespace Player
 						media.Artist = t.Tag.FirstPerformer ?? media.Path.Substring(0, media.Path.LastIndexOf("\\"));
 						media.Title = t.Tag.Title ?? media.Name.Substring(0, media.Name.LastIndexOf("."));
 						media.Album = t.Tag.Album ?? String.Empty;
-						media.Artwork = new SerializableBitmap(t.Tag.Pictures.Length >= 1 ? Images.GetBitmap(t.Tag.Pictures[0]) : Images.MusicArt);
+						media.Artwork = t.Tag.Pictures.Length >= 1 ? Images.GetBitmap(t.Tag.Pictures[0]) : Images.MusicArt;
 						media.Type = MediaType.Music;
 						media.Lyrics = t.Tag.Lyrics ?? String.Empty;
 					}
@@ -132,13 +137,14 @@ namespace Player
 					media.Artist = media.Path.Substring(0, media.Path.LastIndexOf("\\"));
 					media.Artist = media.Artist.Substring(media.Artist.LastIndexOf("\\") + 1);
 					media.Album = "Video";
-					media.Artwork = new SerializableBitmap(Images.VideoArt);
+					media.Artwork = Images.VideoArt;
 					media.Type = MediaType.Video;
 					media.Length = TimeSpan.Zero;
 					break;
 				default: break;
 			}
 			media.IsLoaded = true;
+			return media;
 		}
 		public static void Reload(Media media)
 		{

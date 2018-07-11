@@ -69,34 +69,5 @@ namespace Player
 			pixels = new byte[0];
 			return image;
 		}
-
-		public static BitmapImage GetBitmap(byte[] data)
-		{
-			if (data == null || data.Length == 0)
-				return new BitmapImage();
-			using (var memStream = new MemoryStream())
-			{
-				data.For(eachByte => memStream.WriteByte(eachByte));
-				var image = new BitmapImage();
-				image.BeginInit();
-				image.CacheOption = BitmapCacheOption.OnLoad;
-				image.StreamSource = memStream;
-				image.EndInit();
-				return image;
-			}
-		}
-
-		public static byte[] GetBytes(BitmapImage bitmapImage)
-		{
-			byte[] data;
-			JpegBitmapEncoder encoder = new JpegBitmapEncoder();
-			encoder.Frames.Add(BitmapFrame.Create(bitmapImage));
-			using (MemoryStream ms = new MemoryStream())
-			{
-				encoder.Save(ms);
-				data = ms.ToArray();
-			}
-			return data;
-		}
 	}
 }
