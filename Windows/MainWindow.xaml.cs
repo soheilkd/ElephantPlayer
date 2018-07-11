@@ -25,7 +25,6 @@ namespace Player
 		}
 
 		private MediaManager Manager = new MediaManager();
-		private ObservableCollection<Media>[] Collections = new ObservableCollection<Media>[3];
 		private Timer PlayCountTimer = new Timer(100000) { AutoReset = false };
 		private bool ControlsNotNeededOnVisionIsVisible
 		{
@@ -57,11 +56,8 @@ namespace Player
 			Player.RequestReceived += Player_RequestReceived;
 			Player.LengthFound += (_, e) => Manager.Current.Length = e.Parameter;
 			Player.UpdateLayout();
-			Collections[0] = new ObservableCollection<Media>();
-			Collections[1] = LibraryManager.LoadedCollection.ByArtist;
-			Collections[2] = LibraryManager.LoadedCollection.ByAlbum;
-			ArtistsView.ItemsSource = Collections[1];
-			AlbumsView.ItemsSource = Collections[2];
+			ArtistsView.ItemsSource = Manager.OrderBy(each => each.Artist);
+			AlbumsView.ItemsSource = Manager.OrderBy(each => each.Album);
 			TitlesView.ItemsSource = Manager;
 			Player.ParentWindow = this;
 			TaskbarItemInfo = Player.Thumb.Info;
@@ -71,8 +67,17 @@ namespace Player
 			ArtistsView.MouseDoubleClick += DMouseDoubleClick;
 			TitlesView.MouseDoubleClick += DMouseDoubleClick;
 			AlbumsView.MouseDoubleClick += DMouseDoubleClick;
-			Manager.CollectionChanged += Manager_CollectionChanged;
 			TabControl.SelectedIndex = 1;
+
+			SettingsPanel.RevalidationRequest += async (sender, __) =>
+			{
+				sender.As<Button>().Content = "Revalidating... App will freeze";
+				IsEnabled = false;
+				await Task.Delay(2000);
+				Manager.Revalidate();
+				Application.Current.Shutdown(0);
+				Process.Start(App.Path + "Elephant Player.exe");
+			};
 		}
 
 		private async void KeyboardListener_KeyDown(object sender, RawKeyEventArgs e)
@@ -139,35 +144,10 @@ namespace Player
 			}
 		}
 
-		private void Manager_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
-		{
-			switch (e.Action)
-			{
-				case NotifyCollectionChangedAction.Add:
-					Collections.For(each => each.Insert(e.NewStartingIndex, e.NewItems[0] as Media));
-					break;
-				case NotifyCollectionChangedAction.Remove:
-					Collections.For(each => each.Remove(e.OldItems[0] as Media));
-					break;
-				case NotifyCollectionChangedAction.Replace:
-					Collections.For(each => each[e.NewStartingIndex] = e.NewItems[0] as Media);
-					break;
-				case NotifyCollectionChangedAction.Move:
-					Collections.For(each => each.Move(e.OldStartingIndex, e.NewStartingIndex));
-					break;
-				case NotifyCollectionChangedAction.Reset:
-					Collections.For(each => each.Clear());
-					break;
-				default: break;
-			}
-		}
-
 		private CollectionView[] Views = new CollectionView[4];
 		private PropertyGroupDescription[] Descriptions = new PropertyGroupDescription[4];
 		private void RebindViews()
 		{
-			ArtistsView.ItemsSource = Collections[1];
-			AlbumsView.ItemsSource = Collections[2];
 			Views[0] = (CollectionView)CollectionViewSource.GetDefaultView(ArtistsView.ItemsSource);
 			Descriptions[0] = new PropertyGroupDescription("Artist");
 			Views[0].GroupDescriptions.Add(Descriptions[0]);
@@ -197,6 +177,8 @@ namespace Player
 			while (!Player.IsFullyLoaded)
 				await Task.Delay(10);
 			Environment.GetCommandLineArgs().For(each => Manager.AddFromPath(each, true));
+
+			TitlesView.IsHitTestVisibleChanged += (_, __) => Console.WriteLine("CHANGE");
 		}
 		private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
 		{
@@ -206,7 +188,6 @@ namespace Player
 			App.Settings.Volume = Player.Volume;
 			App.Settings.Save();
 			Manager.CloseSeason();
-			Application.Current.Shutdown();
 		}
 		private void Window_KeyUp(object sender, KeyEventArgs e)
 		{
@@ -348,18 +329,7 @@ namespace Player
 				pro.LoadFor(each);
 			});
 		}
-
-		private Collection<Media> ActiveCollection
-		{
-			get
-			{
-				switch (TabControl.SelectedIndex)
-				{
-					case 0: case 1: return null;
-					default: return Collections[TabControl.SelectedIndex - 1];
-				}
-			}
-		}
+		
 		private ListView ActiveView
 		{
 			get

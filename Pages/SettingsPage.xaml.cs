@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -10,6 +11,8 @@ namespace Player
 	/// </summary>
 	public partial class SettingsPanel : ScrollViewer
 	{
+		public event EventHandler RevalidationRequest;
+
 		public SettingsPanel()
 		{
 			InitializeComponent();
@@ -75,14 +78,9 @@ namespace Player
 			Keys_VolumeIncreaseBox.SelectedKeyChanged += (_, e) => App.Settings.VolumeIncreaseKey = e.Parameter;
 		}
 
-		private async void RevalidateClick(object sender, RoutedEventArgs e)
+		private void RevalidateClick(object sender, RoutedEventArgs e)
 		{
-			sender.As<Button>().Content = "Revalidating... app may stop working";
-			IsEnabled = false;
-			await Task.Delay(2000);
-			new MediaManager().Revalidate();
-			Application.Current.Shutdown(-1);
-			Process.Start(App.Path + "Elephant Player.exe");
+			RevalidationRequest?.Invoke(sender, e);
 		}
 	}
 }

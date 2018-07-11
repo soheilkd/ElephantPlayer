@@ -33,17 +33,21 @@
 									<ColumnDefinition Width="20" />
 									<ColumnDefinition Width="120"/>
 									<ColumnDefinition Width="20" />
+									<ColumnDefinition Width="120"/>
+									<ColumnDefinition Width="20" />
 									<ColumnDefinition />
 								</Grid.ColumnDefinitions>
-								<Image Source="{Binding Artwork}" Width="40" Height="40"/>
-								<TextBlock x:Name="titleBox" Text="{Binding Title}" FontSize="16" Foreground="White" FontWeight="SemiBold" Margin="40,0,0,0" VerticalAlignment="Center"/>
+								<Image Source="{Binding Artwork}" Width="40" Height="40" HorizontalAlignment="Left"/>
+								<TextBlock x:Name="titleBox" Text="{Binding Title}" FontSize="16" Foreground="White" FontWeight="SemiBold" Margin="50,0,0,0" VerticalAlignment="Center"/>
 								<TextBlock x:Name="artistBox" Text="{Binding Artist}" FontSize="13" Foreground="White" VerticalAlignment="Center" Grid.Column="2"/>
-								<TextBlock Text="{Binding PlayCount}" FontSize="17" FontWeight="Bold" Foreground="White" VerticalAlignment="Center" Grid.Column="4" />
+								<TextBlock x:Name="albumBox" Text="{Binding Album}" FontSize="14" Foreground="White" VerticalAlignment="Center" Grid.Column="4"/>
+								<TextBlock Text="{Binding PlayCount}" FontSize="17" FontWeight="Bold" Foreground="White" VerticalAlignment="Center" Grid.Column="6" />
 							</Grid>
 							<DataTemplate.Triggers>
 								<DataTrigger Binding="{Binding IsPlaying}" Value="True">
 									<Setter TargetName="titleBox" Property="Foreground" Value="#FF49d4ff" />
 									<Setter TargetName="artistBox" Property="Foreground" Value="#FF49d4ff" />
+									<Setter TargetName="albumBox" Property="Foreground" Value="#FF49d4ff" />
 								</DataTrigger>
 							</DataTemplate.Triggers>
 						</DataTemplate>
@@ -131,7 +135,7 @@
 				<TabItem.Header>
 					<ContentControl Content="Settings" />
 				</TabItem.Header>
-				<local:SettingsPanel />
+				<local:SettingsPanel x:Name="SettingsPanel"/>
 			</TabItem>
 		</TabControl>
 		<player:MediaPlayer x:Name="Player" />

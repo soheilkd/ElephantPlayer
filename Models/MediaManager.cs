@@ -1,8 +1,6 @@
 ﻿using Player.Events;
 using Player.Models;
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
@@ -16,11 +14,7 @@ namespace Player
 		public event EventHandler<InfoExchangeArgs<Media>> RequestReceived;
 		public MediaManager()
 		{
-			LibraryManager.Load().Unordered.For(each =>
-			{
-				Add(each);
-				QueueEnumerator.Add(each);
-			});
+			LibraryManager.Load().For(each => Add(each));
 		}
 
 		MediaEnumerator QueueEnumerator = new MediaEnumerator();
@@ -56,6 +50,11 @@ namespace Player
 		
 		public Media Play(Media media, bool isFromQueue = false)
 		{
+			if (!MediaOperator.DoesExists(media))
+			{
+				Remove(media);
+				media = Next();
+			}
 			this.For(each => each.IsPlaying = false);
 			media.IsPlaying = true;
 			if (!isFromQueue)
@@ -81,13 +80,17 @@ namespace Player
 		private void RequestPlay() => RequestPlay(this[0]);
 		private void RequestPlay(Media media)
 		{
+			if (!QueueEnumerator.Contains(media))
+				Requeue();
 			RequestReceived?.Invoke(this, new InfoExchangeArgs<Media>(media));
 		}
 
 		public void Revalidate()
 		{
-			this.For(each => MediaOperator.Reload(each));
-			this.For(each => Remove(each), each => !MediaOperator.DoesExists(each));
+			var t = (from each in this where MediaOperator.Load(each).Type != MediaType.None select each).ToArray();
+			Clear();
+			t.For(each => Add(each));
+			LibraryManager.Save(this);
 		}
 
 		public void Requeue(PlayMode playMode = PlayMode.Repeat)
