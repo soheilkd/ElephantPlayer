@@ -22,7 +22,7 @@
     </DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <LangVersion>default</LangVersion>
+    <LangVersion>7.3</LangVersion>
     <DebugSymbols>true</DebugSymbols>
     <Prefer32Bit>false</Prefer32Bit>
     <DocumentationFile>
@@ -98,9 +98,6 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Gma.System.MouseKeyHook, Version=5.6.130.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>packages\MouseKeyHook.5.6.0\lib\net40\Gma.System.MouseKeyHook.dll</HintPath>
-    </Reference>
     <Reference Include="Ionic.Zip, Version=1.9.1.8, Culture=neutral, PublicKeyToken=edbe51ad942a3f5c, processorArchitecture=MSIL">
       <HintPath>packages\Ionic.Zip.1.9.1.8\lib\Ionic.Zip.dll</HintPath>
     </Reference>
@@ -124,7 +121,6 @@
     <Reference Include="System.Core">
       <Private>False</Private>
     </Reference>
-    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xaml">
       <RequiredTargetFramework>4.0</RequiredTargetFramework>
     </Reference>
@@ -143,8 +139,13 @@
   <ItemGroup>
     <Compile Include="App.cs" />
     <Compile Include="Base\Extensions.cs" />
+    <Compile Include="Base\Hook.cs" />
     <Compile Include="Base\Images.cs" />
     <Compile Include="Base\Settings.cs" />
+    <Compile Include="Base\Taskbar.cs" />
+    <Compile Include="Controls\KeyBox.xaml.cs">
+      <DependentUpon>KeyBox.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Controls\MediaPlayer.xaml.cs">
       <DependentUpon>MediaPlayer.xaml</DependentUpon>
     </Compile>
@@ -152,10 +153,11 @@
       <DependentUpon>MaterialButton.xaml</DependentUpon>
     </Compile>
     <Compile Include="Base\DeepBackEnd.cs" />
-    <Compile Include="Models\Events.cs" />
+    <Compile Include="Base\Events.cs" />
     <Compile Include="Models\LibraryManager.cs" />
     <Compile Include="Models\Media.cs" />
-    <Compile Include="Models\SerializableMediaCollection.cs" />
+    <Compile Include="Models\MediaEnumerator.cs" />
+    <Compile Include="Models\Operator.cs" />
     <Compile Include="Pages\NowPlayingPage.xaml.cs">
       <DependentUpon>NowPlayingPage.xaml</DependentUpon>
     </Compile>
@@ -177,6 +179,10 @@
     <Page Include="App.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Controls\KeyBox.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Controls\MediaPlayer.xaml">
       <SubType>Designer</SubType>
@@ -240,7 +246,6 @@
   <ItemGroup>
     <WCFMetadata Include="Connected Services\" />
   </ItemGroup>
-  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PreBuildEvent>
