@@ -19,11 +19,5 @@
 				 Height="26"
 				 FontSize="17"
 				 Foreground="White"/>
-
-		<CheckBox x:Name="GlobalCheckBox"
-				  Foreground="White"
-				  Content="Call only with ancestor"
-				  Checked="GlobalCheckBox_Checked"
-				  Unchecked="GlobalCheckBox_Unchecked"/>
 	</StackPanel>
 </UserControl>
