@@ -1,5 +1,4 @@
-﻿using MaterialDesignThemes.Wpf;
-using System;
+﻿using System;
 using System.IO;
 using System.Windows;
 using System.Windows.Media;
@@ -7,6 +6,8 @@ using System.Windows.Media.Imaging;
 
 namespace Player.Controls
 {
+	public enum EllipseType { Rectular, Circular }
+
 	public static class Extensions
 	{
 		public static string ToNewString(this TimeSpan time) => time.ToString("c").Substring(3, 5);

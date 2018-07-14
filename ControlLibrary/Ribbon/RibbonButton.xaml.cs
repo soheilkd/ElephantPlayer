@@ -5,6 +5,8 @@ namespace Player.Controls.Ribbon
 {
 	public partial class Button : System.Windows.Controls.Ribbon.RibbonButton
 	{
+		public Button() => InitializeComponent();
+
 		public static readonly DependencyProperty IconProperty =
 			DependencyProperty.Register(nameof(Icon), typeof(IconKind), typeof(Button), new PropertyMetadata(IconKind.AccessPoint, new PropertyChangedCallback(OnIconChange)));
 
@@ -17,11 +19,10 @@ namespace Player.Controls.Ribbon
 				LargeImageSource = value.GetBitmap(Brushes.Black);
 			}
 		}
+
 		private static void OnIconChange(DependencyObject d, DependencyPropertyChangedEventArgs e) =>
 			d.SetValue(IconProperty, d.GetValue(IconProperty));
-
-		public Button() => InitializeComponent();
-
+		
 		private void RibbonButton_Loaded(object sender, RoutedEventArgs e) => Icon = Icon;
 
 	}

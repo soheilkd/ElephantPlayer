@@ -87,6 +87,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CodeBase.cs" />
+    <Compile Include="IconKind.cs" />
     <Compile Include="KeyBox.xaml.cs">
       <DependentUpon>KeyBox.xaml</DependentUpon>
     </Compile>

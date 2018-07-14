@@ -24,7 +24,7 @@
 			<local:MaterialButton x:Name="PlayPauseButton" Icon="Play" MouseUp="PlayPauseButton_Clicked" Margin="127,0,0,35" Height="24" Width="24"/>
 			<local:MaterialButton x:Name="VisionButton" Icon="TelevisionClassic" HorizontalAlignment="Center" Margin="0,0,0,35" MouseUp="VisionButton_Clicked" />
 			<local:MaterialButton x:Name="FullScreenButton" Icon="FullScreen" HorizontalAlignment="Right" Margin="0,0,10,35" VerticalAlignment="Bottom" MouseUp="FullScreenButton_Clicked"/>
-			<design:PackIcon x:Name="VolumeIcon" Kind="VolumeHigh" Width="25" Height="25" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0, 0, 155, 33" Foreground="{DynamicResource Foreground}" />
+			<design:PackIcon x:Name="VolumeIcon" Kind="VolumeHigh" Width="25" Height="25" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0, 0, 155, 33" />
 			<Slider x:Name="VolumeSlider" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,28,50,26" IsMoveToPointEnabled="True" Template="{DynamicResource FlatSlider}" Foreground="#F444"
                     Width="100" Maximum="99" SmallChange="2" LargeChange="10" AutoToolTipPlacement="TopLeft" ValueChanged="VolumeSlider_Changed"/>
 			<Grid.RenderTransform>

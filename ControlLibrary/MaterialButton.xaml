@@ -1,14 +1,12 @@
 ﻿<UserControl x:Class="Player.Controls.MaterialButton"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Background="#08000000"
-			 Width="20" Height="20" xmlns:mat="http://materialdesigninxaml.net/winfx/xaml/themes"
-			 x:Name="P" Loaded="UserControl_Loaded">
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+			 Width="20" Height="20" x:Name="P" Loaded="UserControl_Loaded"
+			 xmlns:mat="http://materialdesigninxaml.net/winfx/xaml/themes">
 	<Grid>
-		<Border x:Name="MainEllipse" BorderThickness="0" Margin="-7" BorderBrush="{Binding ElementName=P, Path=Foreground}" CornerRadius="20"
-				Background="{Binding Background,ElementName=P}"/>
+		<Border x:Name="MainEllipse" BorderThickness="0" Margin="-7" BorderBrush="{Binding Foreground,ElementName=P}" CornerRadius="20"/>
 		<Border x:Name="ClickEllipse" BorderBrush="{Binding Foreground,ElementName=P}" CornerRadius="100"  />
-		<mat:PackIcon x:Name="MainIcon" Foreground="{Binding Foreground,ElementName=P}" Background="#01000000"
-                            Width="{Binding Width, ElementName=P}" Height="{Binding Height, ElementName=P}" />
+		<mat:PackIcon x:Name="MainIcon"  Background="#01000000" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Width="Auto" Height="Auto"/>
 	</Grid>
 	<UserControl.Triggers>
 		<EventTrigger RoutedEvent="MouseEnter">
@@ -16,7 +14,7 @@
 				<BeginStoryboard>
 					<Storyboard>
 						<ThicknessAnimation Storyboard.TargetName="MainEllipse" Storyboard.TargetProperty="BorderThickness" 
-                                                    From="{Binding ElementName=MainEllipse, Path=BorderThickness}" To="2"
+											From="{Binding BorderThickness,ElementName=MainEllipse}" To="2"
                                             AccelerationRatio="0.6" DecelerationRatio="0.4" SpeedRatio="5"/>
 					</Storyboard>
 				</BeginStoryboard>
@@ -27,7 +25,7 @@
 				<BeginStoryboard>
 					<Storyboard>
 						<ThicknessAnimation Storyboard.TargetName="MainEllipse" Storyboard.TargetProperty="BorderThickness" 
-                                                    From="{Binding ElementName=MainEllipse, Path=BorderThickness}" To="0"
+											From="{Binding BorderThickness,ElementName=MainEllipse}" To="0"
                                             AccelerationRatio="0.6" DecelerationRatio="0.4" SpeedRatio="2"/>
 					</Storyboard>
 				</BeginStoryboard>
@@ -37,7 +35,8 @@
 			<EventTrigger.Actions>
 				<BeginStoryboard>
 					<Storyboard>
-						<ThicknessAnimation Storyboard.TargetName="MainEllipse" Storyboard.TargetProperty="Margin" From="{Binding ElementName=MainEllipse, Path=Margin}" To="-3"
+						<ThicknessAnimation Storyboard.TargetName="MainEllipse" Storyboard.TargetProperty="Margin"
+											From="{Binding Margin,ElementName=MainEllipse}" To="-3"
                                             AccelerationRatio="0.6" DecelerationRatio="0.4" SpeedRatio="6"/>
 					</Storyboard>
 				</BeginStoryboard>
@@ -46,12 +45,12 @@
 		<EventTrigger RoutedEvent="MouseUp">
 			<EventTrigger.Actions>
 				<BeginStoryboard>
-					<Storyboard>
-						<ThicknessAnimation Storyboard.TargetName="MainEllipse" Storyboard.TargetProperty="Margin" From="{Binding ElementName=MainEllipse, Path=Margin}" To="-7"
-                                            SpeedRatio="6" AccelerationRatio="0.6" DecelerationRatio="0.4" />
-						<ThicknessAnimation Storyboard.TargetName="ClickEllipse" Storyboard.TargetProperty="Margin" From="0" To="-30" SpeedRatio="3" />
-						<ThicknessAnimation Storyboard.TargetName="ClickEllipse" Storyboard.TargetProperty="BorderThickness" From="5" To="0" SpeedRatio="3"/>
-						<DoubleAnimation Storyboard.TargetName="ClickEllipse" Storyboard.TargetProperty="Opacity" From="1" To="0" SpeedRatio="3"/>
+					<Storyboard SpeedRatio="3" Storyboard.TargetName="ClickEllipse" AccelerationRatio="0.3" DecelerationRatio="0.5">
+						<ThicknessAnimation Storyboard.TargetName="MainEllipse" Storyboard.TargetProperty="Margin" 
+											From="{Binding Margin,ElementName=MainEllipse}" To="-7" />
+						<ThicknessAnimation Storyboard.TargetProperty="Margin" From="0" To="-30" />
+						<ThicknessAnimation Storyboard.TargetProperty="BorderThickness" From="5" To="0"/>
+						<DoubleAnimation Storyboard.TargetProperty="Opacity" From="1" To="0"/>
 					</Storyboard>
 				</BeginStoryboard>
 			</EventTrigger.Actions>
