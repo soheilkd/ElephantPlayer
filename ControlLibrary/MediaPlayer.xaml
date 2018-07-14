@@ -3,7 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" MouseMove="Element_MouseMove"
-             xmlns:local="clr-namespace:Player.Controls" xmlns:design="http://materialdesigninxaml.net/winfx/xaml/themes" 
+             xmlns:local="clr-namespace:Player.Controls" xmlns:design="http://materialdesigninxaml.net/winfx/xaml/themes"
 			 mc:Ignorable="d" Loaded="UserControl_Loaded" x:Name="ParentControl"
              d:DesignHeight="300" d:DesignWidth="600">
 	<Grid>
@@ -22,10 +22,8 @@
 			<local:MaterialButton x:Name="PreviousButton" Icon="SkipPrevious" Margin="87,0,0,35" MouseUp="PreviousButton_Clicked" />
 			<local:MaterialButton x:Name="NextButton" Icon="SkipNext" Margin="172,0,0,35" MouseUp="NextButton_Clicked" />
 			<local:MaterialButton x:Name="PlayPauseButton" Icon="Play" MouseUp="PlayPauseButton_Clicked" Margin="127,0,0,35" Height="24" Width="24"/>
-			<local:MaterialButton x:Name="VisionButton" Icon="Television" HorizontalAlignment="Center" Margin="0,0,0,35" MouseUp="VisionButton_Clicked" />
-			<local:MaterialButton x:Name="PlayModeButton" Icon="Repeat" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,197,30" EllipseType="Rectular" MouseUp="PlayMode_Click"/>
+			<local:MaterialButton x:Name="VisionButton" Icon="TelevisionClassic" HorizontalAlignment="Center" Margin="0,0,0,35" MouseUp="VisionButton_Clicked" />
 			<local:MaterialButton x:Name="FullScreenButton" Icon="FullScreen" HorizontalAlignment="Right" Margin="0,0,10,35" VerticalAlignment="Bottom" MouseUp="FullScreenButton_Clicked"/>
-			<local:MaterialButton x:Name="MinimalViewButton" Icon="ChevronDoubleUp" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,240,30" EllipseType="Rectular" MouseUp="MinimalButton_Clicked"/>
 			<design:PackIcon x:Name="VolumeIcon" Kind="VolumeHigh" Width="25" Height="25" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0, 0, 155, 33" Foreground="{DynamicResource Foreground}" />
 			<Slider x:Name="VolumeSlider" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,28,50,26" IsMoveToPointEnabled="True" Template="{DynamicResource FlatSlider}" Foreground="#F444"
                     Width="100" Maximum="99" SmallChange="2" LargeChange="10" AutoToolTipPlacement="TopLeft" ValueChanged="VolumeSlider_Changed"/>
@@ -37,7 +35,6 @@
 	<UserControl.Resources>
 		<SolidColorBrush x:Key="Foreground" Color="White" />
 		<Style TargetType="{x:Type Label}" x:Key="TimeLabel">
-			<Setter Property="Foreground" Value="{DynamicResource Foreground}" />
 			<Setter Property="VerticalAlignment" Value="Bottom"/>
 			<Setter Property="Width" Value="40" />
 			<Setter Property="RenderTransform">
@@ -47,7 +44,6 @@
 			</Setter>
 		</Style>
 		<Style TargetType="local:MaterialButton" >
-			<Setter Property="Foreground" Value="{DynamicResource Foreground}" />
 			<Setter Property="VerticalAlignment" Value="Bottom" />
 			<Setter Property="HorizontalAlignment" Value="Left"/>
 		</Style>
@@ -72,17 +68,17 @@
 				<Grid>
 					<Track x:Name="PART_Track" Grid.Row="1" MouseDown="Position_Holding">
 						<Track.DecreaseRepeatButton>
-							<RepeatButton Height="9" Background="#FCCC" />
+							<RepeatButton Height="9" Background="#F555" />
 						</Track.DecreaseRepeatButton>
 						<Track.IncreaseRepeatButton>
-							<RepeatButton Height="5" Background="#F333"/>
+							<RepeatButton Height="5" Background="#FCCC"/>
 						</Track.IncreaseRepeatButton>
 						<Track.Thumb>
 							<Thumb x:Name="Thumb" OverridesDefaultStyle="True" >
 								<Thumb.Template>
 									<ControlTemplate TargetType="{x:Type Thumb}">
 										<Grid>
-											<Ellipse Width="20" x:Name="grip" StrokeThickness="5" Stroke="#FCCC" Fill="#01FFFFFF" Height="4" Margin="-4, 0, 0, 0"/>
+											<Ellipse Width="20" x:Name="grip" StrokeThickness="5" Stroke="#F555" Fill="#01FFFFFF" Height="4" Margin="-4, 0, 0, 0"/>
 										</Grid>
 										<ControlTemplate.Triggers>
 											<Trigger Property="IsMouseOver" Value="true">

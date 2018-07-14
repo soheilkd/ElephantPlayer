@@ -11,7 +11,9 @@ namespace Player.Controls
 		public static readonly DependencyProperty EllipseProperty =
 			DependencyProperty.Register(nameof(EllipseType), typeof(EllipseTypes), typeof(MaterialButton), new PropertyMetadata(EllipseTypes.Circular));
 		public static readonly DependencyProperty IconProperty =
-			DependencyProperty.Register(nameof(Icon), typeof(PackIconKind), typeof(MaterialButton), new PropertyMetadata(PackIconKind.Settings, new PropertyChangedCallback(OnIconChange)));
+			DependencyProperty.Register(nameof(Icon), typeof(IconKind), typeof(MaterialButton), new PropertyMetadata(IconKind.Sale, new PropertyChangedCallback(OnIconChange)));
+		public static readonly DependencyProperty EllipseMarginProperty =
+			DependencyProperty.Register(nameof(EllipseMargin), typeof(Thickness), typeof(MaterialButton), new PropertyMetadata(new Thickness(-7), new PropertyChangedCallback(OnEllipseMarginChange)));
 
 		public enum EllipseTypes { Rectular, Circular }
 
@@ -25,13 +27,23 @@ namespace Player.Controls
 				ClickEllipse.CornerRadius = new CornerRadius(value == 0 ? 2 : 100);
 			}
 		}
-		public PackIconKind Icon
+		public IconKind Icon
 		{
-			get => (PackIconKind)GetValue(IconProperty);
+			get => (IconKind)GetValue(IconProperty);
 			set
 			{
 				SetValue(IconProperty, value);
-				MainIcon.Kind = value;
+				MainIcon.Kind = (PackIconKind)(int)value;
+			}
+		}
+		public Thickness EllipseMargin
+		{
+			get => (Thickness)GetValue(EllipseMarginProperty);
+			set
+			{
+				SetValue(EllipseMarginProperty, value);
+				MainEllipse.Margin = value;
+
 			}
 		}
 
@@ -43,7 +55,10 @@ namespace Player.Controls
 			Icon = Icon;
 		}
 		private static void OnIconChange(DependencyObject d, DependencyPropertyChangedEventArgs e) =>
-			d.SetValue(IconProperty, (PackIconKind)d.GetValue(IconProperty));
+			d.SetValue(IconProperty, d.GetValue(IconProperty));
+
+		private static void OnEllipseMarginChange(DependencyObject d, DependencyPropertyChangedEventArgs e) =>
+			d.SetValue(EllipseMarginProperty, d.GetValue(EllipseMarginProperty));
 
 		public void EmulateClick() => RaiseEvent(DefaultMouseUpArgs);
 	}

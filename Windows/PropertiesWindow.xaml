@@ -4,7 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         WindowStartupLocation="CenterScreen" AllowsTransparency="True"
-        xmlns:controls="clr-namespace:Player.Controls" Background="#EEE"
+        xmlns:controls="clr-namespace:Player.Controls;assembly=ControlLibrary" Background="#EEE"
         mc:Ignorable="d" WindowStyle="None" ResizeMode="NoResize" BorderThickness="0.1"
         Title="Properties" Height="674" Width="269">
 	<Grid>

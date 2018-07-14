@@ -58,24 +58,24 @@ namespace Player
 			
 			Keys_AncestorBox.SelectedKeyChanged += (_, e) =>
 			{
-				App.Settings.AncestorKey = e.Parameter;
+				App.Settings.AncestorKey = e.Key;
 			};
-			Keys_BackwardBox.SelectedKeyChanged += (_, e) => App.Settings.BackwardKey = e.Parameter;
-			Keys_CopyBox.SelectedKeyChanged += (_, e) => App.Settings.CopyKey = e.Parameter;
-			Keys_DeleteBox.SelectedKeyChanged += (_, e) => App.Settings.DeleteKey = e.Parameter;
-			Keys_FindBox.SelectedKeyChanged += (_, e) => App.Settings.FindKey = e.Parameter;
-			Keys_ForwardBox.SelectedKeyChanged += (_, e) => App.Settings.ForwardKey = e.Parameter;
-			Keys_MediaPlayBox.SelectedKeyChanged += (_, e) => App.Settings.MediaPlayKey = e.Parameter;
-			Keys_MoveBox.SelectedKeyChanged += (_, e) => App.Settings.MoveKey = e.Parameter;
-			Keys_NextBox.SelectedKeyChanged += (_, e) => App.Settings.NextKey = e.Parameter;
-			Keys_PlayModeBox.SelectedKeyChanged += (_, e) => App.Settings.PlayModeKey = e.Parameter;
-			Keys_PreviousBox.SelectedKeyChanged += (_, e) => App.Settings.PreviousKey = e.Parameter;
-			Keys_PrivatePlayPauseBox.SelectedKeyChanged += (_, e) => App.Settings.PrivatePlayPauseKey = e.Parameter;
-			Keys_PropertiesBox.SelectedKeyChanged += (_, e) => App.Settings.PropertiesKey = e.Parameter;
-			Keys_PublicPlayPauseBox.SelectedKeyChanged += (_, e) => App.Settings.PublicPlayPauseKey = e.Parameter;
-			Keys_RemoveBox.SelectedKeyChanged += (_, e) => App.Settings.RemoveKey = e.Parameter;
-			Keys_VolumeDecreaseBox.SelectedKeyChanged += (_, e) => App.Settings.VolumeDecreaseKey = e.Parameter;
-			Keys_VolumeIncreaseBox.SelectedKeyChanged += (_, e) => App.Settings.VolumeIncreaseKey = e.Parameter;
+			Keys_BackwardBox.SelectedKeyChanged += (_, e) => App.Settings.BackwardKey = e.Key;
+			Keys_CopyBox.SelectedKeyChanged += (_, e) => App.Settings.CopyKey = e.Key;
+			Keys_DeleteBox.SelectedKeyChanged += (_, e) => App.Settings.DeleteKey = e.Key;
+			Keys_FindBox.SelectedKeyChanged += (_, e) => App.Settings.FindKey = e.Key;
+			Keys_ForwardBox.SelectedKeyChanged += (_, e) => App.Settings.ForwardKey = e.Key;
+			Keys_MediaPlayBox.SelectedKeyChanged += (_, e) => App.Settings.MediaPlayKey = e.Key;
+			Keys_MoveBox.SelectedKeyChanged += (_, e) => App.Settings.MoveKey = e.Key;
+			Keys_NextBox.SelectedKeyChanged += (_, e) => App.Settings.NextKey = e.Key;
+			Keys_PlayModeBox.SelectedKeyChanged += (_, e) => App.Settings.PlayModeKey = e.Key;
+			Keys_PreviousBox.SelectedKeyChanged += (_, e) => App.Settings.PreviousKey = e.Key;
+			Keys_PrivatePlayPauseBox.SelectedKeyChanged += (_, e) => App.Settings.PrivatePlayPauseKey = e.Key;
+			Keys_PropertiesBox.SelectedKeyChanged += (_, e) => App.Settings.PropertiesKey = e.Key;
+			Keys_PublicPlayPauseBox.SelectedKeyChanged += (_, e) => App.Settings.PublicPlayPauseKey = e.Key;
+			Keys_RemoveBox.SelectedKeyChanged += (_, e) => App.Settings.RemoveKey = e.Key;
+			Keys_VolumeDecreaseBox.SelectedKeyChanged += (_, e) => App.Settings.VolumeDecreaseKey = e.Key;
+			Keys_VolumeIncreaseBox.SelectedKeyChanged += (_, e) => App.Settings.VolumeIncreaseKey = e.Key;
 		}
 
 		private void RevalidateClick(object sender, RoutedEventArgs e)

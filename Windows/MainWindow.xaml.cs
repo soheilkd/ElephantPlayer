@@ -1,21 +1,20 @@
 ﻿using Microsoft.Win32;
+using Player.Controls;
 using Player.Events;
 using Player.Hook;
 using System;
-using System.Collections.ObjectModel;
-using System.Collections.Specialized;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Timers;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
+using System.Windows.Controls.Ribbon;
 using System.Windows.Input;
 
 namespace Player
 {
-	public partial class MainWindow : Window
+	public partial class MainWindow : RibbonWindow
 	{
 		private const int HeightOnMinimal = 130;
 		private double TempHeight
@@ -30,10 +29,10 @@ namespace Player
 		{
 			set
 			{
-				TabControl.Visibility = value ? Visibility.Visible : Visibility.Collapsed;
-				MiniArtworkImage.Visibility = TabControl.Visibility;
-				SearchButton.Visibility = TabControl.Visibility;
-				SearchLabel.Visibility = TabControl.Visibility;
+				ListView.Visibility = value ? Visibility.Visible : Visibility.Collapsed;
+				MiniArtworkImage.Visibility = ListView.Visibility;
+				SearchButton.Visibility = ListView.Visibility;
+				SearchLabel.Visibility = ListView.Visibility;
 			}
 		}
 		private bool WasMaximized;
@@ -53,44 +52,58 @@ namespace Player
 			App.KeyDown += KeyboardListener_KeyDown;
 
 			Manager.RequestReceived += (_, e) => Play(e.Parameter);
-			Player.RequestReceived += Player_RequestReceived;
-			Player.LengthFound += (_, e) => Manager.Current.Length = e.Parameter;
+			Player.LengthFound += (_, e) => Manager.Current.Length = Player.Length;
 			Player.UpdateLayout();
-			ArtistsView.ItemsSource = Manager.OrderBy(each => each.Artist);
-			AlbumsView.ItemsSource = Manager.OrderBy(each => each.Album);
-			TitlesView.ItemsSource = Manager;
+			ListView.ItemsSource = Manager;
 			Player.ParentWindow = this;
 			TaskbarItemInfo = Player.Thumb.Info;
 			Resources["LastPath"] = App.Settings.LastPath;
 
-			RebindViews();
-			ArtistsView.MouseDoubleClick += DMouseDoubleClick;
-			TitlesView.MouseDoubleClick += DMouseDoubleClick;
-			AlbumsView.MouseDoubleClick += DMouseDoubleClick;
-			TabControl.SelectedIndex = 1;
+			ListView.MouseDoubleClick += DMouseDoubleClick;
 
-			SettingsPanel.RevalidationRequest += async (sender, __) =>
+			Player.NextRequest += (_, __) => Play(Manager.Next());
+			Player.PreviousRequest += (_, __) => Play(Manager.Previous());
+			Player.IsMagnifiedChange += (_, e) => ControlsNotNeededOnVisionIsVisible = !(bool)e.NewValue;
+
+			Timer timer = new Timer(1000) { AutoReset = true };
+			timer.Elapsed += (_, __) =>
+			Dispatcher.Invoke(() =>
+			ListView.Margin = Ribbon.IsMinimized ? new Thickness(0, 50, 0, 80) : new Thickness(0, 140, 0, 80));
+			timer.Start();
+		}
+		
+		private void MinimalButton_Clicked(object sender, MouseButtonEventArgs e)
+		{
+			if ((int)MinimalViewButton.Icon == 449)
 			{
-				sender.As<Button>().Content = "Revalidating... App will freeze";
-				IsEnabled = false;
-				await Task.Delay(2000);
-				Manager.Revalidate();
-				Application.Current.Shutdown(0);
-				Process.Start(App.Path + "Elephant Player.exe");
-			};
+				if (WasMaximized)
+					WindowState = WindowState.Maximized;
+				ResizeMode = ResizeMode.CanResize;
+				WindowStyle = WindowStyle.ThreeDBorderWindow;
+				Height = TempHeight;
+				MinimalViewButton.Icon = IconKind.ChevronDoubleUp;
+			}
+			else
+			{
+				WasMaximized = WindowState == WindowState.Maximized;
+				WindowState = WindowState.Normal;
+				TempHeight = ActualHeight;
+				ResizeMode = ResizeMode.CanMinimize;
+				Height = HeightOnMinimal;
+				WindowStyle = WindowStyle.ToolWindow;
+				MinimalViewButton.Icon = IconKind.ChevronDoubleDown;
+			}
 		}
 
 		private async void KeyboardListener_KeyDown(object sender, RawKeyEventArgs e)
 		{
-			if (TabControl.SelectedIndex == TabControl.Items.Count - 1)
-				return;
 			if (IsActive && SearchBox.IsFocused)
 				return;
 			//Key shortcuts when window is active and main key is down (default: alt)
 			if (IsActive && e.Key.HasFlag(App.Settings.AncestorKey))
 			{
 				if (e.Key == App.Settings.RemoveKey) Menu_RemoveClick(this, null);
-				if (e.Key == App.Settings.MediaPlayKey) DMouseDoubleClick(ActiveView, null);
+				if (e.Key == App.Settings.MediaPlayKey) DMouseDoubleClick(ListView, null);
 				if (e.Key == App.Settings.CopyKey) Menu_CopyClick(new MenuItem(), null);
 				if (e.Key == App.Settings.MoveKey) Menu_MoveClick(new MenuItem(), null);
 				if (e.Key == App.Settings.PropertiesKey) Menu_PropertiesClick(this, null);
@@ -123,43 +136,13 @@ namespace Player
 				case RequestType.Next: Play(Manager.Next()); break;
 				case RequestType.Previous: Play(Manager.Previous()); break;
 				case RequestType.Magnifiement: ControlsNotNeededOnVisionIsVisible = !Player.IsMagnified; break;
-				case RequestType.Collapse:
-					WasMaximized = WindowState == WindowState.Maximized;
-					WindowState = WindowState.Normal;
-					TempHeight = ActualHeight;
-					ResizeMode = ResizeMode.CanMinimize;
-					Height = HeightOnMinimal;
-					WindowStyle = WindowStyle.ToolWindow;
-					Player.MinimalViewButton.Icon = MaterialDesignThemes.Wpf.PackIconKind.ChevronDoubleDown;
-					break;
-				case RequestType.Expand:
-					if (WasMaximized)
-						WindowState = WindowState.Maximized;
-					ResizeMode = ResizeMode.CanResize;
-					WindowStyle = WindowStyle.ThreeDBorderWindow;
-					Height = TempHeight;
-					Player.MinimalViewButton.Icon = MaterialDesignThemes.Wpf.PackIconKind.ChevronDoubleUp;
-					break;
 				default: break;
 			}
 		}
 
-		private CollectionView[] Views = new CollectionView[4];
-		private PropertyGroupDescription[] Descriptions = new PropertyGroupDescription[4];
-		private void RebindViews()
-		{
-			Views[0] = (CollectionView)CollectionViewSource.GetDefaultView(ArtistsView.ItemsSource);
-			Descriptions[0] = new PropertyGroupDescription("Artist");
-			Views[0].GroupDescriptions.Add(Descriptions[0]);
-
-			Views[1] = (CollectionView)CollectionViewSource.GetDefaultView(AlbumsView.ItemsSource);
-			Descriptions[1] = new PropertyGroupDescription("Album");
-			Views[1].GroupDescriptions.Add(Descriptions[1]);
-		}
-
 		private void DMouseDoubleClick(object sender, MouseButtonEventArgs e)
 		{
-			if (sender.As<ListView>().SelectedItem is Media med)
+			if (ListView.SelectedItem is Media med)
 				Play(med, false);
 		}
 
@@ -169,7 +152,7 @@ namespace Player
 			TempHeight = App.Settings.LastSize.Height;
 			if (App.Settings.RememberMinimal && App.Settings.WasMinimal)
 			{
-				Player.MinimalViewButton.EmulateClick();
+				MinimalViewButton.EmulateClick();
 				TempHeight = App.Settings.LastSize.Height;
 			}
 			else
@@ -178,11 +161,12 @@ namespace Player
 				await Task.Delay(10);
 			Environment.GetCommandLineArgs().For(each => Manager.AddFromPath(each, true));
 
-			TitlesView.IsHitTestVisibleChanged += (_, __) => Console.WriteLine("CHANGE");
+			ListView.IsHitTestVisibleChanged += (_, __) => Console.WriteLine("CHANGE");
+
 		}
 		private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
 		{
-			App.Settings.LastSize = new Size(Width, Height <= 130 ? TempHeight: Height);
+			App.Settings.LastSize = new Size(Width, Height <= 130 ? TempHeight : Height);
 			App.Settings.LastLoc = new Point(Left, Top);
 			App.Settings.WasMinimal = Height <= 131;
 			App.Settings.Volume = Player.Volume;
@@ -200,22 +184,42 @@ namespace Player
 			((string[])e.Data.GetData(DataFormats.FileDrop)).For(each => Manager.AddFromPath(each));
 		}
 
-
+		bool WasMinimal;
 		private void Play(Media media, bool inQueueImpl = true)
 		{
 			if (!inQueueImpl)
 			{
 				Manager.Play(media);
 			}
+			MediaOperator.Reload(media);
 			Player.Play(media);
 			MiniArtworkImage.Source = media.Artwork;
+
 			DeepBackEnd.NativeMethods.SHAddToRecentDocs(DeepBackEnd.NativeMethods.ShellAddToRecentDocsFlags.Path, media);
 			Title = $"Elephant Player| {media.Artist} - {media.Title}";
+			MinimalViewButton.Visibility = media.IsVideo ? Visibility.Hidden : Visibility.Visible;
+			if (media.IsVideo)
+			{
+				if (WasMinimal)
+					return;
+				if (ActualHeight <= 131)
+				{
+					MinimalViewButton.EmulateClick();
+					WasMinimal = true;
+				}
+				else
+					WasMinimal = false;
+			}
+			else if (WasMinimal && ActualHeight > 131)
+			{
+				MinimalViewButton.EmulateClick();
+				WasMinimal = false;
+			}
 		}
 
 		private void SearchBox_TextChanged(object sender, TextChangedEventArgs e)
 		{
-			RebindViews();
+
 		}
 		private void SearchIcon_Click(object sender, MouseButtonEventArgs e)
 		{
@@ -329,23 +333,45 @@ namespace Player
 				pro.LoadFor(each);
 			});
 		}
-		
-		private ListView ActiveView
-		{
-			get
-			{
-				switch (TabControl.SelectedIndex)
-				{
-					case 1: return TitlesView;
-					case 2: return ArtistsView;
-					case 3: return AlbumsView;
-					default: return null;
-				}
-			}
-		}
+
 		private void For(Action<Media> action)
 		{
-			ActiveView.SelectedItems.Cast<Media>().ToArray().For(action);
+			ListView.SelectedItems.Cast<Media>().ToArray().For(action);
+		}
+
+		private void PlayModeButton_Click(object sender, RoutedEventArgs e)
+		{
+			switch (PlayModeButton.Icon)
+			{
+				case IconKind.Repeat:
+					PlayModeButton.Icon = IconKind.RepeatOnce;
+					PlayModeButton.Label = "Repeat One";
+					App.Settings.PlayMode = PlayMode.RepeatOne;
+					break;
+				case IconKind.RepeatOnce:
+					PlayModeButton.Icon = IconKind.Shuffle;
+					PlayModeButton.Label = "Random";
+					App.Settings.PlayMode = PlayMode.Shuffle;
+					break;
+				case IconKind.Shuffle:
+					PlayModeButton.Icon = IconKind.Repeat;
+					PlayModeButton.Label = "Repeat All";
+					App.Settings.PlayMode = PlayMode.Repeat;
+					break;
+				default:
+					break;
+			}
+		}
+
+		private void Button_Click(object sender, RoutedEventArgs e)
+		{
+			Manager.For(each => MediaOperator.Load(each));
+		}
+
+		private void Button_Click_1(object sender, RoutedEventArgs e)
+		{
+			GC.Collect();
+			GC.WaitForFullGCComplete();
 		}
 	}
 }

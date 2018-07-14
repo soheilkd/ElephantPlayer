@@ -4,4 +4,8 @@
 
 /bin
 /obj
+/ControlsLibrary/bin
+/ControlsLibrary/obj
 /.vs
+/ControlLibrary/bin/Release
+/ControlLibrary/obj/Release

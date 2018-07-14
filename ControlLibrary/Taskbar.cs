@@ -1,9 +1,9 @@
-﻿using MaterialDesignThemes.Wpf;
-using System;
+﻿using System;
+using System.Windows;
 using System.Windows.Input;
 using System.Windows.Shell;
 
-namespace Player.Taskbar
+namespace Player.Controls.Taskbar
 {
 	public class Command : ICommand
 	{
@@ -24,22 +24,22 @@ namespace Player.Taskbar
 		public ThumbButtonInfo PlayThumb = new ThumbButtonInfo()
 		{
 			Description = "Play",
-			ImageSource = Images.GetBitmap(PackIconKind.Play)
+			ImageSource = IconKind.Play.GetBitmap()
 		};
 		public ThumbButtonInfo PauseThumb = new ThumbButtonInfo()
 		{
 			Description = "Pause",
-			ImageSource = Images.GetBitmap(PackIconKind.Pause)
+			ImageSource = IconKind.Pause.GetBitmap()
 		};
 		public ThumbButtonInfo PreviousThumb = new ThumbButtonInfo()
 		{
 			Description = "Previous",
-			ImageSource = Images.GetBitmap(PackIconKind.SkipPrevious)
+			ImageSource = IconKind.SkipPrevious.GetBitmap()
 		};
 		public ThumbButtonInfo NextThumb = new ThumbButtonInfo()
 		{
 			Description = "Next",
-			ImageSource = Images.GetBitmap(PackIconKind.SkipNext)
+			ImageSource = IconKind.SkipNext.GetBitmap()
 		};
 
 		private Command PlayHandler = new Command();
@@ -68,5 +68,11 @@ namespace Player.Taskbar
 		public void SetPlayingState(bool IsPlaying = false) => Info.ThumbButtonInfos[1] = IsPlaying ? PauseThumb : PlayThumb;
 		public void SetProgressState(TaskbarItemProgressState state) => Info.ProgressState = state;
 		public void SetProgressValue(double value) => Info.ProgressValue = value;
+
+		public static JumpItem[] GetJumps(Application app)
+		{
+			return JumpList.GetJumpList(app).JumpItems.ToArray();
+			
+		}
 	}
 }

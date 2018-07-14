@@ -1,5 +1,4 @@
-﻿using Player.Events;
-using System;
+﻿using System;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -8,8 +7,7 @@ namespace Player.Controls
 {
 	public partial class KeyBox : UserControl
 	{
-		public event EventHandler<InfoExchangeArgs<Key>> SelectedKeyChanged;
-		public event EventHandler<InfoExchangeArgs<bool>> IsGlobalChanged;
+		public event EventHandler<KeyEventArgs> SelectedKeyChanged;
 
 		private Key _selectedKey;
 		public Key SelectedKey
@@ -18,7 +16,7 @@ namespace Player.Controls
 			set
 			{
 				_selectedKey = value;
-				SelectedKeyChanged?.Invoke(this, new InfoExchangeArgs<Key>(value));
+				SelectedKeyChanged?.Invoke(this, new KeyEventArgs(null, null, 0, value));
 			}
 		}
 

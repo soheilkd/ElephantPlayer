@@ -1,5 +1,4 @@
 ﻿using MaterialDesignThemes.Wpf;
-using Player.Events;
 using System;
 using System.Threading.Tasks;
 using System.Timers;
@@ -7,6 +6,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media.Animation;
+
 namespace Player.Controls
 {
 	public partial class MediaPlayer : UserControl
@@ -18,8 +18,11 @@ namespace Player.Controls
 		public static DependencyProperty IsFullScreenProperty =
 			DependencyProperty.Register(nameof(IsFullScreen), typeof(bool), typeof(MediaPlayer), new PropertyMetadata(false));
 
-		public event EventHandler<RequestArgs> RequestReceived;
-		public event EventHandler<InfoExchangeArgs<TimeSpan>> LengthFound;
+		public event EventHandler LengthFound;
+		public event EventHandler PlayCounterElapsed;
+		public event EventHandler NextRequest;
+		public event EventHandler PreviousRequest;
+		public event EventHandler<DependencyPropertyChangedEventArgs> IsMagnifiedChange;
 
 		public TimeSpan Position
 		{
@@ -46,28 +49,28 @@ namespace Player.Controls
 					case double n when (n <= 0.7): VolumeIcon.Kind = PackIconKind.VolumeMedium; break;
 					default: VolumeIcon.Kind = PackIconKind.VolumeHigh; break;
 				}
-				App.Settings.Volume = element.Volume;
 			}
 		}
-		private Media _Media = new Media();
+
+		public void ChangeMouseMoveTimer(double interval) => MouseMoveTimer = new Timer(interval) { AutoReset = false };
 		private Timer DraggerTimer = new Timer(250) { AutoReset = false };
-		private Timer MouseMoveTimer = new Timer(App.Settings.MouseOverTimeout) { AutoReset = false };
+		private Timer MouseMoveTimer = new Timer(5000);
 		private Timer PlayCountTimer = new Timer(120000) { AutoReset = false };
 		private TimeSpan timeSpan;
-		private TimeSpan TimeSpan
+		public TimeSpan Length
 		{
 			get => timeSpan;
 			set
 			{
 				timeSpan = value;
-				PositionSlider.Maximum = TimeSpan.TotalMilliseconds;
+				PositionSlider.Maximum = Length.TotalMilliseconds;
 				PositionSlider.SmallChange = 1 * PositionSlider.Maximum / 100;
 				PositionSlider.LargeChange = 5 * PositionSlider.Maximum / 100;
-				TimeLabel_Full.Content = TimeSpan.ToNewString();
-				LengthFound?.Invoke(this, new InfoExchangeArgs<TimeSpan>(TimeSpan));
+				TimeLabel_Full.Content = Length.ToNewString();
+				LengthFound?.Invoke(this, null);
 			}
 		}
-		private bool WasMaximized, isTopMost, IsUXChangingPosition, WasMinimal;
+		private bool WasMaximized, isTopMost, IsUXChangingPosition;
 		public bool IsFullyLoaded;
 		public bool IsFullScreen
 		{
@@ -76,7 +79,7 @@ namespace Player.Controls
 			{
 				SetValue(IsFullScreenProperty, value);
 				ParentWindow.ResizeMode = value ? ResizeMode.NoResize : ResizeMode.CanResize;
-				FullScreenButton.Icon = value ? PackIconKind.FullscreenExit : PackIconKind.Fullscreen;
+				FullScreenButton.Icon = value ? IconKind.FullscreenExit : IconKind.Fullscreen;
 				VisionButton.Visibility = value ? Visibility.Hidden : Visibility.Visible;
 				ParentWindow.WindowStyle = value ? WindowStyle.None : WindowStyle.SingleBorderWindow;
 				if (value)
@@ -105,6 +108,7 @@ namespace Player.Controls
 			get => (bool)GetValue(IsMagnifiedProperty);
 			set
 			{
+				IsMagnifiedChange?.Invoke(this, new DependencyPropertyChangedEventArgs(IsMagnifiedProperty, IsMagnified, value));
 				SetValue(IsMagnifiedProperty, value);
 				if (value)
 				{
@@ -119,7 +123,6 @@ namespace Player.Controls
 					MinifyBoard.Begin();
 					IsTopMost = false;
 				}
-				Request(RequestType.Magnifiement);
 			}
 		}
 		public bool AreControlsVisible
@@ -145,6 +148,8 @@ namespace Player.Controls
 				});
 			}
 		}
+		public bool PlayOnPositionChange { get; set; }
+		public bool AutoOrinateVision { get; set; }
 		public Window ParentWindow;
 		public Taskbar.Thumb Thumb = new Taskbar.Thumb();
 		private Storyboard MagnifyBoard, MinifyBoard, FullOnBoard, FullOffBoard;
@@ -169,21 +174,29 @@ namespace Player.Controls
 			FullOnBoard.Completed += (_, __) => Cursor = Cursors.None;
 			SizeChanged += (_,__) => elementCanvas.Height = IsMagnified ? Double.NaN : 0;
 			FullOffBoard.CurrentStateInvalidated += (_, __) => Cursor = Cursors.Arrow;
-			PlayModeButton.Icon = (PackIconKind)Enum.Parse(typeof(PackIconKind), App.Settings.PlayMode.ToString());
 			element.MediaEnded += (_, __) => Next();
+			element.MediaOpened += Element_MediaOpened;
+		}
+
+		private void Element_MediaOpened(object sender, RoutedEventArgs e)
+		{
+			bool isVideo = element.HasVideo;
+			VisionButton.Visibility = isVideo ? Visibility.Visible : Visibility.Hidden;
+			FullScreenButton.Visibility = VisionButton.Visibility;
+			if (IsFullScreen && !isVideo)
+				FullScreenButton.EmulateClick();
+			IsMagnified = isVideo && AutoOrinateVision;
 		}
 
 		private void UserControl_Loaded(object sender, RoutedEventArgs e)
 		{
 			RunUX();
-			Volume = App.Settings.Volume;
-			VolumeSlider.Value = Volume * 100;
 			IsFullyLoaded = true;
 		}
 
 		private void PlayCountTimer_Elapsed(object sender, ElapsedEventArgs e)
 		{
-			_Media.PlayCount++;
+			PlayCounterElapsed?.Invoke(this, null);
 			PlayCountTimer.Stop();
 		}
 
@@ -213,8 +226,8 @@ namespace Player.Controls
 		{
 			UX:
 			await Task.Delay(250);
-			if (element.NaturalDuration.HasTimeSpan && element.NaturalDuration.TimeSpan != TimeSpan)
-				TimeSpan = element.NaturalDuration.TimeSpan;
+			if (element.NaturalDuration.HasTimeSpan && element.NaturalDuration.TimeSpan != Length)
+				Length = element.NaturalDuration.TimeSpan;
 			TimeLabel_Current.Content = Position.ToNewString();
 			IsUXChangingPosition = true;
 			PositionSlider.Value = Position.TotalMilliseconds;
@@ -228,9 +241,9 @@ namespace Player.Controls
 			element.Pause();
 			while (e.ButtonState == MouseButtonState.Pressed)
 				await Task.Delay(50);
-			if (but == PackIconKind.Pause)
+			if (but == IconKind.Pause)
 				element.Play();
-			else if (App.Settings.PlayOnPositionChange)
+			else if (PlayOnPositionChange)
 				Play();
 		}
 		private void Position_Changed(object sender, RoutedPropertyChangedEventArgs<double> e)
@@ -240,14 +253,14 @@ namespace Player.Controls
 		}
 		private void PlayPauseButton_Clicked(object sender, MouseButtonEventArgs e)
 		{
-			if (PlayPauseButton.Icon == PackIconKind.Pause)
+			if (PlayPauseButton.Icon == IconKind.Pause)
 				Pause();
 			else
 				Play();
 		}
 		private void NextButton_Clicked(object sender, MouseButtonEventArgs e)
 		{
-			Request(RequestType.Next);
+			NextRequest?.Invoke(this, null);
 		}
 		private void PreviousButton_Clicked(object sender, MouseButtonEventArgs e)
 		{
@@ -257,7 +270,7 @@ namespace Player.Controls
 				element.Play();
 			}
 			else
-				Request(RequestType.Previous);
+				PreviousRequest?.Invoke(this, null);
 		}
 		private void FullScreenButton_Clicked(object sender, MouseButtonEventArgs e)
 		{
@@ -271,78 +284,26 @@ namespace Player.Controls
 		{
 			Volume = VolumeSlider.Value / 100;
 		}
-		private void MinimalButton_Clicked(object sender, MouseButtonEventArgs e)
-		{
-			Request((int)MinimalViewButton.Icon == 449 ? RequestType.Expand : RequestType.Collapse);
-		}
 
-		private void PlayMode_Click(object sender, MouseButtonEventArgs e)
+		public void Play(Uri source)
 		{
-			switch (PlayModeButton.Icon)
-			{
-				case PackIconKind.Repeat:
-					PlayModeButton.Icon = PackIconKind.RepeatOnce;
-					App.Settings.PlayMode = PlayMode.RepeatOne;
-					break;
-				case PackIconKind.RepeatOnce:
-					PlayModeButton.Icon = PackIconKind.Shuffle;
-					App.Settings.PlayMode = PlayMode.Shuffle;
-					break;
-				case PackIconKind.Shuffle:
-					PlayModeButton.Icon = PackIconKind.Repeat;
-					App.Settings.PlayMode = PlayMode.Repeat;
-					break;
-				default:
-					break;
-			}
-		}
-		public void Play(Media media)
-		{
-			MediaOperator.Load(media);
-			_Media = media;
-			VisionButton.Visibility = media.IsVideo ? Visibility.Visible : Visibility.Hidden;
-			FullScreenButton.Visibility = VisionButton.Visibility;
-			if (IsFullScreen && !media.IsVideo)
-				FullScreenButton.EmulateClick();
-			IsMagnified = media.IsVideo && App.Settings.VisionOrientation;
-			element.Source = media;
+			element.Source = source;
 			PlayCountTimer.Stop();
 			PlayCountTimer.Start();
 			Play();
-			MinimalViewButton.Visibility = media.IsVideo ? Visibility.Hidden : Visibility.Visible;
-			if (media.IsVideo)
-			{
-				if (WasMinimal)
-					return;
-				if (ParentWindow.ActualHeight <= 131)
-				{
-					MinimalViewButton.EmulateClick();
-					WasMinimal = true;
-				}
-				else
-					WasMinimal = false;
-			}
-			else if (WasMinimal && ParentWindow.ActualHeight > 131)
-			{
-				MinimalViewButton.EmulateClick();
-				WasMinimal = false;
-			}
 		}
-
-		private void Request(RequestType requestType) 
-			=> RequestReceived?.Invoke(this, new RequestArgs(requestType));
 
 		public void Play(bool emulateClick = false)
 		{
 			if (emulateClick)
 			{
-				PlayPauseButton.Icon = PackIconKind.Play;
+				PlayPauseButton.Icon = IconKind.Play;
 				PlayPauseButton.EmulateClick();
 			}
 			else
 			{
 				element.Play();
-				PlayPauseButton.Icon = PackIconKind.Pause;
+				PlayPauseButton.Icon = IconKind.Pause;
 				Thumb.SetPlayingState(true);
 			}
 		}
@@ -350,13 +311,13 @@ namespace Player.Controls
 		{
 			if (emulateClick)
 			{
-				PlayPauseButton.Icon = PackIconKind.Pause;
+				PlayPauseButton.Icon = IconKind.Pause;
 				PlayPauseButton.EmulateClick();
 			}
 			else
 			{
 				element.Pause();
-				PlayPauseButton.Icon = PackIconKind.Play;
+				PlayPauseButton.Icon = IconKind.Play;
 				Thumb.SetPlayingState(false);
 			}
 		}
