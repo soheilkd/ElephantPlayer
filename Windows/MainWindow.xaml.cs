@@ -24,7 +24,6 @@ namespace Player
 		}
 
 		private MediaManager Manager = new MediaManager();
-		private Timer PlayCountTimer = new Timer(100000) { AutoReset = false };
 		private bool ControlsNotNeededOnVisionIsVisible
 		{
 			set
@@ -35,7 +34,8 @@ namespace Player
 				SearchLabel.Visibility = ListView.Visibility;
 			}
 		}
-		private bool WasMaximized;
+		private bool WasMaximized, WasMinimal;
+
 		public MainWindow()
 		{
 			InitializeComponent();
@@ -47,15 +47,16 @@ namespace Player
 
 		private void Initialize()
 		{
-			PlayCountTimer.Elapsed += (_, __) => Manager.Current.PlayCount++;
 			App.NewInstanceRequested += (_, e) => e.Args.ToList().ForEach(each => Manager.AddFromPath(each, true));
 			App.KeyDown += KeyboardListener_KeyDown;
 
 			Manager.RequestReceived += (_, e) => Play(e.Parameter);
 			Player.LengthFound += (_, e) => Manager.Current.Length = Player.Length;
+			Player.FullScreenRequest += Player_FullScreenRequest;
+			Player.PlayCounterElapsed += (_, __) => Manager.Current.PlayCount++;
 			Player.UpdateLayout();
+
 			ListView.ItemsSource = Manager;
-			Player.ParentWindow = this;
 			TaskbarItemInfo = Player.Thumb.Info;
 			Resources["LastPath"] = App.Settings.LastPath;
 
@@ -71,7 +72,22 @@ namespace Player
 			ListView.Margin = Ribbon.IsMinimized ? new Thickness(0, 50, 0, 80) : new Thickness(0, 140, 0, 80));
 			timer.Start();
 		}
-		
+
+		private void Player_FullScreenRequest(object sender, EventArgs e)
+		{
+			ResizeMode = Player.IsFullScreen ? ResizeMode.NoResize : ResizeMode.CanResize;
+			WindowStyle = Player.IsFullScreen ? WindowStyle.None : WindowStyle.SingleBorderWindow;
+			if (Player.IsFullScreen)
+			{
+				WasMaximized = WindowState == WindowState.Maximized;
+				if (WasMaximized)
+					WindowState = WindowState.Normal;
+				WindowState = WindowState.Maximized;
+			}
+			else
+				WindowState = WasMaximized ? WindowState.Maximized : WindowState.Normal;
+		}
+
 		private void MinimalButton_Clicked(object sender, MouseButtonEventArgs e)
 		{
 			if ((int)MinimalViewButton.Icon == 449)
@@ -129,17 +145,6 @@ namespace Player
 			if (e.Key == App.Settings.PreviousKey) Player.Previous();
 		}
 
-		private void Player_RequestReceived(object sender, RequestArgs e)
-		{
-			switch (e.Request)
-			{
-				case RequestType.Next: Play(Manager.Next()); break;
-				case RequestType.Previous: Play(Manager.Previous()); break;
-				case RequestType.Magnifiement: ControlsNotNeededOnVisionIsVisible = !Player.IsMagnified; break;
-				default: break;
-			}
-		}
-
 		private void DMouseDoubleClick(object sender, MouseButtonEventArgs e)
 		{
 			if (ListView.SelectedItem is Media med)
@@ -184,7 +189,6 @@ namespace Player
 			((string[])e.Data.GetData(DataFormats.FileDrop)).For(each => Manager.AddFromPath(each));
 		}
 
-		bool WasMinimal;
 		private void Play(Media media, bool inQueueImpl = true)
 		{
 			if (!inQueueImpl)

@@ -15,13 +15,12 @@ namespace Player.Controls
 			DependencyProperty.Register(nameof(IsMagnified), typeof(bool), typeof(MediaPlayer), new PropertyMetadata(false));
 		public static DependencyProperty AreControlsVisibleProperty =
 			DependencyProperty.Register(nameof(AreControlsVisible), typeof(bool), typeof(MediaPlayer), new PropertyMetadata(true));
-		public static DependencyProperty IsFullScreenProperty =
-			DependencyProperty.Register(nameof(IsFullScreen), typeof(bool), typeof(MediaPlayer), new PropertyMetadata(false));
 
 		public event EventHandler LengthFound;
 		public event EventHandler PlayCounterElapsed;
 		public event EventHandler NextRequest;
 		public event EventHandler PreviousRequest;
+		public event EventHandler FullScreenRequest;
 		public event EventHandler<DependencyPropertyChangedEventArgs> IsMagnifiedChange;
 
 		public TimeSpan Position
@@ -54,16 +53,15 @@ namespace Player.Controls
 
 		public void ChangeMouseMoveTimer(double interval) => MouseMoveTimer = new Timer(interval) { AutoReset = false };
 		public Taskbar.Thumb Thumb = new Taskbar.Thumb();
-		private Timer DraggerTimer = new Timer(250) { AutoReset = false };
 		private Timer MouseMoveTimer = new Timer(5000);
 		private Timer PlayCountTimer = new Timer(120000) { AutoReset = false };
-		private TimeSpan timeSpan;
+		private TimeSpan _Length;
 		public TimeSpan Length
 		{
-			get => timeSpan;
+			get => _Length;
 			set
 			{
-				timeSpan = value;
+				_Length = value;
 				PositionSlider.Maximum = Length.TotalMilliseconds;
 				PositionSlider.SmallChange = 1 * PositionSlider.Maximum / 100;
 				PositionSlider.LargeChange = 5 * PositionSlider.Maximum / 100;
@@ -71,40 +69,10 @@ namespace Player.Controls
 				LengthFound?.Invoke(this, null);
 			}
 		}
-		private bool WasMaximized, isTopMost, IsUXChangingPosition;
+		private bool IsUXChangingPosition;
 		public bool IsFullyLoaded;
-		public bool IsFullScreen
-		{
-			get => (bool)GetValue(IsFullScreenProperty);
-			set
-			{
-				SetValue(IsFullScreenProperty, value);
-				ParentWindow.ResizeMode = value ? ResizeMode.NoResize : ResizeMode.CanResize;
-				FullScreenButton.Icon = value ? IconKind.FullscreenExit : IconKind.Fullscreen;
-				VisionButton.Visibility = value ? Visibility.Hidden : Visibility.Visible;
-				ParentWindow.WindowStyle = value ? WindowStyle.None : WindowStyle.SingleBorderWindow;
-				if (value)
-				{
-					WasMaximized = ParentWindow.WindowState == WindowState.Maximized;
-					if (WasMaximized)
-						ParentWindow.WindowState = WindowState.Normal;
-					ParentWindow.WindowState = WindowState.Maximized;
-				}
-				else
-					ParentWindow.WindowState = WasMaximized ? WindowState.Maximized : WindowState.Normal;
-			}
-		}
-		public bool IsTopMost
-		{
-			get => isTopMost;
-			set
-			{
-				isTopMost = value;
-				ParentWindow.Topmost = value;
-				ParentWindow.WindowStyle = value ? WindowStyle.None : WindowStyle.SingleBorderWindow;
-			}
-		}
-		public bool IsMagnified
+		public bool IsFullScreen => FullScreenButton.Icon == IconKind.FullscreenExit;
+		private bool IsMagnified
 		{
 			get => (bool)GetValue(IsMagnifiedProperty);
 			set
@@ -112,21 +80,12 @@ namespace Player.Controls
 				IsMagnifiedChange?.Invoke(this, new DependencyPropertyChangedEventArgs(IsMagnifiedProperty, IsMagnified, value));
 				SetValue(IsMagnifiedProperty, value);
 				if (value)
-				{
-					MagnifyAnimation.From = new Thickness(ActualWidth / 2, ActualHeight, ActualWidth / 2, 0);
-					elementCanvas.Height = Double.NaN;
 					MagnifyBoard.Begin();
-					MouseMoveTimer.Start();
-				}
 				else
-				{
-					MinifyAnimation.To = new Thickness(ActualWidth / 2, ActualHeight, ActualWidth / 2, 0);
 					MinifyBoard.Begin();
-					IsTopMost = false;
-				}
 			}
 		}
-		public bool AreControlsVisible
+		private bool AreControlsVisible
 		{
 			get => (bool)GetValue(AreControlsVisibleProperty);
 			set
@@ -151,9 +110,7 @@ namespace Player.Controls
 		}
 		public bool PlayOnPositionChange { get; set; }
 		public bool AutoOrinateVision { get; set; }
-		public Window ParentWindow;
 		private Storyboard MagnifyBoard, MinifyBoard, FullOnBoard, FullOffBoard;
-		private ThicknessAnimation MagnifyAnimation, MinifyAnimation;
 
 		public MediaPlayer()
 		{
@@ -162,8 +119,6 @@ namespace Player.Controls
 			MinifyBoard = Resources["MinifyBoard"] as Storyboard;
 			FullOnBoard = Resources["FullOnBoard"] as Storyboard;
 			FullOffBoard = Resources["FullOffBoard"] as Storyboard;
-			MagnifyAnimation = MagnifyBoard.Children[0] as ThicknessAnimation;
-			MinifyAnimation = MinifyBoard.Children[0] as ThicknessAnimation;
 
 			Thumb.NextClicked += (obj, f) => Next();
 			Thumb.PauseClicked += (obj, f) => PlayPause();
@@ -172,11 +127,13 @@ namespace Player.Controls
 			MouseMoveTimer.Elapsed += (_, __) => AreControlsVisible = false;
 			PlayCountTimer.Elapsed += PlayCountTimer_Elapsed;
 			FullOnBoard.Completed += (_, __) => Cursor = Cursors.None;
-			SizeChanged += (_,__) => elementCanvas.Height = IsMagnified ? Double.NaN : 0;
 			FullOffBoard.CurrentStateInvalidated += (_, __) => Cursor = Cursors.Arrow;
 			element.MediaEnded += (_, __) => Next();
 			element.MediaOpened += Element_MediaOpened;
-			
+			MagnifyBoard.CurrentStateInvalidated += (_, __) => elementCanvas.Visibility = Visibility.Visible;
+			MinifyBoard.Completed += (_, __) => elementCanvas.Visibility = Visibility.Hidden;
+			elementCanvas.Visibility = Visibility.Hidden;
+			elementCanvas.Opacity = 0;
 		}
 
 		private void Element_MediaOpened(object sender, RoutedEventArgs e)
@@ -199,19 +156,6 @@ namespace Player.Controls
 		{
 			PlayCounterElapsed?.Invoke(this, null);
 			PlayCountTimer.Stop();
-		}
-
-		private void Element_MouseDown(object sender, MouseButtonEventArgs e)
-		{
-			DraggerTimer.Start();
-			try
-			{
-				if (ParentWindow.WindowState != WindowState.Maximized)
-					ParentWindow.DragMove();
-				if (DraggerTimer.Enabled && !IsFullScreen)
-					IsTopMost = !IsTopMost;
-			}
-			catch { }
 		}
 		
 		private async void Element_MouseMove(object sender, MouseEventArgs e)
@@ -276,7 +220,9 @@ namespace Player.Controls
 		}
 		private void FullScreenButton_Clicked(object sender, MouseButtonEventArgs e)
 		{
-			IsFullScreen = !IsFullScreen;
+			FullScreenButton.Icon = FullScreenButton.Icon == IconKind.Fullscreen ? IconKind.FullscreenExit : IconKind.Fullscreen;
+			VisionButton.Visibility = IsFullScreen ? Visibility.Hidden : Visibility.Visible;
+			FullScreenRequest?.Invoke(this, null);
 		}
 		private void VisionButton_Clicked(object sender, MouseButtonEventArgs e)
 		{

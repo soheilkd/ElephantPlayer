@@ -7,22 +7,20 @@
 			 mc:Ignorable="d" Loaded="UserControl_Loaded" x:Name="ParentControl"
              d:DesignHeight="300" d:DesignWidth="600">
 	<Grid>
-		<Grid Background="Black" x:Name="elementCanvas" Margin="200,500,200,0">
-			<MediaElement x:Name="element" LoadedBehavior="Manual" UnloadedBehavior="Stop" 
-                          MouseDown="Element_MouseDown" ScrubbingEnabled="True"
-                          Volume="1"/>
+		<Grid Background="Black" x:Name="elementCanvas">
+			<MediaElement x:Name="element" LoadedBehavior="Manual" UnloadedBehavior="Stop" ScrubbingEnabled="True" />
 		</Grid>
 		<Grid x:Name="ControlsGrid" Background="Transparent" VerticalAlignment="Bottom" Height="94">
 			<Slider Value="100" x:Name="PositionSlider" ValueChanged="Position_Changed" PreviewMouseLeftButtonDown="Position_Holding" IsMoveToPointEnabled="True"
                VerticalAlignment="Center" Maximum="1000" Template="{DynamicResource FlatSlider}" Margin="50,71,50,0">
 			</Slider>
-			
+
 			<Label Content="00:00" Style="{DynamicResource TimeLabel}" HorizontalAlignment="Left" x:Name="TimeLabel_Current" Margin="10,0,0,0"/>
 			<Label Content="00:00" Style="{DynamicResource TimeLabel}" HorizontalAlignment="Right" x:Name="TimeLabel_Full" Width="38" Margin="0,0,10,0"/>
 			<local:MaterialButton x:Name="PreviousButton" Icon="SkipPrevious" Margin="87,0,0,35" MouseUp="PreviousButton_Clicked" />
 			<local:MaterialButton x:Name="NextButton" Icon="SkipNext" Margin="172,0,0,35" MouseUp="NextButton_Clicked" />
 			<local:MaterialButton x:Name="PlayPauseButton" Icon="Play" MouseUp="PlayPauseButton_Clicked" Margin="127,0,0,35" Height="24" Width="24"/>
-			<local:MaterialButton x:Name="VisionButton" Icon="TelevisionClassic" HorizontalAlignment="Center" Margin="0,0,0,35" MouseUp="VisionButton_Clicked" />
+			<local:MaterialButton x:Name="VisionButton" Icon="Television" HorizontalAlignment="Center" Margin="0,0,0,35" MouseUp="VisionButton_Clicked" />
 			<local:MaterialButton x:Name="FullScreenButton" Icon="FullScreen" HorizontalAlignment="Right" Margin="0,0,10,35" VerticalAlignment="Bottom" MouseUp="FullScreenButton_Clicked"/>
 			<design:PackIcon x:Name="VolumeIcon" Kind="VolumeHigh" Width="25" Height="25" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0, 0, 155, 33" />
 			<Slider x:Name="VolumeSlider" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,28,50,26" IsMoveToPointEnabled="True" Template="{DynamicResource FlatSlider}" Foreground="#F444"
@@ -48,10 +46,10 @@
 			<Setter Property="HorizontalAlignment" Value="Left"/>
 		</Style>
 		<Storyboard x:Key="MinifyBoard" Storyboard.TargetName="elementCanvas" AccelerationRatio="0.4" DecelerationRatio="0.6" SpeedRatio="1">
-			<ThicknessAnimation From="{Binding ElementName=elementCanvas, Path=Margin}" To="200,500,200,0" Storyboard.TargetProperty="Margin" />
+			<DoubleAnimation From="{Binding Opacity,ElementName=elementCanvas}" To="0" Storyboard.TargetProperty="Opacity" />
 		</Storyboard>
 		<Storyboard x:Key="MagnifyBoard" Storyboard.TargetName="elementCanvas" AccelerationRatio="0.4" DecelerationRatio="0.6" SpeedRatio="1">
-			<ThicknessAnimation From="{Binding ElementName=elementCanvas, Path=Margin}" To="0" Storyboard.TargetProperty="Margin" />
+			<DoubleAnimation From="{Binding Opacity,ElementName=elementCanvas}" To="1" Storyboard.TargetProperty="Opacity" />
 		</Storyboard>
 		<Storyboard x:Key="FullOnBoard" Storyboard.TargetProperty="Y" Storyboard.TargetName="ControlsTranslation" AccelerationRatio="0.4" DecelerationRatio="0.6">
 			<DoubleAnimation From="{Binding ElementName=ControlsTranslation, Path=Y}" To="90" SpeedRatio="1.5"/>
