@@ -14,29 +14,30 @@ namespace Player.Controls.Taskbar
 		public bool CanExecute(object parameter) => true;
 		public void Execute(object parameter) => Raised?.Invoke(this, null);
 	}
+
 	public class Thumb
 	{
-		public event EventHandler PlayPressed;
-		public event EventHandler PausePressed;
-		public event EventHandler PrevPressed;
-		public event EventHandler NextPressed;
+		public event EventHandler PlayClicked;
+		public event EventHandler PauseClicked;
+		public event EventHandler PrevClicked;
+		public event EventHandler NextClicked;
 
-		public ThumbButtonInfo PlayThumb = new ThumbButtonInfo()
+		private ThumbButtonInfo PlayThumb = new ThumbButtonInfo()
 		{
 			Description = "Play",
 			ImageSource = IconKind.Play.GetBitmap()
 		};
-		public ThumbButtonInfo PauseThumb = new ThumbButtonInfo()
+		private ThumbButtonInfo PauseThumb = new ThumbButtonInfo()
 		{
 			Description = "Pause",
 			ImageSource = IconKind.Pause.GetBitmap()
 		};
-		public ThumbButtonInfo PreviousThumb = new ThumbButtonInfo()
+		private ThumbButtonInfo PreviousThumb = new ThumbButtonInfo()
 		{
 			Description = "Previous",
 			ImageSource = IconKind.SkipPrevious.GetBitmap()
 		};
-		public ThumbButtonInfo NextThumb = new ThumbButtonInfo()
+		private ThumbButtonInfo NextThumb = new ThumbButtonInfo()
 		{
 			Description = "Next",
 			ImageSource = IconKind.SkipNext.GetBitmap()
@@ -50,10 +51,10 @@ namespace Player.Controls.Taskbar
 
 		public Thumb()
 		{
-			PlayHandler.Raised += (sender, e) => PlayPressed?.Invoke(sender, e);
-			PauseHandler.Raised += (sender, e) => PausePressed?.Invoke(sender, e);
-			PrevHandler.Raised += (sender, e) => PrevPressed?.Invoke(sender, e);
-			NextHandler.Raised += (sender, e) => NextPressed?.Invoke(sender, e);
+			PlayHandler.Raised += (sender, e) => PlayClicked?.Invoke(sender, e);
+			PauseHandler.Raised += (sender, e) => PauseClicked?.Invoke(sender, e);
+			PrevHandler.Raised += (sender, e) => PrevClicked?.Invoke(sender, e);
+			NextHandler.Raised += (sender, e) => NextClicked?.Invoke(sender, e);
 			PreviousThumb.Command = PrevHandler;
 			NextThumb.Command = NextHandler;
 			PlayThumb.Command = PlayHandler;
@@ -65,14 +66,7 @@ namespace Player.Controls.Taskbar
 			Info.ThumbButtonInfos.Add(NextThumb);
 		}
 
-		public void SetPlayingState(bool IsPlaying = false) => Info.ThumbButtonInfos[1] = IsPlaying ? PauseThumb : PlayThumb;
-		public void SetProgressState(TaskbarItemProgressState state) => Info.ProgressState = state;
-		public void SetProgressValue(double value) => Info.ProgressValue = value;
-
-		public static JumpItem[] GetJumps(Application app)
-		{
-			return JumpList.GetJumpList(app).JumpItems.ToArray();
-			
-		}
+		public void SetPlayingState(bool isPlaying) 
+			=> Info.ThumbButtonInfos[1] = isPlaying ? PauseThumb : PlayThumb;
 	}
 }

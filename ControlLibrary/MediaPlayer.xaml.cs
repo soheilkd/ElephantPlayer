@@ -53,6 +53,7 @@ namespace Player.Controls
 		}
 
 		public void ChangeMouseMoveTimer(double interval) => MouseMoveTimer = new Timer(interval) { AutoReset = false };
+		public Taskbar.Thumb Thumb = new Taskbar.Thumb();
 		private Timer DraggerTimer = new Timer(250) { AutoReset = false };
 		private Timer MouseMoveTimer = new Timer(5000);
 		private Timer PlayCountTimer = new Timer(120000) { AutoReset = false };
@@ -151,7 +152,6 @@ namespace Player.Controls
 		public bool PlayOnPositionChange { get; set; }
 		public bool AutoOrinateVision { get; set; }
 		public Window ParentWindow;
-		public Taskbar.Thumb Thumb = new Taskbar.Thumb();
 		private Storyboard MagnifyBoard, MinifyBoard, FullOnBoard, FullOffBoard;
 		private ThicknessAnimation MagnifyAnimation, MinifyAnimation;
 
@@ -165,10 +165,10 @@ namespace Player.Controls
 			MagnifyAnimation = MagnifyBoard.Children[0] as ThicknessAnimation;
 			MinifyAnimation = MinifyBoard.Children[0] as ThicknessAnimation;
 
-			Thumb.NextPressed += (obj, f) => Next();
-			Thumb.PausePressed += (obj, f) => PlayPause();
-			Thumb.PlayPressed += (obj, f) => PlayPause();
-			Thumb.PrevPressed += (obj, f) => Previous();
+			Thumb.NextClicked += (obj, f) => Next();
+			Thumb.PauseClicked += (obj, f) => PlayPause();
+			Thumb.PlayClicked += (obj, f) => PlayPause();
+			Thumb.PrevClicked += (obj, f) => Previous();
 			MouseMoveTimer.Elapsed += (_, __) => AreControlsVisible = false;
 			PlayCountTimer.Elapsed += PlayCountTimer_Elapsed;
 			FullOnBoard.Completed += (_, __) => Cursor = Cursors.None;
@@ -176,6 +176,7 @@ namespace Player.Controls
 			FullOffBoard.CurrentStateInvalidated += (_, __) => Cursor = Cursors.Arrow;
 			element.MediaEnded += (_, __) => Next();
 			element.MediaOpened += Element_MediaOpened;
+			
 		}
 
 		private void Element_MediaOpened(object sender, RoutedEventArgs e)
@@ -212,6 +213,7 @@ namespace Player.Controls
 			}
 			catch { }
 		}
+		
 		private async void Element_MouseMove(object sender, MouseEventArgs e)
 		{
 			var y = ControlsTranslation.Y;
