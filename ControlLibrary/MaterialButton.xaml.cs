@@ -2,6 +2,7 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
 
 namespace Player.Controls
 {
@@ -11,11 +12,15 @@ namespace Player.Controls
 
 		public static readonly MouseButtonEventArgs DefaultMouseUpArgs =
 			new MouseButtonEventArgs(Mouse.PrimaryDevice, 1, MouseButton.Left) { RoutedEvent = MouseUpEvent };
+		public static readonly SolidColorBrush DefaultEllipseBackground =
+			new SolidColorBrush(new Color() { R = 0, G = 0, B = 0, A = 10 });
 
 		public static readonly DependencyProperty EllipseProperty =
 			DependencyProperty.Register(nameof(EllipseType), typeof(EllipseType), typeof(MaterialButton), new PropertyMetadata(EllipseType.Circular));
 		public static readonly DependencyProperty IconProperty =
-			DependencyProperty.Register(nameof(Icon), typeof(IconKind), typeof(MaterialButton), new PropertyMetadata(IconKind.Sale, new PropertyChangedCallback(OnIconChange)));
+			DependencyProperty.Register(nameof(Icon), typeof(IconKind), typeof(MaterialButton), new PropertyMetadata(IconKind.AccessPoint));
+		public static readonly DependencyProperty EllipseBackgroundProperty =
+			DependencyProperty.Register(nameof(EllipseBackground), typeof(Brush), typeof(MaterialButton), new PropertyMetadata(DefaultEllipseBackground));
 
 		public EllipseType EllipseType
 		{
@@ -36,15 +41,22 @@ namespace Player.Controls
 				MainIcon.Kind = (PackIconKind)(int)value;
 			}
 		}
+		public Brush EllipseBackground
+		{
+			get => (Brush)GetValue(EllipseBackgroundProperty);
+			set
+			{
+				SetValue(EllipseBackgroundProperty, value);
+				MainEllipse.Background = value;
+			}
+		}
 		
 		private void UserControl_Loaded(object sender, RoutedEventArgs e)
 		{
 			EllipseType = EllipseType;
 			Icon = Icon;
+			EllipseBackground = EllipseBackground;
 		}
-
-		private static void OnIconChange(DependencyObject d, DependencyPropertyChangedEventArgs e) =>
-			d.SetValue(IconProperty, d.GetValue(IconProperty));
 
 		public void EmulateClick() => RaiseEvent(DefaultMouseUpArgs);
 	}

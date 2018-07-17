@@ -5,14 +5,13 @@ using System.Timers;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
 using System.Windows.Media.Animation;
 
 namespace Player.Controls
 {
 	public partial class MediaPlayer : UserControl
 	{
-		public static DependencyProperty IsMagnifiedProperty =
-			DependencyProperty.Register(nameof(IsMagnified), typeof(bool), typeof(MediaPlayer), new PropertyMetadata(false));
 		public static DependencyProperty AreControlsVisibleProperty =
 			DependencyProperty.Register(nameof(AreControlsVisible), typeof(bool), typeof(MediaPlayer), new PropertyMetadata(true));
 
@@ -72,19 +71,7 @@ namespace Player.Controls
 		private bool IsUXChangingPosition;
 		public bool IsFullyLoaded;
 		public bool IsFullScreen => FullScreenButton.Icon == IconKind.FullscreenExit;
-		private bool IsMagnified
-		{
-			get => (bool)GetValue(IsMagnifiedProperty);
-			set
-			{
-				IsMagnifiedChange?.Invoke(this, new DependencyPropertyChangedEventArgs(IsMagnifiedProperty, IsMagnified, value));
-				SetValue(IsMagnifiedProperty, value);
-				if (value)
-					MagnifyBoard.Begin();
-				else
-					MinifyBoard.Begin();
-			}
-		}
+		public bool IsVisionOn => FullScreenButton.Icon == IconKind.TelevisionOff;
 		private bool AreControlsVisible
 		{
 			get => (bool)GetValue(AreControlsVisibleProperty);
@@ -100,7 +87,7 @@ namespace Player.Controls
 					}
 					else
 					{
-						if (!IsMagnified || ControlsGrid.IsMouseOver)
+						if (!IsVisionOn || ControlsGrid.IsMouseOver)
 							return;
 						FullOffBoard.Stop();
 						FullOnBoard.Begin();
@@ -109,8 +96,9 @@ namespace Player.Controls
 			}
 		}
 		public bool PlayOnPositionChange { get; set; }
-		public bool AutoOrinateVision { get; set; }
+		public bool AutoOrinateVision { get; set; } = true;
 		private Storyboard MagnifyBoard, MinifyBoard, FullOnBoard, FullOffBoard;
+		private Style ButtonsStyle;
 
 		public MediaPlayer()
 		{
@@ -134,6 +122,7 @@ namespace Player.Controls
 			MinifyBoard.Completed += (_, __) => elementCanvas.Visibility = Visibility.Hidden;
 			elementCanvas.Visibility = Visibility.Hidden;
 			elementCanvas.Opacity = 0;
+			ButtonsStyle = Resources[2] as Style;
 		}
 
 		private void Element_MediaOpened(object sender, RoutedEventArgs e)
@@ -143,7 +132,9 @@ namespace Player.Controls
 			FullScreenButton.Visibility = VisionButton.Visibility;
 			if (IsFullScreen && !isVideo)
 				FullScreenButton.EmulateClick();
-			IsMagnified = isVideo && AutoOrinateVision;
+			//Next seems not so readable, it just checks if AutoOrientation is on, check proper conditions where operation is needed
+			if (AutoOrinateVision && ((isVideo && !IsVisionOn) || (!isVideo && IsVisionOn)))
+				VisionButton.EmulateClick();
 		}
 
 		private void UserControl_Loaded(object sender, RoutedEventArgs e)
@@ -226,7 +217,12 @@ namespace Player.Controls
 		}
 		private void VisionButton_Clicked(object sender, MouseButtonEventArgs e)
 		{
-			IsMagnified = !IsMagnified;
+			VisionButton.Icon = VisionButton.Icon == IconKind.Television ? IconKind.TelevisionOff : IconKind.Television;
+			if (IsVisionOn)
+				MinifyBoard.Begin();
+			else
+				MagnifyBoard.Begin();
+			Resources["ButtonsBackground"] = IsVisionOn ? Brushes.White : MaterialButton.DefaultEllipseBackground;
 		}
 		private void VolumeSlider_Changed(object sender, RoutedPropertyChangedEventArgs<double> e)
 		{
