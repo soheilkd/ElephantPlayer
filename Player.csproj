@@ -129,7 +129,7 @@
     <Compile Include="Base\Images.cs" />
     <Compile Include="Base\Settings.cs" />
     <Compile Include="Base\DeepBackEnd.cs" />
-    <Compile Include="Base\Events.cs" />
+    <Compile Include="Base\InfoExchangeArgs.cs" />
     <Compile Include="Models\LibraryManager.cs" />
     <Compile Include="Models\Media.cs" />
     <Compile Include="Models\MediaEnumerator.cs" />

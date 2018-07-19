@@ -1,5 +1,4 @@
-﻿using Player.Events;
-using Player.Models;
+﻿using Player.Models;
 using System;
 using System.Collections.ObjectModel;
 using System.IO;

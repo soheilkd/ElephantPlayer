@@ -1,6 +1,5 @@
 ﻿using Microsoft.Win32;
 using Player.Controls;
-using Player.Events;
 using Player.Hook;
 using System;
 using System.Diagnostics;

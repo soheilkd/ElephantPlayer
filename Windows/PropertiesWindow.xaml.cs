@@ -1,5 +1,4 @@
 ﻿using Microsoft.Win32;
-using Player.Events;
 using System;
 using System.Windows;
 using System.Windows.Input;
