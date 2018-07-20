@@ -11,30 +11,45 @@
 			<MediaElement x:Name="element" LoadedBehavior="Manual" UnloadedBehavior="Stop" ScrubbingEnabled="True" />
 		</Grid>
 		<Grid x:Name="ControlsGrid" Background="Transparent" VerticalAlignment="Bottom" Height="94">
-			<Slider Value="100" x:Name="PositionSlider" ValueChanged="Position_Changed" PreviewMouseLeftButtonDown="Position_Holding" IsMoveToPointEnabled="True"
-               VerticalAlignment="Center" Maximum="1000" Template="{DynamicResource FlatSlider}" Margin="50,71,50,0">
-			</Slider>
-
-			<Label Content="00:00" Style="{DynamicResource TimeLabel}" HorizontalAlignment="Left" x:Name="TimeLabel_Current" Margin="10,0,0,0"/>
-			<Label Content="00:00" Style="{DynamicResource TimeLabel}" HorizontalAlignment="Right" x:Name="TimeLabel_Full" Width="38" Margin="0,0,10,0"/>
-			
-			<local:MaterialButton x:Name="PreviousButton" Icon="SkipPrevious" Margin="87,0,0,35" MouseUp="PreviousButton_Clicked" />
-			<local:MaterialButton x:Name="NextButton" Icon="SkipNext" Margin="192,0,0,35" MouseUp="NextButton_Clicked" />
-			<local:MaterialButton x:Name="PlayPauseButton" Icon="Play" MouseUp="PlayPauseButton_Clicked" Margin="137,0,0,35"/>
-			
-			<local:MaterialButton x:Name="VisionButton" Icon="Television" HorizontalAlignment="Center" Margin="0,0,0,35" MouseUp="VisionButton_Clicked" />
-			<local:MaterialButton x:Name="FullScreenButton" Icon="FullScreen" HorizontalAlignment="Right" Margin="0,0,10,35" VerticalAlignment="Bottom" MouseUp="FullScreenButton_Clicked"/>
-			<design:PackIcon x:Name="VolumeIcon" Kind="VolumeHigh" Width="25" Height="25" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0, 0, 155, 33" />
-			<Slider x:Name="VolumeSlider" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,28,50,26" IsMoveToPointEnabled="True" Template="{DynamicResource FlatSlider}" Foreground="#F444"
+			<Border HorizontalAlignment="Left" VerticalAlignment="Bottom" Width="149" Margin="73,0,0,4" CornerRadius="10">
+				<Grid VerticalAlignment="Top" Margin="0,14,0,0">
+					<local:MaterialButton x:Name="PreviousButton" HorizontalAlignment="Left" Icon="SkipPrevious" Margin="13,0,0,35" MouseUp="PreviousButton_Clicked"/>
+					<local:MaterialButton x:Name="PlayPauseButton" HorizontalAlignment="Center" Icon="Play" Margin="0,0,0,35" MouseUp="PlayPauseButton_Clicked" Height="26" Width="26"/>
+					<local:MaterialButton x:Name="NextButton" HorizontalAlignment="Right" Icon="SkipNext" Margin="0,0,13,35" MouseUp="NextButton_Clicked" />
+				</Grid>
+			</Border>
+			<Border VerticalAlignment="Bottom" HorizontalAlignment="Center" Width="50" Height="73" CornerRadius="10" >
+				<Grid>
+					<local:MaterialButton x:Name="VisionButton" Icon="Television" Margin="0,0,0,25" MouseUp="VisionButton_Clicked" />
+				</Grid>
+			</Border>
+			<Border HorizontalAlignment="Right" VerticalAlignment="Bottom" Height="72" CornerRadius="10" Width="184">
+				<Grid>
+					<local:MaterialButton x:Name="FullScreenButton" Icon="FullScreen" HorizontalAlignment="Right" Margin="0,0,10,35" VerticalAlignment="Bottom" MouseUp="FullScreenButton_Clicked"/>
+					<design:PackIcon x:Name="VolumeIcon" Kind="VolumeHigh" Width="25" Height="25" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0, 0, 155, 33" />
+					<Slider x:Name="VolumeSlider" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,6,50,26" IsMoveToPointEnabled="True" Template="{DynamicResource FlatSlider}" Foreground="#F444"
                     Width="100" Maximum="99" SmallChange="2" LargeChange="10" AutoToolTipPlacement="TopLeft" ValueChanged="VolumeSlider_Changed"/>
+				</Grid>
+			</Border>
+			<Border Height="27" VerticalAlignment="Bottom">
+				<Grid>
+					<Slider Value="100" x:Name="PositionSlider" ValueChanged="Position_Changed" PreviewMouseLeftButtonDown="Position_Holding" IsMoveToPointEnabled="True"
+							VerticalAlignment="Center" Maximum="1000" Template="{DynamicResource FlatSlider}" Margin="50,2,50,0">
+					</Slider>
+
+					<Label Content="00:00" Style="{DynamicResource TimeLabel}" HorizontalAlignment="Left" x:Name="TimeLabel_Current" Margin="10,0,0,0"/>
+					<Label Content="00:00" Style="{DynamicResource TimeLabel}" HorizontalAlignment="Right" x:Name="TimeLabel_Full" Width="38" Margin="0,0,10,0"/>
+				</Grid>
+			</Border>
 			<Grid.RenderTransform>
 				<TranslateTransform x:Name="ControlsTranslation" Y="0" />
 			</Grid.RenderTransform>
 		</Grid>
 	</Grid>
 	<UserControl.Resources>
-		<SolidColorBrush x:Key="Foreground" Color="White" />
-		<SolidColorBrush x:Key="ButtonsBackground" Color="#0A000000"/>
+		<Style TargetType="Border">
+			<Setter Property="Background" Value="#FFDEDEDE"/>
+		</Style>
 		<Style TargetType="{x:Type Label}" x:Key="TimeLabel">
 			<Setter Property="VerticalAlignment" Value="Bottom"/>
 			<Setter Property="Width" Value="40" />
@@ -43,11 +58,6 @@
 					<TranslateTransform x:Name="Translation1" Y="0"/>
 				</Setter.Value>
 			</Setter>
-		</Style>
-		<Style TargetType="local:MaterialButton" >
-			<Setter Property="VerticalAlignment" Value="Bottom" />
-			<Setter Property="HorizontalAlignment" Value="Left"/>
-			<Setter Property="EllipseBackground" Value="{DynamicResource ButtonsBackground}"/>
 		</Style>
 		<Storyboard x:Key="MinifyBoard" Storyboard.TargetName="elementCanvas" AccelerationRatio="0.4" DecelerationRatio="0.6" SpeedRatio="1">
 			<DoubleAnimation From="{Binding Opacity,ElementName=elementCanvas}" To="0" Storyboard.TargetProperty="Opacity" />
@@ -61,8 +71,8 @@
 		<Storyboard x:Key="FullOffBoard" Storyboard.TargetProperty="Y" Storyboard.TargetName="ControlsTranslation" AccelerationRatio="0.4" DecelerationRatio="0.6">
 			<DoubleAnimation From="{Binding ElementName=ControlsTranslation, Path=Y}" To="0" SpeedRatio="1.5"/>
 		</Storyboard>
-		
-		
+
+
 		<TranslateTransform x:Name="Translation1" x:Key="Translation1" Y="0" />
 		<ControlTemplate TargetType="Slider" x:Key="FlatSlider">
 			<Border x:Name="border" Focusable="False" FocusVisualStyle="{x:Null}" BorderBrush="{TemplateBinding BorderBrush}" 

@@ -116,6 +116,7 @@
     <Reference Include="PresentationFramework">
       <Private>False</Private>
     </Reference>
+    <Reference Include="System.Xml" />
     <Reference Include="taglib-sharp, Version=2.1.0.0, Culture=neutral, PublicKeyToken=db62eba44689b5b0, processorArchitecture=MSIL">
       <HintPath>packages\taglib.2.1.0.0\lib\taglib-sharp.dll</HintPath>
       <Private>True</Private>
@@ -129,16 +130,12 @@
     <Compile Include="Base\Images.cs" />
     <Compile Include="Base\Settings.cs" />
     <Compile Include="Base\DeepBackEnd.cs" />
-    <Compile Include="Base\InfoExchangeArgs.cs" />
     <Compile Include="Models\LibraryManager.cs" />
     <Compile Include="Models\Media.cs" />
     <Compile Include="Models\MediaEnumerator.cs" />
     <Compile Include="Models\Operator.cs" />
-    <Compile Include="Pages\NowPlayingPage.xaml.cs">
-      <DependentUpon>NowPlayingPage.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Pages\SettingsPage.xaml.cs">
-      <DependentUpon>SettingsPage.xaml</DependentUpon>
+    <Compile Include="Resources\SettingsTab.xaml.cs">
+      <DependentUpon>SettingsTab.xaml</DependentUpon>
     </Compile>
     <Compile Include="Windows\MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
@@ -156,11 +153,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Pages\NowPlayingPage.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Pages\SettingsPage.xaml">
+    <Page Include="Resources\SettingsTab.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

@@ -15,7 +15,7 @@ namespace Player
 {
 	public partial class MainWindow : RibbonWindow
 	{
-		private const int HeightOnMinimal = 130;
+		private const int HeightOnMinimal = 110;
 		private double TempHeight
 		{
 			get => (double)Resources["MinimalDoubleSys"];
@@ -38,41 +38,42 @@ namespace Player
 		public MainWindow()
 		{
 			InitializeComponent();
-			Initialize();
-			Width = App.Settings.LastSize.Width;
-			Left = App.Settings.LastLoc.X;
-			Top = App.Settings.LastLoc.Y;
-		}
 
-		private void Initialize()
-		{
+			#region Initialization
+			
 			App.NewInstanceRequested += (_, e) => e.Args.ToList().ForEach(each => Manager.AddFromPath(each, true));
 			App.KeyDown += KeyboardListener_KeyDown;
 
 			Manager.RequestReceived += (_, e) => Play(e.Parameter);
-			Player.LengthFound += (_, e) => Manager.Current.Length = Player.Length;
-			Player.FullScreenRequest += Player_FullScreenRequest;
-			Player.PlayCounterElapsed += (_, __) => Manager.Current.PlayCount++;
+			Player.LengthFound += (_, e) => Manager.Current.Length = e.Parameter;
+			Player.FullScreenClicked += Player_FullScreenClicked;
 			Player.UpdateLayout();
 
 			ListView.ItemsSource = Manager;
 			TaskbarItemInfo = Player.Thumb.Info;
 			Resources["LastPath"] = App.Settings.LastPath;
 
-			ListView.MouseDoubleClick += DMouseDoubleClick;
-
-			Player.NextRequest += (_, __) => Play(Manager.Next());
-			Player.PreviousRequest += (_, __) => Play(Manager.Previous());
-			Player.IsMagnifiedChange += (_, e) => ControlsNotNeededOnVisionIsVisible = !(bool)e.NewValue;
+			Player.NextClicked += (_, __) => Play(Manager.Next());
+			Player.PreviousClicked += (_, __) => Play(Manager.Previous());
+			Player.VisionChanged += (_, e) => ControlsNotNeededOnVisionIsVisible = e.Parameter;
+			Player.Volume = App.Settings.Volume;
+			Player.AutoOrinateVision = App.Settings.VisionOrientation;
+			Player.PlayOnPositionChange = App.Settings.PlayOnPositionChange;
 
 			Timer timer = new Timer(1000) { AutoReset = true };
 			timer.Elapsed += (_, __) =>
 			Dispatcher.Invoke(() =>
 			ListView.Margin = Ribbon.IsMinimized ? new Thickness(0, 50, 0, 80) : new Thickness(0, 140, 0, 80));
 			timer.Start();
-		}
+			
+			#endregion
 
-		private void Player_FullScreenRequest(object sender, EventArgs e)
+			Width = App.Settings.LastSize.Width;
+			Left = App.Settings.LastLoc.X;
+			Top = App.Settings.LastLoc.Y;
+		}
+		
+		private void Player_FullScreenClicked(object sender, EventArgs e)
 		{
 			ResizeMode = Player.IsFullScreen ? ResizeMode.NoResize : ResizeMode.CanResize;
 			WindowStyle = Player.IsFullScreen ? WindowStyle.None : WindowStyle.SingleBorderWindow;
@@ -114,15 +115,14 @@ namespace Player
 		{
 			if (IsActive && SearchBox.IsFocused)
 				return;
-			//Key shortcuts when window is active and main key is down (default: alt)
-			if (IsActive && e.Key.HasFlag(App.Settings.AncestorKey))
+			//Key shortcuts when window is active and main key is down
+			if (IsActive && e.Key.HasFlag(Key.LeftShift))
 			{
-				if (e.Key == App.Settings.RemoveKey) Menu_RemoveClick(this, null);
-				if (e.Key == App.Settings.MediaPlayKey) DMouseDoubleClick(ListView, null);
-				if (e.Key == App.Settings.CopyKey) Menu_CopyClick(new MenuItem(), null);
-				if (e.Key == App.Settings.MoveKey) Menu_MoveClick(new MenuItem(), null);
-				if (e.Key == App.Settings.PropertiesKey) Menu_PropertiesClick(this, null);
-				if (e.Key == App.Settings.FindKey)
+				if (e.Key == Key.Delete) Menu_RemoveClick(this, null);
+				if (e.Key == Key.Enter) DMouseDoubleClick(ListView, null);
+				if (e.Key == Key.C) Menu_CopyClick(new MenuItem(), null);
+				if (e.Key == Key.X) Menu_MoveClick(new MenuItem(), null);
+				if (e.Key == Key.F)
 				{
 					SearchBox.IsEnabled = false;
 					SearchBox.Text = "";
@@ -132,16 +132,16 @@ namespace Player
 					SearchBox.Focus();
 				}
 			}
-			//Key shortcuts whether window is active or main key is down (default: alt)
-			if (IsActive || e.Key.HasFlag(App.Settings.AncestorKey))
+			//Key shortcuts whether window is active or main key is down
+			if (IsActive || e.Key.HasFlag(Key.LeftShift))
 			{
-				if (e.Key == App.Settings.BackwardKey) Player.SlidePosition(false);
-				if (e.Key == App.Settings.ForwardKey) Player.SlidePosition(true);
+				if (e.Key == Key.Left) Player.SlidePosition(false);
+				if (e.Key == Key.Right) Player.SlidePosition(true);
 			}
 			//Key shortcuts always invokable
-			if (e.Key == App.Settings.PublicPlayPauseKey) Player.PlayPause();
-			if (e.Key == App.Settings.NextKey) Player.Next();
-			if (e.Key == App.Settings.PreviousKey) Player.Previous();
+			if (e.Key == Key.MediaPlayPause) Player.PlayPause();
+			if (e.Key == Key.MediaNextTrack) Player.Next();
+			if (e.Key == Key.MediaPreviousTrack) Player.Previous();
 		}
 
 		private void DMouseDoubleClick(object sender, MouseButtonEventArgs e)
@@ -179,9 +179,8 @@ namespace Player
 		}
 		private void Window_KeyUp(object sender, KeyEventArgs e)
 		{
-			if (e.Key == (Key)Enum.Parse(typeof(Key), App.Settings.PrivatePlayPauseKey.ToString()))
-				if (!SearchBox.IsFocused)
-					Player.PlayPause();
+			if (e.Key == Key.Space && !SearchBox.IsFocused)
+				Player.PlayPause();
 		}
 		private void Window_Drop(object sender, DragEventArgs e)
 		{
@@ -369,6 +368,11 @@ namespace Player
 		private void Button_Click(object sender, RoutedEventArgs e)
 		{
 			Manager.For(each => MediaOperator.Load(each));
+		}
+
+		private void RibbonApplicationMenuItem_Click(object sender, RoutedEventArgs e)
+		{
+
 		}
 
 		private void Button_Click_1(object sender, RoutedEventArgs e)

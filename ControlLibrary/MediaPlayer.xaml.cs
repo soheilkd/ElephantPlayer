@@ -12,15 +12,12 @@ namespace Player.Controls
 {
 	public partial class MediaPlayer : UserControl
 	{
-		public static DependencyProperty AreControlsVisibleProperty =
-			DependencyProperty.Register(nameof(AreControlsVisible), typeof(bool), typeof(MediaPlayer), new PropertyMetadata(true));
-
-		public event EventHandler LengthFound;
+		public event EventHandler<InfoExchangeArgs<TimeSpan>> LengthFound;
 		public event EventHandler PlayCounterElapsed;
-		public event EventHandler NextRequest;
-		public event EventHandler PreviousRequest;
-		public event EventHandler FullScreenRequest;
-		public event EventHandler<DependencyPropertyChangedEventArgs> IsMagnifiedChange;
+		public event EventHandler NextClicked;
+		public event EventHandler PreviousClicked;
+		public event EventHandler FullScreenClicked;
+		public event EventHandler<InfoExchangeArgs<bool>> VisionChanged;
 
 		public TimeSpan Position
 		{
@@ -50,55 +47,53 @@ namespace Player.Controls
 			}
 		}
 
-		public void ChangeMouseMoveTimer(double interval) => MouseMoveTimer = new Timer(interval) { AutoReset = false };
 		public Taskbar.Thumb Thumb = new Taskbar.Thumb();
 		private Timer MouseMoveTimer = new Timer(5000);
-		private Timer PlayCountTimer = new Timer(120000) { AutoReset = false };
-		private TimeSpan _Length;
-		public TimeSpan Length
+		public double MouseMoveInterval
 		{
-			get => _Length;
+			get => MouseMoveTimer.Interval;
+			set => MouseMoveTimer.Interval = value;
+		}
+		private Timer PlayCountTimer = new Timer(60000) { AutoReset = false };
+		private TimeSpan _MediaTimeSpan;
+		private TimeSpan MediaTimeSpan
+		{
+			get => _MediaTimeSpan;
 			set
 			{
-				_Length = value;
-				PositionSlider.Maximum = Length.TotalMilliseconds;
+				_MediaTimeSpan = value;
+				PositionSlider.Maximum = MediaTimeSpan.TotalMilliseconds;
 				PositionSlider.SmallChange = 1 * PositionSlider.Maximum / 100;
 				PositionSlider.LargeChange = 5 * PositionSlider.Maximum / 100;
-				TimeLabel_Full.Content = Length.ToNewString();
-				LengthFound?.Invoke(this, null);
+				TimeLabel_Full.Content = MediaTimeSpan.ToNewString();
+				LengthFound?.Invoke(this, new InfoExchangeArgs<TimeSpan>(value));
 			}
 		}
 		private bool IsUXChangingPosition;
 		public bool IsFullyLoaded;
 		public bool IsFullScreen => FullScreenButton.Icon == IconKind.FullscreenExit;
-		public bool IsVisionOn => FullScreenButton.Icon == IconKind.TelevisionOff;
+		public bool IsVisionOn => elementCanvas.Opacity >= 0.3;
 		private bool AreControlsVisible
 		{
-			get => (bool)GetValue(AreControlsVisibleProperty);
 			set
 			{
-				Dispatcher.Invoke(() =>
+				if (value)
 				{
-					SetValue(AreControlsVisibleProperty, value);
-					if (value)
-					{
-						FullOnBoard.Stop();
-						FullOffBoard.Begin();
-					}
-					else
-					{
-						if (!IsVisionOn || ControlsGrid.IsMouseOver)
-							return;
-						FullOffBoard.Stop();
-						FullOnBoard.Begin();
-					}
-				});
+					FullOnBoard.Stop();
+					FullOffBoard.Begin();
+				}
+				else
+				{
+					if (!IsVisionOn || ControlsGrid.IsMouseOver)
+						return;
+					FullOffBoard.Stop();
+					FullOnBoard.Begin();
+				}
 			}
 		}
 		public bool PlayOnPositionChange { get; set; }
 		public bool AutoOrinateVision { get; set; } = true;
 		private Storyboard MagnifyBoard, MinifyBoard, FullOnBoard, FullOffBoard;
-		private Style ButtonsStyle;
 
 		public MediaPlayer()
 		{
@@ -122,7 +117,6 @@ namespace Player.Controls
 			MinifyBoard.Completed += (_, __) => elementCanvas.Visibility = Visibility.Hidden;
 			elementCanvas.Visibility = Visibility.Hidden;
 			elementCanvas.Opacity = 0;
-			ButtonsStyle = Resources[2] as Style;
 		}
 
 		private void Element_MediaOpened(object sender, RoutedEventArgs e)
@@ -133,7 +127,7 @@ namespace Player.Controls
 			if (IsFullScreen && !isVideo)
 				FullScreenButton.EmulateClick();
 			//Next seems not so readable, it just checks if AutoOrientation is on, check proper conditions where operation is needed
-			if (AutoOrinateVision && ((isVideo && !IsVisionOn) || (!isVideo && IsVisionOn)))
+			if ((AutoOrinateVision && (isVideo && !IsVisionOn)) || (!isVideo && IsVisionOn))
 				VisionButton.EmulateClick();
 		}
 
@@ -163,8 +157,8 @@ namespace Player.Controls
 		{
 			UX:
 			await Task.Delay(250);
-			if (element.NaturalDuration.HasTimeSpan && element.NaturalDuration.TimeSpan != Length)
-				Length = element.NaturalDuration.TimeSpan;
+			if (element.NaturalDuration.HasTimeSpan && element.NaturalDuration.TimeSpan != MediaTimeSpan)
+				MediaTimeSpan = element.NaturalDuration.TimeSpan;
 			TimeLabel_Current.Content = Position.ToNewString();
 			IsUXChangingPosition = true;
 			PositionSlider.Value = Position.TotalMilliseconds;
@@ -197,7 +191,7 @@ namespace Player.Controls
 		}
 		private void NextButton_Clicked(object sender, MouseButtonEventArgs e)
 		{
-			NextRequest?.Invoke(this, null);
+			NextClicked?.Invoke(this, null);
 		}
 		private void PreviousButton_Clicked(object sender, MouseButtonEventArgs e)
 		{
@@ -207,22 +201,20 @@ namespace Player.Controls
 				element.Play();
 			}
 			else
-				PreviousRequest?.Invoke(this, null);
+				PreviousClicked?.Invoke(this, null);
 		}
 		private void FullScreenButton_Clicked(object sender, MouseButtonEventArgs e)
 		{
 			FullScreenButton.Icon = FullScreenButton.Icon == IconKind.Fullscreen ? IconKind.FullscreenExit : IconKind.Fullscreen;
 			VisionButton.Visibility = IsFullScreen ? Visibility.Hidden : Visibility.Visible;
-			FullScreenRequest?.Invoke(this, null);
+			FullScreenClicked?.Invoke(this, null);
 		}
 		private void VisionButton_Clicked(object sender, MouseButtonEventArgs e)
 		{
-			VisionButton.Icon = VisionButton.Icon == IconKind.Television ? IconKind.TelevisionOff : IconKind.Television;
-			if (IsVisionOn)
-				MinifyBoard.Begin();
-			else
-				MagnifyBoard.Begin();
-			Resources["ButtonsBackground"] = IsVisionOn ? Brushes.White : MaterialButton.DefaultEllipseBackground;
+			VisionButton.Icon = IsVisionOn ? IconKind.Television : IconKind.TelevisionOff;
+			if (IsVisionOn) MinifyBoard.Begin();
+			else MagnifyBoard.Begin();
+			VisionChanged?.Invoke(this, new InfoExchangeArgs<bool>(IsVisionOn));
 		}
 		private void VolumeSlider_Changed(object sender, RoutedPropertyChangedEventArgs<double> e)
 		{
@@ -278,6 +270,5 @@ namespace Player.Controls
 		public void Next() => NextButton.EmulateClick();
 		public void Previous() => PreviousButton.EmulateClick();
 		public void PlayPause() => PlayPauseButton.EmulateClick();
-
 	}
 }

@@ -31,6 +31,8 @@ namespace Player
 		[STAThread]
 		public static void Main()
 		{
+			Settings.LibraryLocation = $"{App.Path}\\Library.bin";
+			Settings.Save();
 			AppDomain.CurrentDomain.ProcessExit += (_, __) => Listener.Dispose();
 			AppDomain.CurrentDomain.UnhandledException += (sender, e) =>
 			{

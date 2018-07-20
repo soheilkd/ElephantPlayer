@@ -8,7 +8,7 @@ namespace Player.Controls.Ribbon
 		public Button() => InitializeComponent();
 
 		public static readonly DependencyProperty IconProperty =
-			DependencyProperty.Register(nameof(Icon), typeof(IconKind), typeof(Button), new PropertyMetadata(IconKind.AccessPoint, new PropertyChangedCallback(OnIconChange)));
+			DependencyProperty.Register(nameof(Icon), typeof(IconKind), typeof(Button), new PropertyMetadata(IconKind.AccessPoint));
 
 		public IconKind Icon
 		{
@@ -20,10 +20,6 @@ namespace Player.Controls.Ribbon
 			}
 		}
 
-		private static void OnIconChange(DependencyObject d, DependencyPropertyChangedEventArgs e) =>
-			d.SetValue(IconProperty, d.GetValue(IconProperty));
-		
 		private void RibbonButton_Loaded(object sender, RoutedEventArgs e) => Icon = Icon;
-
 	}
 }

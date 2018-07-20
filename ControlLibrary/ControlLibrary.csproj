@@ -56,9 +56,9 @@
     <Reference Include="PresentationFramework" />
   </ItemGroup>
   <ItemGroup>
-    <Page Include="KeyBox.xaml">
-      <Generator>MSBuild:Compile</Generator>
+    <Page Include="Icon.xaml">
       <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="MaterialButton.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -69,6 +69,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Ribbon\QuickButton.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Ribbon\RibbonApplicationMenuButton.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -87,10 +91,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CodeBase.cs" />
-    <Compile Include="IconKind.cs" />
-    <Compile Include="KeyBox.xaml.cs">
-      <DependentUpon>KeyBox.xaml</DependentUpon>
+    <Compile Include="Icon.xaml.cs">
+      <DependentUpon>Icon.xaml</DependentUpon>
     </Compile>
+    <Compile Include="IconKind.cs" />
+    <Compile Include="Events.cs" />
     <Compile Include="MaterialButton.xaml.cs">
       <DependentUpon>MaterialButton.xaml</DependentUpon>
     </Compile>
@@ -112,6 +117,9 @@
     </Compile>
     <Compile Include="Ribbon\QuickButton.xaml.cs">
       <DependentUpon>QuickButton.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Ribbon\RibbonApplicationMenuButton.xaml.cs">
+      <DependentUpon>RibbonApplicationMenuButton.xaml</DependentUpon>
     </Compile>
     <Compile Include="Ribbon\RibbonButton.xaml.cs">
       <DependentUpon>RibbonButton.xaml</DependentUpon>

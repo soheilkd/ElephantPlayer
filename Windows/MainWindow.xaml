@@ -1,12 +1,12 @@
 ﻿<RibbonWindow
-    x:Class="Player.MainWindow" BorderThickness="0" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+	x:Class="Player.MainWindow" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" KeyUp="Window_KeyUp"
     xmlns:player="clr-namespace:Player.Controls;assembly=ControlLibrary" xmlns:sys="clr-namespace:System;assembly=mscorlib"
-	xmlns:rib="clr-namespace:Player.Controls.Ribbon;assembly=ControlLibrary"
-    x:Name="window" Loaded="Window_Loaded" Closing="Window_Closing" Drop="Window_Drop" AllowDrop="True"
-    Title="Elephant Player" Width="651" Icon="/Elephant Player;component/Resources/Player.ico">
+	xmlns:rib="clr-namespace:Player.Controls.Ribbon;assembly=ControlLibrary" xmlns:player1="clr-namespace:Player"
+	x:Name="window" Loaded="Window_Loaded" Closing="Window_Closing" Drop="Window_Drop" AllowDrop="True"
+    Title="Elephant Player" Width="651" Icon="/Elephant Player;component/Resources/Player.ico" Background="#FFDEDEDE">
 	<Grid x:Name="ContentGrid">
-		<Ribbon x:Name="Ribbon" SelectedIndex="0" IsMinimized="True">
+		<Ribbon x:Name="Ribbon" IsMinimized="True" Background="Transparent" >
 			<Ribbon.QuickAccessToolBar>
 				<RibbonQuickAccessToolBar>
 					<RibbonQuickAccessToolBar.Items>
@@ -19,70 +19,73 @@
 			<Ribbon.Items>
 				<RibbonTab Header="Home">
 					<RibbonGroup>
-						<RibbonGroup.Items>
-							<rib:Button Icon="Harddisk" Label="Load" Click="Button_Click"/>
-						</RibbonGroup.Items>
+						<rib:Button Icon="Harddisk" Label="Load" Click="Button_Click"/>
 					</RibbonGroup>
 					<RibbonGroup>
-						<RibbonGroup.Items>
-							<rib:Button Icon="Recycle" Label="Run GC" Click="Button_Click_1"/>
-						</RibbonGroup.Items>
+						<rib:Button Icon="Recycle" Label="Run GC" Click="Button_Click_1"/>
 					</RibbonGroup>
 					<RibbonGroup>
-						<RibbonGroup.Items>
-							<rib:MenuButton IconKind="ContentCopy" Label="Copy...">
-								<RibbonMenuItem Header="{DynamicResource LastPath}" Click="Menu_CopyClick"/>
-								<RibbonMenuItem Header="Browse..." Click="Menu_CopyClick"/>
-							</rib:MenuButton>
-							<rib:MenuButton IconKind="ContentDuplicate" Label="Move...">
-								<RibbonMenuItem Header="{DynamicResource LastPath}" Click="Menu_MoveClick"/>
-								<RibbonMenuItem Header="Browse..." Click="Menu_MoveClick"/>
-							</rib:MenuButton>
-						</RibbonGroup.Items>
+						<rib:MenuButton IconKind="ContentCopy" Label="Copy...">
+							<RibbonMenuItem Header="{DynamicResource LastPath}" Click="Menu_CopyClick"/>
+							<RibbonMenuItem Header="Browse..." Click="Menu_CopyClick"/>
+						</rib:MenuButton>
+						<rib:MenuButton IconKind="ContentDuplicate" Label="Move...">
+							<RibbonMenuItem Header="{DynamicResource LastPath}" Click="Menu_MoveClick"/>
+							<RibbonMenuItem Header="Browse..." Click="Menu_MoveClick"/>
+						</rib:MenuButton>
 					</RibbonGroup>
 				</RibbonTab>
 				<RibbonTab Header="Library">
 					<RibbonGroup>
-						<RibbonGroup.Items>
-							<rib:Button Icon="CheckboxMultipleMarkedOutline" Label="Revalidate"/>
-							<rib:MenuButton IconKind="SortAscending" Label="Sort Ascending">
-								<rib:MenuButton.Items>
-									<RibbonMenuItem Tag="0" Header="Title"/>
-									<RibbonMenuItem Tag="1" Header="Artist"/>
-									<RibbonMenuItem Tag="2" Header="Album"/>
-									<RibbonMenuItem Tag="3" Header="Plays"/>
-									<RibbonMenuItem Tag="4" Header="Addition Date"/>
-								</rib:MenuButton.Items>
-							</rib:MenuButton>
-							<rib:MenuButton IconKind="SortDescending" Label="Sort Descending">
-								<rib:MenuButton.Items>
-									<RibbonMenuItem Tag="5" Header="Title"/>
-									<RibbonMenuItem Tag="6" Header="Artist"/>
-									<RibbonMenuItem Tag="7" Header="Album"/>
-									<RibbonMenuItem Tag="8" Header="Plays"/>
-									<RibbonMenuItem Tag="9" Header="Addition Date"/>
-								</rib:MenuButton.Items>
-							</rib:MenuButton>
-						</RibbonGroup.Items>
+						<rib:Button Icon="CheckboxMultipleMarkedOutline" Label="Revalidate"/>
+						<rib:MenuButton IconKind="SortAscending" Label="Sort Ascending">
+							<rib:MenuButton.Items>
+								<RibbonMenuItem Tag="0" Header="Title"/>
+								<RibbonMenuItem Tag="1" Header="Artist"/>
+								<RibbonMenuItem Tag="2" Header="Album"/>
+								<RibbonMenuItem Tag="3" Header="Plays"/>
+								<RibbonMenuItem Tag="4" Header="Addition Date"/>
+							</rib:MenuButton.Items>
+						</rib:MenuButton>
+						<rib:MenuButton IconKind="SortDescending" Label="Sort Descending">
+							<rib:MenuButton.Items>
+								<RibbonMenuItem Tag="5" Header="Title"/>
+								<RibbonMenuItem Tag="6" Header="Artist"/>
+								<RibbonMenuItem Tag="7" Header="Album"/>
+								<RibbonMenuItem Tag="8" Header="Plays"/>
+								<RibbonMenuItem Tag="9" Header="Addition Date"/>
+							</rib:MenuButton.Items>
+						</rib:MenuButton>
 					</RibbonGroup>
 				</RibbonTab>
 				<RibbonTab Header="Playback">
 					<RibbonGroup>
-						<RibbonGroup.Items>
-							<rib:Button x:Name="PlayModeButton" Icon="Repeat" Click="PlayModeButton_Click" Label="Repeat All"/>
-						</RibbonGroup.Items>
+						<rib:Button x:Name="PlayModeButton" Icon="Repeat" Click="PlayModeButton_Click" Label="Repeat All"/>
 					</RibbonGroup>
 				</RibbonTab>
+				<player1:SettingsTab />
 			</Ribbon.Items>
 			<Ribbon.ApplicationMenu>
 				<RibbonApplicationMenu>
 					<RibbonApplicationMenu.FooterPaneContent>
-						<TextBlock TextAlignment="Right" Text="soheilkd®" FontFamily="Comic Sans MS" FontSize="18" FontWeight="Light"/>
+						<TextBlock Background="White" TextAlignment="Right" Text="soheilkd®" FontFamily="Comic Sans MS" FontSize="18" FontWeight="Light"/>
 					</RibbonApplicationMenu.FooterPaneContent>
+					<rib:RibbonApplicationMenuButton IconKind="FileMultiple" Header="Open Media" IconForeground="DarkGray"/>
+					<rib:RibbonApplicationMenuButton IconKind="FolderOpen" Header="Import Folder" IconForeground="Chocolate">
+						<rib:RibbonApplicationMenuButton IconForeground="Chocolate" IconKind="FolderOutline" Header="Top Only"/>
+						<rib:RibbonApplicationMenuButton IconForeground="Chocolate" IconKind="FolderMultiple" Header="Full Tree"/>
+					</rib:RibbonApplicationMenuButton>
+					<RibbonSeparator />
+					<rib:RibbonApplicationMenuButton IconKind="FileImport" Header="Import Library" IconForeground="DarkBlue" />
+					<rib:RibbonApplicationMenuButton IconKind="FileExport" Header="Export Library" IconForeground="DarkBlue">
+						<rib:RibbonApplicationMenuButton IconForeground="DarkBlue" IconKind="FileTree" Header="As Binary File" />
+						<rib:RibbonApplicationMenuButton IconForeground="DarkBlue" IconKind="FileXml" Header="As XML" />
+						<rib:RibbonApplicationMenuButton IconForeground="DarkBlue" IconKind="FileDocument" Header="As Text"/>
+					</rib:RibbonApplicationMenuButton>
 				</RibbonApplicationMenu>
 			</Ribbon.ApplicationMenu>
 		</Ribbon>
-		<ListView x:Name="ListView" ContextMenu="{DynamicResource ContextMenu1}" Margin="0,50,0,80">
+		<ListView x:Name="ListView" ContextMenu="{DynamicResource ContextMenu1}" Margin="0,50,0,80" MouseDoubleClick="DMouseDoubleClick">
 			<ListView.ItemTemplate>
 				<DataTemplate>
 					<Grid Height="40">
@@ -95,7 +98,7 @@
 							<ColumnDefinition Width="20" />
 							<ColumnDefinition />
 						</Grid.ColumnDefinitions>
-						<Image Source="{Binding Artwork}" Width="40" Height="40" HorizontalAlignment="Left"/>
+						<player:Icon Kind="BorderNone" x:Name="matButton" Width="40" Height="40" HorizontalAlignment="Left" Foreground="IndianRed"/>
 						<TextBlock x:Name="titleBox" Text="{Binding Title}" FontSize="16" FontWeight="SemiBold" Margin="50,0,0,0" VerticalAlignment="Center"/>
 						<TextBlock x:Name="artistBox" Text="{Binding Artist}" FontSize="13" VerticalAlignment="Center" Grid.Column="2"/>
 						<TextBlock x:Name="albumBox" Text="{Binding Album}" FontSize="14" VerticalAlignment="Center" Grid.Column="4"/>
@@ -103,9 +106,10 @@
 					</Grid>
 					<DataTemplate.Triggers>
 						<DataTrigger Binding="{Binding IsPlaying}" Value="True">
-							<Setter TargetName="titleBox" Property="Foreground" Value="Chocolate" />
-							<Setter TargetName="artistBox" Property="Foreground" Value="Chocolate" />
-							<Setter TargetName="albumBox" Property="Foreground" Value="Chocolate" />
+							<Setter Property="Kind" Value="Orbit" TargetName="matButton" />
+							<Setter Property="Foreground" Value="#F666" TargetName="titleBox" />
+							<Setter Property="Foreground" Value="#F666" TargetName="artistBox" />
+							<Setter Property="Foreground" Value="#F666" TargetName="albumBox" />
 						</DataTrigger>
 					</DataTemplate.Triggers>
 				</DataTemplate>
@@ -182,10 +186,4 @@
 			</Style.Triggers>
 		</Style>
 	</Window.Resources>
-	<RibbonWindow.Background>
-		<LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
-			<GradientStop Color="#FF56BAFF" Offset="0"/>
-			<GradientStop Color="#FFA6DAF0" Offset="1"/>
-		</LinearGradientBrush>
-	</RibbonWindow.Background>
 </RibbonWindow>

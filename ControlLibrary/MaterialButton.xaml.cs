@@ -28,8 +28,8 @@ namespace Player.Controls
 			set
 			{
 				SetValue(EllipseProperty, value);
-				MainEllipse.CornerRadius = new CornerRadius(value == 0 ? 2 : 20);
-				ClickEllipse.CornerRadius = new CornerRadius(value == 0 ? 2 : 100);
+				//MainEllipse.CornerRadius = new CornerRadius(value == 0 ? 2 : 20);
+				//ClickEllipse.CornerRadius = new CornerRadius(value == 0 ? 2 : 100);
 			}
 		}
 		public IconKind Icon
@@ -47,7 +47,7 @@ namespace Player.Controls
 			set
 			{
 				SetValue(EllipseBackgroundProperty, value);
-				MainEllipse.Background = value;
+				MainEllipse.Fill = value;
 			}
 		}
 		

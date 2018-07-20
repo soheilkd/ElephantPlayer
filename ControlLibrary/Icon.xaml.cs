@@ -4,14 +4,12 @@ using System.Windows.Controls;
 
 namespace Player.Controls
 {
-	public partial class QuickButton : Button
+	public partial class Icon : UserControl
 	{
-		public QuickButton() => InitializeComponent();
-
 		public static readonly DependencyProperty IconProperty =
-			   DependencyProperty.Register(nameof(Icon), typeof(IconKind), typeof(QuickButton), new PropertyMetadata(IconKind.Sale));
+			DependencyProperty.Register(nameof(Kind), typeof(IconKind), typeof(Icon), new PropertyMetadata(IconKind.AccessPoint));
 
-		public IconKind Icon
+		public IconKind Kind
 		{
 			get => (IconKind)GetValue(IconProperty);
 			set
@@ -20,6 +18,9 @@ namespace Player.Controls
 				MainIcon.Kind = (PackIconKind)(int)value;
 			}
 		}
-		private void Button_Loaded(object sender, RoutedEventArgs e) => Icon = Icon;
+
+		public Icon() => InitializeComponent();
+
+		private void UserControl_Loaded(object sender, RoutedEventArgs e) => Kind = Kind;
 	}
 }

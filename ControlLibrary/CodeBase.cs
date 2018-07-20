@@ -19,7 +19,9 @@ namespace Player.Controls
 				Icon = icon,
 				Foreground = foreground ?? Brushes.White
 			};
-			control.MainEllipse.Background = new SolidColorBrush(new Color() { R = 0, G = 0, B = 0, A = 1 });
+			control.MainEllipse.Fill = Brushes.Transparent;
+			control.MainEllipse.StrokeThickness = 0;
+			control.Background = Brushes.Transparent;
 			control.UpdateLayout();
 			control.Height = 100;
 			control.Width = 100;

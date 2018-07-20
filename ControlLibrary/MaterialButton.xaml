@@ -4,18 +4,18 @@
 			 Width="23" Height="23" x:Name="P" Loaded="UserControl_Loaded"
 			 xmlns:mat="http://materialdesigninxaml.net/winfx/xaml/themes">
 	<Grid>
-		<Border x:Name="MainEllipse" Margin="-7" BorderBrush="{Binding Foreground,ElementName=P}" CornerRadius="20"/>
-		<Border x:Name="ClickEllipse" BorderBrush="{Binding Foreground,ElementName=P}" CornerRadius="100"  />
-		<mat:PackIcon x:Name="MainIcon"  Background="#03000000" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Width="Auto" Height="Auto"/>
+		<Ellipse x:Name="MainEllipse" Margin="-7" Stroke="{Binding Foreground,ElementName=P}" StrokeDashArray="4" StrokeDashCap="Round" StrokeThickness="0"/>
+		<Ellipse x:Name="ClickEllipse" Stroke="{Binding Foreground,ElementName=P}" StrokeThickness="0" />
+		<mat:PackIcon x:Name="MainIcon" Width="Auto" Height="Auto"/>
 	</Grid>
 	<UserControl.Triggers>
 		<EventTrigger RoutedEvent="MouseEnter">
 			<EventTrigger.Actions>
 				<BeginStoryboard>
 					<Storyboard>
-						<ThicknessAnimation Storyboard.TargetName="MainEllipse" Storyboard.TargetProperty="BorderThickness" 
-											From="{Binding BorderThickness,ElementName=MainEllipse}" To="2"
-                                            AccelerationRatio="0.6" DecelerationRatio="0.4" SpeedRatio="5"/>
+						<DoubleAnimation Storyboard.TargetName="MainEllipse" Storyboard.TargetProperty="StrokeThickness" 
+											From="{Binding StrokeThickness,ElementName=MainEllipse}" To="2"
+                                            AccelerationRatio="0.6" DecelerationRatio="0.4" SpeedRatio="4"/>
 					</Storyboard>
 				</BeginStoryboard>
 			</EventTrigger.Actions>
@@ -24,8 +24,8 @@
 			<EventTrigger.Actions>
 				<BeginStoryboard>
 					<Storyboard>
-						<ThicknessAnimation Storyboard.TargetName="MainEllipse" Storyboard.TargetProperty="BorderThickness" 
-											From="{Binding BorderThickness,ElementName=MainEllipse}" To="0"
+						<DoubleAnimation Storyboard.TargetName="MainEllipse" Storyboard.TargetProperty="StrokeThickness" 
+											From="{Binding StrokeThickness,ElementName=MainEllipse}" To="0"
                                             AccelerationRatio="0.6" DecelerationRatio="0.4" SpeedRatio="2"/>
 					</Storyboard>
 				</BeginStoryboard>
@@ -35,9 +35,8 @@
 			<EventTrigger.Actions>
 				<BeginStoryboard>
 					<Storyboard>
-						<ThicknessAnimation Storyboard.TargetName="MainEllipse" Storyboard.TargetProperty="Margin"
-											From="{Binding Margin,ElementName=MainEllipse}" To="-3"
-                                            AccelerationRatio="0.6" DecelerationRatio="0.4" SpeedRatio="6"/>
+						<DoubleAnimation Storyboard.TargetName="MainEllipse" Storyboard.TargetProperty="StrokeDashOffset"
+										 From="0" To="100" AccelerationRatio="0.4" DecelerationRatio="0.6"/>
 					</Storyboard>
 				</BeginStoryboard>
 			</EventTrigger.Actions>
@@ -47,8 +46,8 @@
 				<BeginStoryboard>
 					<Storyboard SpeedRatio="3" Storyboard.TargetName="ClickEllipse" AccelerationRatio="0.5" DecelerationRatio="0.5">
 						<ThicknessAnimation Storyboard.TargetName="MainEllipse" Storyboard.TargetProperty="Margin" From="-3" To="-7" />
-						<ThicknessAnimation Storyboard.TargetProperty="Margin" From="0" To="-30" />
-						<ThicknessAnimation Storyboard.TargetProperty="BorderThickness" From="5" To="0"/>
+						<ThicknessAnimation Storyboard.TargetProperty="Margin" From="-2" To="-30" />
+						<DoubleAnimation Storyboard.TargetProperty="StrokeThickness" From="5" To="0"/>
 						<DoubleAnimation Storyboard.TargetProperty="Opacity" From="1" To="0"/>
 					</Storyboard>
 				</BeginStoryboard>

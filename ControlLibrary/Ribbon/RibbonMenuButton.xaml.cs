@@ -8,7 +8,7 @@ namespace Player.Controls.Ribbon
 		public MenuButton() => InitializeComponent();
 
 		public static readonly DependencyProperty IconProperty =
-			DependencyProperty.Register(nameof(IconKind), typeof(IconKind), typeof(MenuButton), new PropertyMetadata(IconKind.AccessPoint, new PropertyChangedCallback(OnIconChange)));
+			DependencyProperty.Register(nameof(IconKind), typeof(IconKind), typeof(MenuButton), new PropertyMetadata(IconKind.AccessPoint));
 
 		public IconKind IconKind
 		{
@@ -19,8 +19,5 @@ namespace Player.Controls.Ribbon
 				LargeImageSource = value.GetBitmap(Brushes.Black);
 			}
 		}
-
-		private static void OnIconChange(DependencyObject d, DependencyPropertyChangedEventArgs e) =>
-			d.SetValue(IconProperty, d.GetValue(IconProperty));
 	}
 }
