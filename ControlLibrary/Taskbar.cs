@@ -6,9 +6,9 @@ namespace Player.Controls.Taskbar
 {
 	public class Command : ICommand
 	{
-#pragma warning disable CS0067 //Suppres never used warning
+		#pragma warning disable CS0067 //Suppres never used warning
 		public event EventHandler CanExecuteChanged;
-#pragma warning restore CS0067
+		#pragma warning restore CS0067
 		public event EventHandler Raised;
 		public bool CanExecute(object parameter) => true;
 		public void Execute(object parameter) => Raised?.Invoke(this, null);
@@ -24,22 +24,22 @@ namespace Player.Controls.Taskbar
 		private ThumbButtonInfo PlayThumb = new ThumbButtonInfo()
 		{
 			Description = "Play",
-			ImageSource = IconKind.Play.GetBitmap()
+			ImageSource = IconType.PlaySolid.GetBitmap()
 		};
 		private ThumbButtonInfo PauseThumb = new ThumbButtonInfo()
 		{
 			Description = "Pause",
-			ImageSource = IconKind.Pause.GetBitmap()
+			ImageSource = IconType.PauseBadge12.GetBitmap()
 		};
 		private ThumbButtonInfo PreviousThumb = new ThumbButtonInfo()
 		{
 			Description = "Previous",
-			ImageSource = IconKind.SkipPrevious.GetBitmap()
+			ImageSource = IconType.Previous.GetBitmap()
 		};
 		private ThumbButtonInfo NextThumb = new ThumbButtonInfo()
 		{
 			Description = "Next",
-			ImageSource = IconKind.SkipNext.GetBitmap()
+			ImageSource = IconType.Next.GetBitmap()
 		};
 
 		private Command PlayHandler = new Command();

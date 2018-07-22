@@ -53,6 +53,6 @@ namespace Player
 			}
 		}
 		public Size LastSize { get; set; }
-		public Point LastLoc { get; set; }
+		public Point LastLocation { get; set; }
 	}
 }

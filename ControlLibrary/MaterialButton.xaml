@@ -2,11 +2,11 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 			 Width="23" Height="23" x:Name="P" Loaded="UserControl_Loaded"
-			 xmlns:mat="http://materialdesigninxaml.net/winfx/xaml/themes">
+			 xmlns:controls="clr-namespace:Player.Controls">
 	<Grid>
 		<Ellipse x:Name="MainEllipse" Margin="-7" Stroke="{Binding Foreground,ElementName=P}" StrokeDashArray="4" StrokeDashCap="Round" StrokeThickness="0"/>
 		<Ellipse x:Name="ClickEllipse" Stroke="{Binding Foreground,ElementName=P}" StrokeThickness="0" />
-		<mat:PackIcon x:Name="MainIcon" Width="Auto" Height="Auto"/>
+		<controls:Icon x:Name="MainIcon" Width="Auto" Height="Auto"/>
 	</Grid>
 	<UserControl.Triggers>
 		<EventTrigger RoutedEvent="MouseEnter">

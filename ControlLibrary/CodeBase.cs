@@ -6,22 +6,19 @@ using System.Windows.Media.Imaging;
 
 namespace Player.Controls
 {
-	public enum EllipseType { Rectular, Circular }
 
 	public static class Extensions
 	{
 		public static string ToNewString(this TimeSpan time) => time.ToString("c").Substring(3, 5);
 		
-		public static BitmapImage GetBitmap(this IconKind icon, Brush foreground = null)
+		public static BitmapImage GetBitmap(this IconType icon, Brush foreground = null)
 		{
-			var control = new MaterialButton()
+			var control = new Icon()
 			{
-				Icon = icon,
+				Type = icon,
 				Foreground = foreground ?? Brushes.White
 			};
-			control.MainEllipse.Fill = Brushes.Transparent;
-			control.MainEllipse.StrokeThickness = 0;
-			control.Background = Brushes.Transparent;
+			control.textBlock.FontWeight = FontWeights.Bold;
 			control.UpdateLayout();
 			control.Height = 100;
 			control.Width = 100;

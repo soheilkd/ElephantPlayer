@@ -1,9 +1,10 @@
 ﻿<UserControl x:Class="Player.Controls.MediaPlayer"
-             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" MouseMove="Element_MouseMove"
-             xmlns:local="clr-namespace:Player.Controls" xmlns:design="http://materialdesigninxaml.net/winfx/xaml/themes"
+			 xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+			 xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+			 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+			 xmlns:local="clr-namespace:Player.Controls"
+			 MouseMove="Element_MouseMove"
 			 mc:Ignorable="d" Loaded="UserControl_Loaded" x:Name="ParentControl"
              d:DesignHeight="300" d:DesignWidth="600">
 	<Grid>
@@ -13,28 +14,28 @@
 		<Grid x:Name="ControlsGrid" Background="Transparent" VerticalAlignment="Bottom" Height="94">
 			<Border HorizontalAlignment="Left" VerticalAlignment="Bottom" Width="149" Margin="73,0,0,4" CornerRadius="10">
 				<Grid VerticalAlignment="Top" Margin="0,14,0,0">
-					<local:MaterialButton x:Name="PreviousButton" HorizontalAlignment="Left" Icon="SkipPrevious" Margin="13,0,0,35" MouseUp="PreviousButton_Clicked"/>
+					<local:MaterialButton x:Name="PreviousButton" HorizontalAlignment="Left" Icon="Previous" Margin="13,0,0,35" MouseUp="PreviousButton_Clicked"/>
 					<local:MaterialButton x:Name="PlayPauseButton" HorizontalAlignment="Center" Icon="Play" Margin="0,0,0,35" MouseUp="PlayPauseButton_Clicked" Height="26" Width="26"/>
-					<local:MaterialButton x:Name="NextButton" HorizontalAlignment="Right" Icon="SkipNext" Margin="0,0,13,35" MouseUp="NextButton_Clicked" />
+					<local:MaterialButton x:Name="NextButton" HorizontalAlignment="Right" Icon="Next" Margin="0,0,13,35" MouseUp="NextButton_Clicked" />
 				</Grid>
 			</Border>
-			<Border VerticalAlignment="Bottom" HorizontalAlignment="Center" Width="50" Height="73" CornerRadius="10" >
+			<Border x:Name="VisionBorder" x:FieldModifier="public" VerticalAlignment="Bottom" HorizontalAlignment="Center" Width="50" Height="73" CornerRadius="10" >
 				<Grid>
-					<local:MaterialButton x:Name="VisionButton" Icon="Television" Margin="0,0,0,25" MouseUp="VisionButton_Clicked" />
+					<local:MaterialButton x:Name="VisionButton" Icon="Video" Margin="0,0,0,25" MouseUp="VisionButton_Clicked" />
 				</Grid>
 			</Border>
-			<Border HorizontalAlignment="Right" VerticalAlignment="Bottom" Height="72" CornerRadius="10" Width="184">
+			<Border x:Name="VolumeBorder" x:FieldModifier="public" HorizontalAlignment="Right" VerticalAlignment="Bottom" Height="72" CornerRadius="10" Width="184">
 				<Grid>
 					<local:MaterialButton x:Name="FullScreenButton" Icon="FullScreen" HorizontalAlignment="Right" Margin="0,0,10,35" VerticalAlignment="Bottom" MouseUp="FullScreenButton_Clicked"/>
-					<design:PackIcon x:Name="VolumeIcon" Kind="VolumeHigh" Width="25" Height="25" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0, 0, 155, 33" />
-					<Slider x:Name="VolumeSlider" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,6,50,26" IsMoveToPointEnabled="True" Template="{DynamicResource FlatSlider}" Foreground="#F444"
+					<local:Icon x:Name="VolumeIcon" Type="Volume" Width="25" Height="25" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0, 0, 155, 33" />
+					<Slider x:Name="VolumeSlider" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,6,50,26" IsMoveToPointEnabled="True" Foreground="#F444"
                     Width="100" Maximum="99" SmallChange="2" LargeChange="10" AutoToolTipPlacement="TopLeft" ValueChanged="VolumeSlider_Changed"/>
 				</Grid>
 			</Border>
 			<Border Height="27" VerticalAlignment="Bottom">
 				<Grid>
 					<Slider Value="100" x:Name="PositionSlider" ValueChanged="Position_Changed" PreviewMouseLeftButtonDown="Position_Holding" IsMoveToPointEnabled="True"
-							VerticalAlignment="Center" Maximum="1000" Template="{DynamicResource FlatSlider}" Margin="50,2,50,0">
+							VerticalAlignment="Center" Maximum="1000" Margin="50,2,50,0">
 					</Slider>
 
 					<Label Content="00:00" Style="{DynamicResource TimeLabel}" HorizontalAlignment="Left" x:Name="TimeLabel_Current" Margin="10,0,0,0"/>
@@ -47,82 +48,33 @@
 		</Grid>
 	</Grid>
 	<UserControl.Resources>
-		<Style TargetType="Border">
-			<Setter Property="Background" Value="#FFDEDEDE"/>
-		</Style>
-		<Style TargetType="{x:Type Label}" x:Key="TimeLabel">
-			<Setter Property="VerticalAlignment" Value="Bottom"/>
-			<Setter Property="Width" Value="40" />
-			<Setter Property="RenderTransform">
-				<Setter.Value>
-					<TranslateTransform x:Name="Translation1" Y="0"/>
-				</Setter.Value>
-			</Setter>
-		</Style>
-		<Storyboard x:Key="MinifyBoard" Storyboard.TargetName="elementCanvas" AccelerationRatio="0.4" DecelerationRatio="0.6" SpeedRatio="1">
-			<DoubleAnimation From="{Binding Opacity,ElementName=elementCanvas}" To="0" Storyboard.TargetProperty="Opacity" />
-		</Storyboard>
-		<Storyboard x:Key="MagnifyBoard" Storyboard.TargetName="elementCanvas" AccelerationRatio="0.4" DecelerationRatio="0.6" SpeedRatio="1">
-			<DoubleAnimation From="{Binding Opacity,ElementName=elementCanvas}" To="1" Storyboard.TargetProperty="Opacity" />
-		</Storyboard>
-		<Storyboard x:Key="FullOnBoard" Storyboard.TargetProperty="Y" Storyboard.TargetName="ControlsTranslation" AccelerationRatio="0.4" DecelerationRatio="0.6">
-			<DoubleAnimation From="{Binding ElementName=ControlsTranslation, Path=Y}" To="90" SpeedRatio="1.5"/>
-		</Storyboard>
-		<Storyboard x:Key="FullOffBoard" Storyboard.TargetProperty="Y" Storyboard.TargetName="ControlsTranslation" AccelerationRatio="0.4" DecelerationRatio="0.6">
-			<DoubleAnimation From="{Binding ElementName=ControlsTranslation, Path=Y}" To="0" SpeedRatio="1.5"/>
-		</Storyboard>
+		<SolidColorBrush x:Key="BorderBack" Color="#FFDEDEDE"/>
+			<Style TargetType="Border">
+				<Setter Property="Background" Value="{DynamicResource BorderBack}"/>
+			</Style>
+			<Style TargetType="{x:Type Label}" x:Key="TimeLabel">
+				<Setter Property="VerticalAlignment" Value="Bottom"/>
+				<Setter Property="Width" Value="40" />
+				<Setter Property="RenderTransform">
+					<Setter.Value>
+						<TranslateTransform x:Name="Translation1" Y="0"/>
+					</Setter.Value>
+				</Setter>
+			</Style>
+			<Storyboard x:Key="MinifyBoard" Storyboard.TargetName="elementCanvas" AccelerationRatio="0.4" DecelerationRatio="0.6" SpeedRatio="1">
+				<DoubleAnimation From="{Binding Opacity,ElementName=elementCanvas}" To="0" Storyboard.TargetProperty="Opacity" />
+			</Storyboard>
+			<Storyboard x:Key="MagnifyBoard" Storyboard.TargetName="elementCanvas" AccelerationRatio="0.4" DecelerationRatio="0.6" SpeedRatio="1">
+				<DoubleAnimation From="{Binding Opacity,ElementName=elementCanvas}" To="1" Storyboard.TargetProperty="Opacity" />
+			</Storyboard>
+			<Storyboard x:Key="FullOnBoard" Storyboard.TargetProperty="Y" Storyboard.TargetName="ControlsTranslation" AccelerationRatio="0.4" DecelerationRatio="0.6">
+				<DoubleAnimation From="{Binding ElementName=ControlsTranslation, Path=Y}" To="90" SpeedRatio="1.5"/>
+			</Storyboard>
+			<Storyboard x:Key="FullOffBoard" Storyboard.TargetProperty="Y" Storyboard.TargetName="ControlsTranslation" AccelerationRatio="0.4" DecelerationRatio="0.6">
+				<DoubleAnimation From="{Binding ElementName=ControlsTranslation, Path=Y}" To="0" SpeedRatio="1.5"/>
+			</Storyboard>
 
 
 		<TranslateTransform x:Name="Translation1" x:Key="Translation1" Y="0" />
-		<ControlTemplate TargetType="Slider" x:Key="FlatSlider">
-			<Border x:Name="border" Focusable="False" FocusVisualStyle="{x:Null}" BorderBrush="{TemplateBinding BorderBrush}" 
-					BorderThickness="{TemplateBinding BorderThickness}" Background="{TemplateBinding Background}">
-				<Grid>
-					<Track x:Name="PART_Track" Grid.Row="1" MouseDown="Position_Holding">
-						<Track.DecreaseRepeatButton>
-							<RepeatButton Height="9" Background="#F555" />
-						</Track.DecreaseRepeatButton>
-						<Track.IncreaseRepeatButton>
-							<RepeatButton Height="5" Background="#FCCC"/>
-						</Track.IncreaseRepeatButton>
-						<Track.Thumb>
-							<Thumb x:Name="Thumb" OverridesDefaultStyle="True" >
-								<Thumb.Template>
-									<ControlTemplate TargetType="{x:Type Thumb}">
-										<Grid>
-											<Ellipse Width="20" x:Name="grip" StrokeThickness="5" Stroke="#F555" Fill="#01FFFFFF" Height="4" Margin="-4, 0, 0, 0"/>
-										</Grid>
-										<ControlTemplate.Triggers>
-											<Trigger Property="IsMouseOver" Value="true">
-												<Setter Property="StrokeThickness" TargetName="grip" Value="3"/>
-											</Trigger>
-											<Trigger Property="IsDragging" Value="true">
-												<Setter Property="StrokeThickness" TargetName="grip" Value="10" />
-											</Trigger>
-											<EventTrigger RoutedEvent="UIElement.MouseEnter">
-												<BeginStoryboard>
-													<Storyboard SpeedRatio="4" AccelerationRatio="0.2" DecelerationRatio="0.8" Storyboard.TargetName="grip">
-														<DoubleAnimation From="4" To="20" Storyboard.TargetProperty="Height"/>
-													</Storyboard>
-												</BeginStoryboard>
-											</EventTrigger>
-											<EventTrigger RoutedEvent="UIElement.MouseLeave">
-												<BeginStoryboard>
-													<Storyboard SpeedRatio="3" AccelerationRatio="0.2" DecelerationRatio="0.8" Storyboard.TargetName="grip">
-														<DoubleAnimation From="20" To="4" Storyboard.TargetProperty="Height"/>
-													</Storyboard>
-												</BeginStoryboard>
-											</EventTrigger>
-										</ControlTemplate.Triggers>
-									</ControlTemplate>
-								</Thumb.Template>
-							</Thumb>
-						</Track.Thumb>
-						<Track.Triggers>
-						</Track.Triggers>
-					</Track>
-				</Grid>
-			</Border>
-		</ControlTemplate>
 	</UserControl.Resources>
 </UserControl>

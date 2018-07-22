@@ -1,26 +1,42 @@
-﻿using MaterialDesignThemes.Wpf;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
 
 namespace Player.Controls
 {
-	public partial class Icon : UserControl
+	public partial class Icon : Viewbox
 	{
-		public static readonly DependencyProperty IconProperty =
-			DependencyProperty.Register(nameof(Kind), typeof(IconKind), typeof(Icon), new PropertyMetadata(IconKind.AccessPoint));
+		public static readonly DependencyProperty TypeProperty =
+			DependencyProperty.Register(nameof(Type), typeof(IconType), typeof(Icon), new PropertyMetadata(IconType.Wifi));
+		public static readonly DependencyProperty ForegroundProperty =
+			DependencyProperty.Register(nameof(Foreground), typeof(Brush), typeof(Icon), new PropertyMetadata(Brushes.White));
 
-		public IconKind Kind
+		public IconType Type
 		{
-			get => (IconKind)GetValue(IconProperty);
+			get => (IconType)GetValue(TypeProperty);
 			set
 			{
-				SetValue(IconProperty, value);
-				MainIcon.Kind = (PackIconKind)(int)value;
+				SetValue(TypeProperty, value);
+				textBlock.Text = Properties.Resources.ResourceManager.GetString(value.ToString());
+			}
+		}
+
+		public Brush Foreground
+		{
+			get => (Brush)GetValue(ForegroundProperty);
+			set
+			{
+				SetValue(ForegroundProperty, value);
+				textBlock.Foreground = value;
 			}
 		}
 
 		public Icon() => InitializeComponent();
 
-		private void UserControl_Loaded(object sender, RoutedEventArgs e) => Kind = Kind;
+		private void UserControl_Loaded(object sender, RoutedEventArgs e)
+		{
+			Type = Type;
+			Foreground = Foreground;
+		}
 	}
 }

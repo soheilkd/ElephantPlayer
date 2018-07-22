@@ -1,5 +1,4 @@
-﻿using MaterialDesignThemes.Wpf;
-using System;
+﻿using System;
 using System.Threading.Tasks;
 using System.Timers;
 using System.Windows;
@@ -18,6 +17,23 @@ namespace Player.Controls
 		public event EventHandler PreviousClicked;
 		public event EventHandler FullScreenClicked;
 		public event EventHandler<InfoExchangeArgs<bool>> VisionChanged;
+
+		private Brush _BorderBack = Brushes.White;
+		public Brush BorderBack
+		{
+			get => _BorderBack;
+			set
+			{
+				var r = (SolidColorBrush)value;
+				_BorderBack = new SolidColorBrush(new Color()
+				{
+					R = r.Color.R,
+					G = r.Color.G,
+					B = r.Color.B,
+					A = 255
+				});
+			}
+		}
 
 		public TimeSpan Position
 		{
@@ -39,10 +55,10 @@ namespace Player.Controls
 				element.Volume = value;
 				switch (element.Volume)
 				{
-					case double n when (n <= 0.1): VolumeIcon.Kind = PackIconKind.VolumeOff;  break;
-					case double n when (n <= 0.4): VolumeIcon.Kind = PackIconKind.VolumeLow; break;
-					case double n when (n <= 0.7): VolumeIcon.Kind = PackIconKind.VolumeMedium; break;
-					default: VolumeIcon.Kind = PackIconKind.VolumeHigh; break;
+					case double n when (n <= 0.1): VolumeIcon.Type = IconType.Volume0; break;
+					case double n when (n <= 0.4): VolumeIcon.Type = IconType.Volume1; break;
+					case double n when (n <= 0.7): VolumeIcon.Type = IconType.Volume2; break;
+					default: VolumeIcon.Type = IconType.Volume3; break;
 				}
 			}
 		}
@@ -71,24 +87,27 @@ namespace Player.Controls
 		}
 		private bool IsUXChangingPosition;
 		public bool IsFullyLoaded;
-		public bool IsFullScreen => FullScreenButton.Icon == IconKind.FullscreenExit;
-		public bool IsVisionOn => elementCanvas.Opacity >= 0.3;
+		public bool IsFullScreen => FullScreenButton.Icon == IconType.BackToWindow;
+		public bool IsVisionOn { get; set; }
 		private bool AreControlsVisible
 		{
 			set
 			{
-				if (value)
+				Dispatcher.Invoke(() =>
 				{
-					FullOnBoard.Stop();
-					FullOffBoard.Begin();
-				}
-				else
-				{
-					if (!IsVisionOn || ControlsGrid.IsMouseOver)
-						return;
-					FullOffBoard.Stop();
-					FullOnBoard.Begin();
-				}
+					if (value)
+					{
+						FullOnBoard.Stop();
+						FullOffBoard.Begin();
+					}
+					else
+					{
+						if (!IsVisionOn || ControlsGrid.IsMouseOver)
+							return;
+						FullOffBoard.Stop();
+						FullOnBoard.Begin();
+					}
+				});
 			}
 		}
 		public bool PlayOnPositionChange { get; set; }
@@ -117,6 +136,7 @@ namespace Player.Controls
 			MinifyBoard.Completed += (_, __) => elementCanvas.Visibility = Visibility.Hidden;
 			elementCanvas.Visibility = Visibility.Hidden;
 			elementCanvas.Opacity = 0;
+			Resources["BorderBack"] = Brushes.Transparent;
 		}
 
 		private void Element_MediaOpened(object sender, RoutedEventArgs e)
@@ -172,7 +192,7 @@ namespace Player.Controls
 			element.Pause();
 			while (e.ButtonState == MouseButtonState.Pressed)
 				await Task.Delay(50);
-			if (but == IconKind.Pause)
+			if (but == IconType.Pause)
 				element.Play();
 			else if (PlayOnPositionChange)
 				Play();
@@ -184,7 +204,7 @@ namespace Player.Controls
 		}
 		private void PlayPauseButton_Clicked(object sender, MouseButtonEventArgs e)
 		{
-			if (PlayPauseButton.Icon == IconKind.Pause)
+			if (PlayPauseButton.Icon == IconType.Pause)
 				Pause();
 			else
 				Play();
@@ -205,16 +225,19 @@ namespace Player.Controls
 		}
 		private void FullScreenButton_Clicked(object sender, MouseButtonEventArgs e)
 		{
-			FullScreenButton.Icon = FullScreenButton.Icon == IconKind.Fullscreen ? IconKind.FullscreenExit : IconKind.Fullscreen;
+			FullScreenButton.Icon = FullScreenButton.Icon == IconType.FullScreen ? IconType.BackToWindow : IconType.FullScreen;
 			VisionButton.Visibility = IsFullScreen ? Visibility.Hidden : Visibility.Visible;
 			FullScreenClicked?.Invoke(this, null);
 		}
 		private void VisionButton_Clicked(object sender, MouseButtonEventArgs e)
 		{
-			VisionButton.Icon = IsVisionOn ? IconKind.Television : IconKind.TelevisionOff;
-			if (IsVisionOn) MinifyBoard.Begin();
-			else MagnifyBoard.Begin();
+			IsVisionOn = !IsVisionOn;
+			VisionButton.Icon = IsVisionOn ? IconType.PresenceChickletVideo : IconType.Video;
+			if (IsVisionOn) MagnifyBoard.Begin();
+			else MinifyBoard.Begin();
 			VisionChanged?.Invoke(this, new InfoExchangeArgs<bool>(IsVisionOn));
+			Resources["BorderBack"] = IsVisionOn ? BorderBack : Brushes.Transparent;
+			AreControlsVisible = true;
 		}
 		private void VolumeSlider_Changed(object sender, RoutedPropertyChangedEventArgs<double> e)
 		{
@@ -233,13 +256,13 @@ namespace Player.Controls
 		{
 			if (emulateClick)
 			{
-				PlayPauseButton.Icon = IconKind.Play;
+				PlayPauseButton.Icon = IconType.Play;
 				PlayPauseButton.EmulateClick();
 			}
 			else
 			{
 				element.Play();
-				PlayPauseButton.Icon = IconKind.Pause;
+				PlayPauseButton.Icon = IconType.Pause;
 				Thumb.SetPlayingState(true);
 			}
 		}
@@ -247,13 +270,13 @@ namespace Player.Controls
 		{
 			if (emulateClick)
 			{
-				PlayPauseButton.Icon = IconKind.Pause;
+				PlayPauseButton.Icon = IconType.Pause;
 				PlayPauseButton.EmulateClick();
 			}
 			else
 			{
 				element.Pause();
-				PlayPauseButton.Icon = IconKind.Play;
+				PlayPauseButton.Icon = IconType.Play;
 				Thumb.SetPlayingState(false);
 			}
 		}
