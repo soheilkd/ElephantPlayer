@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace Player
 {
-	public enum PlayMode { Shuffle, RepeatOne, Repeat }
+	public enum PlayMode { Repeat, RepeatOne, Shuffle }
 
 	public class MediaManager : ObservableCollection<Media>
 	{
@@ -14,9 +14,11 @@ namespace Player
 		public MediaManager()
 		{
 			LibraryManager.Load().For(each => Add(each));
+			QueueEnumerator.Filter(this, String.Empty);
+			CollectionChanged += (_,__) => QueueEnumerator.Filter(this);
 		}
 
-		MediaEnumerator QueueEnumerator = new MediaEnumerator();
+		public MediaEnumerator QueueEnumerator = new MediaEnumerator();
 
 		public Media Current { get => QueueEnumerator.Current; }
 
@@ -46,27 +48,20 @@ namespace Player
 			if (reqNext)
 				RequestPlay(Next());
 		}
-		
-		public Media Play(Media media, bool isFromQueue = false)
+
+		public Media Next(Media media)
 		{
-			if (!MediaOperator.DoesExists(media))
-			{
-				Remove(media);
-				media = Next();
-			}
 			this.For(each => each.IsPlaying = false);
 			media.IsPlaying = true;
-			if (!isFromQueue)
-				Requeue();
 			return QueueEnumerator.Get(media);
 		}
 		public Media Next()
 		{
-			return Play(QueueEnumerator.GetNext(), true);
+			return Next(QueueEnumerator.GetNext());
 		}
 		public Media Previous()
 		{
-			return Play(QueueEnumerator.GetPrevious(), true);
+			return Next(QueueEnumerator.GetPrevious());
 		}
 
 		public void CloseSeason()
@@ -80,7 +75,7 @@ namespace Player
 		private void RequestPlay(Media media)
 		{
 			if (!QueueEnumerator.Contains(media))
-				Requeue();
+				QueueEnumerator = new MediaEnumerator(this);
 			RequestReceived?.Invoke(this, new InfoExchangeArgs<Media>(media));
 		}
 
@@ -90,26 +85,6 @@ namespace Player
 			Clear();
 			t.For(each => Add(each));
 			LibraryManager.Save(this);
-		}
-
-		public void Requeue(PlayMode playMode = PlayMode.Repeat)
-		{
-			QueueEnumerator.Clear();
-			switch (playMode)
-			{
-				case PlayMode.Shuffle:
-					Requeue(PlayMode.Repeat);
-					QueueEnumerator.Shuffle();
-					break;
-				case PlayMode.RepeatOne:
-					Extensions.Do(() => QueueEnumerator.Add(Current), 10);
-					break;
-				case PlayMode.Repeat:
-					QueueEnumerator.Reset();
-					this.For(each => QueueEnumerator.Add(each));
-					break;
-				default: break;
-			}
 		}
 	}
 }

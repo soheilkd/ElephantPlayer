@@ -6,24 +6,27 @@ using System.Linq;
 
 namespace Player.Models
 {
-	class MediaEnumerator : ObservableCollection<Media>, IEnumerator<Media>
+	public class MediaEnumerator : ObservableCollection<Media>, IEnumerator<Media>
 	{
-		private int _current;
-		public Media Current => this[_current];
+		private int _position;
+		public Media Current => _position < Count ? this[_position] : new Media();
 		object IEnumerator.Current => Current;
+
+		public MediaEnumerator(IEnumerable<Media> collection) : base(collection) { }
+		public MediaEnumerator() : base() { }
 
 		public bool MoveNext()
 		{
-			_current++;
-			if (_current == Count)
-				_current = 0;
+			_position++;
+			if (_position == Count)
+				_position = 0;
 			return true;
 		}
 		public bool MovePrevious()
 		{
-			_current--;
-			if (_current <= -1)
-				_current = Count - 1;
+			_position--;
+			if (_position <= -1)
+				_position = Count - 1;
 			return true;
 		}
 
@@ -39,16 +42,16 @@ namespace Player.Models
 		}
 		public Media Get(int index)
 		{
-			_current = index;
+			_position = index;
 			return Current;
 		}
 		public Media Get(Media media)
 		{
-			_current = IndexOf(media);
+			_position = IndexOf(media);
 			return Current;
 		}
 
-		public void Reset() => _current = 0;
+		public void Reset() => _position = 0;
 		public void Dispose() => Clear();
 		
 		public void RemoveThose(Func<Media, bool> filter)
@@ -71,6 +74,22 @@ namespace Player.Models
 			var c = Count;
 			Clear();
 			Extensions.Do(() => Add(t[rand.Next(c)]), c);
+		}
+
+		string _LastQuery;
+		public void Filter(IEnumerable<Media> originalCollection, string query = "")
+		{
+			_LastQuery = query;
+			if (originalCollection.AsParallel().Where(each => each.Matches(query)).Count() == 0)
+			{
+				Filter(originalCollection, String.Empty);
+				return;
+			}
+			var c = Current;
+			ClearItems(); 
+			foreach (var item in originalCollection.Where(each => each.Matches(query)))
+				 Add(item);
+			_position = IndexOf(c) != -1 ? IndexOf(c) : 0;
 		}
 	}
 }

@@ -60,6 +60,17 @@ namespace Player
 			PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 		}
 
+		public bool Matches(string query)
+		{
+			if (String.IsNullOrWhiteSpace(query)) return true;
+			return
+				Title.IncaseContains(query) ||
+				Name.IncaseContains(query) ||
+				Artist.IncaseContains(query) ||
+				Album.IncaseContains(query) ||
+				Path.IncaseContains(query);
+		}
+
 		public static implicit operator string(Media media) => media.Path;
 		public static implicit operator Uri(Media media) => new Uri(media.Path);
 		public static implicit operator MediaType(Media media) => media.Type;
