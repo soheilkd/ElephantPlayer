@@ -1,24 +1,24 @@
 ﻿using System;
 using System.IO;
-using System.Runtime.Serialization.Formatters.Binary;
 using System.Windows;
+using System.Xml.Serialization;
 
 namespace Player
 {
 	[Serializable]
 	public class Settings
 	{
-		private static readonly BinaryFormatter DefaultFormatter = new BinaryFormatter();
-
+		private static readonly XmlSerializer DefaultSerializer = new XmlSerializer(typeof(Settings));
+		
 		public void Save()
 		{
-			using (var stream = new FileStream($"{App.Path}Settings.bin", FileMode.Create))
-				DefaultFormatter.Serialize(stream, this);
+			using (var stream = new FileStream($"{App.Path}Settings.xml", FileMode.Create))
+				DefaultSerializer.Serialize(stream, this);
 		}
 		public static Settings Load()
 		{
-			using (var stream = new FileStream($"{App.Path}Settings.bin", FileMode.Open))
-				return (Settings)DefaultFormatter.Deserialize(stream);
+			using (var stream = new FileStream($"{App.Path}Settings.xml", FileMode.Open))
+				return (Settings)DefaultSerializer.Deserialize(stream);
 		}
 
 		public PlayMode PlayMode { get; set; }
