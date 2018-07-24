@@ -89,6 +89,15 @@ namespace Player
 			RememberMinimalCheck.Checked += (_, __) => App.Settings.RememberMinimal = true;
 			RememberMinimalCheck.Unchecked += (_, __) => App.Settings.RememberMinimal = false;
 			Player.BorderBack = Background;
+
+			foreach (var item in this.FindChildren<MenuItem>())
+			{
+				item.Background = Menu.Background;
+			}
+			foreach (MenuItem item in ListView.ContextMenu.Items)
+			{
+				item.Background = Menu.Background;
+			}
 			#endregion
 			
 			Left = App.Settings.LastLocation.X;
@@ -116,6 +125,7 @@ namespace Player
 
 		private void MinimalButton_Clicked(object sender, MouseButtonEventArgs e)
 		{
+			Hide();
 			Topmost = !Topmost;
 			Title = $"{(Topmost ?  "": "Elephant Player | ")}{Manager.Current.Artist} - {Manager.Current.Title}";
 			LeftWindowCommands.Visibility = Topmost ? Visibility.Collapsed : Visibility.Visible;
@@ -143,6 +153,7 @@ namespace Player
 				Height = TempHeight;
 				Width = TempWidth;
 			}
+			Show();
 		}
 
 		private async void KeyboardListener_KeyDown(object sender, RawKeyEventArgs e)

@@ -80,7 +80,6 @@ namespace Player
 				ArtworkImage.Source = new BitmapImage(new Uri(ArtworkDialog.FileName));
 			}
 		}
-		private void Grid_MouseDown(object sender, MouseButtonEventArgs e) { try { DragMove(); } catch { } }
 		
 	}
 }
