@@ -1,8 +1,8 @@
-﻿using Player.Models;
-using System;
+﻿using System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows.Media.Imaging;
+using System.Xml.Serialization;
 
 namespace Player
 {

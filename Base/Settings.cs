@@ -32,7 +32,7 @@ namespace Player
 		public bool RememberMinimal { get; set; }
 		public bool WasMinimal { get; set; }
 		public int MouseTimeoutIndex { get; set; }
-		public string LibraryLocation { get; set; } = "@Library.bin";
+		public string LibraryLocation { get; set; }
 		
 		public int MouseOverTimeout
 		{

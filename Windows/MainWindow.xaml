@@ -18,36 +18,32 @@
 						<MenuItem Header="Run GC"/>
 						<MenuItem Header="Open Media"/>
 						<MenuItem Header="Import Folder">
-							<MenuItem Header="Top Only"/>
-							<MenuItem Header="Full Tree"/>
+							<MenuItem Header="Top Only" Click="Menu_FolderTopClick"/>
+							<MenuItem Header="Full Tree" Click="Menu_FolderTreeClick"/>
 						</MenuItem>
 					</MenuItem>
 					<MenuItem Background="Transparent">
 						<MenuItem.Header>
 							<player:Icon Type="Library" Foreground="#FEEE"/>
 						</MenuItem.Header>
-						<MenuItem Header="Import Library"/>
-						<MenuItem Header="Export Library">
-							<MenuItem Header="As Binary File" />
-							<MenuItem Header="As XML" />
-							<MenuItem Header="As Text"/>
-						</MenuItem>
-						<MenuItem Header="Heavy Load"/>
-						<MenuItem Header="Revalidate" Click="MenuItem_Click_1"/>
+						<MenuItem Header="Import Library" Click="Menu_LibraryImportClick"/>
+						<MenuItem Header="Export Library" Click="Menu_LibraryExportClick"/>
+						<MenuItem Header="Heavy Load" Click="Menu_HeavyLoadClick"/>
+						<MenuItem Header="Revalidate" Click="Menu_RevalidateClick"/>
 						<MenuItem Header="Sort">
 							<MenuItem Header="Ascending">
-								<MenuItem Tag="0" Header="Title"/>
-								<MenuItem Tag="1" Header="Artist"/>
-								<MenuItem Tag="2" Header="Album"/>
-								<MenuItem Tag="3" Header="Plays"/>
-								<MenuItem Tag="4" Header="Addition Date"/>
+								<MenuItem Tag="0" Click="Menu_SortClick" Header="Title"/>
+								<MenuItem Tag="1" Click="Menu_SortClick" Header="Artist"/>
+								<MenuItem Tag="2" Click="Menu_SortClick" Header="Album"/>
+								<MenuItem Tag="3" Click="Menu_SortClick" Header="Plays"/>
+								<MenuItem Tag="4" Click="Menu_SortClick" Header="Addition Date"/>
 							</MenuItem>
 							<MenuItem Header="Descending" >
-								<MenuItem Tag="5" Header="Title"/>
-								<MenuItem Tag="6" Header="Artist"/>
-								<MenuItem Tag="7" Header="Album"/>
-								<MenuItem Tag="8" Header="Plays"/>
-								<MenuItem Tag="9" Header="Addition Date"/>
+								<MenuItem Tag="5" Click="Menu_SortClick" Header="Title"/>
+								<MenuItem Tag="6" Click="Menu_SortClick" Header="Artist"/>
+								<MenuItem Tag="7" Click="Menu_SortClick" Header="Album"/>
+								<MenuItem Tag="8" Click="Menu_SortClick" Header="Plays"/>
+								<MenuItem Tag="9" Click="Menu_SortClick" Header="Addition Date"/>
 							</MenuItem>
 						</MenuItem>
 					</MenuItem>
@@ -107,9 +103,9 @@
 						</ComboBox>
 					</MenuItem>
 					<MenuItem Header="Play Mode" x:Name="PlayModeSubMenu">
-						<MenuItem IsCheckable="True" Header="Repeat All" Tag="0" Click="MenuItem_Click"/>
-						<MenuItem IsCheckable="True" Header="Repeat One" Tag="1" Click="MenuItem_Click"/>
-						<MenuItem IsCheckable="True" Header="Shuffle" Tag="2" Click="MenuItem_Click"/>
+						<MenuItem IsCheckable="True" Header="Repeat All" Tag="0" Click="Menu_PlayModeClick"/>
+						<MenuItem IsCheckable="True" Header="Repeat One" Tag="1" Click="Menu_PlayModeClick"/>
+						<MenuItem IsCheckable="True" Header="Shuffle" Tag="2" Click="Menu_PlayModeClick"/>
 					</MenuItem>
 				</MenuItem>
 			</Menu>
@@ -120,7 +116,6 @@
 			<ListView.ContextMenu>
 				<ContextMenu>
 					<MenuItem Header="Detergent Meta" Click="Menu_TagDetergent" />
-					<MenuItem Header="Play after current" Click="Menu_PlayAfterClick" />
 					<MenuItem Header="Move to..." >
 						<MenuItem Header="{DynamicResource LastPath}" Click="Menu_MoveClick"/>
 						<MenuItem Header="Browse..." Click="Menu_MoveClick"/>

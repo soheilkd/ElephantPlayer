@@ -3,6 +3,7 @@ using Microsoft.Win32;
 using Player.Hook;
 using System;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
@@ -152,6 +153,10 @@ namespace Player
 					WindowState = WindowState.Maximized;
 				Height = TempHeight;
 				Width = TempWidth;
+				if (Left + Width > 1366)
+					Left = 1366 - Width;
+				if (Top + Height > 720)
+					Top = 720 - Height;
 			}
 			Show();
 		}
@@ -283,14 +288,6 @@ namespace Player
 		{
 			For(item => MediaOperator.CleanTag(item));
 		}
-		private void Menu_PlayAfterClick(object sender, RoutedEventArgs e)
-		{
-			For(item =>
-			{
-				Manager.Remove(item);
-				Manager.Insert(Manager.IndexOf(Manager.Current) + 1, item);
-			});
-		}
 		private void Menu_MoveClick(object sender, RoutedEventArgs e)
 		{
 			switch ((sender.As<MenuItem>().Header ?? "INDIV").ToString().Substring(0, 1))
@@ -386,17 +383,7 @@ namespace Player
 			});
 		}
 
-		private void For(Action<Media> action)
-		{
-			ListView.SelectedItems.Cast<Media>().ToArray().For(action);
-		}
-
-		private void Button_Click(object sender, RoutedEventArgs e)
-		{
-			Manager.For(each => MediaOperator.Load(each));
-		}
-
-		private void MenuItem_Click(object sender, RoutedEventArgs e)
+		private void Menu_PlayModeClick(object sender, RoutedEventArgs e)
 		{
 			PlayModeSubMenu.Items[0].As<MenuItem>().IsChecked = false;
 			PlayModeSubMenu.Items[1].As<MenuItem>().IsChecked = false;
@@ -405,13 +392,75 @@ namespace Player
 			PlayModeSubMenu.Items[tag].As<MenuItem>().IsChecked = true;
 			App.Settings.PlayMode = (PlayMode)tag;
 		}
+		private void Menu_FolderTopClick(object sender, RoutedEventArgs e)
+		{
+			if (Dialogs.RequestFolder(out var folders))
+				folders.For(
+					eachFolder => Directory.GetFiles(eachFolder).For(
+						eachFile => Manager.AddFromPath(eachFile)));
+		}
+		private void Menu_FolderTreeClick(object sender, RoutedEventArgs e)
+		{
+			if (Dialogs.RequestFolder(out var folders))
+				folders.For(
+					eachFolder => Directory.GetFiles(eachFolder, "*", SearchOption.AllDirectories).For(
+						eachFile => Manager.AddFromPath(eachFile)));
+		}
+		private void Menu_LibraryImportClick(object sender, RoutedEventArgs e)
+		{
+			if (Dialogs.RequestFile(out var file, Dialogs.DefaultLibraryFilter))
+				if (LibraryManager.TryLoad(file[0], out var lib))
+				{
+					App.Settings.LibraryLocation = file[0];
+					Manager.Clear();
+					lib.For(each => Manager.Add(each));
+				}
+		}
+		private void Menu_LibraryExportClick(object sender, RoutedEventArgs e)
+		{
+			if (Dialogs.RequestSave(out var file, Dialogs.DefaultLibraryFilter))
+			{
+				if (!file.EndsWith(".bin"))
+					file += ".bin";
+				if (!file.StartsWith(App.Path)) App.Settings.LibraryLocation = file;
+				else App.Settings.LibraryLocation = file.Replace(App.Path, String.Empty);
+				LibraryManager.Save(Manager);
+			}
+		}
+		private void Menu_SortClick(object sender, RoutedEventArgs e)
+		{
+			var tag = Int32.Parse(sender.As<MenuItem>().Tag.ToString());
 
-		private void MenuItem_Click_1(object sender, RoutedEventArgs e)
+			switch (tag)
+			{
+				case 0: Manager.SortQueueBy(each => each.Title); break;
+				case 1: Manager.SortQueueBy(item => item.Artist); break;
+				case 2: Manager.SortQueueBy(item => item.Album); break;
+				case 3: Manager.SortQueueBy(item => item.PlayCount); break;
+				case 4: Manager.SortQueueBy(item => item.AdditionDate); break;
+				case 5: Manager.SortQueueDescendingBy(item => item.Title); break;
+				case 6: Manager.SortQueueDescendingBy(item => item.Artist); break;
+				case 7: Manager.SortQueueDescendingBy(item => item.Album); break;
+				case 8: Manager.SortQueueDescendingBy(item => item.PlayCount); break;
+				case 9: Manager.SortQueueDescendingBy(item => item.AdditionDate); break;
+				default: break;
+			}
+		}
+		private void Menu_HeavyLoadClick(object sender, RoutedEventArgs e)
+		{
+			Manager.For(each => MediaOperator.Load(each));
+		}
+		private void Menu_RevalidateClick(object sender, RoutedEventArgs e)
 		{
 			Hide();
 			Manager.Revalidate();
 			Close();
 			Process.Start("Elephant Player.exe");
+		}
+
+		private void For(Action<Media> action)
+		{
+			ListView.SelectedItems.Cast<Media>().ToArray().For(action);
 		}
 	}
 }

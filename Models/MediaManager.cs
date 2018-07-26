@@ -86,5 +86,10 @@ namespace Player
 			t.For(each => Add(each));
 			LibraryManager.Save(this);
 		}
+
+		public void SortQueueBy<T>(Func<Media, T> keySelector)
+			=> QueueEnumerator.SortBy(keySelector);
+		public void SortQueueDescendingBy<T>(Func<Media, T> keySelector)
+			=> QueueEnumerator.SortDescendingBy(keySelector);
 	}
 }

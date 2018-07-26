@@ -91,5 +91,20 @@ namespace Player.Models
 				 Add(item);
 			_position = IndexOf(c) != -1 ? IndexOf(c) : 0;
 		}
+
+		public void SortBy<T>(Func<Media, T> keySelector)
+		{
+			var p = this.ToArray();
+			Clear();
+			p.OrderBy(keySelector).ForEach(each => Add(each));
+			p = null;
+		}
+		public void SortDescendingBy<T>(Func<Media, T> keySelector)
+		{
+			var p = this.ToArray();
+			Clear();
+			p.OrderByDescending(keySelector).ForEach(each => Add(each));
+			p = null;
+		}
 	}
 }
