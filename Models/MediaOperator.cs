@@ -29,8 +29,7 @@ namespace Player
 				string output = "";
 				int lit1 = target.ToLower().IndexOf(word);
 				if (target.StartsWith(word)) lit1 = 0;
-				if (lit1 == -1)
-					return target;
+				if (lit1 == -1) return target;
 				string temp1 = target.Substring(0, lit1);
 				if (temp1 == String.Empty) temp1 = " ";
 				if (temp1.LastIndexOf(' ') == -1) return " ";
@@ -38,17 +37,15 @@ namespace Player
 				output += temp2;
 				int lit2 = target.ToLower().LastIndexOf(word);
 				temp1 = target.Substring(lit2);
-				if (!temp1.EndsWith(temp1))
-					temp2 = temp1.Substring(temp1.IndexOf(' '));
+				if (!temp1.EndsWith(temp1)) temp2 = temp1.Substring(temp1.IndexOf(' '));
 				else temp2 = "";
 				output += temp2;
 				return output;
 			}
 			string c(string target)
 			{
-				if (String.IsNullOrWhiteSpace(target))
-					return target;
-				string[] litretures = new string[] { ".com", ".ir", ".org", "www.", "@", ".me", ".biz", ".net" };
+				if (String.IsNullOrWhiteSpace(target)) return target;
+				string[] litretures = ".com;.ir;.org;www.;@;.me;.biz;.net".Split(';');
 				var lit = new List<string>();
 				litretures.For(each => lit.Add(each), each => target.IncaseContains(each));
 				lit.ToArray().For(each => target = deleteWord(target, each));
@@ -100,8 +97,7 @@ namespace Player
 				if (prompt)
 				{
 					var res = MessageBox.Show(manip, "Continue?", MessageBoxButton.YesNo, MessageBoxImage.Question, MessageBoxResult.Yes);
-					if (res == MessageBoxResult.No)
-						return;
+					if (res == MessageBoxResult.No) return;
 				}
 				file.Save();
 				Reload(media);
@@ -139,7 +135,6 @@ namespace Player
 					media.Album = "Video";
 					media.Artwork = Images.VideoArt;
 					media.Type = MediaType.Video;
-					media.Length = TimeSpan.Zero;
 					break;
 				default: break;
 			}

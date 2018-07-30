@@ -8,11 +8,7 @@ namespace Player
 {
 	public static class Dialogs
     {
-		public static readonly Collection<CommonFileDialogFilter> DefaultLibraryFilter = 
-			new Collection<CommonFileDialogFilter>(new[]
-			{
-				new CommonFileDialogFilter("Binary File", "*.bin")
-			});
+		public static readonly CommonFileDialogFilter[] DefaultLibraryFilter = new[] { new CommonFileDialogFilter("Binary File", "*.bin") };
 
 		public static bool RequestFolder(out string[] folders, bool multiSelect = true)
 		{
