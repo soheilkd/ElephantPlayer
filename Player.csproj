@@ -146,6 +146,7 @@
     <Compile Include="Base\Extensions.cs" />
     <Compile Include="Base\Hook.cs" />
     <Compile Include="Base\Images.cs" />
+    <Compile Include="Base\HookEvents.cs" />
     <Compile Include="Base\Settings.cs" />
     <Compile Include="Base\DeepBackEnd.cs" />
     <Compile Include="Models\LibraryManager.cs" />

@@ -50,7 +50,7 @@ namespace Player
 			#region Initialization
 			
 			App.NewInstanceRequested += (_, e) => e.Args.ToList().ForEach(each => Manager.AddFromPath(each, true));
-			App.KeyDown += KeyboardListener_KeyDown;
+			Hook.Events.KeyDown += KeyboardListener_KeyDown;
 
 			Manager.RequestReceived += (_, e) => Play(e.Parameter);
 			Player.LengthFound += (_, e) => Manager.Current.Length = e.Parameter;
