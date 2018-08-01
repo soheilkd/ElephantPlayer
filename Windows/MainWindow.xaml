@@ -159,28 +159,6 @@
                Placement="Bottom" PopupAnimation="Fade" AllowsTransparency="True">
 			<TextBox HorizontalAlignment="Right" VerticalAlignment="Top" Width="140" Height="20" x:Name="SearchBox" TextChanged="SearchBox_TextChanged" />
 		</Popup>
-
-		<Image x:Name="MiniArtworkImage" Height="50" Width="50" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="6,0,0,28">
-			<Image.Triggers>
-				<EventTrigger RoutedEvent="UIElement.MouseDown">
-					<BeginStoryboard>
-						<Storyboard Storyboard.TargetName="MiniArtworkImage" SpeedRatio="2" AccelerationRatio="0.3" DecelerationRatio="0.7">
-							<DoubleAnimation Storyboard.TargetProperty="Width" From="{Binding Width, ElementName=MiniArtworkImage}" To="400"/>
-							<DoubleAnimation Storyboard.TargetProperty="Height" From="{Binding Width, ElementName=MiniArtworkImage}" To="400"/>
-						</Storyboard>
-					</BeginStoryboard>
-				</EventTrigger>
-				<EventTrigger RoutedEvent="UIElement.MouseUp">
-					<BeginStoryboard>
-						<Storyboard Storyboard.TargetName="MiniArtworkImage" SpeedRatio="2" AccelerationRatio="0.3" DecelerationRatio="0.7">
-							<DoubleAnimation Storyboard.TargetProperty="Width" From="{Binding Width, ElementName=MiniArtworkImage}" To="50"/>
-							<DoubleAnimation Storyboard.TargetProperty="Height" From="{Binding Width, ElementName=MiniArtworkImage}" To="50"/>
-						</Storyboard>
-					</BeginStoryboard>
-				</EventTrigger>
-			</Image.Triggers>
-		</Image>
-
 	</Grid>
 	<Window.Resources>
 		<ResourceDictionary>

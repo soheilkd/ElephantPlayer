@@ -112,13 +112,15 @@ namespace Player.Controls
 		}
 		public bool PlayOnPositionChange { get; set; }
 		public bool AutoOrinateVision { get; set; } = true;
-		private Storyboard MagnifyBoard, MinifyBoard, FullOnBoard, FullOffBoard;
+		private Storyboard VisionOnBoard, FullOnBoard, FullOffBoard;
 
 		public MediaPlayer()
 		{
+			//Unosquare.FFME.MediaElement.FFmpegDirectory = @"C:\Program Files\soheilkd\Player\ffmpeg";
+			Unosquare.FFME.MediaElement.FFmpegDirectory = @"ffmpeg\";
 			InitializeComponent();
-			MagnifyBoard = Resources["MagnifyBoard"] as Storyboard;
-			MinifyBoard = Resources["MinifyBoard"] as Storyboard;
+			
+			VisionOnBoard = Resources["VisionOnBoard"] as Storyboard;
 			FullOnBoard = Resources["FullOnBoard"] as Storyboard;
 			FullOffBoard = Resources["FullOffBoard"] as Storyboard;
 
@@ -132,23 +134,18 @@ namespace Player.Controls
 			FullOffBoard.CurrentStateInvalidated += (_, __) => Cursor = Cursors.Arrow;
 			element.MediaEnded += (_, __) => Next();
 			element.MediaOpened += Element_MediaOpened;
-			MagnifyBoard.CurrentStateInvalidated += (_, __) => elementCanvas.Visibility = Visibility.Visible;
-			MinifyBoard.Completed += (_, __) => elementCanvas.Visibility = Visibility.Hidden;
-			elementCanvas.Visibility = Visibility.Hidden;
-			elementCanvas.Opacity = 0;
 			Resources["BorderBack"] = Brushes.Transparent;
 		}
 
 		private void Element_MediaOpened(object sender, RoutedEventArgs e)
 		{
-			bool isVideo = element.HasVideo;
-			VisionButton.Visibility = isVideo ? Visibility.Visible : Visibility.Hidden;
-			FullScreenButton.Visibility = VisionButton.Visibility;
+			bool isVideo = element.VideoFrameRate != 90000;
+			FullScreenButton.Visibility = isVideo ? Visibility.Visible : Visibility.Hidden;
 			if (IsFullScreen && !isVideo)
 				FullScreenButton.EmulateClick();
 			//Next seems not so readable, it just checks if AutoOrientation is on, check proper conditions where operation is needed
 			if ((AutoOrinateVision && (isVideo && !IsVisionOn)) || (!isVideo && IsVisionOn))
-				VisionButton.EmulateClick();
+				Element_MouseUp(this, new MouseButtonEventArgs(Mouse.PrimaryDevice, 1, MouseButton.Left));
 		}
 
 		private void UserControl_Loaded(object sender, RoutedEventArgs e)
@@ -189,11 +186,11 @@ namespace Player.Controls
 		private async void Position_Holding(object sender, MouseButtonEventArgs e)
 		{
 			var but = PlayPauseButton.Icon;
-			element.Pause();
+			await element.Pause();
 			while (e.ButtonState == MouseButtonState.Pressed)
 				await Task.Delay(50);
 			if (but == IconType.Pause)
-				element.Play();
+				await element.Play();
 			else if (PlayOnPositionChange)
 				Play();
 		}
@@ -226,18 +223,7 @@ namespace Player.Controls
 		private void FullScreenButton_Clicked(object sender, MouseButtonEventArgs e)
 		{
 			FullScreenButton.Icon = FullScreenButton.Icon == IconType.FullScreen ? IconType.BackToWindow : IconType.FullScreen;
-			VisionButton.Visibility = IsFullScreen ? Visibility.Hidden : Visibility.Visible;
 			FullScreenClicked?.Invoke(this, null);
-		}
-		private void VisionButton_Clicked(object sender, MouseButtonEventArgs e)
-		{
-			IsVisionOn = !IsVisionOn;
-			VisionButton.Icon = IsVisionOn ? IconType.PresenceChickletVideo : IconType.Video;
-			if (IsVisionOn) MagnifyBoard.Begin();
-			else MinifyBoard.Begin();
-			VisionChanged?.Invoke(this, new InfoExchangeArgs<bool>(IsVisionOn));
-			Resources["BorderBack"] = IsVisionOn ? BorderBack : Brushes.Transparent;
-			AreControlsVisible = true;
 		}
 		private void VolumeSlider_Changed(object sender, RoutedPropertyChangedEventArgs<double> e)
 		{
@@ -290,6 +276,22 @@ namespace Player.Controls
 			element.Stop();
 			element.Source = null;
 		}
+
+		private void Element_MouseUp(object sender, MouseButtonEventArgs e)
+		{
+			IsVisionOn = !IsVisionOn;
+			VisionOnBoard.Begin();
+			VisionChanged?.Invoke(this, new InfoExchangeArgs<bool>(IsVisionOn));
+			Resources["BorderBack"] = IsVisionOn ? BorderBack : Brushes.Transparent;
+			AreControlsVisible = true;
+			element.VerticalAlignment = IsVisionOn ? VerticalAlignment.Stretch : VerticalAlignment.Bottom;
+			element.HorizontalAlignment = IsVisionOn ? HorizontalAlignment.Stretch : HorizontalAlignment.Left;
+			element.Width = IsVisionOn ? Double.NaN : 50d;
+			element.Height = IsVisionOn ? Double.NaN : 50d;
+			element.Margin = IsVisionOn ? new Thickness(0) : new Thickness(6, 0, 0, 28);
+			element.SetValue(Panel.ZIndexProperty, IsVisionOn ? 0: 1);
+		}
+
 		public void Next() => NextButton.EmulateClick();
 		public void Previous() => PreviousButton.EmulateClick();
 		public void PlayPause() => PlayPauseButton.EmulateClick();

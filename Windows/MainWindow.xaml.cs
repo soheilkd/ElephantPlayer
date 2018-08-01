@@ -33,7 +33,6 @@ namespace Player
 			set
 			{
 				ListView.Visibility = value ? Visibility.Visible : Visibility.Collapsed;
-				MiniArtworkImage.Visibility = ListView.Visibility;
 				if (!Topmost)
 				{
 					SearchButton.Visibility = ListView.Visibility;
@@ -132,12 +131,10 @@ namespace Player
 			LeftWindowCommands.Visibility = Topmost ? Visibility.Collapsed : Visibility.Visible;
 			MinimalViewButton.Icon = Topmost ? Controls.IconType.OpenPaneMirrored : Controls.IconType.ClosePaneMirrored;
 			Menu.Visibility = Topmost ? Visibility.Hidden : Visibility.Visible;
-			Player.VisionBorder.Visibility = Menu.Visibility;
 			Player.VolumeBorder.Visibility = Menu.Visibility;
 			SearchButton.Visibility = Menu.Visibility;
 			WindowStyle = Topmost ? WindowStyle.ToolWindow : WindowStyle.ThreeDBorderWindow;
 			ResizeMode = Topmost ? ResizeMode.CanMinimize : ResizeMode.CanResize;
-			MiniArtworkImage.IsEnabled = !Topmost;
 			if (Topmost)
 			{
 				WasMaximized = WindowState == WindowState.Maximized;
@@ -243,12 +240,8 @@ namespace Player
 		private void Play(Media media, bool inQueueImpl = true)
 		{
 			if (!inQueueImpl)
-			{
 				Manager.Next(media);
-			}
-			MediaOperator.Reload(media);
 			Player.Play(media);
-			MiniArtworkImage.Source = media.Artwork;
 
 			DeepBackEnd.NativeMethods.SHAddToRecentDocs(DeepBackEnd.NativeMethods.ShellAddToRecentDocsFlags.Path, media);
 			Title = $"{(Topmost ? "" : "Elephant Player | ")}{media.Artist} - {media.Title}";
