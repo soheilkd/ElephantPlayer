@@ -2,17 +2,14 @@
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows.Media.Imaging;
-using System.Xml.Serialization;
 
 namespace Player
 {
-	[Flags]
 	public enum MediaType
 	{
-		None = 0B0,
-		File = 0B10,
-		Music = File | 0B100,
-		Video = File | 0B1000
+		None = 0,
+		Music = 1,
+		Video = 2
 	}
 
 	[Serializable]
@@ -27,8 +24,8 @@ namespace Player
 		private bool _IsPlaying;
 		private TimeSpan _Len;
 		public MediaType Type;
+		public string Lyrics = "";
 		[field: NonSerialized] public BitmapImage _Artwork;
-		[field: NonSerialized] public string Lyrics = "";
 		[field: NonSerialized] public bool IsLoaded = false;
 		[field: NonSerialized] public event PropertyChangedEventHandler PropertyChanged;
 
@@ -51,8 +48,6 @@ namespace Player
 			Path = path;
 			AdditionDate = DateTime.Now;
 		}
-
-		public override string ToString() => Path;
 		
 		protected void Set<T>(ref T field, T value, [CallerMemberName] string propertyName = null)
 		{
@@ -70,6 +65,8 @@ namespace Player
 				Album.IncaseContains(query) ||
 				Path.IncaseContains(query);
 		}
+
+		public override string ToString() => Path;
 
 		public static implicit operator string(Media media) => media.Path;
 		public static implicit operator Uri(Media media) => new Uri(media.Path);

@@ -1,5 +1,4 @@
-﻿using Player.Models;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -11,14 +10,12 @@ namespace Player
 	{
 		private static readonly string[] SupportedMusics = "mp3;wma;aac;m4a".Split(';');
 		private static readonly string[] SupportedVideos = "mp4;mpg;mkv;wmv;mov;avi;m4v;ts;wav;mpeg;webm".Split(';');
-		private static readonly string[] SupportedFiles = "zip;rar;bin;dat".Split(';');
 
 		public static MediaType GetMediaType(string path)
 		{
 			var ext = path.Substring(path.LastIndexOf('.') + 1).ToLower();
 			if (SupportedMusics.Contains(ext)) return MediaType.Music;
 			else if (SupportedVideos.Contains(ext)) return MediaType.Video;
-			else if (SupportedFiles.Contains(ext)) return MediaType.File;
 			else return MediaType.None;
 		}
 
@@ -165,7 +162,7 @@ namespace Player
 			if (!DoesExists(media))
 				return false;
 			Load(media);
-			return media.Type.HasFlag(MediaType.File);
+			return media.Type != MediaType.None;
 		}
 	}
 }

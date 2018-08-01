@@ -53,19 +53,6 @@ namespace Player.Models
 
 		public void Reset() => _position = 0;
 		public void Dispose() => Clear();
-		
-		public void RemoveThose(Func<Media, bool> filter)
-		{
-			this.Where(filter).AsParallel().ForAll(each => Remove(each));
-		}
-		public void KeepThose(Func<Media, bool> filter)
-		{
-			var t = this.Where(filter);
-			Clear();
-			foreach (var item in t)
-				Add(item);
-			t = null;
-		}
 
 		public void Shuffle()
 		{
@@ -76,7 +63,7 @@ namespace Player.Models
 			Extensions.Do(() => Add(t[rand.Next(c)]), c);
 		}
 
-		string _LastQuery;
+		private string _LastQuery;
 		public void Filter(IEnumerable<Media> originalCollection, string query = "")
 		{
 			_LastQuery = query;
