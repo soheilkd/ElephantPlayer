@@ -1,6 +1,7 @@
 ﻿using MahApps.Metro.Controls;
 using Microsoft.Win32;
 using System;
+using System.Linq;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
@@ -9,6 +10,8 @@ namespace Player
 {
 	public partial class PropertiesUI : MetroWindow
 	{
+		private const char Seperator = ';';
+
 		private OpenFileDialog _OpenArtDialog = new OpenFileDialog()
 		{
 			CheckFileExists = true,
@@ -30,22 +33,22 @@ namespace Player
 				return;
 			}
 			_Media = media;
-			_TagFile = TagLib.File.Create(media);
+			_TagFile = TagLib.File.Create(media.Path);
 			var tag = _TagFile.Tag;
 			MediaOperator.Load(_Media);
 			TitleBox.Text = tag.Title ?? String.Empty;
 			AlbumBox.Text = tag.Album ?? String.Empty;
-			ArtistBox.Text = tag.FirstPerformer ?? String.Empty;
-			AlbumArtistBox.Text = tag.FirstAlbumArtist ?? String.Empty;
-			ComposerBox.Text = tag.FirstComposer ?? String.Empty;
+			ArtistBox.Text = String.Join(Seperator.ToString(), tag.Performers) ?? String.Empty;
+			AlbumArtistBox.Text = String.Join(Seperator.ToString(), tag.AlbumArtists) ?? String.Empty;
+			ComposerBox.Text = String.Join(Seperator.ToString(), tag.Composers) ?? String.Empty;
 			ConductorBox.Text = tag.Conductor ?? String.Empty;
-			GenreBox.Text = tag.FirstGenre ?? String.Empty;
+			GenreBox.Text = String.Join(Seperator.ToString(), tag.Genres) ?? String.Empty;
 			TrackBox.Text = tag.Track.ToString() ?? String.Empty;
 			CommentBox.Text = tag.Comment ?? String.Empty;
 			YearBox.Text = tag.Year.ToString() ?? String.Empty;
 			CopyrightBox.Text = tag.Copyright ?? String.Empty;
 			LyricsBox.Text = tag.Lyrics ?? String.Empty;
-			ArtworkImage.Source = media.Artwork;
+			ArtworkImage.Source = tag.Pictures.Length >= 1 ? Images.GetBitmap(tag.Pictures[0]) : Images.MusicArt;
 			Show();
 		}
 
@@ -58,11 +61,11 @@ namespace Player
 		{
 			_TagFile.Tag.Title = TitleBox.Text ?? String.Empty;
 			_TagFile.Tag.Album = AlbumBox.Text ?? String.Empty;
-			_TagFile.Tag.Performers = new string[] { ArtistBox.Text ?? String.Empty };
-			_TagFile.Tag.AlbumArtists = new string[] { AlbumArtistBox.Text ?? String.Empty };
-			_TagFile.Tag.Composers = new string[] { ComposerBox.Text ?? String.Empty };
+			_TagFile.Tag.Performers = ArtistBox.Text.Split(Seperator) ?? new string[0];
+			_TagFile.Tag.AlbumArtists = AlbumArtistBox.Text.Split(Seperator) ?? new string[0];
+			_TagFile.Tag.Composers = ComposerBox.Text.Split(Seperator) ?? new string[0];
 			_TagFile.Tag.Conductor = ConductorBox.Text ?? String.Empty;
-			_TagFile.Tag.Genres = new string[] { GenreBox.Text ?? String.Empty };
+			_TagFile.Tag.Genres = GenreBox.Text.Split(Seperator) ?? new string[0];
 			_TagFile.Tag.Track = UInt32.TryParse(TrackBox.Text ?? "0", out uint num) ? num : 0;
 			_TagFile.Tag.Comment = CommentBox.Text ?? String.Empty;
 			_TagFile.Tag.Year = UInt32.TryParse(YearBox.Text ?? "0", out uint num2) ? num2 : 0;
