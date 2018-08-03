@@ -8,6 +8,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 
 namespace Player
@@ -27,6 +28,27 @@ namespace Player
 			set => Resources["MinimalWidthTemp"] = value;
 		}
 
+		private GridLength TitleColumnWidth
+		{
+			get => (GridLength)Resources["TitleColumnWidth"];
+			set => Resources["TitleColumnWidth"] = value;
+		}
+		private GridLength ArtistColumnWidth
+		{
+			get => (GridLength)Resources["ArtistColumnWidth"];
+			set => Resources["ArtistColumnWidth"] = value;
+		}
+		private GridLength AlbumColumnWidth
+		{
+			get => (GridLength)Resources["AlbumColumnWidth"];
+			set => Resources["AlbumColumnWidth"] = value;
+		}
+		private GridLength PlaysColumnWidth
+		{
+			get => (GridLength)Resources["PlaysColumnWidth"];
+			set => Resources["PlaysColumnWidth"] = value;
+		}
+
 		private MediaManager Manager = new MediaManager();
 		private bool ControlsNotNeededOnVisionIsVisible
 		{
@@ -37,6 +59,7 @@ namespace Player
 				{
 					SearchButton.Visibility = ListView.Visibility;
 					SearchLabel.Visibility = ListView.Visibility;
+					MinimalViewButton.Visibility = ListView.Visibility;
 				}
 			}
 		}
@@ -94,7 +117,7 @@ namespace Player
 			{
 				item.Background = Menu.Background;
 			}
-			foreach (MenuItem item in ListView.ContextMenu.Items)
+			foreach (MenuItem item in DataGrid.ContextMenu.Items)
 			{
 				item.Background = Menu.Background;
 			}
@@ -193,7 +216,7 @@ namespace Player
 
 		private void List_DoubleClick(object sender, MouseButtonEventArgs e)
 		{
-			if (ListView.SelectedItem is Media med)
+			if (DataGrid.SelectedItem is Media med)
 				Play(med, false);
 		}
 
@@ -242,8 +265,7 @@ namespace Player
 			if (!inQueueImpl)
 				Manager.Next(media);
 			Player.Play(media);
-
-			DeepBackEnd.NativeMethods.SHAddToRecentDocs(DeepBackEnd.NativeMethods.ShellAddToRecentDocsFlags.Path, media);
+			
 			Title = $"{(Topmost ? "" : "Elephant Player | ")}{media.Artist} - {media.Title}";
 			MinimalViewButton.Visibility = media.IsVideo ? Visibility.Hidden : Visibility.Visible;
 			if (media.IsVideo)
@@ -420,25 +442,6 @@ namespace Player
 				LibraryManager.Save(Manager);
 			}
 		}
-		private void Menu_SortClick(object sender, RoutedEventArgs e)
-		{
-			var tag = Int32.Parse(sender.As<MenuItem>().Tag.ToString());
-
-			switch (tag)
-			{
-				case 0: Manager.SortQueueBy(each => each.Title); break;
-				case 1: Manager.SortQueueBy(item => item.Artist); break;
-				case 2: Manager.SortQueueBy(item => item.Album); break;
-				case 3: Manager.SortQueueBy(item => item.PlayCount); break;
-				case 4: Manager.SortQueueBy(item => item.AdditionDate); break;
-				case 5: Manager.SortQueueDescendingBy(item => item.Title); break;
-				case 6: Manager.SortQueueDescendingBy(item => item.Artist); break;
-				case 7: Manager.SortQueueDescendingBy(item => item.Album); break;
-				case 8: Manager.SortQueueDescendingBy(item => item.PlayCount); break;
-				case 9: Manager.SortQueueDescendingBy(item => item.AdditionDate); break;
-				default: break;
-			}
-		}
 		private void Menu_HeavyLoadClick(object sender, RoutedEventArgs e)
 		{
 			Manager.For(each => MediaOperator.Load(each));
@@ -449,6 +452,110 @@ namespace Player
 			Manager.Revalidate();
 			Close();
 			Process.Start("Elephant Player.exe");
+		}
+
+		private void TitleColumn_Click(object sender, MouseButtonEventArgs e)
+		{
+			ArtistColumnHeader.Text = "    Artist";
+			AlbumColumnHeader.Text = "    Album";
+			PlaysColumnHeader.Text = "    Plays";
+			if (!TitleColumnHeader.Text.EndsWith("⬇"))
+			{
+				Manager.QueueEnumerator.SortBy(each => each.Title);
+				TitleColumnHeader.Text = "    Title ⬇";
+			}
+			else
+			{
+				Manager.QueueEnumerator.SortDescendingBy(each => each.Title);
+				TitleColumnHeader.Text = "    Title ⬆";
+			}
+		}
+		private void ArtistColumn_Click(object sender, MouseButtonEventArgs e)
+		{
+			TitleColumnHeader.Text = "    Title";
+			AlbumColumnHeader.Text = "    Album";
+			PlaysColumnHeader.Text = "    Plays";
+			if (!ArtistColumnHeader.Text.EndsWith("⬇"))
+			{
+				Manager.QueueEnumerator.SortBy(each => each.Artist);
+				ArtistColumnHeader.Text = "    Artist ⬇";
+			}
+			else
+			{
+				Manager.QueueEnumerator.SortDescendingBy(each => each.Artist);
+				ArtistColumnHeader.Text = "    Artist ⬆";
+			}
+		}
+		private void AlbumColumn_Click(object sender, MouseButtonEventArgs e)
+		{
+			TitleColumnHeader.Text = "    Title";
+			ArtistColumnHeader.Text = "    Artist";
+			PlaysColumnHeader.Text = "    Plays";
+			if (!AlbumColumnHeader.Text.EndsWith("⬇"))
+			{
+				Manager.QueueEnumerator.SortBy(each => each.Album);
+				AlbumColumnHeader.Text = "    Album ⬇";
+			}
+			else
+			{
+				Manager.QueueEnumerator.SortDescendingBy(each => each.Album);
+				AlbumColumnHeader.Text = "    Album ⬆";
+			}
+		}
+		private void PlaysColumn_Click(object sender, MouseButtonEventArgs e)
+		{
+			TitleColumnHeader.Text = "    Title";
+			ArtistColumnHeader.Text = "    Artist";
+			AlbumColumnHeader.Text = "    Album";
+			if (!PlaysColumnHeader.Text.EndsWith("⬇"))
+			{
+				Manager.QueueEnumerator.SortBy(each => each.PlayCount);
+				PlaysColumnHeader.Text = "    Plays ⬇";
+			}
+			else
+			{
+				Manager.QueueEnumerator.SortDescendingBy(each => each.PlayCount);
+				PlaysColumnHeader.Text = "    Plays ⬆";
+			}
+		}
+
+		private void Splitter1_DragCompleted(object sender, DragCompletedEventArgs e)
+		{
+			TitleColumnWidth = new GridLength(TitleColumnWidth.Value + e.HorizontalChange);
+		}
+
+		private void Splitter2_DragCompleted(object sender, DragCompletedEventArgs e)
+		{
+			ArtistColumnWidth = new GridLength(ArtistColumnWidth.Value + e.HorizontalChange);
+		}
+
+		private void Splitter3_DragCompleted(object sender, DragCompletedEventArgs e)
+		{
+			AlbumColumnWidth = new GridLength(AlbumColumnWidth.Value + e.HorizontalChange);
+		}
+
+		private void GridSplitter_DragDelta_1(object sender, DragDeltaEventArgs e)
+		{
+			var tag = Int32.Parse(((Control)sender).Tag.ToString());
+			switch (tag)
+			{
+				case 1: TitleColumnHeader.Width += e.HorizontalChange; break;
+				case 2: ArtistColumnHeader.Width += e.HorizontalChange; break;
+				case 3: AlbumColumnHeader.Width += e.HorizontalChange; break;
+				default: break;
+			}
+		}
+
+		private void GridSplitter_DragCompleted(object sender, DragCompletedEventArgs e)
+		{
+			var tag = Int32.Parse(((Control)sender).Tag.ToString());
+			switch (tag)
+			{
+				case 1: TitleColumnWidth = new GridLength(TitleColumnWidth.Value + e.HorizontalChange); break;
+				case 2: ArtistColumnWidth = new GridLength(ArtistColumnWidth.Value + e.HorizontalChange); break;
+				case 3: AlbumColumnWidth = new GridLength(AlbumColumnWidth.Value + e.HorizontalChange); break;
+				default: break;
+			}
 		}
 
 		private void For(Action<Media> action)
