@@ -1,7 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
-using System.Windows.Media.Imaging;
 
 namespace Player
 {
@@ -25,7 +24,6 @@ namespace Player
 		private TimeSpan _Len;
 		public MediaType Type;
 		public string Lyrics = "";
-		[field: NonSerialized] public BitmapImage _Artwork;
 		[field: NonSerialized] public bool IsLoaded = false;
 		[field: NonSerialized] public event PropertyChangedEventHandler PropertyChanged;
 
@@ -37,7 +35,6 @@ namespace Player
 		public int PlayCount { get => _PlayCount; set => Set(ref _PlayCount, value); }
 		public bool IsPlaying { get => _IsPlaying; set => Set(ref _IsPlaying, value); }
 		public TimeSpan Length { get => _Len; set => Set(ref _Len, value); }
-		public BitmapImage Artwork { get => _Artwork; set => Set(ref _Artwork, value); }
 		public DateTime AdditionDate { get; private set; }
 		public string Path { get; set; }
 		public bool IsVideo => Type == MediaType.Video;
@@ -65,10 +62,7 @@ namespace Player
 				Album.IncaseContains(query) ||
 				Path.IncaseContains(query);
 		}
-
-		public override string ToString() => Path;
-
-		public static implicit operator string(Media media) => media.Path;
+		
 		public static implicit operator Uri(Media media) => new Uri(media.Path);
 		public static implicit operator MediaType(Media media) => media.Type;
 	}

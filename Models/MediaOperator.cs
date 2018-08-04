@@ -49,7 +49,7 @@ namespace Player
 				return target;
 			}
 
-			using (var file = TagLib.File.Create(media))
+			using (var file = TagLib.File.Create(media.Path))
 			{
 				string[] form(TagLib.Tag tag2)
 				{
@@ -112,16 +112,14 @@ namespace Player
 			}
 			media.Name = media.Path.Substring(media.Path.LastIndexOf("\\") + 1);
 			media.Directory = media.Path.Substring(0, media.Path.LastIndexOf("\\"));
-			switch (GetMediaType(media))
+			switch (media.Type = GetMediaType(media.Path))
 			{
 				case MediaType.Music:
-					using (var t = TagLib.File.Create(media))
+					using (var t = TagLib.File.Create(media.Path))
 					{
 						media.Artist = t.Tag.FirstPerformer ?? media.Path.Substring(0, media.Path.LastIndexOf("\\"));
 						media.Title = t.Tag.Title ?? media.Name.Substring(0, media.Name.LastIndexOf("."));
 						media.Album = t.Tag.Album ?? String.Empty;
-						media.Artwork = t.Tag.Pictures.Length >= 1 ? Images.GetBitmap(t.Tag.Pictures[0]) : Images.MusicArt;
-						media.Type = MediaType.Music;
 						media.Lyrics = t.Tag.Lyrics ?? String.Empty;
 					}
 					break;
@@ -130,8 +128,6 @@ namespace Player
 					media.Artist = media.Path.Substring(0, media.Path.LastIndexOf("\\"));
 					media.Artist = media.Artist.Substring(media.Artist.LastIndexOf("\\") + 1);
 					media.Album = "Video";
-					media.Artwork = Images.VideoArt;
-					media.Type = MediaType.Video;
 					break;
 				default: break;
 			}
@@ -146,15 +142,15 @@ namespace Player
 		public static void Move(Media media, string toDir)
 		{
 			toDir += media.Name;
-			File.Move(media, toDir);
+			File.Move(media.Path, toDir);
 			media.Path = toDir;
 		}
 		public static void Copy(Media media, string toDir)
 		{
 			toDir += media.Name;
-			File.Copy(media, toDir, true);
+			File.Copy(media.Path, toDir, true);
 		}
-		public static bool DoesExists(Media media) => File.Exists(media);
+		public static bool DoesExists(Media media) => File.Exists(media.Path);
 
 		public static bool TryLoadFromPath(string path, out Media media)
 		{

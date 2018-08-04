@@ -43,7 +43,7 @@ namespace Player
 		public void Delete(Media media)
 		{
 			bool reqNext = Current == media;
-			File.Delete(media);
+			File.Delete(media.Path);
 			this.Where(each => each.Path == media.Path).ToArray().For(each => Remove(each));
 			if (reqNext)
 				RequestPlay(Next());
