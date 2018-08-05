@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Timers;
 using System.Windows;
@@ -116,10 +117,8 @@ namespace Player.Controls
 
 		public MediaPlayer()
 		{
-			//Unosquare.FFME.MediaElement.FFmpegDirectory = @"C:\Program Files\soheilkd\Player\ffmpeg";
 			Unosquare.FFME.MediaElement.FFmpegDirectory = @"ffmpeg\";
 			InitializeComponent();
-			
 			VisionOnBoard = Resources["VisionOnBoard"] as Storyboard;
 			FullOnBoard = Resources["FullOnBoard"] as Storyboard;
 			FullOffBoard = Resources["FullOffBoard"] as Storyboard;
@@ -137,9 +136,11 @@ namespace Player.Controls
 			Resources["BorderBack"] = Brushes.Transparent;
 		}
 
+
+		private double[] _InvalidFrameRates = new[] { 90000d, 0d };
 		private void Element_MediaOpened(object sender, RoutedEventArgs e)
 		{
-			bool isVideo = element.VideoFrameRate != 90000;
+			bool isVideo = !_InvalidFrameRates.Contains(element.VideoFrameRate);
 			FullScreenButton.Visibility = isVideo ? Visibility.Visible : Visibility.Hidden;
 			if (IsFullScreen && !isVideo)
 				FullScreenButton.EmulateClick();
