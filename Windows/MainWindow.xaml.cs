@@ -50,17 +50,13 @@ namespace Player
 		}
 
 		private MediaManager Manager = new MediaManager();
-		private bool ControlsNotNeededOnVisionIsVisible
+		private Visibility ControlsNotNeededOnVisionVisibility
 		{
 			set
 			{
-				ListView.Visibility = value ? Visibility.Visible : Visibility.Collapsed;
-				if (!Topmost)
-				{
-					SearchButton.Visibility = ListView.Visibility;
-					SearchLabel.Visibility = ListView.Visibility;
-					MinimalViewButton.Visibility = ListView.Visibility;
-				}
+				SearchButton.Visibility = value;
+				SearchLabel.Visibility = value;
+				MinimalViewButton.Visibility = value;
 			}
 		}
 		private bool WasMaximized, WasMinimal;
@@ -79,13 +75,13 @@ namespace Player
 			Player.FullScreenClicked += Player_FullScreenClicked;
 			Player.UpdateLayout();
 
-			ListView.ItemsSource = Manager.QueueEnumerator;
+			DataGrid.ItemsSource = Manager.QueueEnumerator;
 			TaskbarItemInfo = Player.Thumb.Info;
 			Resources["LastPath"] = App.Settings.LastPath;
 
 			Player.NextClicked += (_, __) => Play(Manager.Next());
 			Player.PreviousClicked += (_, __) => Play(Manager.Previous());
-			Player.VisionChanged += (_, e) => ControlsNotNeededOnVisionIsVisible = !e.Parameter;
+			Player.VisionChanged += (_, e) => ControlsNotNeededOnVisionVisibility = e.Parameter ? Visibility.Hidden : Visibility.Visible;
 			Player.Volume = App.Settings.Volume;
 			Player.AutoOrinateVision = App.Settings.VisionOrientation;
 			Player.PlayOnPositionChange = App.Settings.PlayOnPositionChange;
@@ -189,7 +185,7 @@ namespace Player
 			if (IsActive && e.Key.HasFlag(Key.LeftShift))
 			{
 				if (e.Key == Key.Delete) Menu_RemoveClick(this, null);
-				if (e.Key == Key.Enter) List_DoubleClick(ListView, null);
+				if (e.Key == Key.Enter) List_DoubleClick(DataGrid, null);
 				if (e.Key == Key.C) Menu_CopyClick(new MenuItem(), null);
 				if (e.Key == Key.X) Menu_MoveClick(new MenuItem(), null);
 				if (e.Key == Key.F)
@@ -454,113 +450,9 @@ namespace Player
 			Process.Start("Elephant Player.exe");
 		}
 
-		private void TitleColumn_Click(object sender, MouseButtonEventArgs e)
-		{
-			ArtistColumnHeader.Text = "    Artist";
-			AlbumColumnHeader.Text = "    Album";
-			PlaysColumnHeader.Text = "    Plays";
-			if (!TitleColumnHeader.Text.EndsWith("⬇"))
-			{
-				Manager.QueueEnumerator.SortBy(each => each.Title);
-				TitleColumnHeader.Text = "    Title ⬇";
-			}
-			else
-			{
-				Manager.QueueEnumerator.SortDescendingBy(each => each.Title);
-				TitleColumnHeader.Text = "    Title ⬆";
-			}
-		}
-		private void ArtistColumn_Click(object sender, MouseButtonEventArgs e)
-		{
-			TitleColumnHeader.Text = "    Title";
-			AlbumColumnHeader.Text = "    Album";
-			PlaysColumnHeader.Text = "    Plays";
-			if (!ArtistColumnHeader.Text.EndsWith("⬇"))
-			{
-				Manager.QueueEnumerator.SortBy(each => each.Artist);
-				ArtistColumnHeader.Text = "    Artist ⬇";
-			}
-			else
-			{
-				Manager.QueueEnumerator.SortDescendingBy(each => each.Artist);
-				ArtistColumnHeader.Text = "    Artist ⬆";
-			}
-		}
-		private void AlbumColumn_Click(object sender, MouseButtonEventArgs e)
-		{
-			TitleColumnHeader.Text = "    Title";
-			ArtistColumnHeader.Text = "    Artist";
-			PlaysColumnHeader.Text = "    Plays";
-			if (!AlbumColumnHeader.Text.EndsWith("⬇"))
-			{
-				Manager.QueueEnumerator.SortBy(each => each.Album);
-				AlbumColumnHeader.Text = "    Album ⬇";
-			}
-			else
-			{
-				Manager.QueueEnumerator.SortDescendingBy(each => each.Album);
-				AlbumColumnHeader.Text = "    Album ⬆";
-			}
-		}
-		private void PlaysColumn_Click(object sender, MouseButtonEventArgs e)
-		{
-			TitleColumnHeader.Text = "    Title";
-			ArtistColumnHeader.Text = "    Artist";
-			AlbumColumnHeader.Text = "    Album";
-			if (!PlaysColumnHeader.Text.EndsWith("⬇"))
-			{
-				Manager.QueueEnumerator.SortBy(each => each.PlayCount);
-				PlaysColumnHeader.Text = "    Plays ⬇";
-			}
-			else
-			{
-				Manager.QueueEnumerator.SortDescendingBy(each => each.PlayCount);
-				PlaysColumnHeader.Text = "    Plays ⬆";
-			}
-		}
-
-		private void Splitter1_DragCompleted(object sender, DragCompletedEventArgs e)
-		{
-			TitleColumnWidth = new GridLength(TitleColumnWidth.Value + e.HorizontalChange);
-		}
-
-		private void Splitter2_DragCompleted(object sender, DragCompletedEventArgs e)
-		{
-			ArtistColumnWidth = new GridLength(ArtistColumnWidth.Value + e.HorizontalChange);
-		}
-
-		private void Splitter3_DragCompleted(object sender, DragCompletedEventArgs e)
-		{
-			AlbumColumnWidth = new GridLength(AlbumColumnWidth.Value + e.HorizontalChange);
-		}
-
-		private void GridSplitter_DragDelta_1(object sender, DragDeltaEventArgs e)
-		{
-			var tag = Int32.Parse(((Control)sender).Tag.ToString());
-			switch (tag)
-			{
-				case 1: TitleColumnHeader.Width += e.HorizontalChange; break;
-				case 2: ArtistColumnHeader.Width += e.HorizontalChange; break;
-				case 3: AlbumColumnHeader.Width += e.HorizontalChange; break;
-				default: break;
-			}
-		}
-
-		private void GridSplitter_DragCompleted(object sender, DragCompletedEventArgs e)
-		{
-			var tag = Int32.Parse(((Control)sender).Tag.ToString());
-			switch (tag)
-			{
-				case 1: TitleColumnWidth = new GridLength(TitleColumnWidth.Value + e.HorizontalChange); break;
-				case 2: ArtistColumnWidth = new GridLength(ArtistColumnWidth.Value + e.HorizontalChange); break;
-				case 3: AlbumColumnWidth = new GridLength(AlbumColumnWidth.Value + e.HorizontalChange); break;
-				default: break;
-			}
-		}
-
 		private void For(Action<Media> action)
 		{
-			ListView.SelectedItems.Cast<Media>().ToArray().For(action);
+			DataGrid.SelectedItems.Cast<Media>().ToArray().For(action);
 		}
 	}
 }

@@ -4,7 +4,7 @@
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 	xmlns:mah="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
 	xmlns:player="clr-namespace:Player.Controls;assembly=ControlLibrary"
-	xmlns:sys="clr-namespace:System;assembly=mscorlib" 
+	xmlns:system="clr-namespace:System;assembly=mscorlib"
 	Title="Elephant Player" Background="{DynamicResource AccentColorBrush}" ShowIconOnTitleBar="False" AllowDrop="True"
 	Loaded="Window_Loaded" Closing="Window_Closing" Drop="Window_Drop" KeyUp="Window_KeyUp">
 	<mah:MetroWindow.LeftWindowCommands>
@@ -30,22 +30,6 @@
 						<MenuItem Header="Export Library" Click="Menu_LibraryExportClick"/>
 						<MenuItem Header="Heavy Load" Click="Menu_HeavyLoadClick"/>
 						<MenuItem Header="Revalidate" Click="Menu_RevalidateClick"/>
-						<MenuItem Header="Sort">
-							<MenuItem Header="Ascending">
-								<MenuItem Tag="0" Click="Menu_SortClick" Header="Title"/>
-								<MenuItem Tag="1" Click="Menu_SortClick" Header="Artist"/>
-								<MenuItem Tag="2" Click="Menu_SortClick" Header="Album"/>
-								<MenuItem Tag="3" Click="Menu_SortClick" Header="Plays"/>
-								<MenuItem Tag="4" Click="Menu_SortClick" Header="Addition Date"/>
-							</MenuItem>
-							<MenuItem Header="Descending" >
-								<MenuItem Tag="5" Click="Menu_SortClick" Header="Title"/>
-								<MenuItem Tag="6" Click="Menu_SortClick" Header="Artist"/>
-								<MenuItem Tag="7" Click="Menu_SortClick" Header="Album"/>
-								<MenuItem Tag="8" Click="Menu_SortClick" Header="Plays"/>
-								<MenuItem Tag="9" Click="Menu_SortClick" Header="Addition Date"/>
-							</MenuItem>
-						</MenuItem>
 					</MenuItem>
 				</Menu>
 			</StackPanel>
@@ -112,8 +96,8 @@
 		</mah:WindowCommands>
 	</mah:MetroWindow.RightWindowCommands>
 	<Grid x:Name="ContentGrid">
-		<ListView x:Name="ListView" Margin="0,0,0,80" MouseDoubleClick="List_DoubleClick" Background="Transparent" BorderThickness="0">
-			<ListView.ContextMenu>
+		<DataGrid x:Name="DataGrid" Margin="0,20,0,80" MouseDoubleClick="List_DoubleClick" Background="Transparent">
+			<DataGrid.ContextMenu>
 				<ContextMenu>
 					<MenuItem Header="Detergent Meta" Click="Menu_TagDetergent" />
 					<MenuItem Header="Move to..." >
@@ -129,41 +113,20 @@
 					<MenuItem Header="Open Location" Click="Menu_LocationClick"/>
 					<MenuItem Header="Properties" Click="Menu_PropertiesClick"/>
 				</ContextMenu>
-			</ListView.ContextMenu>
-			<ListView.ItemTemplate>
-				<DataTemplate>
-					<Grid Height="30">
-						<Grid.ColumnDefinitions>
-							<ColumnDefinition Width="300"/>
-							<ColumnDefinition Width="20" />
-							<ColumnDefinition Width="120"/>
-							<ColumnDefinition Width="20" />
-							<ColumnDefinition Width="120"/>
-							<ColumnDefinition Width="20" />
-							<ColumnDefinition />
-						</Grid.ColumnDefinitions>
-						<TextBlock VerticalAlignment="Center" Grid.Column="0" Text="{Binding Title}" Margin="10,0,0,0" FontSize="16" FontWeight="SemiBold" />
-						<TextBlock VerticalAlignment="Center" Grid.Column="2" Text="{Binding Artist}"/>
-						<TextBlock VerticalAlignment="Center" Grid.Column="4" Text="{Binding Album}"/>
-						<TextBlock VerticalAlignment="Center" Grid.Column="6" Text="{Binding PlayCount}" FontSize="17" FontWeight="Bold"/>
-					</Grid>
-				</DataTemplate>
-			</ListView.ItemTemplate>
-		</ListView>
+			</DataGrid.ContextMenu>
+		</DataGrid>
 		<player:MediaPlayer x:Name="Player"/>
 		<player:MaterialButton x:Name="MinimalViewButton" Icon="ClosePaneMirrored" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,12,35" MouseUp="MinimalButton_Clicked"/>
 		<Label x:Name="SearchLabel" Content="{Binding Text, ElementName=SearchBox}" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,190,20"/>
-		<player:MaterialButton x:Name="SearchButton" HorizontalAlignment="Right" VerticalAlignment="Bottom" Icon="Search" 
-                          MouseUp="SearchIcon_Click" Margin="0,0,195,35" Width="20" Height="20"/>
-		<Popup x:Name="SearchPopup" PlacementTarget="{Binding ElementName=SearchButton}" StaysOpen="False" 
-               Placement="Bottom" PopupAnimation="Fade" AllowsTransparency="True">
+		<player:MaterialButton x:Name="SearchButton" HorizontalAlignment="Right" VerticalAlignment="Bottom" Icon="Search" MouseUp="SearchIcon_Click" Margin="0,0,195,35" Width="20" Height="20"/>
+		<Popup x:Name="SearchPopup" PlacementTarget="{Binding ElementName=SearchButton}" StaysOpen="False" Placement="Bottom" PopupAnimation="Fade" AllowsTransparency="True">
 			<TextBox HorizontalAlignment="Right" VerticalAlignment="Top" Width="140" Height="20" x:Name="SearchBox" TextChanged="SearchBox_TextChanged" />
 		</Popup>
 	</Grid>
 	<Window.Resources>
 		<ResourceDictionary>
 			<ResourceDictionary.MergedDictionaries>
-				<!-- MahApps.Metro resource dictionaries. Make sure that all file names are Case Sensitive! -->
+				<!-- MahApps.Metro resource dictionaries -->
 				<ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Controls.xaml" />
 				<ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Fonts.xaml" />
 				<ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Colors.xaml" />
@@ -171,9 +134,15 @@
 				<ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Accents/Steel.xaml" />
 				<ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Accents/BaseDark.xaml" />
 			</ResourceDictionary.MergedDictionaries>
-			<sys:Double x:Key="MinimalWidthTemp" />
-			<sys:Double x:Key="MinimalHeightTemp" />
-			<sys:String x:Key="LastPath" >D:\\</sys:String>
+
+			<GridLength x:Key="TitleColumnWidth">300</GridLength>
+			<GridLength x:Key="ArtistColumnWidth">120</GridLength>
+			<GridLength x:Key="AlbumColumnWidth">120</GridLength>
+			<GridLength x:Key="PlaysColumnWidth">70</GridLength>
+
+			<system:Double x:Key="MinimalWidthTemp" />
+			<system:Double x:Key="MinimalHeightTemp" />
+			<system:String x:Key="LastPath">D:\\</system:String>
 			<Style TargetType="ListViewItem">
 				<Style.Triggers>
 					<DataTrigger Binding="{Binding IsPlaying}" Value="True">
@@ -183,6 +152,5 @@
 				</Style.Triggers>
 			</Style>
 		</ResourceDictionary>
-
 	</Window.Resources>
 </mah:MetroWindow>
