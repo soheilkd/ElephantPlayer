@@ -85,8 +85,7 @@ namespace Player
 			Player.Volume = App.Settings.Volume;
 			Player.AutoOrinateVision = App.Settings.VisionOrientation;
 			Player.PlayOnPositionChange = App.Settings.PlayOnPositionChange;
-
-
+			
 			OrinateCheck.IsChecked = App.Settings.VisionOrientation;
 			LiveLibraryCheck.IsChecked = App.Settings.LiveLibrary;
 			ExplicitCheck.IsChecked = App.Settings.ExplicitContent;
@@ -403,23 +402,9 @@ namespace Player
 			PlayModeSubMenu.Items[tag].As<MenuItem>().IsChecked = true;
 			App.Settings.PlayMode = (PlayMode)tag;
 		}
-		private void Menu_FolderTopClick(object sender, RoutedEventArgs e)
-		{
-			if (Dialogs.RequestFolder(out var folders))
-				folders.For(
-					eachFolder => Directory.GetFiles(eachFolder).For(
-						eachFile => Manager.AddFromPath(eachFile)));
-		}
-		private void Menu_FolderTreeClick(object sender, RoutedEventArgs e)
-		{
-			if (Dialogs.RequestFolder(out var folders))
-				folders.For(
-					eachFolder => Directory.GetFiles(eachFolder, "*", SearchOption.AllDirectories).For(
-						eachFile => Manager.AddFromPath(eachFile)));
-		}
 		private void Menu_LibraryImportClick(object sender, RoutedEventArgs e)
 		{
-			if (Dialogs.RequestFile(out var file, Dialogs.DefaultLibraryFilter))
+			if (Dialogs.RequestFile(out var file, Dialogs.LibraryFilter))
 				if (LibraryManager.TryLoad(file[0], out var lib))
 				{
 					App.Settings.LibraryLocation = file[0];
@@ -429,7 +414,7 @@ namespace Player
 		}
 		private void Menu_LibraryExportClick(object sender, RoutedEventArgs e)
 		{
-			if (Dialogs.RequestSave(out var file, Dialogs.DefaultLibraryFilter))
+			if (Dialogs.RequestSave(out var file, Dialogs.LibraryFilter))
 			{
 				if (!file.EndsWith(".bin"))
 					file += ".bin";
