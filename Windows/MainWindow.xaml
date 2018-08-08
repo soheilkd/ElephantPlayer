@@ -5,7 +5,7 @@
 	xmlns:mah="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
 	xmlns:player="clr-namespace:Player.Controls;assembly=ControlLibrary"
 	xmlns:system="clr-namespace:System;assembly=mscorlib"
-	Title="Elephant Player" Background="{DynamicResource AccentColorBrush}" ShowIconOnTitleBar="False" AllowDrop="True"
+	Title="Elephant Player" ShowIconOnTitleBar="False" AllowDrop="True"
 	Loaded="Window_Loaded" Closing="Window_Closing" Drop="Window_Drop" KeyUp="Window_KeyUp">
 	<mah:MetroWindow.LeftWindowCommands>
 		<mah:WindowCommands>
@@ -92,7 +92,7 @@
 		</mah:WindowCommands>
 	</mah:MetroWindow.RightWindowCommands>
 	<Grid x:Name="ContentGrid">
-		<DataGrid x:Name="DataGrid" Margin="0,0,0,80" MouseDoubleClick="List_DoubleClick" RowBackground="Transparent" Background="Transparent" IsReadOnly="True" AutoGenerateColumns="False">
+		<DataGrid x:Name="DataGrid" Margin="0,0,0,80" MouseDoubleClick="List_DoubleClick" IsReadOnly="True" AutoGenerateColumns="False">
 			<DataGrid.ContextMenu>
 				<ContextMenu>
 					<MenuItem Header="Detergent Meta" Click="Menu_TagDetergent" />
