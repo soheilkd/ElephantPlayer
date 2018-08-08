@@ -16,11 +16,7 @@
 							<player:Icon Type="ButtonMenu" Foreground="#FEEE"/>
 						</MenuItem.Header>
 						<MenuItem Header="Run GC"/>
-						<MenuItem Header="Open Media"/>
-						<MenuItem Header="Import Folder">
-							<MenuItem Header="Top Only" Click="Menu_FolderTopClick"/>
-							<MenuItem Header="Full Tree" Click="Menu_FolderTreeClick"/>
-						</MenuItem>
+						<MenuItem Header="About"/>
 					</MenuItem>
 					<MenuItem Background="Transparent">
 						<MenuItem.Header>
@@ -96,7 +92,7 @@
 		</mah:WindowCommands>
 	</mah:MetroWindow.RightWindowCommands>
 	<Grid x:Name="ContentGrid">
-		<DataGrid x:Name="DataGrid" Margin="0,20,0,80" MouseDoubleClick="List_DoubleClick" Background="Transparent">
+		<DataGrid x:Name="DataGrid" Margin="0,0,0,80" MouseDoubleClick="List_DoubleClick" RowBackground="Transparent" Background="Transparent" IsReadOnly="True" AutoGenerateColumns="False">
 			<DataGrid.ContextMenu>
 				<ContextMenu>
 					<MenuItem Header="Detergent Meta" Click="Menu_TagDetergent" />
@@ -114,6 +110,13 @@
 					<MenuItem Header="Properties" Click="Menu_PropertiesClick"/>
 				</ContextMenu>
 			</DataGrid.ContextMenu>
+			<DataGrid.Columns>
+				<DataGridTextColumn FontSize="15" Width="300" Header="Title" Binding="{Binding Title}"/>
+				<DataGridTextColumn Width="120" Header="Artist" Binding="{Binding Artist}"/>
+				<DataGridTextColumn Width="120" Header="Album" Binding="{Binding Album}"/>
+				<DataGridTextColumn Width="60" Header="Plays" Binding="{Binding PlayCount}"/>
+				<DataGridTextColumn Header="Date Added" Binding="{Binding AdditionDate}"/>
+			</DataGrid.Columns>
 		</DataGrid>
 		<player:MediaPlayer x:Name="Player"/>
 		<player:MaterialButton x:Name="MinimalViewButton" Icon="ClosePaneMirrored" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,12,35" MouseUp="MinimalButton_Clicked"/>
@@ -134,16 +137,11 @@
 				<ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Accents/Steel.xaml" />
 				<ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Accents/BaseDark.xaml" />
 			</ResourceDictionary.MergedDictionaries>
-
-			<GridLength x:Key="TitleColumnWidth">300</GridLength>
-			<GridLength x:Key="ArtistColumnWidth">120</GridLength>
-			<GridLength x:Key="AlbumColumnWidth">120</GridLength>
-			<GridLength x:Key="PlaysColumnWidth">70</GridLength>
-
+			
 			<system:Double x:Key="MinimalWidthTemp" />
 			<system:Double x:Key="MinimalHeightTemp" />
 			<system:String x:Key="LastPath">D:\\</system:String>
-			<Style TargetType="ListViewItem">
+			<Style TargetType="DataGridRow">
 				<Style.Triggers>
 					<DataTrigger Binding="{Binding IsPlaying}" Value="True">
 						<Setter Property="Background" Value="#6777" />

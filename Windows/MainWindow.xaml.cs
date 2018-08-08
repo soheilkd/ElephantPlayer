@@ -27,28 +27,7 @@ namespace Player
 			get => (double)Resources["MinimalWidthTemp"];
 			set => Resources["MinimalWidthTemp"] = value;
 		}
-
-		private GridLength TitleColumnWidth
-		{
-			get => (GridLength)Resources["TitleColumnWidth"];
-			set => Resources["TitleColumnWidth"] = value;
-		}
-		private GridLength ArtistColumnWidth
-		{
-			get => (GridLength)Resources["ArtistColumnWidth"];
-			set => Resources["ArtistColumnWidth"] = value;
-		}
-		private GridLength AlbumColumnWidth
-		{
-			get => (GridLength)Resources["AlbumColumnWidth"];
-			set => Resources["AlbumColumnWidth"] = value;
-		}
-		private GridLength PlaysColumnWidth
-		{
-			get => (GridLength)Resources["PlaysColumnWidth"];
-			set => Resources["PlaysColumnWidth"] = value;
-		}
-
+		
 		private MediaManager Manager = new MediaManager();
 		private Visibility ControlsNotNeededOnVisionVisibility
 		{

@@ -136,7 +136,6 @@ namespace Player.Controls
 			Resources["BorderBack"] = Brushes.Transparent;
 		}
 
-
 		private double[] _InvalidFrameRates = new[] { 90000d, 0d };
 		private void Element_MediaOpened(object sender, RoutedEventArgs e)
 		{

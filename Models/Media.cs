@@ -26,7 +26,7 @@ namespace Player
 		public string Lyrics = "";
 		[field: NonSerialized] public bool IsLoaded = false;
 		[field: NonSerialized] public event PropertyChangedEventHandler PropertyChanged;
-
+		
 		public string Name { get => _Name; set => Set(ref _Name, value); }
 		public string Artist { get => _Artist; set => Set(ref _Artist, value); }
 		public string Title { get => _Title; set => Set(ref _Title, value); }

@@ -133,12 +133,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="App.cs" />
+    <Compile Include="Base\Dialogs.cs" />
     <Compile Include="Base\Extensions.cs" />
     <Compile Include="Base\Hook.cs" />
     <Compile Include="Base\Images.cs" />
     <Compile Include="Base\HookEvents.cs" />
-    <Compile Include="Base\Settings.cs" />
     <Compile Include="Base\DeepBackEnd.cs" />
+    <Compile Include="Base\Settings.cs" />
     <Compile Include="Models\LibraryManager.cs" />
     <Compile Include="Models\Media.cs" />
     <Compile Include="Models\MediaEnumerator.cs" />

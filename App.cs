@@ -14,14 +14,13 @@ namespace Player
 			Environment.GetCommandLineArgs()[0].Substring(0, Environment.GetCommandLineArgs()[0].LastIndexOf("\\") + 1);
 
 		public static Settings Settings { get; } = Settings.Load();
+
 		[STAThread]
 		public static void Main()
 		{
 			AppDomain.CurrentDomain.ProcessExit += (_, __) => Hook.Events.Dispose();
 			AppDomain.CurrentDomain.UnhandledException += (sender, e) =>
-			{
 				MessageBox.Show($"Unhandled {e.ExceptionObject}\r\n", "Exception", MessageBoxButton.OK, MessageBoxImage.Error);
-			};
 			if (Instance<App>.InitializeAsFirstInstance("ElephantIPC_soheilkd"))
 			{
 				var application = new App();
