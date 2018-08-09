@@ -137,6 +137,15 @@ namespace Player.Controls
 		}
 
 		private double[] _InvalidFrameRates = new[] { 90000d, 0d };
+		private bool IsBuffering
+		{
+			set
+			{
+				ProgressIndicator.IsIndeterminate = value;
+				ProgressIndicator.Visibility = value ? Visibility.Visible : Visibility.Hidden;
+				PositionSlider.Visibility = value ? Visibility.Hidden : Visibility.Visible;
+			}
+		}
 		private void Element_MediaOpened(object sender, RoutedEventArgs e)
 		{
 			bool isVideo = !_InvalidFrameRates.Contains(element.VideoFrameRate);
@@ -146,12 +155,14 @@ namespace Player.Controls
 			//Next seems not so readable, it just checks if AutoOrientation is on, check proper conditions where operation is needed
 			if ((AutoOrinateVision && (isVideo && !IsVisionOn)) || (!isVideo && IsVisionOn))
 				Element_MouseUp(this, new MouseButtonEventArgs(Mouse.PrimaryDevice, 1, MouseButton.Left));
+			IsBuffering = false;
 		}
 
 		private void UserControl_Loaded(object sender, RoutedEventArgs e)
 		{
 			RunUX();
 			IsFullyLoaded = true;
+			element.MediaOpening += (_, __) => IsBuffering = true;
 		}
 
 		private void PlayCountTimer_Elapsed(object sender, ElapsedEventArgs e)

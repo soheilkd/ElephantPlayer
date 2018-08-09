@@ -1,15 +1,15 @@
 ﻿<UserControl x:Class="Player.Controls.MediaPlayer"
-			 xmlns:ff="clr-namespace:Unosquare.FFME;assembly=ffme.win"
 			 xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
 			 xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
 			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 			 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 			 xmlns:local="clr-namespace:Player.Controls"
+			 xmlns:ff="clr-namespace:Unosquare.FFME;assembly=ffme.win"
 			 MouseMove="Element_MouseMove"
 			 mc:Ignorable="d" Loaded="UserControl_Loaded" x:Name="ParentControl"
              d:DesignHeight="300" d:DesignWidth="600">
 	<Grid>
-		<ff:MediaElement x:Name="element" LoadedBehavior="Play" Background="Black" UnloadedBehavior="Manual" ScrubbingEnabled="True" MouseUp="Element_MouseUp"
+		<ff:MediaElement MouseDoubleClick="Element_MouseUp" x:Name="element" LoadedBehavior="Play" Background="Black" UnloadedBehavior="Manual" ScrubbingEnabled="True"
 						 HorizontalAlignment="Left" VerticalAlignment="Bottom" Width="50" Height="50" Margin="6,0,0,28"/>
 		<Grid x:Name="ControlsGrid" Background="Transparent" VerticalAlignment="Bottom" Height="94">
 			<Border HorizontalAlignment="Left" VerticalAlignment="Bottom" Width="149" Margin="73,0,0,4" CornerRadius="10">
@@ -19,7 +19,7 @@
 					<local:MaterialButton x:Name="NextButton" HorizontalAlignment="Right" Icon="Next" Margin="0,0,13,35" MouseUp="NextButton_Clicked" />
 				</Grid>
 			</Border>
-			<Border x:Name="VolumeBorder" x:FieldModifier="public" HorizontalAlignment="Right" VerticalAlignment="Bottom" Height="72" CornerRadius="10" Width="184">
+			<Border x:Name="VolumeBorder" x:FieldModifier="public" HorizontalAlignment="Right" VerticalAlignment="Bottom" Height="72" CornerRadius="10" Width="187">
 				<Grid>
 					<local:MaterialButton x:Name="FullScreenButton" Icon="FullScreen" HorizontalAlignment="Right" Margin="0,0,10,35" VerticalAlignment="Bottom" MouseUp="FullScreenButton_Clicked"/>
 					<local:Icon x:Name="VolumeIcon" Type="Volume" Width="25" Height="25" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0, 0, 155, 33" />
@@ -29,6 +29,7 @@
 			</Border>
 			<Border Height="27" VerticalAlignment="Bottom">
 				<Grid>
+					<ProgressBar x:Name="ProgressIndicator" Visibility="Hidden" Margin="50,2,50,0"/>
 					<Slider Value="100" x:Name="PositionSlider" ValueChanged="Position_Changed" PreviewMouseLeftButtonDown="Position_Holding" IsMoveToPointEnabled="True"
 							VerticalAlignment="Center" Maximum="1000" Margin="50,2,50,0">
 					</Slider>
