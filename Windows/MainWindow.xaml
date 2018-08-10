@@ -4,13 +4,13 @@
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 	xmlns:mah="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
 	xmlns:player="clr-namespace:Player.Controls;assembly=ControlLibrary"
-	xmlns:system="clr-namespace:System;assembly=mscorlib"
+	xmlns:system="clr-namespace:System;assembly=mscorlib" Background="{DynamicResource AccentColorBrush}"
 	Title="Elephant Player" ShowIconOnTitleBar="False" AllowDrop="True"
 	Loaded="Window_Loaded" Closing="Window_Closing" Drop="Window_Drop" KeyUp="Window_KeyUp">
 	<mah:MetroWindow.LeftWindowCommands>
 		<mah:WindowCommands>
 			<StackPanel Orientation="Horizontal">
-				<Menu x:Name="Menu" Background="{DynamicResource AccentColorBrush}">
+				<Menu x:Name="Menu" Background="Transparent">
 					<MenuItem Background="Transparent">
 						<MenuItem.Header>
 							<player:Icon Type="ButtonMenu" Foreground="#FEEE"/>
@@ -92,7 +92,7 @@
 		</mah:WindowCommands>
 	</mah:MetroWindow.RightWindowCommands>
 	<Grid x:Name="ContentGrid">
-		<DataGrid x:Name="DataGrid" Margin="0,0,0,80" MouseDoubleClick="List_DoubleClick" IsReadOnly="True" AutoGenerateColumns="False">
+		<DataGrid x:Name="DataGrid" Margin="0,0,0,80" MouseDoubleClick="List_DoubleClick" IsReadOnly="True" Background="Transparent" AutoGenerateColumns="False">
 			<DataGrid.ContextMenu>
 				<ContextMenu>
 					<MenuItem Header="Detergent Meta" Click="Menu_TagDetergent" />
@@ -111,12 +111,26 @@
 				</ContextMenu>
 			</DataGrid.ContextMenu>
 			<DataGrid.Columns>
+				<DataGridTextColumn FontSize="20" Header="  " Width="10"/>
 				<DataGridTextColumn FontSize="15" Width="300" Header="Title" Binding="{Binding Title}"/>
 				<DataGridTextColumn Width="120" Header="Artist" Binding="{Binding Artist}"/>
 				<DataGridTextColumn Width="120" Header="Album" Binding="{Binding Album}"/>
 				<DataGridTextColumn Width="60" Header="Plays" Binding="{Binding PlayCount}"/>
 				<DataGridTextColumn Header="Date Added" Binding="{Binding AdditionDate}"/>
 			</DataGrid.Columns>
+			<DataGrid.RowStyle>
+				<Style TargetType="DataGridRow">
+					<Setter Property="Background" Value="Transparent"/>
+					<Style.Triggers>
+						<Trigger Property="IsMouseOver" Value="True">
+							<Setter Property="Background" Value="#FFB9B9B9"/>
+						</Trigger>
+						<Trigger Property="IsSelected" Value="True">
+							<Setter Property="Background" Value="#FF707070"/>
+						</Trigger>
+					</Style.Triggers>
+				</Style>
+			</DataGrid.RowStyle>
 		</DataGrid>
 		<player:MediaPlayer x:Name="Player"/>
 		<player:MaterialButton x:Name="MinimalViewButton" Icon="ClosePaneMirrored" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,12,35" MouseUp="MinimalButton_Clicked"/>
@@ -137,7 +151,7 @@
 				<ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Accents/Steel.xaml" />
 				<ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Accents/BaseDark.xaml" />
 			</ResourceDictionary.MergedDictionaries>
-			
+
 			<system:Double x:Key="MinimalWidthTemp" />
 			<system:Double x:Key="MinimalHeightTemp" />
 			<system:String x:Key="LastPath">D:\\</system:String>

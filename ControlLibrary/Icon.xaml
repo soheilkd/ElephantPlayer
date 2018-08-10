@@ -1,5 +1,7 @@
-﻿<Viewbox x:Class="Player.Controls.Icon"
+﻿<UserControl x:Class="Player.Controls.Icon" x:Name="P"
 		 xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
 		 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Loaded="UserControl_Loaded">
-	<TextBlock x:Name="textBlock" FontFamily="Segoe MDL2 Assets" FontWeight="Light"/>
-</Viewbox>
+	<Viewbox>
+		<TextBlock x:Name="textBlock" FontFamily="Segoe MDL2 Assets" Foreground="{Binding Foreground, ElementName=P}"/>
+	</Viewbox>
+</UserControl>

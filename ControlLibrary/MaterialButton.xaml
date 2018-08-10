@@ -6,7 +6,7 @@
 	<Grid>
 		<Ellipse x:Name="MainEllipse" Margin="-7" Stroke="{Binding Foreground,ElementName=P}" StrokeDashArray="4" StrokeDashCap="Round" StrokeThickness="0"/>
 		<Ellipse x:Name="ClickEllipse" Stroke="{Binding Foreground,ElementName=P}" StrokeThickness="0" />
-		<controls:Icon x:Name="MainIcon" Width="Auto" Height="Auto"/>
+		<controls:Icon x:Name="MainIcon" Foreground="{Binding Foreground, ElementName=P}" Width="Auto" Height="Auto"/>
 	</Grid>
 	<UserControl.Triggers>
 		<EventTrigger RoutedEvent="MouseEnter">
