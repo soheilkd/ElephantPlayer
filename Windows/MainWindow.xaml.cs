@@ -2,13 +2,12 @@
 using Microsoft.Win32;
 using Player.Hook;
 using System;
+using System.ComponentModel;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 
 namespace Player
@@ -26,6 +25,11 @@ namespace Player
 		{
 			get => (double)Resources["MinimalWidthTemp"];
 			set => Resources["MinimalWidthTemp"] = value;
+		}
+		private Visibility SelectiveBoxesVisibility
+		{
+			get => (Visibility)Resources["SelectiveBoxesVisibility"];
+			set => Resources["SelectiveBoxesVisibility"] = value;
 		}
 		
 		private MediaManager Manager = new MediaManager();
@@ -55,6 +59,7 @@ namespace Player
 			Player.UpdateLayout();
 
 			DataGrid.ItemsSource = Manager.QueueEnumerator;
+
 			TaskbarItemInfo = Player.Thumb.Info;
 			Resources["LastPath"] = App.Settings.LastPath;
 
@@ -228,6 +233,18 @@ namespace Player
 		{
 			if (e.Key == Key.Space && !SearchBox.IsFocused)
 				Player.PlayPause();
+			if (e.Key == Key.S)
+			{
+				switch (SelectiveBoxesVisibility)
+				{
+					case Visibility.Visible:
+						SelectiveBoxesVisibility = Visibility.Hidden;
+						break;
+					default:
+						SelectiveBoxesVisibility = Visibility.Visible;
+						break;
+				}
+			}
 		}
 		private void Window_Drop(object sender, DragEventArgs e)
 		{
@@ -414,9 +431,34 @@ namespace Player
 			Process.Start("Elephant Player.exe");
 		}
 
+		private void DataGrid_Sorting(object sender, DataGridSortingEventArgs e)
+		{
+			var asc = e.Column.SortDirection == ListSortDirection.Ascending;
+			switch (e.Column.DisplayIndex)
+			{
+				case 1:
+					Manager.SortQueueBy(each => each.Title, asc);
+					break;
+				case 2:
+					Manager.SortQueueBy(each => each.Artist, asc);
+					break;
+				case 3:
+					Manager.SortQueueBy(each => each.Album, asc);
+					break;
+				case 4:
+					Manager.SortQueueBy(each => each.PlayCount, asc);
+					break;
+				case 5:
+					Manager.SortQueueBy(each => each.AdditionDate, asc);
+					break;
+				default:
+					break;
+			}
+		}
+
 		private void For(Action<Media> action)
 		{
-			DataGrid.SelectedItems.Cast<Media>().ToArray().For(action);
+			Manager.For(each => action(each), each => each.IsSelected);
 		}
 	}
 }

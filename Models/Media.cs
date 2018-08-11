@@ -19,6 +19,7 @@ namespace Player
 		private string _Title;
 		private string _Album;
 		private string _Dir;
+		private bool _IsSelected;
 		private int _PlayCount;
 		private bool _IsPlaying;
 		private TimeSpan _Len;
@@ -34,6 +35,7 @@ namespace Player
 		public string Directory { get => _Dir; set => Set(ref _Dir, value); }
 		public int PlayCount { get => _PlayCount; set => Set(ref _PlayCount, value); }
 		public bool IsPlaying { get => _IsPlaying; set => Set(ref _IsPlaying, value); }
+		public bool IsSelected { get => _IsSelected; set => Set(ref _IsSelected, value); }
 		public TimeSpan Length { get => _Len; set => Set(ref _Len, value); }
 		public DateTime AdditionDate { get; private set; }
 		public string Path { get; set; }

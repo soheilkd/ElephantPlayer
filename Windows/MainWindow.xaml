@@ -92,7 +92,7 @@
 		</mah:WindowCommands>
 	</mah:MetroWindow.RightWindowCommands>
 	<Grid x:Name="ContentGrid">
-		<DataGrid x:Name="DataGrid" Margin="0,0,0,80" MouseDoubleClick="List_DoubleClick" IsReadOnly="True" Background="Transparent" AutoGenerateColumns="False">
+		<DataGrid x:Name="DataGrid" Margin="0,0,0,80" MouseDoubleClick="List_DoubleClick" Background="Transparent" AutoGenerateColumns="False">
 			<DataGrid.ContextMenu>
 				<ContextMenu>
 					<MenuItem Header="Detergent Meta" Click="Menu_TagDetergent" />
@@ -111,24 +111,56 @@
 				</ContextMenu>
 			</DataGrid.ContextMenu>
 			<DataGrid.Columns>
-				<DataGridTextColumn FontSize="20" Header="  " Width="10"/>
-				<DataGridTextColumn FontSize="15" Width="300" Header="Title" Binding="{Binding Title}"/>
-				<DataGridTextColumn Width="120" Header="Artist" Binding="{Binding Artist}"/>
-				<DataGridTextColumn Width="120" Header="Album" Binding="{Binding Album}"/>
-				<DataGridTextColumn Width="60" Header="Plays" Binding="{Binding PlayCount}"/>
-				<DataGridTextColumn Header="Date Added" Binding="{Binding AdditionDate}"/>
+				<DataGridCheckBoxColumn Visibility="{DynamicResource SelectiveBoxesVisibility}" Binding="{Binding Mode=TwoWay, Path=IsSelected}"/>
+				<DataGridTextColumn IsReadOnly="True" FontSize="15" Width="300" Header="Title" Binding="{Binding Title}"/>
+				<DataGridTextColumn IsReadOnly="True" Width="120" Header="Artist" Binding="{Binding Artist}"/>
+				<DataGridTextColumn IsReadOnly="True" Width="120" Header="Album" Binding="{Binding Album}"/>
+				<DataGridTextColumn IsReadOnly="True" Width="60" Header="Plays" Binding="{Binding PlayCount}"/>
+				<DataGridTextColumn IsReadOnly="True" Header="Date Added" Binding="{Binding AdditionDate}"/>
 			</DataGrid.Columns>
 			<DataGrid.RowStyle>
 				<Style TargetType="DataGridRow">
-					<Setter Property="Background" Value="Transparent"/>
-					<Style.Triggers>
-						<Trigger Property="IsMouseOver" Value="True">
-							<Setter Property="Background" Value="#FFB9B9B9"/>
-						</Trigger>
-						<Trigger Property="IsSelected" Value="True">
-							<Setter Property="Background" Value="#FF707070"/>
-						</Trigger>
-					</Style.Triggers>
+					<Setter Property="Template" >
+						<Setter.Value>
+							<ControlTemplate TargetType="{x:Type DataGridRow}">
+								<Border x:Name="DGR_Border"
+										Background="Transparent"
+										Margin="1">
+									<SelectiveScrollingGrid>
+										<SelectiveScrollingGrid.ColumnDefinitions>
+											<ColumnDefinition Width="Auto" />
+											<ColumnDefinition Width="*" />
+										</SelectiveScrollingGrid.ColumnDefinitions>
+										<SelectiveScrollingGrid.RowDefinitions>
+											<RowDefinition Height="*" />
+											<RowDefinition Height="Auto" />
+										</SelectiveScrollingGrid.RowDefinitions>
+										<DataGridCellsPresenter Grid.Column="1"
+                                                ItemsPanel="{TemplateBinding ItemsPanel}"
+                                                SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
+										<DataGridDetailsPresenter Grid.Column="1"
+                                                  Grid.Row="1"
+                                                  SelectiveScrollingGrid.SelectiveScrollingOrientation="{Binding AreRowDetailsFrozen, ConverterParameter={x:Static SelectiveScrollingOrientation.Vertical}, Converter={x:Static DataGrid.RowDetailsScrollingConverter}, RelativeSource={RelativeSource AncestorType={x:Type DataGrid}}}"
+                                                  Visibility="{TemplateBinding DetailsVisibility}" />
+										<DataGridRowHeader Grid.RowSpan="2"
+                                           SelectiveScrollingGrid.SelectiveScrollingOrientation="Vertical"
+                                           Visibility="{Binding HeadersVisibility, ConverterParameter={x:Static DataGridHeadersVisibility.Row}, Converter={x:Static DataGrid.HeadersVisibilityConverter}, RelativeSource={RelativeSource AncestorType={x:Type DataGrid}}}" />
+									</SelectiveScrollingGrid>
+								</Border>
+								<ControlTemplate.Triggers>
+									<Trigger Property="IsMouseOver" Value="True">
+										<Setter TargetName="DGR_Border" Property="Background" Value="LightGray" />
+									</Trigger>
+									<Trigger Property="IsSelected" Value="True">
+										<Setter TargetName="DGR_Border" Property="Background" Value="Gray" />
+									</Trigger>
+									<DataTrigger Binding="{Binding IsPlaying}" Value="True">
+										<Setter TargetName="DGR_Border" Property="Background" Value="#FF0071A6"/>
+									</DataTrigger>
+								</ControlTemplate.Triggers>
+							</ControlTemplate>
+						</Setter.Value>
+					</Setter>
 				</Style>
 			</DataGrid.RowStyle>
 		</DataGrid>
@@ -152,6 +184,7 @@
 				<ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Accents/BaseDark.xaml" />
 			</ResourceDictionary.MergedDictionaries>
 
+			<Visibility x:Key="SelectiveBoxesVisibility">Hidden</Visibility>
 			<system:Double x:Key="MinimalWidthTemp" />
 			<system:Double x:Key="MinimalHeightTemp" />
 			<system:String x:Key="LastPath">D:\\</system:String>

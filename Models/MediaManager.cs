@@ -87,9 +87,7 @@ namespace Player
 			LibraryManager.Save(this);
 		}
 
-		public void SortQueueBy<T>(Func<Media, T> keySelector)
-			=> QueueEnumerator.SortBy(keySelector);
-		public void SortQueueDescendingBy<T>(Func<Media, T> keySelector)
-			=> QueueEnumerator.SortDescendingBy(keySelector);
+		public void SortQueueBy<T>(Func<Media, T> keySelector, bool asc = true)
+			=> QueueEnumerator.SortBy(keySelector, asc);
 	}
 }
