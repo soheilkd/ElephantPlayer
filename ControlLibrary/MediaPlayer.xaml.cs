@@ -148,6 +148,7 @@ namespace Player.Controls
 		}
 		private void Element_MediaOpened(object sender, RoutedEventArgs e)
 		{
+			ResetCountTimer();
 			bool isVideo = !_InvalidFrameRates.Contains(element.VideoFrameRate);
 			FullScreenButton.Visibility = isVideo ? Visibility.Visible : Visibility.Hidden;
 			if (IsFullScreen && !isVideo)
@@ -158,6 +159,11 @@ namespace Player.Controls
 			IsBuffering = false;
 		}
 
+		private void ResetCountTimer()
+		{
+			PlayCountTimer.Stop();
+			PlayCountTimer.Start();
+		}
 		private void UserControl_Loaded(object sender, RoutedEventArgs e)
 		{
 			RunUX();
@@ -227,6 +233,7 @@ namespace Player.Controls
 			{
 				element.Stop();
 				element.Play();
+				ResetCountTimer();
 			}
 			else
 				PreviousClicked?.Invoke(this, null);
@@ -244,8 +251,6 @@ namespace Player.Controls
 		public void Play(Uri source)
 		{
 			element.Source = source;
-			PlayCountTimer.Stop();
-			PlayCountTimer.Start();
 			Play();
 		}
 
