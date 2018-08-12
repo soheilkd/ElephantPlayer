@@ -143,7 +143,6 @@
     <Compile Include="Models\LibraryManager.cs" />
     <Compile Include="Models\Media.cs" />
     <Compile Include="Models\MediaEnumerator.cs" />
-    <Compile Include="Models\MediaOperator.cs" />
     <Compile Include="Windows\MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
     </Compile>

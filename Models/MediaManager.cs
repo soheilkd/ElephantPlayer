@@ -26,7 +26,7 @@ namespace Player
 		{
 			if (Directory.Exists(path))
 				Directory.GetFiles(path, "*", SearchOption.AllDirectories).For(each => AddFromPath(each));
-			if (MediaOperator.TryLoadFromPath(path, out var media))
+			if (Media.TryLoadFromPath(path, out var media))
 			{
 				var duplication = this.Where(item => item.Path == path);
 				if (duplication.Count() != 0 && requestPlay)
@@ -81,7 +81,8 @@ namespace Player
 
 		public void Revalidate()
 		{
-			var t = (from each in this where MediaOperator.Load(each).Type != MediaType.None select each).ToArray();
+			this.For(each => each.Reload());
+			var t = (from each in this where each.Type != MediaType.None select each).ToArray();
 			Clear();
 			t.For(each => Add(each));
 			LibraryManager.Save(this);

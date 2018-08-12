@@ -219,7 +219,7 @@ namespace Player
 				await Task.Delay(10);
 			Environment.GetCommandLineArgs().For(each => Manager.AddFromPath(each, true));
 		}
-		private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+		private void Window_Closing(object sender, CancelEventArgs e)
 		{
 			App.Settings.LastSize = new Size(Width <= 310 ? TempWidth: Width, Height <= 130 ? TempHeight : Height);
 			App.Settings.LastLocation = new Point(Left, Top);
@@ -292,7 +292,7 @@ namespace Player
 
 		private void Menu_TagDetergent(object sender, RoutedEventArgs e)
 		{
-			For(item => MediaOperator.CleanTag(item));
+			For(item => item.CleanTag());
 		}
 		private void Menu_MoveClick(object sender, RoutedEventArgs e)
 		{
@@ -316,7 +316,7 @@ namespace Player
 					}
 					break;
 				default:
-					For(item => MediaOperator.Move(item, toDir: Resources["LastPath"].ToString()));
+					For(item => item.Move(toDir: Resources["LastPath"].ToString()));
 					break;
 			}
 		}
@@ -342,7 +342,7 @@ namespace Player
 					}
 					break;
 				default:
-					For(item => MediaOperator.Copy(item, toDir: Resources["LastPath"].ToString()));
+					For(item => item.Copy(toDir: Resources["LastPath"].ToString()));
 					break;
 			}
 		}
@@ -374,15 +374,15 @@ namespace Player
 						var pos = Player.Position;
 						Player.Stop();
 						f.Parameter.Save();
-						MediaOperator.Reload(Manager.Current);
+						Manager.Current.Reload();
 						Play(Manager.Current);
 						Player.Position = pos;
-						MediaOperator.Reload(each);
+						each.Reload();
 					}
 					else
 					{
 						f.Parameter.Save();
-						MediaOperator.Reload(each);
+						each.Reload();
 					}
 				};
 				pro.LoadFor(each);
@@ -421,7 +421,7 @@ namespace Player
 		}
 		private void Menu_HeavyLoadClick(object sender, RoutedEventArgs e)
 		{
-			Manager.For(each => MediaOperator.Load(each));
+			Manager.For(each => each.Load());
 		}
 		private void Menu_RevalidateClick(object sender, RoutedEventArgs e)
 		{

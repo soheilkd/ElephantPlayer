@@ -4,7 +4,7 @@
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 	xmlns:mah="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
 	xmlns:player="clr-namespace:Player.Controls;assembly=ControlLibrary"
-	xmlns:system="clr-namespace:System;assembly=mscorlib" Background="{DynamicResource AccentColorBrush}"
+	xmlns:system="clr-namespace:System;assembly=mscorlib" Background="#CC374049"
 	Title="Elephant Player" ShowIconOnTitleBar="False" AllowDrop="True"
 	Loaded="Window_Loaded" Closing="Window_Closing" Drop="Window_Drop" KeyUp="Window_KeyUp">
 	<mah:MetroWindow.LeftWindowCommands>
