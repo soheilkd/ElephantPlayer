@@ -43,10 +43,7 @@ namespace Player.Controls
 			{
 				element.Position = value;
 				if (value.TotalSeconds <= 20)
-				{
-					PlayCountTimer.Stop();
-					PlayCountTimer.Start();
-				}
+					ResetCountTimer();
 			}
 		}
 		public double Volume
@@ -251,6 +248,7 @@ namespace Player.Controls
 		public void Play(Uri source)
 		{
 			element.Source = source;
+			ResetCountTimer();
 			Play();
 		}
 
