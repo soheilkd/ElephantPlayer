@@ -42,11 +42,7 @@ namespace Player.Controls
 			set
 			{
 				element.Position = value;
-				if (value.TotalSeconds <= 20)
-				{
-					PlayCountTimer.Stop();
-					PlayCountTimer.Start();
-				}
+				ResetCountTimer();
 			}
 		}
 		public double Volume

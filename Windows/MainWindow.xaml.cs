@@ -69,6 +69,7 @@ namespace Player
 			Player.Volume = App.Settings.Volume;
 			Player.AutoOrinateVision = App.Settings.VisionOrientation;
 			Player.PlayOnPositionChange = App.Settings.PlayOnPositionChange;
+			Player.PlayCounterElapsed += (_, __) => Manager.Current.PlayCount++;
 			
 			OrinateCheck.IsChecked = App.Settings.VisionOrientation;
 			LiveLibraryCheck.IsChecked = App.Settings.LiveLibrary;
