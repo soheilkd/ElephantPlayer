@@ -70,25 +70,23 @@ namespace Player
 				Path.IncaseContains(query);
 		}
 
-		public void Move(string toDir)
+		public void MoveTo(string dir)
 		{
-			toDir += Name;
-			File.Move(Path, toDir);
-			Path = toDir;
+			dir += Name;
+			File.Move(Path, dir);
+			Path = dir;
 		}
-		public void Copy(string toDir)
+		public void CopyTo(string dir)
 		{
-			toDir += Name;
-			File.Copy(Path, toDir, true);
+			dir += Name;
+			File.Copy(Path, dir, true);
 		}
 
 		#region Load
-
-
 		private static readonly string[] SupportedMusics = "mp3;wma;aac;m4a".Split(';');
 		private static readonly string[] SupportedVideos = "mp4;mpg;mkv;wmv;mov;avi;m4v;ts;wav;mpeg;webm".Split(';');
 
-		public static MediaType GetMediaType(string path)
+		private static MediaType GetMediaType(string path)
 		{
 			var ext = path.Substring(path.LastIndexOf('.') + 1).ToLower();
 			if (SupportedMusics.Contains(ext)) return MediaType.Music;
@@ -215,7 +213,6 @@ namespace Player
 				Reload();
 			}
 		}
-
 
 		public static bool TryLoadFromPath(string path, out Media media)
 		{

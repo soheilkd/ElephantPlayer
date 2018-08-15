@@ -12,7 +12,7 @@ using System.Windows.Input;
 
 namespace Player
 {
-	public partial class MainWindow : MetroWindow
+	public partial class MainWindow : MahApps.Metro.Controls.MetroWindow
 	{
 		private const int HeightOnMinimal = 112;
 		private const int WidthOnMinimal = 300;
@@ -31,7 +31,15 @@ namespace Player
 			get => (Visibility)Resources["SelectiveBoxesVisibility"];
 			set => Resources["SelectiveBoxesVisibility"] = value;
 		}
-		
+		private SaveFileDialog MediaTransferDialog = new SaveFileDialog()
+		{
+			AddExtension = false,
+			CheckPathExists = true,
+			CreatePrompt = false,
+			DereferenceLinks = true,
+			InitialDirectory = App.Settings.LastPath
+		};
+
 		private MediaManager Manager = new MediaManager();
 		private Visibility ControlsNotNeededOnVisionVisibility
 		{
@@ -47,9 +55,7 @@ namespace Player
 		public MainWindow()
 		{
 			InitializeComponent();
-
 			#region Initialization
-			
 			App.NewInstanceRequested += (_, e) => e.Args.ToList().ForEach(each => Manager.AddFromPath(each, true));
 			Hook.Events.KeyDown += KeyboardListener_KeyDown;
 
@@ -94,13 +100,9 @@ namespace Player
 			Player.BorderBack = Background;
 
 			foreach (var item in this.FindChildren<MenuItem>())
-			{
 				item.Background = Menu.Background;
-			}
 			foreach (MenuItem item in DataGrid.ContextMenu.Items)
-			{
 				item.Background = Menu.Background;
-			}
 			#endregion
 			
 			Left = App.Settings.LastLocation.X;
@@ -300,24 +302,16 @@ namespace Player
 			switch ((sender.As<MenuItem>().Header ?? "INDIV").ToString().Substring(0, 1))
 			{
 				case "B":
-					SaveFileDialog saveDiag = new SaveFileDialog()
+					MediaTransferDialog.Title = "Move";
+					if (MediaTransferDialog.ShowDialog().Value)
 					{
-						AddExtension = false,
-						CheckPathExists = true,
-						CreatePrompt = false,
-						DereferenceLinks = true,
-						InitialDirectory = App.Settings.LastPath,
-						Title = "Move"
-					};
-					if (saveDiag.ShowDialog().Value)
-					{
-						App.Settings.LastPath = saveDiag.FileName.Substring(0, saveDiag.FileName.LastIndexOf('\\') + 1);
+						App.Settings.LastPath = MediaTransferDialog.FileName.Substring(0, MediaTransferDialog.FileName.LastIndexOf('\\') + 1);
 						Resources["LastPath"] = App.Settings.LastPath;
 						goto default;
 					}
 					break;
 				default:
-					For(item => item.Move(toDir: Resources["LastPath"].ToString()));
+					For(item => item.MoveTo(Resources["LastPath"].ToString()));
 					break;
 			}
 		}
@@ -326,24 +320,16 @@ namespace Player
 			switch ((sender.As<MenuItem>().Header ?? "INDIV").ToString().Substring(0, 1))
 			{
 				case "B":
-					SaveFileDialog saveDiag = new SaveFileDialog()
+					MediaTransferDialog.Title = "Copy";
+					if (MediaTransferDialog.ShowDialog().Value)
 					{
-						AddExtension = false,
-						CheckPathExists = true,
-						CreatePrompt = false,
-						DereferenceLinks = true,
-						InitialDirectory = App.Settings.LastPath,
-						Title = "Copy"
-					};
-					if (saveDiag.ShowDialog().Value)
-					{
-						App.Settings.LastPath = saveDiag.FileName.Substring(0, saveDiag.FileName.LastIndexOf('\\') + 1);
+						App.Settings.LastPath = MediaTransferDialog.FileName.Substring(0, MediaTransferDialog.FileName.LastIndexOf('\\') + 1);
 						Resources["LastPath"] = App.Settings.LastPath;
 						goto default;
 					}
 					break;
 				default:
-					For(item => item.Copy(toDir: Resources["LastPath"].ToString()));
+					For(item => item.CopyTo(Resources["LastPath"].ToString()));
 					break;
 			}
 		}

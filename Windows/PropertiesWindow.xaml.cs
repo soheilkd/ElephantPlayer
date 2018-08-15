@@ -35,7 +35,7 @@ namespace Player
 			_Media = media;
 			_TagFile = TagLib.File.Create(media.Path);
 			var tag = _TagFile.Tag;
-			MediaOperator.Load(_Media);
+			_Media.Load();
 			TitleBox.Text = tag.Title ?? String.Empty;
 			AlbumBox.Text = tag.Album ?? String.Empty;
 			ArtistBox.Text = String.Join(Seperator.ToString(), tag.Performers) ?? String.Empty;
