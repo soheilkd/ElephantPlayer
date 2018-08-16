@@ -12,7 +12,7 @@ using System.Windows.Input;
 
 namespace Player
 {
-	public partial class MainWindow : MahApps.Metro.Controls.MetroWindow
+	public partial class MainWindow : MetroWindow
 	{
 		private const int HeightOnMinimal = 112;
 		private const int WidthOnMinimal = 300;
@@ -51,17 +51,17 @@ namespace Player
 			}
 		}
 		private bool WasMaximized, WasMinimal;
-
+		
 		public MainWindow()
 		{
 			InitializeComponent();
 			#region Initialization
-			App.NewInstanceRequested += (_, e) => e.Args.ToList().ForEach(each => Manager.AddFromPath(each, true));
-			Hook.Events.KeyDown += KeyboardListener_KeyDown;
+			App.NewInstanceRequested += (_, e) => e.Args.For(each => Manager.AddFromPath(each, true));
+			Events.KeyDown += KeyboardListener_KeyDown;
 
 			Manager.RequestReceived += (_, e) => Play(e.Parameter);
 			Player.LengthFound += (_, e) => Manager.Current.Length = e.Parameter;
-			Player.FullScreenClicked += Player_FullScreenClicked;
+			Player.FullScreenToggled += Player_FullScreenClicked;
 			Player.UpdateLayout();
 
 			DataGrid.ItemsSource = Manager.QueueEnumerator;
@@ -72,7 +72,6 @@ namespace Player
 			Player.NextClicked += (_, __) => Play(Manager.Next());
 			Player.PreviousClicked += (_, __) => Play(Manager.Previous());
 			Player.VisionChanged += (_, e) => ControlsNotNeededOnVisionVisibility = e.Parameter ? Visibility.Hidden : Visibility.Visible;
-			Player.Volume = App.Settings.Volume;
 			Player.AutoOrinateVision = App.Settings.VisionOrientation;
 			Player.PlayOnPositionChange = App.Settings.PlayOnPositionChange;
 			Player.PlayCounterElapsed += (_, __) => Manager.Current.PlayCount++;
@@ -132,11 +131,11 @@ namespace Player
 		{
 			Hide();
 			Topmost = !Topmost;
+			Player.IsMinimal = Topmost;
 			Title = $"{(Topmost ?  "": "Elephant Player | ")}{Manager.Current.Artist} - {Manager.Current.Title}";
 			LeftWindowCommands.Visibility = Topmost ? Visibility.Collapsed : Visibility.Visible;
 			MinimalViewButton.Icon = Topmost ? Controls.IconType.OpenPaneMirrored : Controls.IconType.ClosePaneMirrored;
 			Menu.Visibility = Topmost ? Visibility.Hidden : Visibility.Visible;
-			Player.VolumeBorder.Visibility = Menu.Visibility;
 			SearchButton.Visibility = Menu.Visibility;
 			WindowStyle = Topmost ? WindowStyle.ToolWindow : WindowStyle.ThreeDBorderWindow;
 			ResizeMode = Topmost ? ResizeMode.CanMinimize : ResizeMode.CanResize;
@@ -220,6 +219,7 @@ namespace Player
 			}
 			while (!Player.IsFullyLoaded)
 				await Task.Delay(10);
+			Player.ChangeVolumeBySlider(App.Settings.Volume);
 			Environment.GetCommandLineArgs().For(each => Manager.AddFromPath(each, true));
 		}
 		private void Window_Closing(object sender, CancelEventArgs e)
@@ -228,6 +228,7 @@ namespace Player
 			App.Settings.LastLocation = new Point(Left, Top);
 			App.Settings.WasMinimal = Height <= 131;
 			App.Settings.Volume = Player.Volume;
+			MessageBox.Show(Player.Volume.ToString());
 			App.Settings.Save();
 			Manager.CloseSeason();
 			Application.Current.Shutdown();
@@ -381,7 +382,7 @@ namespace Player
 			PlayModeSubMenu.Items[0].As<MenuItem>().IsChecked = false;
 			PlayModeSubMenu.Items[1].As<MenuItem>().IsChecked = false;
 			PlayModeSubMenu.Items[2].As<MenuItem>().IsChecked = false;
-			byte tag = Byte.Parse(sender.As<MenuItem>().Tag.ToString());
+			byte tag = byte.Parse(sender.As<MenuItem>().Tag.ToString());
 			PlayModeSubMenu.Items[tag].As<MenuItem>().IsChecked = true;
 			App.Settings.PlayMode = (PlayMode)tag;
 		}
@@ -418,9 +419,9 @@ namespace Player
 			Process.Start("Elephant Player.exe");
 		}
 
-		private void DataGrid_Sorting(object sender, DataGridSortingEventArgs e)
+		private void Data_Sorting(object sender, DataGridSortingEventArgs e)
 		{
-			var asc = e.Column.SortDirection == ListSortDirection.Ascending;
+			var asc = (e.Column.SortDirection ?? ListSortDirection.Descending) == ListSortDirection.Descending;
 			switch (e.Column.DisplayIndex)
 			{
 				case 1:
@@ -443,9 +444,7 @@ namespace Player
 			}
 		}
 
-		private void For(Action<Media> action)
-		{
+		private void For(Action<Media> action) =>
 			Manager.For(each => action(each), each => each.IsSelected);
-		}
 	}
 }

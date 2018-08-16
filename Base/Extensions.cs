@@ -19,7 +19,14 @@ namespace Player
 			}
 			return -1;
 		}
-		public static bool IncaseContains(this string item, string with) => item.ToLower().Contains(with.ToLower());
+		public static bool Contains(this string source, string str, StringComparison comparison)
+		{
+			return source.IndexOf(str, comparisonType: comparison) > -1;
+		}
+		public static bool IncaseContains(this string source, string str)
+		{
+			return Contains(source, str, StringComparison.OrdinalIgnoreCase);
+		}
 
 		public static void For<T>(this IList<T> collection, Action<T> action)
 		{

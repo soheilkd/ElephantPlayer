@@ -92,10 +92,10 @@
 		</mah:WindowCommands>
 	</mah:MetroWindow.RightWindowCommands>
 	<Grid x:Name="ContentGrid">
-		<DataGrid x:Name="DataGrid" Margin="0,0,0,80" MouseDoubleClick="List_DoubleClick" Background="Transparent" AutoGenerateColumns="False">
+		<DataGrid x:Name="DataGrid" Margin="0,0,0,80" MouseDoubleClick="List_DoubleClick" Background="Transparent" AutoGenerateColumns="False" Sorting="Data_Sorting">
 			<DataGrid.ContextMenu>
 				<ContextMenu>
-					<MenuItem Header="Detergent Meta" Click="Menu_TagDetergent" />
+					<MenuItem Header="Clean Tag" Click="Menu_TagDetergent" />
 					<MenuItem Header="Move to..." >
 						<MenuItem Header="{DynamicResource LastPath}" Click="Menu_MoveClick"/>
 						<MenuItem Header="Browse..." Click="Menu_MoveClick"/>

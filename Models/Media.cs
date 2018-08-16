@@ -61,7 +61,7 @@ namespace Player
 
 		public bool Matches(string query)
 		{
-			if (String.IsNullOrWhiteSpace(query)) return true;
+			if (string.IsNullOrWhiteSpace(query)) return true;
 			return
 				Title.IncaseContains(query) ||
 				Name.IncaseContains(query) ||

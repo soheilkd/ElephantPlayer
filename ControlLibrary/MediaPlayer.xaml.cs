@@ -16,7 +16,7 @@ namespace Player.Controls
 		public event EventHandler PlayCounterElapsed;
 		public event EventHandler NextClicked;
 		public event EventHandler PreviousClicked;
-		public event EventHandler FullScreenClicked;
+		public event EventHandler FullScreenToggled;
 		public event EventHandler<InfoExchangeArgs<bool>> VisionChanged;
 
 		private Brush _BorderBack = Brushes.White;
@@ -47,7 +47,8 @@ namespace Player.Controls
 		}
 		public double Volume
 		{
-			get => element.Volume; set
+			get => element.Volume;
+			set
 			{
 				element.Volume = value;
 				switch (element.Volume)
@@ -59,15 +60,25 @@ namespace Player.Controls
 				}
 			}
 		}
+		private bool _IsMinimal;
+		public bool IsMinimal
+		{
+			get => _IsMinimal;
+			set
+			{
+				_IsMinimal = value;
+				VolumeBorder.Visibility = value ? Visibility.Hidden : Visibility.Visible;
+			}
+		}
 
 		public Taskbar.Thumb Thumb = new Taskbar.Thumb();
+		private Timer PlayCountTimer = new Timer(60000) { AutoReset = false };
 		private Timer MouseMoveTimer = new Timer(5000);
 		public double MouseMoveInterval
 		{
 			get => MouseMoveTimer.Interval;
 			set => MouseMoveTimer.Interval = value;
 		}
-		private Timer PlayCountTimer = new Timer(60000) { AutoReset = false };
 		private TimeSpan _MediaTimeSpan;
 		private TimeSpan MediaTimeSpan
 		{
@@ -75,17 +86,17 @@ namespace Player.Controls
 			set
 			{
 				_MediaTimeSpan = value;
-				PositionSlider.Maximum = MediaTimeSpan.TotalMilliseconds;
+				PositionSlider.Maximum = value.TotalMilliseconds;
+				TimeLabel_Full.Content = value.ToNewString();
 				PositionSlider.SmallChange = 1 * PositionSlider.Maximum / 100;
 				PositionSlider.LargeChange = 5 * PositionSlider.Maximum / 100;
-				TimeLabel_Full.Content = MediaTimeSpan.ToNewString();
 				LengthFound?.Invoke(this, new InfoExchangeArgs<TimeSpan>(value));
 			}
 		}
 		private bool IsUXChangingPosition;
 		public bool IsFullyLoaded;
 		public bool IsFullScreen => FullScreenButton.Icon == IconType.BackToWindow;
-		public bool IsVisionOn { get; set; }
+		public bool IsVisionOn { get; set; } 
 		private bool AreControlsVisible
 		{
 			set
@@ -107,8 +118,8 @@ namespace Player.Controls
 				});
 			}
 		}
-		public bool PlayOnPositionChange { get; set; }
-		public bool AutoOrinateVision { get; set; } = true;
+		public bool PlayOnPositionChange { get; set; } 
+		public bool AutoOrinateVision { get; set; } 
 		private Storyboard VisionOnBoard, FullOnBoard, FullOffBoard;
 
 		public MediaPlayer()
@@ -132,6 +143,7 @@ namespace Player.Controls
 			Resources["BorderBack"] = Brushes.Transparent;
 		}
 
+		//Invalid frame rates are for video detection
 		private double[] _InvalidFrameRates = new[] { 90000d, 0d };
 		private bool IsBuffering
 		{
@@ -237,11 +249,12 @@ namespace Player.Controls
 		private void FullScreenButton_Clicked(object sender, MouseButtonEventArgs e)
 		{
 			FullScreenButton.Icon = FullScreenButton.Icon == IconType.FullScreen ? IconType.BackToWindow : IconType.FullScreen;
-			FullScreenClicked?.Invoke(this, null);
+			FullScreenToggled?.Invoke(this, null);
 		}
 		private void VolumeSlider_Changed(object sender, RoutedPropertyChangedEventArgs<double> e)
 		{
 			Volume = VolumeSlider.Value / 100;
+			Console.WriteLine(Volume);
 		}
 
 		public void Play(Uri source)
@@ -307,5 +320,10 @@ namespace Player.Controls
 		public void Next() => NextButton.EmulateClick();
 		public void Previous() => PreviousButton.EmulateClick();
 		public void PlayPause() => PlayPauseButton.EmulateClick();
+
+		public void ChangeVolumeBySlider(double volume)
+		{
+			VolumeSlider.Value = volume;
+		}
 	}
 }

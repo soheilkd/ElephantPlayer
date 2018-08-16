@@ -19,7 +19,7 @@
 					<local:MaterialButton x:Name="NextButton" HorizontalAlignment="Right" Icon="Next" Margin="0,0,13,35" MouseUp="NextButton_Clicked" />
 				</Grid>
 			</Border>
-			<Border x:Name="VolumeBorder" x:FieldModifier="public" HorizontalAlignment="Right" VerticalAlignment="Bottom" Height="72" CornerRadius="10" Width="187">
+			<Border x:Name="VolumeBorder" HorizontalAlignment="Right" VerticalAlignment="Bottom" Height="72" CornerRadius="10" Width="187">
 				<Grid>
 					<local:MaterialButton x:Name="FullScreenButton" Icon="FullScreen" HorizontalAlignment="Right" Margin="0,0,10,35" VerticalAlignment="Bottom" MouseUp="FullScreenButton_Clicked"/>
 					<local:Icon x:Name="VolumeIcon" Type="Volume" Width="25" Height="25" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0, 0, 155, 33" />
