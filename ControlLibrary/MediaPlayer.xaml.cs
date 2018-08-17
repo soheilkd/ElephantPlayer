@@ -121,10 +121,9 @@ namespace Player.Controls
 		public bool PlayOnPositionChange { get; set; } 
 		public bool AutoOrinateVision { get; set; } 
 		private Storyboard VisionOnBoard, FullOnBoard, FullOffBoard;
-
+		
 		public MediaPlayer()
 		{
-			Unosquare.FFME.MediaElement.FFmpegDirectory = @"ffmpeg\";
 			InitializeComponent();
 			VisionOnBoard = Resources["VisionOnBoard"] as Storyboard;
 			FullOnBoard = Resources["FullOnBoard"] as Storyboard;
@@ -254,7 +253,6 @@ namespace Player.Controls
 		private void VolumeSlider_Changed(object sender, RoutedPropertyChangedEventArgs<double> e)
 		{
 			Volume = VolumeSlider.Value / 100;
-			Console.WriteLine(Volume);
 		}
 
 		public void Play(Uri source)
@@ -324,6 +322,10 @@ namespace Player.Controls
 		public void ChangeVolumeBySlider(double volume)
 		{
 			VolumeSlider.Value = volume;
+		}
+		public void ChangeFFmpegDirectory(string newDir)
+		{
+			Unosquare.FFME.MediaElement.FFmpegDirectory = newDir;
 		}
 	}
 }

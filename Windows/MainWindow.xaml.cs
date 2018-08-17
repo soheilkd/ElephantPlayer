@@ -97,6 +97,7 @@ namespace Player
 			RememberMinimalCheck.Checked += (_, __) => App.Settings.RememberMinimal = true;
 			RememberMinimalCheck.Unchecked += (_, __) => App.Settings.RememberMinimal = false;
 			Player.BorderBack = Background;
+			Player.ChangeFFmpegDirectory($@"{App.Path}\ffmpeg");
 
 			foreach (var item in this.FindChildren<MenuItem>())
 				item.Background = Menu.Background;
@@ -228,7 +229,6 @@ namespace Player
 			App.Settings.LastLocation = new Point(Left, Top);
 			App.Settings.WasMinimal = Height <= 131;
 			App.Settings.Volume = Player.Volume;
-			MessageBox.Show(Player.Volume.ToString());
 			App.Settings.Save();
 			Manager.CloseSeason();
 			Application.Current.Shutdown();
