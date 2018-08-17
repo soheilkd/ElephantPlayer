@@ -98,6 +98,8 @@ namespace Player
 			RememberMinimalCheck.Unchecked += (_, __) => App.Settings.RememberMinimal = false;
 			Player.BorderBack = Background;
 			Player.ChangeFFmpegDirectory($@"{App.Path}\ffmpeg");
+			Player.ChangeVolumeBySlider(App.Settings.Volume * 100);
+			Player.Volume = App.Settings.Volume;
 
 			foreach (var item in this.FindChildren<MenuItem>())
 				item.Background = Menu.Background;
@@ -220,7 +222,6 @@ namespace Player
 			}
 			while (!Player.IsFullyLoaded)
 				await Task.Delay(10);
-			Player.ChangeVolumeBySlider(App.Settings.Volume);
 			Environment.GetCommandLineArgs().For(each => Manager.AddFromPath(each, true));
 		}
 		private void Window_Closing(object sender, CancelEventArgs e)
