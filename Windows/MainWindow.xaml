@@ -4,7 +4,7 @@
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 	xmlns:mah="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
 	xmlns:player="clr-namespace:Player.Controls;assembly=ControlLibrary"
-	xmlns:system="clr-namespace:System;assembly=mscorlib" Background="{DynamicResource AccentColorBrush}"
+	xmlns:system="clr-namespace:System;assembly=mscorlib" Background="{DynamicResource MajorBackground}"
 	Title="Elephant Player" ShowIconOnTitleBar="False" AllowDrop="True"
 	Loaded="Window_Loaded" Closing="Window_Closing" Drop="Window_Drop" KeyUp="Window_KeyUp">
 	<mah:MetroWindow.LeftWindowCommands>
@@ -184,6 +184,7 @@
 				<ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Accents/BaseDark.xaml" />
 			</ResourceDictionary.MergedDictionaries>
 
+			<SolidColorBrush x:Key="MajorBackground" Color="#FF43464B"/>
 			<Visibility x:Key="SelectiveBoxesVisibility">Hidden</Visibility>
 			<system:Double x:Key="MinimalWidthTemp" />
 			<system:Double x:Key="MinimalHeightTemp" />
