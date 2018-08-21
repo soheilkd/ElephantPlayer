@@ -6,7 +6,6 @@ using System.Windows.Media.Imaging;
 
 namespace Player.Controls
 {
-
 	public static class Extensions
 	{
 		public static string ToNewString(this TimeSpan time) => time.ToString("c").Substring(3, 5);

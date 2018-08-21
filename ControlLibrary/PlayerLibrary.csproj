@@ -64,32 +64,36 @@
     <Reference Include="PresentationFramework" />
   </ItemGroup>
   <ItemGroup>
-    <Page Include="Icon.xaml">
+    <Page Include="Controls\Icon.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="MaterialButton.xaml">
+    <Page Include="Controls\MaterialButton.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="MediaPlayer.xaml">
+    <Page Include="Controls\MediaPlayer.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CodeBase.cs" />
     <Compile Include="Events.cs" />
-    <Compile Include="Icon.xaml.cs">
+    <Compile Include="Controls\Icon.xaml.cs">
       <DependentUpon>Icon.xaml</DependentUpon>
     </Compile>
-    <Compile Include="IconType.cs" />
-    <Compile Include="MaterialButton.xaml.cs">
+    <Compile Include="Controls\IconType.cs" />
+    <Compile Include="Controls\MaterialButton.xaml.cs">
       <DependentUpon>MaterialButton.xaml</DependentUpon>
     </Compile>
-    <Compile Include="MediaPlayer.xaml.cs">
+    <Compile Include="Controls\MediaPlayer.xaml.cs">
       <DependentUpon>MediaPlayer.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Extensions.cs" />
+    <Compile Include="Hook\HookEvents.cs" />
+    <Compile Include="Hook\InterceptKeys.cs" />
+    <Compile Include="Hook\KeyboardListener.cs" />
+    <Compile Include="Hook\RawKeyEventArgs.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
