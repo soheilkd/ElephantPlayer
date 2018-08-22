@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Player.Hook
+namespace Player.LibraryHook
 {
 	public static class Events
 	{

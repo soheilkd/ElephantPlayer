@@ -2,7 +2,7 @@
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
-namespace Player.Hook
+namespace Player.LibraryHook
 {
 	public class KeyboardListener : IDisposable
 	{

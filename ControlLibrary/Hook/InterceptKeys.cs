@@ -2,7 +2,7 @@
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 
-namespace Player.Hook
+namespace Player.LibraryHook
 {
 	internal static class InterceptKeys
 	{

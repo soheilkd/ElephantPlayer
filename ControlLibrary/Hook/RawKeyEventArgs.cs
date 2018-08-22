@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Windows.Input;
 
-namespace Player.Hook
+namespace Player.LibraryHook
 {
 	public class RawKeyEventArgs : EventArgs
 	{
