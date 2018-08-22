@@ -5,15 +5,15 @@ using System.Windows.Media;
 
 namespace Player.Controls
 {
-	public partial class MaterialButton : UserControl
+	public partial class Button : UserControl
 	{
-		public MaterialButton() => InitializeComponent();
+		public Button() => InitializeComponent();
 
 		public static readonly MouseButtonEventArgs DefaultMouseUpArgs =
 			new MouseButtonEventArgs(Mouse.PrimaryDevice, 1, MouseButton.Left) { RoutedEvent = MouseUpEvent };
 		
 		public static readonly DependencyProperty IconProperty =
-			DependencyProperty.Register(nameof(Icon), typeof(IconType), typeof(MaterialButton), new PropertyMetadata(IconType.Wifi));
+			DependencyProperty.Register(nameof(Icon), typeof(IconType), typeof(Button), new PropertyMetadata(IconType.Wifi));
 		
 		public IconType Icon
 		{
