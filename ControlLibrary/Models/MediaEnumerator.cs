@@ -60,7 +60,7 @@ namespace Player.Models
 			var t = this.ToArray();
 			var c = Count;
 			Clear();
-			Extensions.Do(() => Add(t[rand.Next(c)]), c);
+			Extensions.Repeat(() => Add(t[rand.Next(c)]), c);
 		}
 
 		private string _LastQuery;

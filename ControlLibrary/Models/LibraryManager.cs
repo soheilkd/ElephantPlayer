@@ -1,8 +1,9 @@
-﻿using System.Collections.ObjectModel;
+﻿using Player.Models;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 
-namespace Player
+namespace Player.Models
 {
 	public static class LibraryManager
 	{
@@ -18,17 +19,17 @@ namespace Player
 				LoadedCollection = (Collection<Media>)(new BinaryFormatter()).Deserialize(stream);
 			return LoadedCollection;
 		}
-		
+
 		public static void Save(Collection<Media> medias)
 		{
-			var coli = new ObservableCollection<Media>(medias);
-			using (var stream = new FileStream(Path, FileMode.Create))
+			ObservableCollection<Media> coli = new ObservableCollection<Media>(medias);
+			using (FileStream stream = new FileStream(Path, FileMode.Create))
 				(new BinaryFormatter()).Serialize(stream, coli);
 		}
 
 		public static bool TryLoad(string path, out Collection<Media> output)
 		{
-			var last = App.Settings.LibraryLocation;
+			string last = App.Settings.LibraryLocation;
 			App.Settings.LibraryLocation = path;
 			try
 			{

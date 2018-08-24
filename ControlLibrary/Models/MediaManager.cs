@@ -1,13 +1,10 @@
-﻿using Player.Models;
-using System;
+﻿using System;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 
-namespace Player
+namespace Player.Models
 {
-	public enum PlayMode { Repeat, RepeatOne, Shuffle }
-
 	public class MediaManager : ObservableCollection<Media>
 	{
 		public event EventHandler<InfoExchangeArgs<Media>> RequestReceived;
