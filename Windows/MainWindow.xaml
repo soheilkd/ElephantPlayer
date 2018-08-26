@@ -1,26 +1,27 @@
 ﻿<mah:MetroWindow 
 	x:Class="Player.MainWindow" x:Name="window" 
 	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" BorderBrush="#FF43464B"
+	WindowTitleBrush="#FF43464B"
 	xmlns:mah="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
-	xmlns:player="clr-namespace:Player.Controls;assembly=ControlLibrary"
+	xmlns:player="clr-namespace:Player.Controls;assembly=PlayerLibrary"
 	xmlns:system="clr-namespace:System;assembly=mscorlib" Background="{DynamicResource MajorBackground}"
 	Title="Elephant Player" ShowIconOnTitleBar="False" AllowDrop="True"
 	Loaded="Window_Loaded" Closing="Window_Closing" Drop="Window_Drop" KeyUp="Window_KeyUp">
 	<mah:MetroWindow.LeftWindowCommands>
 		<mah:WindowCommands>
 			<StackPanel Orientation="Horizontal">
-				<Menu x:Name="Menu" Background="Transparent">
-					<MenuItem Background="Transparent">
+				<Menu x:Name="Menu">
+					<MenuItem>
 						<MenuItem.Header>
-							<player:Icon Type="ButtonMenu" Foreground="#FEEE"/>
+							<player:Icon Type="ButtonMenu"/>
 						</MenuItem.Header>
 						<MenuItem Header="Run GC"/>
 						<MenuItem Header="About"/>
 					</MenuItem>
-					<MenuItem Background="Transparent">
+					<MenuItem>
 						<MenuItem.Header>
-							<player:Icon Type="Library" Foreground="#FEEE"/>
+							<player:Icon Type="Library"/>
 						</MenuItem.Header>
 						<MenuItem Header="Import Library" Click="Menu_LibraryImportClick"/>
 						<MenuItem Header="Export Library" Click="Menu_LibraryExportClick"/>
@@ -33,16 +34,16 @@
 	</mah:MetroWindow.LeftWindowCommands>
 	<mah:MetroWindow.RightWindowCommands>
 		<mah:WindowCommands>
-			<Menu Background="{DynamicResource AccentColorBrush}">
-				<MenuItem Background="Transparent">
+			<Menu>
+				<MenuItem>
 					<MenuItem.Header>
 						<StackPanel Orientation="Horizontal">
-							<player:Icon Type="Settings" Foreground="#FEEE"/>
+							<player:Icon Type="Settings"/>
 						</StackPanel>
 					</MenuItem.Header>
 					<MenuItem>
 						<MenuItem.Header>
-							<CheckBox x:Name="OrinateCheck" Content="Auto Orinate Vision"/>
+							<CheckBox x:Name="OrinateCheck"/>
 						</MenuItem.Header>
 					</MenuItem>
 					<MenuItem>
@@ -92,7 +93,7 @@
 		</mah:WindowCommands>
 	</mah:MetroWindow.RightWindowCommands>
 	<Grid x:Name="ContentGrid">
-		<DataGrid x:Name="DataGrid" Margin="0,0,0,80" MouseDoubleClick="List_DoubleClick" Background="Transparent" AutoGenerateColumns="False" Sorting="Data_Sorting">
+		<DataGrid x:Name="DataGrid" Margin="0,0,0,80" MouseDoubleClick="List_DoubleClick" Background="Transparent" AutoGenerateColumns="False" Sorting="Data_Sorting" IsReadOnly="True">
 			<DataGrid.ContextMenu>
 				<ContextMenu>
 					<MenuItem Header="Clean Tag" Click="Menu_TagDetergent" />
@@ -111,41 +112,19 @@
 				</ContextMenu>
 			</DataGrid.ContextMenu>
 			<DataGrid.Columns>
-				<DataGridCheckBoxColumn Visibility="{DynamicResource SelectiveBoxesVisibility}" Binding="{Binding Mode=TwoWay, Path=IsSelected}"/>
-				<DataGridTextColumn IsReadOnly="True" FontSize="15" Width="300" Header="Title" Binding="{Binding Title}"/>
-				<DataGridTextColumn IsReadOnly="True" Width="120" Header="Artist" Binding="{Binding Artist}"/>
-				<DataGridTextColumn IsReadOnly="True" Width="120" Header="Album" Binding="{Binding Album}"/>
-				<DataGridTextColumn IsReadOnly="True" Width="60" Header="Plays" Binding="{Binding PlayCount}"/>
-				<DataGridTextColumn IsReadOnly="True" Header="Date Added" Binding="{Binding AdditionDate}"/>
+				<DataGridTextColumn FontSize="15" Width="300" Header="Title" Binding="{Binding Title}"/>
+				<DataGridTextColumn Width="120" Header="Artist" Binding="{Binding Artist}"/>
+				<DataGridTextColumn Width="120" Header="Album" Binding="{Binding Album}"/>
+				<DataGridTextColumn Width="60" Header="Plays" Binding="{Binding PlayCount}"/>
+				<DataGridTextColumn Header="Date Added" Binding="{Binding AdditionDate}"/>
 			</DataGrid.Columns>
 			<DataGrid.RowStyle>
 				<Style TargetType="DataGridRow">
 					<Setter Property="Template" >
 						<Setter.Value>
 							<ControlTemplate TargetType="{x:Type DataGridRow}">
-								<Border x:Name="DGR_Border"
-										Background="Transparent"
-										Margin="1">
-									<SelectiveScrollingGrid>
-										<SelectiveScrollingGrid.ColumnDefinitions>
-											<ColumnDefinition Width="Auto" />
-											<ColumnDefinition Width="*" />
-										</SelectiveScrollingGrid.ColumnDefinitions>
-										<SelectiveScrollingGrid.RowDefinitions>
-											<RowDefinition Height="*" />
-											<RowDefinition Height="Auto" />
-										</SelectiveScrollingGrid.RowDefinitions>
-										<DataGridCellsPresenter Grid.Column="1"
-                                                ItemsPanel="{TemplateBinding ItemsPanel}"
-                                                SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
-										<DataGridDetailsPresenter Grid.Column="1"
-                                                  Grid.Row="1"
-                                                  SelectiveScrollingGrid.SelectiveScrollingOrientation="{Binding AreRowDetailsFrozen, ConverterParameter={x:Static SelectiveScrollingOrientation.Vertical}, Converter={x:Static DataGrid.RowDetailsScrollingConverter}, RelativeSource={RelativeSource AncestorType={x:Type DataGrid}}}"
-                                                  Visibility="{TemplateBinding DetailsVisibility}" />
-										<DataGridRowHeader Grid.RowSpan="2"
-                                           SelectiveScrollingGrid.SelectiveScrollingOrientation="Vertical"
-                                           Visibility="{Binding HeadersVisibility, ConverterParameter={x:Static DataGridHeadersVisibility.Row}, Converter={x:Static DataGrid.HeadersVisibilityConverter}, RelativeSource={RelativeSource AncestorType={x:Type DataGrid}}}" />
-									</SelectiveScrollingGrid>
+								<Border x:Name="DGR_Border" Padding="2">
+									<DataGridCellsPresenter/>
 								</Border>
 								<ControlTemplate.Triggers>
 									<Trigger Property="IsMouseOver" Value="True">
@@ -165,9 +144,9 @@
 			</DataGrid.RowStyle>
 		</DataGrid>
 		<player:MediaPlayer x:Name="Player"/>
-		<player:MaterialButton x:Name="MinimalViewButton" Icon="ClosePaneMirrored" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,12,35" MouseUp="MinimalButton_Clicked"/>
+		<player:Button x:Name="MinimalViewButton" Icon="ClosePaneMirrored" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,12,35" MouseUp="MinimalButton_Clicked"/>
 		<Label x:Name="SearchLabel" Content="{Binding Text, ElementName=SearchBox}" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,190,20"/>
-		<player:MaterialButton x:Name="SearchButton" HorizontalAlignment="Right" VerticalAlignment="Bottom" Icon="Search" MouseUp="SearchIcon_Click" Margin="0,0,195,35" Width="20" Height="20"/>
+		<player:Button x:Name="SearchButton" HorizontalAlignment="Right" VerticalAlignment="Bottom" Icon="Search" MouseUp="SearchIcon_Click" Margin="0,0,195,35" Width="20" Height="20"/>
 		<Popup x:Name="SearchPopup" PlacementTarget="{Binding ElementName=SearchButton}" StaysOpen="False" Placement="Bottom" PopupAnimation="Fade" AllowsTransparency="True">
 			<TextBox HorizontalAlignment="Right" VerticalAlignment="Top" Width="140" Height="20" x:Name="SearchBox" TextChanged="SearchBox_TextChanged" />
 		</Popup>
@@ -177,15 +156,12 @@
 			<ResourceDictionary.MergedDictionaries>
 				<!-- MahApps.Metro resource dictionaries -->
 				<ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Controls.xaml" />
-				<ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Fonts.xaml" />
 				<ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Colors.xaml" />
 				<!-- Accent and AppTheme setting -->
-				<ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Accents/Steel.xaml" />
 				<ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Accents/BaseDark.xaml" />
 			</ResourceDictionary.MergedDictionaries>
 
 			<SolidColorBrush x:Key="MajorBackground" Color="#FF43464B"/>
-			<Visibility x:Key="SelectiveBoxesVisibility">Hidden</Visibility>
 			<system:Double x:Key="MinimalWidthTemp" />
 			<system:Double x:Key="MinimalHeightTemp" />
 			<system:String x:Key="LastPath">D:\\</system:String>
@@ -196,6 +172,11 @@
 						<Setter Property="Foreground" Value="Cyan"/>
 					</DataTrigger>
 				</Style.Triggers>
+			</Style>
+			<Style TargetType="Menu">
+				<Setter Property="Background" Value="{DynamicResource MajorBackground}"/>
+				<Setter Property="Foreground" Value="#EEE"/>
+				<Setter Property="FontSize" Value="14"/>
 			</Style>
 		</ResourceDictionary>
 	</Window.Resources>
