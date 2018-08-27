@@ -134,19 +134,12 @@
   <ItemGroup>
     <Compile Include="App.cs" />
     <Compile Include="Base\Dialogs.cs" />
-    <Compile Include="Base\Extensions.cs" />
-    <Compile Include="Base\Hook.cs" />
     <Compile Include="Base\Images.cs" />
-    <Compile Include="Base\HookEvents.cs" />
     <Compile Include="Base\DeepBackEnd.cs" />
     <Compile Include="Base\Settings.cs" />
-    <Compile Include="Models\LibraryManager.cs" />
-    <Compile Include="Models\Media.cs" />
-    <Compile Include="Models\MediaEnumerator.cs" />
     <Compile Include="Windows\MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Models\MediaManager.cs" />
     <Compile Include="Windows\PropertiesWindow.xaml.cs">
       <DependentUpon>PropertiesWindow.xaml</DependentUpon>
     </Compile>
@@ -206,10 +199,13 @@
     <WCFMetadata Include="Connected Services\" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="ControlLibrary\ControlLibrary.csproj">
+    <ProjectReference Include="ControlLibrary\PlayerLibrary.csproj">
       <Project>{e1811160-1a4f-48f1-8be7-d4fc40b02dd3}</Project>
-      <Name>ControlLibrary</Name>
+      <Name>PlayerLibrary</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\MusicLogo.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

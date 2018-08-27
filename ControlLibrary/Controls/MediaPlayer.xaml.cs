@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Player.Taskbar;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Timers;
@@ -25,7 +26,7 @@ namespace Player.Controls
 			get => _BorderBack;
 			set
 			{
-				var r = (SolidColorBrush)value;
+				SolidColorBrush r = (SolidColorBrush)value;
 				_BorderBack = new SolidColorBrush(new Color()
 				{
 					R = r.Color.R,
@@ -71,7 +72,7 @@ namespace Player.Controls
 			}
 		}
 
-		public Taskbar.Thumb Thumb = new Taskbar.Thumb();
+		public ThumbManager Thumb = new ThumbManager();
 		private Timer PlayCountTimer = new Timer(60000) { AutoReset = false };
 		private Timer MouseMoveTimer = new Timer(5000);
 		public double MouseMoveInterval
@@ -96,7 +97,7 @@ namespace Player.Controls
 		private bool IsUXChangingPosition;
 		public bool IsFullyLoaded;
 		public bool IsFullScreen => FullScreenButton.Icon == IconType.BackToWindow;
-		public bool IsVisionOn { get; set; } 
+		public bool IsVisionOn { get; set; }
 		private bool AreControlsVisible
 		{
 			set
@@ -118,10 +119,10 @@ namespace Player.Controls
 				});
 			}
 		}
-		public bool PlayOnPositionChange { get; set; } 
-		public bool AutoOrinateVision { get; set; } 
+		public bool PlayOnPositionChange { get; set; }
+		public bool AutoOrinateVision { get; set; }
 		private Storyboard VisionOnBoard, FullOnBoard, FullOffBoard;
-		
+
 		public MediaPlayer()
 		{
 			InitializeComponent();
@@ -183,17 +184,17 @@ namespace Player.Controls
 			PlayCounterElapsed?.Invoke(this, null);
 			PlayCountTimer.Stop();
 		}
-		
+
 		private async void Element_MouseMove(object sender, MouseEventArgs e)
 		{
-			var y = ControlsTranslation.Y;
+			double y = ControlsTranslation.Y;
 			await Task.Delay(50);
 			if (ControlsTranslation.Y < y)
 				return;
 			AreControlsVisible = true;
 			MouseMoveTimer.Start();
 		}
-		
+
 		private async void RunUX()
 		{
 			UX:
@@ -209,7 +210,7 @@ namespace Player.Controls
 
 		private async void Position_Holding(object sender, MouseButtonEventArgs e)
 		{
-			var but = PlayPauseButton.Icon;
+			IconType but = PlayPauseButton.Icon;
 			await element.Pause();
 			while (e.ButtonState == MouseButtonState.Pressed)
 				await Task.Delay(50);
@@ -309,10 +310,10 @@ namespace Player.Controls
 			AreControlsVisible = true;
 			element.VerticalAlignment = IsVisionOn ? VerticalAlignment.Stretch : VerticalAlignment.Bottom;
 			element.HorizontalAlignment = IsVisionOn ? HorizontalAlignment.Stretch : HorizontalAlignment.Left;
-			element.Width = IsVisionOn ? Double.NaN : 50d;
-			element.Height = IsVisionOn ? Double.NaN : 50d;
+			element.Width = IsVisionOn ? double.NaN : 50d;
+			element.Height = IsVisionOn ? double.NaN : 50d;
 			element.Margin = IsVisionOn ? new Thickness(0) : new Thickness(6, 0, 0, 28);
-			element.SetValue(Panel.ZIndexProperty, IsVisionOn ? 0: 1);
+			element.SetValue(Panel.ZIndexProperty, IsVisionOn ? 0 : 1);
 		}
 
 		public void Next() => NextButton.EmulateClick();

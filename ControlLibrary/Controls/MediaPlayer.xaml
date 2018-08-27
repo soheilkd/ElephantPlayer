@@ -14,14 +14,14 @@
 		<Grid x:Name="ControlsGrid" Background="Transparent" VerticalAlignment="Bottom" Height="94">
 			<Border HorizontalAlignment="Left" VerticalAlignment="Bottom" Width="149" Margin="73,0,0,4" CornerRadius="10">
 				<Grid VerticalAlignment="Top" Margin="0,14,0,0">
-					<local:MaterialButton x:Name="PreviousButton" HorizontalAlignment="Left" Icon="Previous" Margin="13,0,0,35" MouseUp="PreviousButton_Clicked"/>
-					<local:MaterialButton x:Name="PlayPauseButton" HorizontalAlignment="Center" Icon="Play" Margin="0,0,0,35" MouseUp="PlayPauseButton_Clicked" Height="26" Width="26"/>
-					<local:MaterialButton x:Name="NextButton" HorizontalAlignment="Right" Icon="Next" Margin="0,0,13,35" MouseUp="NextButton_Clicked" />
+					<local:Button x:Name="PreviousButton" HorizontalAlignment="Left" Icon="Previous" Margin="13,0,0,35" MouseUp="PreviousButton_Clicked"/>
+					<local:Button x:Name="PlayPauseButton" HorizontalAlignment="Center" Icon="Play" Margin="0,0,0,35" MouseUp="PlayPauseButton_Clicked" Height="26" Width="26"/>
+					<local:Button x:Name="NextButton" HorizontalAlignment="Right" Icon="Next" Margin="0,0,13,35" MouseUp="NextButton_Clicked" />
 				</Grid>
 			</Border>
 			<Border x:Name="VolumeBorder" HorizontalAlignment="Right" VerticalAlignment="Bottom" Height="72" CornerRadius="10" Width="187">
 				<Grid>
-					<local:MaterialButton x:Name="FullScreenButton" Icon="FullScreen" HorizontalAlignment="Right" Margin="0,0,10,35" VerticalAlignment="Bottom" MouseUp="FullScreenButton_Clicked"/>
+					<local:Button x:Name="FullScreenButton" Icon="FullScreen" HorizontalAlignment="Right" Margin="0,0,10,35" VerticalAlignment="Bottom" MouseUp="FullScreenButton_Clicked"/>
 					<local:Icon x:Name="VolumeIcon" Type="Volume" Width="25" Height="25" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0, 0, 155, 33" />
 					<Slider x:Name="VolumeSlider" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,6,50,26" IsMoveToPointEnabled="True" Foreground="#F444"
                     Width="100" Maximum="99" SmallChange="2" LargeChange="10" AutoToolTipPlacement="TopLeft" ValueChanged="VolumeSlider_Changed"/>

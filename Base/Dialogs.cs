@@ -1,16 +1,15 @@
 ﻿using Microsoft.Win32;
-using System;
 using System.Linq;
 
 namespace Player
 {
 	public static class Dialogs
 	{
-		public static readonly string LibraryFilter = "Serialized Library (.bin)|*.bin";
+		public const string LibraryFilter = "Serialized Library |*.bin";
 
 		public static bool RequestFile(out string[] files, string filter, bool multiSelect = false)
 		{
-			var dialog = new OpenFileDialog()
+			OpenFileDialog dialog = new OpenFileDialog()
 			{
 				Multiselect = multiSelect,
 				Filter = filter
@@ -29,7 +28,7 @@ namespace Player
 
 		public static bool RequestSave(out string output, string filter)
 		{
-			var dialog = new SaveFileDialog()
+			SaveFileDialog dialog = new SaveFileDialog()
 			{
 				Filter = filter
 			};
@@ -40,7 +39,7 @@ namespace Player
 			}
 			else
 			{
-				output = String.Empty;
+				output = string.Empty;
 				return false;
 			}
 		}

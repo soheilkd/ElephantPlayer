@@ -1,6 +1,7 @@
 ﻿using MahApps.Metro.Controls;
 using Microsoft.Win32;
-using Player.Hook;
+using Player.LibraryHook;
+using Player.Models;
 using System;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -169,6 +170,7 @@ namespace Player
 		{
 			if (IsActive && SearchBox.IsFocused)
 				return;
+			Console.WriteLine(e.Key);
 			//Key shortcuts when window is active and main key is down
 			if (IsActive && e.Key.HasFlag(Key.LeftShift))
 			{
@@ -446,6 +448,6 @@ namespace Player
 		}
 
 		private void For(Action<Media> action) =>
-			Manager.For(each => action(each), each => each.IsSelected);
+			DataGrid.SelectedItems.Cast<Media>().ToArray().For(each => action(each));
 	}
 }
