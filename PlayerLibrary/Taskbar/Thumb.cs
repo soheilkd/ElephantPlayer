@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Windows.Shell;
+using Player.Extensions;
 using Player.Properties;
 
 namespace Player.Taskbar
@@ -14,7 +15,7 @@ namespace Player.Taskbar
 		private ThumbButtonInfo PlayThumb = new ThumbButtonInfo()
 		{
 			Description = "Play",
-			ImageSource = Resources.NextImage.ToImageSource()
+			ImageSource = Resources.PlayImage.ToImageSource()
 		};
 		private ThumbButtonInfo PauseThumb = new ThumbButtonInfo()
 		{

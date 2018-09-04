@@ -1,4 +1,5 @@
-﻿using Player.Taskbar;
+﻿using Player.Extensions;
+using Player.Taskbar;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
