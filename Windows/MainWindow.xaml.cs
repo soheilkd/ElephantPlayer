@@ -1,6 +1,8 @@
 ﻿using MahApps.Metro.Controls;
 using Microsoft.Win32;
-using Player.LibraryHook;
+using Player.Extensions;
+using Player.Hook;
+using Player.Library;
 using Player.Models;
 using System;
 using System.ComponentModel;
@@ -38,7 +40,7 @@ namespace Player
 			CheckPathExists = true,
 			CreatePrompt = false,
 			DereferenceLinks = true,
-			InitialDirectory = App.Settings.LastPath
+			InitialDirectory = Settings.Current.LastPath
 		};
 
 		private MediaManager Manager = new MediaManager();
@@ -68,39 +70,39 @@ namespace Player
 			DataGrid.ItemsSource = Manager.QueueEnumerator;
 
 			TaskbarItemInfo = Player.Thumb.Info;
-			Resources["LastPath"] = App.Settings.LastPath;
+			Resources["LastPath"] = Settings.Current.LastPath;
 
 			Player.NextClicked += (_, __) => Play(Manager.Next());
 			Player.PreviousClicked += (_, __) => Play(Manager.Previous());
 			Player.VisionChanged += (_, e) => ControlsNotNeededOnVisionVisibility = e.Parameter ? Visibility.Hidden : Visibility.Visible;
-			Player.AutoOrinateVision = App.Settings.VisionOrientation;
-			Player.PlayOnPositionChange = App.Settings.PlayOnPositionChange;
+			Player.AutoOrinateVision = Settings.Current.VisionOrientation;
+			Player.PlayOnPositionChange = Settings.Current.PlayOnPositionChange;
 			Player.PlayCounterElapsed += (_, __) => Manager.Current.PlayCount++;
 			
-			OrinateCheck.IsChecked = App.Settings.VisionOrientation;
-			LiveLibraryCheck.IsChecked = App.Settings.LiveLibrary;
-			ExplicitCheck.IsChecked = App.Settings.ExplicitContent;
-			PlayOnPosCheck.IsChecked = App.Settings.PlayOnPositionChange;
-			RevalidOnExitCheck.IsChecked = App.Settings.RevalidateOnExit;
-			TimeoutCombo.SelectedIndex = App.Settings.MouseTimeoutIndex;
+			OrinateCheck.IsChecked = Settings.Current.VisionOrientation;
+			LiveLibraryCheck.IsChecked = Settings.Current.LiveLibrary;
+			ExplicitCheck.IsChecked = Settings.Current.ExplicitContent;
+			PlayOnPosCheck.IsChecked = Settings.Current.PlayOnPositionChange;
+			RevalidOnExitCheck.IsChecked = Settings.Current.RevalidateOnExit;
+			TimeoutCombo.SelectedIndex = Settings.Current.MouseTimeoutIndex;
 
-			TimeoutCombo.SelectionChanged += (_, __) => App.Settings.MouseTimeoutIndex = TimeoutCombo.SelectedIndex;
-			OrinateCheck.Checked += (_, __) => App.Settings.VisionOrientation = true;
-			OrinateCheck.Unchecked += (_, __) => App.Settings.VisionOrientation = false;
-			LiveLibraryCheck.Checked += (_, __) => App.Settings.LiveLibrary = true;
-			LiveLibraryCheck.Unchecked += (_, __) => App.Settings.LiveLibrary = false;
-			ExplicitCheck.Checked += (_, __) => App.Settings.ExplicitContent = true;
-			ExplicitCheck.Unchecked += (_, __) => App.Settings.ExplicitContent = false;
-			PlayOnPosCheck.Checked += (_, __) => App.Settings.PlayOnPositionChange = true;
-			PlayOnPosCheck.Unchecked += (_, __) => App.Settings.PlayOnPositionChange = false;
-			RevalidOnExitCheck.Checked += (_, __) => App.Settings.RevalidateOnExit = true;
-			RevalidOnExitCheck.Unchecked += (_, __) => App.Settings.RevalidateOnExit = false;
-			RememberMinimalCheck.Checked += (_, __) => App.Settings.RememberMinimal = true;
-			RememberMinimalCheck.Unchecked += (_, __) => App.Settings.RememberMinimal = false;
+			TimeoutCombo.SelectionChanged += (_, __) => Settings.Current.MouseTimeoutIndex = TimeoutCombo.SelectedIndex;
+			OrinateCheck.Checked += (_, __) => Settings.Current.VisionOrientation = true;
+			OrinateCheck.Unchecked += (_, __) => Settings.Current.VisionOrientation = false;
+			LiveLibraryCheck.Checked += (_, __) => Settings.Current.LiveLibrary = true;
+			LiveLibraryCheck.Unchecked += (_, __) => Settings.Current.LiveLibrary = false;
+			ExplicitCheck.Checked += (_, __) => Settings.Current.ExplicitContent = true;
+			ExplicitCheck.Unchecked += (_, __) => Settings.Current.ExplicitContent = false;
+			PlayOnPosCheck.Checked += (_, __) => Settings.Current.PlayOnPositionChange = true;
+			PlayOnPosCheck.Unchecked += (_, __) => Settings.Current.PlayOnPositionChange = false;
+			RevalidOnExitCheck.Checked += (_, __) => Settings.Current.RevalidateOnExit = true;
+			RevalidOnExitCheck.Unchecked += (_, __) => Settings.Current.RevalidateOnExit = false;
+			RememberMinimalCheck.Checked += (_, __) => Settings.Current.RememberMinimal = true;
+			RememberMinimalCheck.Unchecked += (_, __) => Settings.Current.RememberMinimal = false;
 			Player.BorderBack = Background;
-			Player.ChangeFFmpegDirectory($@"{App.Path}\ffmpeg");
-			Player.ChangeVolumeBySlider(App.Settings.Volume * 100);
-			Player.Volume = App.Settings.Volume;
+			Player.ChangeFFmpegDirectory($@"{Settings.AppPath}\ffmpeg");
+			Player.ChangeVolumeBySlider(Settings.Current.Volume * 100);
+			Player.Volume = Settings.Current.Volume;
 
 			foreach (var item in this.FindChildren<MenuItem>())
 				item.Background = Menu.Background;
@@ -108,8 +110,8 @@ namespace Player
 				item.Background = Menu.Background;
 			#endregion
 			
-			Left = App.Settings.LastLocation.X;
-			Top = App.Settings.LastLocation.Y;
+			Left = Settings.Current.LastLocation.X;
+			Top = Settings.Current.LastLocation.Y;
 		}
 		
 		private void Player_FullScreenClicked(object sender, EventArgs e)
@@ -209,13 +211,13 @@ namespace Player
 		private async void Window_Loaded(object sender, RoutedEventArgs e)
 		{
 			Height = 1;
-			TempHeight = App.Settings.LastSize.Height;
-			TempWidth = App.Settings.LastSize.Width;
-			if (App.Settings.RememberMinimal && App.Settings.WasMinimal)
+			TempHeight = Settings.Current.LastSize.Height;
+			TempWidth = Settings.Current.LastSize.Width;
+			if (Settings.Current.RememberMinimal && Settings.Current.WasMinimal)
 			{
 				MinimalViewButton.EmulateClick();
-				TempHeight = App.Settings.LastSize.Height;
-				TempWidth = App.Settings.LastSize.Width;
+				TempHeight = Settings.Current.LastSize.Height;
+				TempWidth = Settings.Current.LastSize.Width;
 			}
 			else
 			{
@@ -228,11 +230,11 @@ namespace Player
 		}
 		private void Window_Closing(object sender, CancelEventArgs e)
 		{
-			App.Settings.LastSize = new Size(Width <= 310 ? TempWidth: Width, Height <= 130 ? TempHeight : Height);
-			App.Settings.LastLocation = new Point(Left, Top);
-			App.Settings.WasMinimal = Height <= 131;
-			App.Settings.Volume = Player.Volume;
-			App.Settings.Save();
+			Settings.Current.LastSize = new Size(Width <= 310 ? TempWidth: Width, Height <= 130 ? TempHeight : Height);
+			Settings.Current.LastLocation = new Point(Left, Top);
+			Settings.Current.WasMinimal = Height <= 131;
+			Settings.Current.Volume = Player.Volume;
+			Settings.Current.Save();
 			Manager.CloseSeason();
 			Application.Current.Shutdown();
 		}
@@ -309,8 +311,8 @@ namespace Player
 					MediaTransferDialog.Title = "Move";
 					if (MediaTransferDialog.ShowDialog().Value)
 					{
-						App.Settings.LastPath = MediaTransferDialog.FileName.Substring(0, MediaTransferDialog.FileName.LastIndexOf('\\') + 1);
-						Resources["LastPath"] = App.Settings.LastPath;
+						Settings.Current.LastPath = MediaTransferDialog.FileName.Substring(0, MediaTransferDialog.FileName.LastIndexOf('\\') + 1);
+						Resources["LastPath"] = Settings.Current.LastPath;
 						goto default;
 					}
 					break;
@@ -327,8 +329,8 @@ namespace Player
 					MediaTransferDialog.Title = "Copy";
 					if (MediaTransferDialog.ShowDialog().Value)
 					{
-						App.Settings.LastPath = MediaTransferDialog.FileName.Substring(0, MediaTransferDialog.FileName.LastIndexOf('\\') + 1);
-						Resources["LastPath"] = App.Settings.LastPath;
+						Settings.Current.LastPath = MediaTransferDialog.FileName.Substring(0, MediaTransferDialog.FileName.LastIndexOf('\\') + 1);
+						Resources["LastPath"] = Settings.Current.LastPath;
 						goto default;
 					}
 					break;
@@ -387,14 +389,14 @@ namespace Player
 			PlayModeSubMenu.Items[2].As<MenuItem>().IsChecked = false;
 			byte tag = byte.Parse(sender.As<MenuItem>().Tag.ToString());
 			PlayModeSubMenu.Items[tag].As<MenuItem>().IsChecked = true;
-			App.Settings.PlayMode = (PlayMode)tag;
+			Settings.Current.PlayMode = (PlayMode)tag;
 		}
 		private void Menu_LibraryImportClick(object sender, RoutedEventArgs e)
 		{
 			if (Dialogs.RequestFile(out var file, Dialogs.LibraryFilter))
 				if (LibraryManager.TryLoad(file[0], out var lib))
 				{
-					App.Settings.LibraryLocation = file[0];
+					Settings.Current.LibraryLocation = file[0];
 					Manager.Clear();
 					lib.For(each => Manager.Add(each));
 				}
@@ -405,8 +407,8 @@ namespace Player
 			{
 				if (!file.EndsWith(".bin"))
 					file += ".bin";
-				if (!file.StartsWith(App.Path)) App.Settings.LibraryLocation = file;
-				else App.Settings.LibraryLocation = file.Replace(App.Path, String.Empty);
+				if (!file.StartsWith(Settings.AppPath)) Settings.Current.LibraryLocation = file;
+				else Settings.Current.LibraryLocation = file.Replace(Settings.AppPath, String.Empty);
 				LibraryManager.Save(Manager);
 			}
 		}

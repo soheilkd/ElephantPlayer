@@ -1,5 +1,6 @@
 ﻿using MahApps.Metro.Controls;
 using Microsoft.Win32;
+using Player.Extensions;
 using Player.Models;
 using System;
 using System.Windows;
@@ -48,7 +49,7 @@ namespace Player
 			YearBox.Text = tag.Year.ToString() ?? string.Empty;
 			CopyrightBox.Text = tag.Copyright ?? string.Empty;
 			LyricsBox.Text = tag.Lyrics ?? string.Empty;
-			ArtworkImage.Source = tag.Pictures.Length >= 1 ? Images.GetBitmap(tag.Pictures[0]) : Properties.Resources.MusicLogo.ToImageSource();
+			ArtworkImage.Source = tag.Pictures.Length >= 1 ? tag.Pictures[0].GetBitmap() : Properties.Resources.MusicLogo.ToImageSource();
 			Show();
 		}
 
