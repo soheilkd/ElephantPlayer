@@ -407,8 +407,7 @@ namespace Player
 			{
 				if (!file.EndsWith(".bin"))
 					file += ".bin";
-				if (!file.StartsWith(Settings.AppPath)) Settings.Current.LibraryLocation = file;
-				else Settings.Current.LibraryLocation = file.Replace(Settings.AppPath, String.Empty);
+				Settings.Current.LibraryLocation = file;
 				LibraryManager.Save(Manager);
 			}
 		}
