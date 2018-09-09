@@ -6,7 +6,7 @@ namespace Player.Controls
 	public partial class Icon : ContentControl
 	{
 		public static readonly DependencyProperty TypeProperty =
-			DependencyProperty.Register(nameof(Type), typeof(IconType), typeof(Icon), new PropertyMetadata(IconType.Wifi));
+			DependencyProperty.Register(nameof(Type), typeof(IconType), typeof(Icon), new PropertyMetadata(IconType.Menu));
 
 		public IconType Type
 		{
@@ -14,7 +14,7 @@ namespace Player.Controls
 			set
 			{
 				SetValue(TypeProperty, value);
-				textBlock.Text = Properties.Resources.ResourceManager.GetString(value.ToString());
+				MainPath.Data = IconProvider.GetPath(value);
 			}
 		}
 

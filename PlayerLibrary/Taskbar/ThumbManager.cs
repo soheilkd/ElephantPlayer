@@ -1,7 +1,6 @@
-﻿using System;
+﻿using Player.Controls;
+using System;
 using System.Windows.Shell;
-using Player.Extensions;
-using Player.Properties;
 
 namespace Player.Taskbar
 {
@@ -15,22 +14,22 @@ namespace Player.Taskbar
 		private ThumbButtonInfo PlayThumb = new ThumbButtonInfo()
 		{
 			Description = "Play",
-			ImageSource = Resources.PlayImage.ToImageSource()
+			ImageSource = IconProvider.GetBitmap(IconType.Play)
 		};
 		private ThumbButtonInfo PauseThumb = new ThumbButtonInfo()
 		{
 			Description = "Pause",
-			ImageSource = Resources.PauseImage.ToImageSource()
+			ImageSource = IconProvider.GetBitmap(IconType.Pause)
 		};
 		private ThumbButtonInfo PreviousThumb = new ThumbButtonInfo()
 		{
 			Description = "Previous",
-			ImageSource = Resources.PreviousImage.ToImageSource()
+			ImageSource = IconProvider.GetBitmap(IconType.Previous)
 		};
 		private ThumbButtonInfo NextThumb = new ThumbButtonInfo()
 		{
 			Description = "Next",
-			ImageSource = Resources.NextImage.ToImageSource()
+			ImageSource = IconProvider.GetBitmap(IconType.Next)
 		};
 
 		private Command PlayHandler = new Command();
@@ -56,7 +55,7 @@ namespace Player.Taskbar
 			Info.ThumbButtonInfos.Add(NextThumb);
 		}
 
-		public void SetPlayingState(bool isPlaying) 
+		public void SetPlayingState(bool isPlaying)
 			=> Info.ThumbButtonInfos[1] = isPlaying ? PauseThumb : PlayThumb;
 	}
 }
