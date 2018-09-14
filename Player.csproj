@@ -98,9 +98,6 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="ControlzEx, Version=3.0.2.4, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>packages\ControlzEx.3.0.2.4\lib\net462\ControlzEx.dll</HintPath>
-    </Reference>
     <Reference Include="MahApps.Metro, Version=1.6.5.1, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>packages\MahApps.Metro.1.6.5\lib\net47\MahApps.Metro.dll</HintPath>
     </Reference>
@@ -109,12 +106,7 @@
       <EmbedInteropTypes>False</EmbedInteropTypes>
     </Reference>
     <Reference Include="System.Drawing" />
-    <Reference Include="System.Management" />
-    <Reference Include="System.Runtime.Remoting" />
     <Reference Include="System.Windows" />
-    <Reference Include="System.Windows.Interactivity, Version=4.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>packages\ControlzEx.3.0.2.4\lib\net462\System.Windows.Interactivity.dll</HintPath>
-    </Reference>
     <Reference Include="System.Xaml">
       <RequiredTargetFramework>4.0</RequiredTargetFramework>
     </Reference>
@@ -124,7 +116,6 @@
     <Reference Include="PresentationFramework">
       <Private>False</Private>
     </Reference>
-    <Reference Include="System.Xml" />
     <Reference Include="taglib-sharp, Version=2.1.0.0, Culture=neutral, PublicKeyToken=db62eba44689b5b0, processorArchitecture=MSIL">
       <HintPath>packages\taglib.2.1.0.0\lib\taglib-sharp.dll</HintPath>
       <Private>True</Private>
@@ -133,10 +124,30 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="App.cs" />
-    <Compile Include="Base\Dialogs.cs" />
-    <Compile Include="Base\Images.cs" />
-    <Compile Include="Base\DeepBackEnd.cs" />
-    <Compile Include="Base\Settings.cs" />
+    <Compile Include="Extensions\CollectionExtensions.cs" />
+    <Compile Include="Extensions\ImagingExtensions.cs" />
+    <Compile Include="Extensions\MiscExtensions.cs" />
+    <Compile Include="Extensions\ObjectExtensions.cs" />
+    <Compile Include="Extensions\StringExtensions.cs" />
+    <Compile Include="Hook\Events.cs" />
+    <Compile Include="Hook\InterceptKeys.cs" />
+    <Compile Include="Hook\KeyboardListener.cs" />
+    <Compile Include="Hook\RawKeyEventArgs.cs" />
+    <Compile Include="Instances\Instance.cs" />
+    <Compile Include="Instances\InstanceEventArgs.cs" />
+    <Compile Include="Instances\ISingleInstanceApp.cs" />
+    <Compile Include="Models\LibraryManager.cs" />
+    <Compile Include="Models\Media.cs" />
+    <Compile Include="Models\MediaEnumerator.cs" />
+    <Compile Include="Models\MediaManager.cs" />
+    <Compile Include="Models\MediaType.cs" />
+    <Compile Include="Models\Playlist.cs" />
+    <Compile Include="Models\PlayMode.cs" />
+    <Compile Include="Models\SerializableBitmap.cs" />
+    <Compile Include="Native\NativeMethods.cs" />
+    <Compile Include="Native\WM.cs" />
+    <Compile Include="Taskbar\Command.cs" />
+    <Compile Include="Taskbar\ThumbManager.cs" />
     <Compile Include="Windows\MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
     </Compile>
@@ -199,13 +210,13 @@
     <WCFMetadata Include="Connected Services\" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="ControlLibrary\PlayerLibrary.csproj">
+    <None Include="Resources\MusicLogo.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="PlayerLibrary\PlayerLibrary.csproj">
       <Project>{e1811160-1a4f-48f1-8be7-d4fc40b02dd3}</Project>
       <Name>PlayerLibrary</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\MusicLogo.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

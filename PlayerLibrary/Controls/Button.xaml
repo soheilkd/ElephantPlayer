@@ -5,8 +5,9 @@
 			 xmlns:controls="clr-namespace:Player.Controls">
 	<Grid>
 		<Ellipse x:Name="MainEllipse" Margin="-7" Fill="Gray" Opacity="0"/>
-		<Ellipse x:Name="ClickEllipse" Stroke="{Binding Foreground,ElementName=P}" StrokeThickness="0" />
-		<controls:Icon x:Name="MainIcon" Foreground="{Binding Foreground, ElementName=P}" Width="Auto" Height="Auto"/>
+		<Ellipse x:Name="ClickEllipse" Stroke="{Binding P.Foreground}" StrokeThickness="0" />
+		<controls:Icon x:Name="MainIcon" Foreground="{Binding Foreground,ElementName=P}" VerticalAlignment="Center" HorizontalAlignment="Center"
+					   Height="{Binding Height, ElementName=P}" Width="{Binding Width, ElementName=P}"/>
 	</Grid>
 	<UserControl.Triggers>
 		<EventTrigger RoutedEvent="MouseEnter">

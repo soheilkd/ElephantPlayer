@@ -1,6 +1,4 @@
-﻿using Player.Extensions;
-using Player.Taskbar;
-using System;
+﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Timers;
@@ -9,6 +7,8 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
+using Player.Extensions;
+using Player.Taskbar;
 
 namespace Player.Controls
 {
@@ -56,9 +56,8 @@ namespace Player.Controls
 				switch (element.Volume)
 				{
 					case double n when (n <= 0.1): VolumeIcon.Type = IconType.Volume0; break;
-					case double n when (n <= 0.4): VolumeIcon.Type = IconType.Volume1; break;
-					case double n when (n <= 0.7): VolumeIcon.Type = IconType.Volume2; break;
-					default: VolumeIcon.Type = IconType.Volume3; break;
+					case double n when (n <= 0.6): VolumeIcon.Type = IconType.Volume1; break;
+					default: VolumeIcon.Type = IconType.Volume2; break;
 				}
 			}
 		}
@@ -97,7 +96,7 @@ namespace Player.Controls
 		}
 		private bool IsUXChangingPosition;
 		public bool IsFullyLoaded;
-		public bool IsFullScreen => FullScreenButton.Icon == IconType.BackToWindow;
+		public bool IsFullScreen => FullScreenButton.Icon == IconType.FullScreenExit;
 		public bool IsVisionOn { get; set; }
 		private bool AreControlsVisible
 		{
@@ -249,7 +248,7 @@ namespace Player.Controls
 		}
 		private void FullScreenButton_Clicked(object sender, MouseButtonEventArgs e)
 		{
-			FullScreenButton.Icon = FullScreenButton.Icon == IconType.FullScreen ? IconType.BackToWindow : IconType.FullScreen;
+			FullScreenButton.Icon = FullScreenButton.Icon == IconType.FullScreen ? IconType.FullScreenExit : IconType.FullScreen;
 			FullScreenToggled?.Invoke(this, null);
 		}
 		private void VolumeSlider_Changed(object sender, RoutedPropertyChangedEventArgs<double> e)

@@ -58,8 +58,8 @@ namespace Player.Models
 		public void Shuffle()
 		{
 			Random rand = new Random(DateTime.Now.Millisecond);
-			var t = this.ToArray();
-			var c = Count;
+			Media[] t = this.ToArray();
+			int c = Count;
 			Clear();
 			MiscExtensions.Repeat(() => Add(t[rand.Next(c)]), c);
 		}
@@ -68,25 +68,25 @@ namespace Player.Models
 		public void Filter(IEnumerable<Media> originalCollection, string query = "")
 		{
 			_LastQuery = query;
+			IEnumerable<Media> coli = originalCollection;
 			if (originalCollection.AsParallel().Where(each => each.Matches(query)).Count() == 0)
 			{
-				Filter(originalCollection, String.Empty);
+				Filter(originalCollection, string.Empty);
 				return;
 			}
-			var c = Current;
-			ClearItems(); 
-			foreach (var item in originalCollection.Where(each => each.Matches(query)))
-				 Add(item);
+			Media c = Current;
+			ClearItems();
+			foreach (Media item in originalCollection.Where(each => each.Matches(query)))
+				Add(item);
 			_position = IndexOf(c) != -1 ? IndexOf(c) : 0;
 		}
 
 		public void SortBy<T>(Func<Media, T> keySelector, bool asc = true)
 		{
-			var p = this.ToArray();
-			Clear();
-			if (asc) p.OrderBy(keySelector).ForEach(each => Add(each));
-			else p.OrderByDescending(keySelector).ForEach(each => Add(each));
-			p = null;
+			Media[] p = (asc ? this.OrderBy(keySelector) : this.OrderByDescending(keySelector)).ToArray();
+			for (int i = 0; i < Count; i++)
+				if (p[i] != this[i])
+					Move(IndexOf(p[i]), i);
 		}
 	}
 }
