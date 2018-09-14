@@ -3,7 +3,6 @@ using System.IO;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using Draw = System.Drawing;
 
 namespace Player.Controls
 {
@@ -11,7 +10,7 @@ namespace Player.Controls
 	{
 		private static readonly ResourceDictionary Icons = new ResourceDictionary()
 		{
-			Source = new Uri("/PlayerLibrary;component/Controls/Icons.xaml", UriKind.RelativeOrAbsolute)
+			Source = new Uri("/Player.Controls;component/Icons.xaml", UriKind.RelativeOrAbsolute)
 		};
 
 		internal static StreamGeometry GetPath(IconType type)

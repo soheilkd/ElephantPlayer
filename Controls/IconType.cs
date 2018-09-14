@@ -16,6 +16,8 @@
 		FullScreen,
 		FullScreenExit,
 		ExpandPane,
-		CollapsePane
+		CollapsePane,
+		VisionOn,
+		VisionOff
 	}
 }

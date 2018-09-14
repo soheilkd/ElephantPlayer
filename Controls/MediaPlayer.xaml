@@ -4,28 +4,31 @@
 			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 			 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 			 xmlns:player="clr-namespace:Player.Controls"
-			 xmlns:ff="clr-namespace:Unosquare.FFME;assembly=ffme.win"
 			 MouseMove="Element_MouseMove"
 			 mc:Ignorable="d" Loaded="UserControl_Loaded" x:Name="ParentControl"
              d:DesignHeight="300" d:DesignWidth="600">
 	<Grid>
-		<ff:MediaElement MouseDoubleClick="Element_MouseUp" x:Name="element" LoadedBehavior="Play" Background="Black" UnloadedBehavior="Manual" ScrubbingEnabled="True"
-						 HorizontalAlignment="Left" VerticalAlignment="Bottom" Width="50" Height="50" Margin="6,0,0,28"/>
+		<Canvas x:Name="ElementCanvas" >
+			<MediaElement x:Name="element" LoadedBehavior="Manual" UnloadedBehavior="Manual" ScrubbingEnabled="True"/>
+		</Canvas>
 		<Grid x:Name="ControlsGrid" Background="Transparent" VerticalAlignment="Bottom" Height="94">
 			<Border HorizontalAlignment="Left" VerticalAlignment="Bottom" Width="149" Margin="73,0,0,4" CornerRadius="10">
-				<Grid VerticalAlignment="Top" Margin="0,14,0,0">
-					<player:Button x:Name="PreviousButton" HorizontalAlignment="Left" Icon="Previous" Margin="13,0,0,35" MouseUp="PreviousButton_Clicked"/>
-					<player:Button x:Name="PlayPauseButton" HorizontalAlignment="Center" Icon="Play" Margin="0,0,0,35" MouseUp="PlayPauseButton_Clicked"/>
-					<player:Button x:Name="NextButton" HorizontalAlignment="Right" Icon="Next" Margin="0,0,13,35" MouseUp="NextButton_Clicked" />
+				<Grid Margin="0,14,0,0">
+					<player:Button x:Name="PreviousButton" Icon="Previous" HorizontalAlignment="Left" Margin="13,0,0,35" MouseUp="PreviousButton_Clicked"/>
+					<player:Button x:Name="PlayPauseButton" Icon="Play" HorizontalAlignment="Center" Margin="0,0,0,35" MouseUp="PlayPauseButton_Clicked"/>
+					<player:Button x:Name="NextButton" Icon="Next" HorizontalAlignment="Right" Margin="0,0,13,35" MouseUp="NextButton_Clicked" />
 				</Grid>
 			</Border>
 			<Border x:Name="VolumeBorder" HorizontalAlignment="Right" VerticalAlignment="Bottom" Height="72" CornerRadius="10" Width="187">
 				<Grid>
-					<player:Button x:Name="FullScreenButton" Icon="FullScreen" HorizontalAlignment="Right" Margin="0,0,10,35" VerticalAlignment="Bottom" MouseUp="FullScreenButton_Clicked"/>
-					<player:Icon x:Name="VolumeIcon" Type="Volume2" Width="25" Height="25" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0, 0, 155, 33" />
+					<player:Button x:Name="FullScreenButton" HorizontalAlignment="Right" Margin="0,0,10,35" VerticalAlignment="Bottom" MouseUp="FullScreenButton_Clicked"/>
+					<player:Icon x:Name="VolumeIcon" Width="25" Height="25" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0, 0, 155, 33" />
 					<Slider x:Name="VolumeSlider" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,6,50,26" IsMoveToPointEnabled="True" Foreground="#F444"
                     Width="100" Maximum="99" SmallChange="2" LargeChange="10" AutoToolTipPlacement="TopLeft" ValueChanged="VolumeSlider_Changed"/>
 				</Grid>
+			</Border>
+			<Border HorizontalAlignment="Center" VerticalAlignment="Bottom" Width="60" Height="74" CornerRadius="10">
+				<player:Button x:Name="VisionButton" Icon="VisionOn" VerticalAlignment="Top" Margin="0,14,0,0" MouseUp="Button_MouseUp"/>
 			</Border>
 			<Border Height="27" VerticalAlignment="Bottom">
 				<Grid>
@@ -57,8 +60,11 @@
 				</Setter.Value>
 			</Setter>
 		</Style>
-		<Storyboard x:Key="VisionOnBoard" Storyboard.TargetName="element" AccelerationRatio="0.4" DecelerationRatio="0.6" SpeedRatio="1">
-			<DoubleAnimation From="0" To="1" Storyboard.TargetProperty="Opacity" />
+		<Storyboard x:Key="VisionOnBoard" Storyboard.TargetName="ElementCanvas" AccelerationRatio="0.4" DecelerationRatio="0.6" SpeedRatio="1">
+			<ThicknessAnimation From="{Binding Margin, ElementName=ElementCanvas}" To="0" Storyboard.TargetProperty="Margin" />
+		</Storyboard>
+		<Storyboard x:Key="VisionOffBoard" Storyboard.TargetName="ElementCanvas" AccelerationRatio="0.4" DecelerationRatio="0.6" SpeedRatio="1">
+			<ThicknessAnimation From="{Binding Margin, ElementName=ElementCanvas}" To="1000" Storyboard.TargetProperty="Margin" />
 		</Storyboard>
 		<Storyboard x:Key="FullOnBoard" Storyboard.TargetProperty="Y" Storyboard.TargetName="ControlsTranslation" AccelerationRatio="0.4" DecelerationRatio="0.6">
 			<DoubleAnimation From="{Binding ElementName=ControlsTranslation, Path=Y}" To="90" SpeedRatio="1.5"/>

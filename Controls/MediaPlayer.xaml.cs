@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using System.Threading.Tasks;
 using System.Timers;
 using System.Windows;
@@ -121,7 +120,7 @@ namespace Player.Controls
 		}
 		public bool PlayOnPositionChange { get; set; }
 		public bool AutoOrinateVision { get; set; }
-		private Storyboard VisionOnBoard, FullOnBoard, FullOffBoard;
+		private Storyboard VisionOnBoard, VisionOffBoard, FullOnBoard, FullOffBoard;
 
 		public MediaPlayer()
 		{
@@ -142,29 +141,17 @@ namespace Player.Controls
 			element.MediaOpened += Element_MediaOpened;
 			Resources["BorderBack"] = Brushes.Transparent;
 		}
-
-		//Invalid frame rates are for video detection
-		private double[] _InvalidFrameRates = new[] { 90000d, 0d };
-		private bool IsBuffering
-		{
-			set
-			{
-				ProgressIndicator.IsIndeterminate = value;
-				ProgressIndicator.Visibility = value ? Visibility.Visible : Visibility.Hidden;
-				PositionSlider.Visibility = value ? Visibility.Hidden : Visibility.Visible;
-			}
-		}
+		
 		private void Element_MediaOpened(object sender, RoutedEventArgs e)
 		{
 			ResetCountTimer();
-			bool isVideo = !_InvalidFrameRates.Contains(element.VideoFrameRate);
+			bool isVideo = element.HasVideo;
 			FullScreenButton.Visibility = isVideo ? Visibility.Visible : Visibility.Hidden;
 			if (IsFullScreen && !isVideo)
 				FullScreenButton.EmulateClick();
 			//Next seems not so readable, it just checks if AutoOrientation is on, check proper conditions where operation is needed
 			if ((AutoOrinateVision && (isVideo && !IsVisionOn)) || (!isVideo && IsVisionOn))
 				Element_MouseUp(this, new MouseButtonEventArgs(Mouse.PrimaryDevice, 1, MouseButton.Left));
-			IsBuffering = false;
 		}
 
 		private void ResetCountTimer()
@@ -176,7 +163,6 @@ namespace Player.Controls
 		{
 			RunUX();
 			IsFullyLoaded = true;
-			element.MediaOpening += (_, __) => IsBuffering = true;
 		}
 
 		private void PlayCountTimer_Elapsed(object sender, ElapsedEventArgs e)
@@ -211,11 +197,11 @@ namespace Player.Controls
 		private async void Position_Holding(object sender, MouseButtonEventArgs e)
 		{
 			IconType but = PlayPauseButton.Icon;
-			await element.Pause();
+			element.Pause();
 			while (e.ButtonState == MouseButtonState.Pressed)
 				await Task.Delay(50);
 			if (but == IconType.Pause)
-				await element.Play();
+				element.Play();
 			else if (PlayOnPositionChange)
 				Play();
 		}
@@ -318,15 +304,17 @@ namespace Player.Controls
 
 		public void Next() => NextButton.EmulateClick();
 		public void Previous() => PreviousButton.EmulateClick();
+
+		private void Button_MouseUp(object sender, MouseButtonEventArgs e)
+		{
+
+		}
+
 		public void PlayPause() => PlayPauseButton.EmulateClick();
 
 		public void ChangeVolumeBySlider(double volume)
 		{
 			VolumeSlider.Value = volume;
-		}
-		public void ChangeFFmpegDirectory(string newDir)
-		{
-			Unosquare.FFME.MediaElement.FFmpegDirectory = newDir;
 		}
 	}
 }
