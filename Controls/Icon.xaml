@@ -1,9 +1,7 @@
 ﻿<ContentControl x:Class="Player.Controls.Icon" x:Name="P"
 		 xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
 		 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Loaded="UserControl_Loaded">
-	<Path x:Name="MainPath" 
-		  Fill="{Binding Foreground, ElementName=P}"
-		  Stroke="{Binding OpacityMask, ElementName=P}"
-		  Width="{Binding Width, ElementName=P}"
-		  Height="{Binding Height, ElementName=P}"/>
+	<Path x:Name="MainPath"
+	Fill="{Binding Foreground, ElementName=P}" 
+	Stroke="{Binding OpacityMask, ElementName=P}"/>
 </ContentControl>

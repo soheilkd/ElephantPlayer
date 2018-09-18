@@ -14,7 +14,7 @@ namespace Player.Controls
 			set
 			{
 				SetValue(TypeProperty, value);
-				MainPath.Data = IconProvider.GetPath(value);
+				MainPath.Data = IconProvider.Geometries[value];
 			}
 		}
 

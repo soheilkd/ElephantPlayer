@@ -10,7 +10,6 @@
 		Volume0,
 		Volume1,
 		Volume2,
-		Library,
 		Menu,
 		Settings,
 		FullScreen,
@@ -18,6 +17,7 @@
 		ExpandPane,
 		CollapsePane,
 		VisionOn,
-		VisionOff
+		VisionOff,
+		Back
 	}
 }
