@@ -1,0 +1,38 @@
+﻿<UserControl x:Class="Player.Controls.Tile" x:Name="parent" Loaded="Parent_Loaded"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Width="150">
+	<Grid Background="#F666">
+		<Image x:Name="MainImage" Margin="0,0,0,25"/>
+		<TextBlock x:Name="MainTextBlock" Padding="5" Text="{Binding Tag, ElementName=parent}" FontWeight="Light" FontSize="17" VerticalAlignment="Bottom"/>
+		<Popup x:Name="TilePopup" AllowsTransparency="True" Placement="Bottom" PopupAnimation="Fade" IsOpen="{Binding IsMouseOver, Mode=OneWay, Delay=1, ElementName=parent}">
+			<Grid Background="#F666">
+				<TextBlock Padding="5" Text="{Binding Tag, ElementName=parent}" FontWeight="Light" FontSize="17" VerticalAlignment="Bottom"/>
+			</Grid>
+		</Popup>
+		<Border x:Name="HoverBorder" BorderThickness="2" BorderBrush="White" Opacity="0"/>
+	</Grid>
+	<UserControl.Triggers>
+		<EventTrigger RoutedEvent="MouseEnter">
+			<BeginStoryboard>
+				<Storyboard Storyboard.TargetName="HoverBorder" AccelerationRatio="0.3" DecelerationRatio="0.7" SpeedRatio="2">
+					<DoubleAnimation Storyboard.TargetProperty="Opacity" From="0" To="1"/>
+				</Storyboard>
+			</BeginStoryboard>
+		</EventTrigger>
+		<EventTrigger RoutedEvent="MouseLeave">
+			<BeginStoryboard>
+				<Storyboard Storyboard.TargetName="HoverBorder" AccelerationRatio="0.7" DecelerationRatio="0.3" SpeedRatio="2">
+					<DoubleAnimation Storyboard.TargetProperty="Opacity" From="1" To="0"/>
+				</Storyboard>
+			</BeginStoryboard>
+		</EventTrigger>
+	</UserControl.Triggers>
+	<UserControl.Resources>
+		<Style TargetType="UserControl" x:Key="Default">
+			<Setter Property="Height" Value="125"/>
+		</Style>
+		<Style TargetType="UserControl" x:Key="Singular">
+			<Setter Property="Height" Value="40"/>
+		</Style>
+	</UserControl.Resources>
+</UserControl>

@@ -1,0 +1,24 @@
+﻿<ContentControl x:Class="Player.Controls.Navigation.NavigationControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+			 xmlns:local="clr-namespace:Player.Controls">
+	<ContentControl.Template>
+		<ControlTemplate TargetType="ContentControl">
+			<Grid>
+				<local:Button HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10" MouseUp="Button_MouseUp" Icon="Back" Foreground="White"/>
+				<TextBlock Text="{TemplateBinding Tag}" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="24" FontWeight="Light" Margin="50,4,0,0" Foreground="White"/>
+				<ContentPresenter Content="{TemplateBinding Content}" Margin="0,40,0,0"/>
+			</Grid>
+		</ControlTemplate>
+	</ContentControl.Template>
+	<ContentControl.Resources>
+		<Storyboard x:Key="OpenStoryboard" Duration="00:00:01" AccelerationRatio="0.3" DecelerationRatio="0.7" >
+			<ThicknessAnimation From="-100,0,0,0" To="0" Storyboard.TargetProperty="Margin"/>
+			<DoubleAnimation From="0" To="1" Storyboard.TargetProperty="Opacity"/>
+		</Storyboard>
+		<Storyboard x:Key="BackStoryboard" Duration="00:00:01" AccelerationRatio="0.7" DecelerationRatio="0.3">
+			<ThicknessAnimation From="0" To="-100,0,0,0" Storyboard.TargetProperty="Margin"/>
+			<DoubleAnimation From="1" To="0" Storyboard.TargetProperty="Opacity"/>
+		</Storyboard>
+	</ContentControl.Resources>
+</ContentControl>
