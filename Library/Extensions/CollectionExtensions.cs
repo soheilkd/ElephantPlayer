@@ -1,20 +1,32 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Reflection;
 
 namespace Player.Extensions
 {
 	public static class CollectionExtensions
 	{
-		public static void For<T>(this IList<T> collection, Action<T> action)
+		public static void For<T>(this IList<T> list, Action<T> action)
 		{
-			for (int i = 0; i < collection.Count; i++)
-				action(collection[i]);
+			for (int i = 0; i < list.Count; i++)
+				action(list[i]);
 		}
-		public static void For<T>(this IList<T> collection, Func<T, bool> condition, Action<T> action)
+		public static void For<T>(this IList<T> list, Func<T, bool> condition, Action<T> action)
 		{
-			for (int i = 0; i < collection.Count; i++)
-				if (condition(collection[i]))
-					action(collection[i]);
+			for (int i = 0; i < list.Count; i++)
+				if (condition(list[i]))
+					action(list[i]);
+		}
+		public static void For<T>(this IList<T> list, Action<int, T> action)
+		{
+			for (int i = 0; i < list.Count; i++)
+				action(i, list[i]);
+		}
+		public static void ForEach<T>(this IEnumerable enumerable, Action<T> action)
+		{
+			foreach (T item in enumerable)
+				action(item);
 		}
 		public static void ForEach<T>(this IEnumerable<T> collection, Action<T> action)
 		{
