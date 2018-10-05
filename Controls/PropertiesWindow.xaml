@@ -1,9 +1,9 @@
-﻿<mah:MetroWindow x:Class="Player.PropertiesUI" xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
+﻿<mah:MetroWindow x:Class="Player.Controls.PropertiesUI" xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         WindowStartupLocation="CenterScreen" Background="{DynamicResource AccentColorBrush}"
-        xmlns:controls="clr-namespace:Player.Controls;assembly=PlayerLibrary"
-        ResizeMode="NoResize" ShowMinButton="False"
+        xmlns:controls="clr-namespace:Player.Controls"
+        ResizeMode="NoResize"
         Title="Properties" Height="674" Width="269">
 	<Grid>
 		<StackPanel>

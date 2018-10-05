@@ -1,10 +1,5 @@
-﻿using MahApps.Metro.Controls;
-using Microsoft.Win32;
-using Player.Extensions;
-using Player.Hook;
-using Player.Library;
-using Player.Models;
-using System;
+﻿using System;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
@@ -12,6 +7,14 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using MahApps.Metro.Controls;
+using Microsoft.Win32;
+using Player.Controls.Navigation;
+using Player.Extensions;
+using Player.Hook;
+using Player.Library;
+using Player.Models;
+using Player.Views;
 
 namespace Player
 {
@@ -29,21 +32,8 @@ namespace Player
 			get => (double)Resources["MinimalWidthTemp"];
 			set => Resources["MinimalWidthTemp"] = value;
 		}
-		private Visibility SelectiveBoxesVisibility
-		{
-			get => (Visibility)Resources["SelectiveBoxesVisibility"];
-			set => Resources["SelectiveBoxesVisibility"] = value;
-		}
-		private SaveFileDialog MediaTransferDialog = new SaveFileDialog()
-		{
-			AddExtension = false,
-			CheckPathExists = true,
-			CreatePrompt = false,
-			DereferenceLinks = true,
-			InitialDirectory = Settings.Current.LastPath
-		};
 
-		private MediaManager Manager = new MediaManager();
+		private Controller Library = new Controller();
 		private Visibility ControlsNotNeededOnVisionVisibility
 		{
 			set
@@ -59,50 +49,26 @@ namespace Player
 		{
 			InitializeComponent();
 			#region Initialization
-			App.NewInstanceRequested += (_, e) => e.Args.For(each => Manager.AddFromPath(each, true));
+			App.NewInstanceRequested += (_, e) => e.Args.For(each => Library.AddFromPath(each, true));
 			Events.KeyDown += KeyboardListener_KeyDown;
 
-			Manager.RequestReceived += (_, e) => Play(e.Parameter);
-			Player.LengthFound += (_, e) => Manager.Current.Length = e.Parameter;
+			Library.MediaRequested += (_, e) => Play(Library, e.Parameter);
 			Player.FullScreenToggled += Player_FullScreenClicked;
 			Player.UpdateLayout();
 
-			DataGrid.ItemsSource = Manager.QueueEnumerator;
+			DataGrid.ItemsSource = Library;
 
 			TaskbarItemInfo = Player.Thumb.Info;
-			Resources["LastPath"] = Settings.Current.LastPath;
-
-			Player.NextClicked += (_, __) => Play(Manager.Next());
-			Player.PreviousClicked += (_, __) => Play(Manager.Previous());
-			Player.VisionChanged += (_, e) => ControlsNotNeededOnVisionVisibility = e.Parameter ? Visibility.Hidden : Visibility.Visible;
-			Player.AutoOrinateVision = Settings.Current.VisionOrientation;
-			Player.PlayOnPositionChange = Settings.Current.PlayOnPositionChange;
-			Player.PlayCounterElapsed += (_, __) => Manager.Current.PlayCount++;
+			Resources["LastPath"] = Settings.LastPath;
 			
-			OrinateCheck.IsChecked = Settings.Current.VisionOrientation;
-			LiveLibraryCheck.IsChecked = Settings.Current.LiveLibrary;
-			ExplicitCheck.IsChecked = Settings.Current.ExplicitContent;
-			PlayOnPosCheck.IsChecked = Settings.Current.PlayOnPositionChange;
-			RevalidOnExitCheck.IsChecked = Settings.Current.RevalidateOnExit;
-			TimeoutCombo.SelectedIndex = Settings.Current.MouseTimeoutIndex;
-
-			TimeoutCombo.SelectionChanged += (_, __) => Settings.Current.MouseTimeoutIndex = TimeoutCombo.SelectedIndex;
-			OrinateCheck.Checked += (_, __) => Settings.Current.VisionOrientation = true;
-			OrinateCheck.Unchecked += (_, __) => Settings.Current.VisionOrientation = false;
-			LiveLibraryCheck.Checked += (_, __) => Settings.Current.LiveLibrary = true;
-			LiveLibraryCheck.Unchecked += (_, __) => Settings.Current.LiveLibrary = false;
-			ExplicitCheck.Checked += (_, __) => Settings.Current.ExplicitContent = true;
-			ExplicitCheck.Unchecked += (_, __) => Settings.Current.ExplicitContent = false;
-			PlayOnPosCheck.Checked += (_, __) => Settings.Current.PlayOnPositionChange = true;
-			PlayOnPosCheck.Unchecked += (_, __) => Settings.Current.PlayOnPositionChange = false;
-			RevalidOnExitCheck.Checked += (_, __) => Settings.Current.RevalidateOnExit = true;
-			RevalidOnExitCheck.Unchecked += (_, __) => Settings.Current.RevalidateOnExit = false;
-			RememberMinimalCheck.Checked += (_, __) => Settings.Current.RememberMinimal = true;
-			RememberMinimalCheck.Unchecked += (_, __) => Settings.Current.RememberMinimal = false;
+			Player.VisionChanged += (_, e) => ControlsNotNeededOnVisionVisibility = e.Parameter ? Visibility.Hidden : Visibility.Visible;
+			Player.MediaChanged += (_, e) => Title = $"{(Topmost ? "" : "Elephant Player | ")}{e.Parameter.Artist} - {e.Parameter.Title}";
+			Player.AutoOrinateVision = Settings.VisionOrientation;
+			Player.PlayOnPositionChange = Settings.PlayOnPositionChange;
+			
 			Player.BorderBack = Background;
-			Player.ChangeFFmpegDirectory($@"{Settings.AppPath}\ffmpeg");
-			Player.ChangeVolumeBySlider(Settings.Current.Volume * 100);
-			Player.Volume = Settings.Current.Volume;
+			Player.ChangeVolumeBySlider(Settings.Volume * 100);
+			Player.Volume = Settings.Volume;
 
 			foreach (var item in this.FindChildren<MenuItem>())
 				item.Background = Menu.Background;
@@ -110,8 +76,8 @@ namespace Player
 				item.Background = Menu.Background;
 			#endregion
 			
-			Left = Settings.Current.LastLocation.X;
-			Top = Settings.Current.LastLocation.Y;
+			Left = Settings.LastLocation.X;
+			Top = Settings.LastLocation.Y;
 		}
 		
 		private void Player_FullScreenClicked(object sender, EventArgs e)
@@ -138,9 +104,9 @@ namespace Player
 			Hide();
 			Topmost = !Topmost;
 			Player.IsMinimal = Topmost;
-			Title = $"{(Topmost ?  "": "Elephant Player | ")}{Manager.Current.Artist} - {Manager.Current.Title}";
+			Title = $"{(Topmost ?  "": "Elephant Player | ")}{Player.Current.Artist} - {Player.Current.Title}";
 			LeftWindowCommands.Visibility = Topmost ? Visibility.Collapsed : Visibility.Visible;
-			MinimalViewButton.Icon = Topmost ? Controls.IconType.OpenPaneMirrored : Controls.IconType.ClosePaneMirrored;
+			MinimalViewButton.Icon = Topmost ? Controls.IconType.ExpandPane : Controls.IconType.CollapsePane;
 			Menu.Visibility = Topmost ? Visibility.Hidden : Visibility.Visible;
 			SearchButton.Visibility = Menu.Visibility;
 			WindowStyle = Topmost ? WindowStyle.ToolWindow : WindowStyle.ThreeDBorderWindow;
@@ -172,14 +138,9 @@ namespace Player
 		{
 			if (IsActive && SearchBox.IsFocused)
 				return;
-			Console.WriteLine(e.Key);
 			//Key shortcuts when window is active and main key is down
 			if (IsActive && e.Key.HasFlag(Key.LeftShift))
 			{
-				if (e.Key == Key.Delete) Menu_RemoveClick(this, null);
-				if (e.Key == Key.Enter) List_DoubleClick(DataGrid, null);
-				if (e.Key == Key.C) Menu_CopyClick(new MenuItem(), null);
-				if (e.Key == Key.X) Menu_MoveClick(new MenuItem(), null);
 				if (e.Key == Key.F)
 				{
 					SearchBox.IsEnabled = false;
@@ -205,19 +166,18 @@ namespace Player
 		private void List_DoubleClick(object sender, MouseButtonEventArgs e)
 		{
 			if (DataGrid.SelectedItem is Media med)
-				Play(med, false);
+				Play(Library, med);
 		}
 
 		private async void Window_Loaded(object sender, RoutedEventArgs e)
 		{
-			Height = 1;
-			TempHeight = Settings.Current.LastSize.Height;
-			TempWidth = Settings.Current.LastSize.Width;
-			if (Settings.Current.RememberMinimal && Settings.Current.WasMinimal)
+			TempHeight = Settings.LastSize.Height;
+			TempWidth = Settings.LastSize.Width;
+			if (Settings.RememberMinimal && Settings.WasMinimal)
 			{
 				MinimalViewButton.EmulateClick();
-				TempHeight = Settings.Current.LastSize.Height;
-				TempWidth = Settings.Current.LastSize.Width;
+				TempHeight = Settings.LastSize.Height;
+				TempWidth = Settings.LastSize.Width;
 			}
 			else
 			{
@@ -226,47 +186,64 @@ namespace Player
 			}
 			while (!Player.IsFullyLoaded)
 				await Task.Delay(10);
-			Environment.GetCommandLineArgs().For(each => Manager.AddFromPath(each, true));
+			Environment.GetCommandLineArgs().For(each => Library.AddFromPath(each, true));
+
+			var artists = Library.OrderBy(each => each.Artist).GroupBy(each => each.Artist);
+			var grid = ArtistNavigation.GetChildContent(1) as Grid;
+			artists.ForEach(each =>
+			grid.Children.Add(
+				new NavigationTile()
+				{
+					Tag = each.Key,
+					TileStyle = Controls.TileStyle.Singular,
+					Navigation = new NavigationControl()
+					{
+						Tag = each.Key,
+						Content = new ArtistView(new MediaQueue(each), (queue, media) => Play(queue, media))
+					}
+				}));
+
+			var albums = Library.OrderBy(each => each.Artist).GroupBy(each => each.Album);
+			var grid2 = AlbumNavigation.GetChildContent(1) as Grid;
+			albums.ForEach(each =>
+			grid2.Children.Add(
+				new NavigationTile()
+				{
+					Tag = each.Key,
+					TileStyle = Controls.TileStyle.Singular,
+					Navigation = new NavigationControl()
+					{
+						Tag = each.Key,
+						Content = new AlbumView(new MediaQueue(each), (queue, media) => Play(queue, media))
+					}
+				}));
+			grid.SizeChanged += (_, __) => grid.AlignItems(Controls.Tile.StandardSize);
+			grid2.SizeChanged += (_, __) => grid2.AlignItems(Controls.Tile.StandardSize);
 		}
 		private void Window_Closing(object sender, CancelEventArgs e)
 		{
-			Settings.Current.LastSize = new Size(Width <= 310 ? TempWidth: Width, Height <= 130 ? TempHeight : Height);
-			Settings.Current.LastLocation = new Point(Left, Top);
-			Settings.Current.WasMinimal = Height <= 131;
-			Settings.Current.Volume = Player.Volume;
-			Settings.Current.Save();
-			Manager.CloseSeason();
+			Settings.LastSize = new Size(Width <= 310 ? TempWidth: Width, Height <= 130 ? TempHeight : Height);
+			Settings.LastLocation = new Point(Left, Top);
+			Settings.WasMinimal = Height <= 131;
+			Settings.Volume = Player.Volume;
+			Settings.Save();
+			Library.CloseSeason();
 			Application.Current.Shutdown();
 		}
 		private void Window_KeyUp(object sender, KeyEventArgs e)
 		{
 			if (e.Key == Key.Space && !SearchBox.IsFocused)
 				Player.PlayPause();
-			if (e.Key == Key.S)
-			{
-				switch (SelectiveBoxesVisibility)
-				{
-					case Visibility.Visible:
-						SelectiveBoxesVisibility = Visibility.Hidden;
-						break;
-					default:
-						SelectiveBoxesVisibility = Visibility.Visible;
-						break;
-				}
-			}
 		}
 		private void Window_Drop(object sender, DragEventArgs e)
 		{
-			((string[])e.Data.GetData(DataFormats.FileDrop)).For(each => Manager.AddFromPath(each));
+			((string[])e.Data.GetData(DataFormats.FileDrop)).For(each => Library.AddFromPath(each));
 		}
 
-		private void Play(Media media, bool inQueueImpl = true)
+		private void Play(MediaQueue queue, Media media)
 		{
-			if (!inQueueImpl)
-				Manager.Next(media);
-			Player.Play(media);
+			Player.Play(queue, media);
 			
-			Title = $"{(Topmost ? "" : "Elephant Player | ")}{media.Artist} - {media.Title}";
 			MinimalViewButton.Visibility = media.IsVideo ? Visibility.Hidden : Visibility.Visible;
 			if (media.IsVideo)
 			{
@@ -290,8 +267,8 @@ namespace Player
 		private bool IsQueried = false;
 		private void SearchBox_TextChanged(object sender, TextChangedEventArgs e)
 		{
-			IsQueried = !String.IsNullOrWhiteSpace(SearchBox.Text);
-			Manager.QueueEnumerator.Filter(Manager, SearchBox.Text);
+			IsQueried = !string.IsNullOrWhiteSpace(SearchBox.Text);
+			Library.Filter(SearchBox.Text);
 		}
 		private void SearchIcon_Click(object sender, MouseButtonEventArgs e)
 		{
@@ -299,106 +276,14 @@ namespace Player
 			SearchBox.Focus();
 		}
 
-		private void Menu_TagDetergent(object sender, RoutedEventArgs e)
-		{
-			For(item => item.CleanTag());
-		}
-		private void Menu_MoveClick(object sender, RoutedEventArgs e)
-		{
-			switch ((sender.As<MenuItem>().Header ?? "INDIV").ToString().Substring(0, 1))
-			{
-				case "B":
-					MediaTransferDialog.Title = "Move";
-					if (MediaTransferDialog.ShowDialog().Value)
-					{
-						Settings.Current.LastPath = MediaTransferDialog.FileName.Substring(0, MediaTransferDialog.FileName.LastIndexOf('\\') + 1);
-						Resources["LastPath"] = Settings.Current.LastPath;
-						goto default;
-					}
-					break;
-				default:
-					For(item => item.MoveTo(Resources["LastPath"].ToString()));
-					break;
-			}
-		}
-		private void Menu_CopyClick(object sender, RoutedEventArgs e)
-		{
-			switch ((sender.As<MenuItem>().Header ?? "INDIV").ToString().Substring(0, 1))
-			{
-				case "B":
-					MediaTransferDialog.Title = "Copy";
-					if (MediaTransferDialog.ShowDialog().Value)
-					{
-						Settings.Current.LastPath = MediaTransferDialog.FileName.Substring(0, MediaTransferDialog.FileName.LastIndexOf('\\') + 1);
-						Resources["LastPath"] = Settings.Current.LastPath;
-						goto default;
-					}
-					break;
-				default:
-					For(item => item.CopyTo(Resources["LastPath"].ToString()));
-					break;
-			}
-		}
-		private void Menu_RemoveClick(object sender, RoutedEventArgs e)
-		{
-			For(item => Manager.Remove(item));
-		}
-		private void Menu_DeleteClick(object sender, RoutedEventArgs e)
-		{
-			string msg = "Sure? These will be deleted:\r\n";
-			For(item => msg += $"{item.Path}\r\n");
-			if (MessageBox.Show(msg, "Sure?", MessageBoxButton.OKCancel, MessageBoxImage.Warning) != MessageBoxResult.OK)
-				return;
-			For(item => Manager.Delete(item));
-		}
-		private void Menu_LocationClick(object sender, RoutedEventArgs e)
-		{
-			For(item => Process.Start("explorer.exe", "/select," + item.Path));
-		}
-		private void Menu_PropertiesClick(object sender, RoutedEventArgs e)
-		{
-			For(each =>
-			{
-				var pro = new PropertiesUI();
-				pro.SaveRequested += (_, f) =>
-				{
-					if (f.Parameter.Name == Manager.Current.Path)
-					{
-						var pos = Player.Position;
-						Player.Stop();
-						f.Parameter.Save();
-						Manager.Current.Reload();
-						Play(Manager.Current);
-						Player.Position = pos;
-						each.Reload();
-					}
-					else
-					{
-						f.Parameter.Save();
-						each.Reload();
-					}
-				};
-				pro.LoadFor(each);
-			});
-		}
-
-		private void Menu_PlayModeClick(object sender, RoutedEventArgs e)
-		{
-			PlayModeSubMenu.Items[0].As<MenuItem>().IsChecked = false;
-			PlayModeSubMenu.Items[1].As<MenuItem>().IsChecked = false;
-			PlayModeSubMenu.Items[2].As<MenuItem>().IsChecked = false;
-			byte tag = byte.Parse(sender.As<MenuItem>().Tag.ToString());
-			PlayModeSubMenu.Items[tag].As<MenuItem>().IsChecked = true;
-			Settings.Current.PlayMode = (PlayMode)tag;
-		}
 		private void Menu_LibraryImportClick(object sender, RoutedEventArgs e)
 		{
 			if (Dialogs.RequestFile(out var file, Dialogs.LibraryFilter))
-				if (LibraryManager.TryLoad(file[0], out var lib))
+				if (Controller.TryLoad(file[0], out var lib))
 				{
-					Settings.Current.LibraryLocation = file[0];
-					Manager.Clear();
-					lib.For(each => Manager.Add(each));
+					Settings.LibraryLocation = file[0];
+					Library.Clear();
+					lib.For(each => Library.Add(each));
 				}
 		}
 		private void Menu_LibraryExportClick(object sender, RoutedEventArgs e)
@@ -407,48 +292,60 @@ namespace Player
 			{
 				if (!file.EndsWith(".bin"))
 					file += ".bin";
-				Settings.Current.LibraryLocation = file;
-				LibraryManager.Save(Manager);
+				Settings.LibraryLocation = file;
+				Controller.Save(Library);
 			}
 		}
 		private void Menu_HeavyLoadClick(object sender, RoutedEventArgs e)
 		{
-			Manager.For(each => each.Load());
+			Library.For(each => each.Load());
 		}
 		private void Menu_RevalidateClick(object sender, RoutedEventArgs e)
 		{
 			Hide();
-			Manager.Revalidate();
+			Library.Revalidate();
 			Close();
 			Process.Start("Elephant Player.exe");
 		}
 
 		private void Data_Sorting(object sender, DataGridSortingEventArgs e)
 		{
-			var asc = (e.Column.SortDirection ?? ListSortDirection.Descending) == ListSortDirection.Descending;
+			var asc = (e.Column.SortDirection ?? ListSortDirection.Ascending) == ListSortDirection.Descending;
 			switch (e.Column.DisplayIndex)
 			{
+				case 0:
+					Library.SortBy(each => each.Title, asc);
+					break;
 				case 1:
-					Manager.SortQueueBy(each => each.Title, asc);
+					Library.SortBy(each => each.Artist, asc);
 					break;
 				case 2:
-					Manager.SortQueueBy(each => each.Artist, asc);
+					Library.SortBy(each => each.Album, asc);
 					break;
 				case 3:
-					Manager.SortQueueBy(each => each.Album, asc);
+					Library.SortBy(each => each.PlayCount, asc);
 					break;
 				case 4:
-					Manager.SortQueueBy(each => each.PlayCount, asc);
-					break;
-				case 5:
-					Manager.SortQueueBy(each => each.AdditionDate, asc);
+					Library.SortBy(each => each.AdditionDate, asc);
 					break;
 				default:
 					break;
 			}
 		}
 
-		private void For(Action<Media> action) =>
-			DataGrid.SelectedItems.Cast<Media>().ToArray().For(each => action(each));
+		bool Loaded1 = false, Loaded2 = false;
+		private void Grid_Loaded(object sender, RoutedEventArgs e)
+		{
+			if (Loaded1)
+				return;
+			Loaded1 = true;
+		}
+
+		private void ArtistGrid_Loaded(object sender, RoutedEventArgs e)
+		{
+			if (Loaded2)
+				return;
+			Loaded2 = true;
+		}
 	}
 }

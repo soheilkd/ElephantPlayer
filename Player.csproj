@@ -106,6 +106,7 @@
       <EmbedInteropTypes>False</EmbedInteropTypes>
     </Reference>
     <Reference Include="System.Drawing" />
+    <Reference Include="System.Runtime.Remoting" />
     <Reference Include="System.Windows" />
     <Reference Include="System.Xaml">
       <RequiredTargetFramework>4.0</RequiredTargetFramework>
@@ -116,43 +117,23 @@
     <Reference Include="PresentationFramework">
       <Private>False</Private>
     </Reference>
-    <Reference Include="taglib-sharp, Version=2.1.0.0, Culture=neutral, PublicKeyToken=db62eba44689b5b0, processorArchitecture=MSIL">
-      <HintPath>packages\taglib.2.1.0.0\lib\taglib-sharp.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Xml.Serialization" />
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="App.cs" />
-    <Compile Include="Extensions\CollectionExtensions.cs" />
-    <Compile Include="Extensions\ImagingExtensions.cs" />
-    <Compile Include="Extensions\MiscExtensions.cs" />
-    <Compile Include="Extensions\ObjectExtensions.cs" />
-    <Compile Include="Extensions\StringExtensions.cs" />
-    <Compile Include="Hook\Events.cs" />
-    <Compile Include="Hook\InterceptKeys.cs" />
-    <Compile Include="Hook\KeyboardListener.cs" />
-    <Compile Include="Hook\RawKeyEventArgs.cs" />
-    <Compile Include="Instances\Instance.cs" />
-    <Compile Include="Instances\InstanceEventArgs.cs" />
-    <Compile Include="Instances\ISingleInstanceApp.cs" />
-    <Compile Include="Models\LibraryManager.cs" />
-    <Compile Include="Models\Media.cs" />
-    <Compile Include="Models\MediaEnumerator.cs" />
-    <Compile Include="Models\MediaManager.cs" />
-    <Compile Include="Models\MediaType.cs" />
-    <Compile Include="Models\Playlist.cs" />
-    <Compile Include="Models\PlayMode.cs" />
-    <Compile Include="Models\SerializableBitmap.cs" />
-    <Compile Include="Native\NativeMethods.cs" />
-    <Compile Include="Native\WM.cs" />
-    <Compile Include="Taskbar\Command.cs" />
-    <Compile Include="Taskbar\ThumbManager.cs" />
+    <Compile Include="Views\AlbumView.xaml.cs">
+      <DependentUpon>AlbumView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\ArtistView.xaml.cs">
+      <DependentUpon>ArtistView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\SettingsView.xaml.cs">
+      <DependentUpon>SettingsView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Windows\MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Windows\PropertiesWindow.xaml.cs">
-      <DependentUpon>PropertiesWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -163,11 +144,19 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Windows\MainWindow.xaml">
+    <Page Include="Views\AlbumView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Windows\PropertiesWindow.xaml">
+    <Page Include="Views\ArtistView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\SettingsView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Windows\MainWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -210,12 +199,16 @@
     <WCFMetadata Include="Connected Services\" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\MusicLogo.png" />
+    <None Include="README.md" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="PlayerLibrary\PlayerLibrary.csproj">
+    <ProjectReference Include="Controls\Player.Controls.csproj">
+      <Project>{33fa80e2-7623-446e-b8d2-473bb0ac5b63}</Project>
+      <Name>Player.Controls</Name>
+    </ProjectReference>
+    <ProjectReference Include="Library\Player.Library.csproj">
       <Project>{e1811160-1a4f-48f1-8be7-d4fc40b02dd3}</Project>
-      <Name>PlayerLibrary</Name>
+      <Name>Player.Library</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

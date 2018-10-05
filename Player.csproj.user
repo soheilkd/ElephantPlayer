@@ -3,12 +3,6 @@
   <PropertyGroup>
     <ReferencePath>
     </ReferencePath>
-    <PublishUrlHistory>publish\|ftp://localhost/|D:\Users\Soheil\Desktop\ELP\</PublishUrlHistory>
-    <InstallUrlHistory>http://localhost:8080/</InstallUrlHistory>
-    <SupportUrlHistory />
-    <UpdateUrlHistory />
-    <BootstrapperUrlHistory />
-    <ErrorReportUrlHistory />
     <FallbackCulture>en-US</FallbackCulture>
     <VerifyUploadedFiles>false</VerifyUploadedFiles>
   </PropertyGroup>
