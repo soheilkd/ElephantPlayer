@@ -1,15 +1,12 @@
 ﻿<UserControl x:Class="Player.Controls.MediaPlayer"
 			 xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-			 xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
 			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-			 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 			 xmlns:player="clr-namespace:Player.Controls"
 			 MouseMove="Element_MouseMove"
-			 mc:Ignorable="d" Loaded="UserControl_Loaded" x:Name="ParentControl"
-             d:DesignHeight="300" d:DesignWidth="600">
+             Loaded="UserControl_Loaded" x:Name="ParentControl">
 	<Grid>
-		<Canvas x:Name="ElementCanvas" >
-			<MediaElement x:Name="element" LoadedBehavior="Manual" UnloadedBehavior="Manual" ScrubbingEnabled="True"/>
+        <Canvas x:Name="ElementCanvas" Background="Black" Margin="800,0,0,0">
+			<MediaElement x:Name="element" LoadedBehavior="Manual" ScrubbingEnabled="True" Stretch="Uniform" />
 		</Canvas>
 		<Grid x:Name="ControlsGrid" Background="Transparent" VerticalAlignment="Bottom" Height="94">
 			<Border HorizontalAlignment="Left" VerticalAlignment="Bottom" Width="149" Margin="73,0,0,4" CornerRadius="10">
@@ -60,11 +57,11 @@
 				</Setter.Value>
 			</Setter>
 		</Style>
-		<Storyboard x:Key="VisionOnBoard" Storyboard.TargetName="ElementCanvas" AccelerationRatio="0.4" DecelerationRatio="0.6" SpeedRatio="1">
+		<Storyboard x:Key="VisionOnBoard" Storyboard.TargetName="ElementCanvas" AccelerationRatio="0.7" DecelerationRatio="0.3" SpeedRatio="1">
 			<ThicknessAnimation From="{Binding Margin, ElementName=ElementCanvas}" To="0" Storyboard.TargetProperty="Margin" />
 		</Storyboard>
-		<Storyboard x:Key="VisionOffBoard" Storyboard.TargetName="ElementCanvas" AccelerationRatio="0.4" DecelerationRatio="0.6" SpeedRatio="1">
-			<ThicknessAnimation From="{Binding Margin, ElementName=ElementCanvas}" To="1000" Storyboard.TargetProperty="Margin" />
+		<Storyboard x:Key="VisionOffBoard" Storyboard.TargetName="ElementCanvas" AccelerationRatio="0.3" DecelerationRatio="0.7" SpeedRatio="1">
+			<ThicknessAnimation From="{Binding Margin, ElementName=ElementCanvas}" To="800,0,0,0" Storyboard.TargetProperty="Margin" />
 		</Storyboard>
 		<Storyboard x:Key="FullOnBoard" Storyboard.TargetProperty="Y" Storyboard.TargetName="ControlsTranslation" AccelerationRatio="0.4" DecelerationRatio="0.6">
 			<DoubleAnimation From="{Binding ElementName=ControlsTranslation, Path=Y}" To="90" SpeedRatio="1.5"/>

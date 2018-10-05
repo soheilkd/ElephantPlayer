@@ -7,18 +7,19 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using Player.Extensions;
+using Player.Models;
 using Player.Taskbar;
 
 namespace Player.Controls
 {
 	public partial class MediaPlayer : UserControl
 	{
-		public event EventHandler<InfoExchangeArgs<TimeSpan>> LengthFound;
-		public event EventHandler PlayCounterElapsed;
-		public event EventHandler NextClicked;
-		public event EventHandler PreviousClicked;
+		public event EventHandler<InfoExchangeArgs<Media>> MediaChanged;
 		public event EventHandler FullScreenToggled;
 		public event EventHandler<InfoExchangeArgs<bool>> VisionChanged;
+
+		public MediaQueue Queue { get; private set; } = new MediaQueue();
+		public Media Current => Queue.Current;
 
 		private Brush _BorderBack = Brushes.White;
 		public Brush BorderBack
@@ -90,7 +91,7 @@ namespace Player.Controls
 				TimeLabel_Full.Content = value.ToNewString();
 				PositionSlider.SmallChange = 1 * PositionSlider.Maximum / 100;
 				PositionSlider.LargeChange = 5 * PositionSlider.Maximum / 100;
-				LengthFound?.Invoke(this, new InfoExchangeArgs<TimeSpan>(value));
+				Queue.Current.Length = value;
 			}
 		}
 		private bool IsUXChangingPosition;
@@ -126,6 +127,7 @@ namespace Player.Controls
 		{
 			InitializeComponent();
 			VisionOnBoard = Resources["VisionOnBoard"] as Storyboard;
+			VisionOffBoard = Resources["VisionOffBoard"] as Storyboard;
 			FullOnBoard = Resources["FullOnBoard"] as Storyboard;
 			FullOffBoard = Resources["FullOffBoard"] as Storyboard;
 
@@ -140,6 +142,8 @@ namespace Player.Controls
 			element.MediaEnded += (_, __) => Next();
 			element.MediaOpened += Element_MediaOpened;
 			Resources["BorderBack"] = Brushes.Transparent;
+			VisionOffBoard.Completed += delegate { ElementCanvas.Visibility = Visibility.Hidden; };
+			VisionOnBoard.CurrentStateInvalidated += delegate { ElementCanvas.Visibility = Visibility.Visible; };
 		}
 		
 		private void Element_MediaOpened(object sender, RoutedEventArgs e)
@@ -163,11 +167,12 @@ namespace Player.Controls
 		{
 			RunUX();
 			IsFullyLoaded = true;
+			ElementCanvas.Visibility = Visibility.Hidden;
 		}
 
 		private void PlayCountTimer_Elapsed(object sender, ElapsedEventArgs e)
 		{
-			PlayCounterElapsed?.Invoke(this, null);
+			Queue.Current.PlayCount++;
 			PlayCountTimer.Stop();
 		}
 
@@ -219,7 +224,20 @@ namespace Player.Controls
 		}
 		private void NextButton_Clicked(object sender, MouseButtonEventArgs e)
 		{
-			NextClicked?.Invoke(this, null);
+			Play(Queue.Next());
+		}
+		private void Play(Media media)
+		{
+			Queue.ClearIsPlayings(except: media);
+			element.Source = new Uri(media.Path);
+			MediaChanged?.Invoke(this, new InfoExchangeArgs<Media>(media));
+			Play();
+		}
+		public void Play(MediaQueue queue, Media media)
+		{
+			Queue.ClearIsPlayings();
+			Queue = queue;
+			Play(media);
 		}
 		private void PreviousButton_Clicked(object sender, MouseButtonEventArgs e)
 		{
@@ -230,7 +248,7 @@ namespace Player.Controls
 				ResetCountTimer();
 			}
 			else
-				PreviousClicked?.Invoke(this, null);
+				Play(Queue.Previous());
 		}
 		private void FullScreenButton_Clicked(object sender, MouseButtonEventArgs e)
 		{
@@ -240,12 +258,6 @@ namespace Player.Controls
 		private void VolumeSlider_Changed(object sender, RoutedPropertyChangedEventArgs<double> e)
 		{
 			Volume = VolumeSlider.Value / 100;
-		}
-
-		public void Play(Uri source)
-		{
-			element.Source = source;
-			Play();
 		}
 
 		public void Play(bool emulateClick = false)
@@ -307,7 +319,10 @@ namespace Player.Controls
 
 		private void Button_MouseUp(object sender, MouseButtonEventArgs e)
 		{
-
+			if (IsVisionOn = !IsVisionOn)
+				VisionOnBoard.Begin();
+			else
+				VisionOffBoard.Begin();
 		}
 
 		public void PlayPause() => PlayPauseButton.EmulateClick();
