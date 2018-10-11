@@ -5,8 +5,8 @@
 	WindowTitleBrush="#FF43464B"
 	xmlns:mah="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
 	xmlns:system="clr-namespace:System;assembly=mscorlib"
-	xmlns:controls="clr-namespace:Player.Controls;assembly=Player.Controls"
-	xmlns:nav="clr-namespace:Player.Controls.Navigation;assembly=Player.Controls"
+	xmlns:controls="clr-namespace:Player.Controls;assembly=Library"
+	xmlns:nav="clr-namespace:Player.Controls.Navigation;assembly=Library"
 	xmlns:views="clr-namespace:Player.Views" Background="{DynamicResource MajorBackground}"
 	Title="Elephant Player" ShowIconOnTitleBar="False" AllowDrop="True"
 	Loaded="Window_Loaded" Closing="Window_Closing" Drop="Window_Drop" KeyUp="Window_KeyUp">

@@ -7,7 +7,7 @@
 		<ControlTemplate TargetType="ContentControl">
 			<Grid>
 				<ContentPresenter x:Name="Presenter" Content="{TemplateBinding Content}"/>
-				<navigation:NavigationControl x:Name="NavigationContent"/>
+				<navigation:NavigationControl x:Name="NavigationContent" Opacity="0"/>
 			</Grid>
 		</ControlTemplate>
 	</ContentControl.Template>

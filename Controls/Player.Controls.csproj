@@ -7,7 +7,7 @@
     <ProjectGuid>{33FA80E2-7623-446E-B8D2-473BB0AC5B63}</ProjectGuid>
     <OutputType>library</OutputType>
     <RootNamespace>Player.Controls</RootNamespace>
-    <AssemblyName>Player.Controls</AssemblyName>
+    <AssemblyName>Controls</AssemblyName>
     <TargetFrameworkVersion>v4.7</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
@@ -58,76 +58,6 @@
       <HintPath>..\packages\taglib.2.1.0.0\lib\taglib-sharp.dll</HintPath>
     </Reference>
     <Reference Include="WindowsBase" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="MediaDataGrid.xaml.cs">
-      <DependentUpon>MediaDataGrid.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Navigation\NavigationControl.xaml.cs">
-      <DependentUpon>NavigationControl.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Navigation\NavigationViewer.xaml.cs">
-      <DependentUpon>NavigationViewer.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="PropertiesWindow.xaml.cs">
-      <DependentUpon>PropertiesWindow.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Taskbar\Command.cs" />
-    <Compile Include="Taskbar\ThumbManager.cs" />
-    <Compile Include="Navigation\NavigationTile.xaml.cs">
-      <DependentUpon>NavigationTile.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Tile.xaml.cs">
-      <DependentUpon>Tile.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="TileStyle.cs" />
-    <Page Include="Button.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Icon.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="MediaDataGrid.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="MediaPlayer.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Compile Include="Button.xaml.cs">
-      <DependentUpon>Button.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Icon.xaml.cs">
-      <DependentUpon>Icon.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="IconProvider.cs" />
-    <Compile Include="IconType.cs" />
-    <Compile Include="MediaPlayer.xaml.cs">
-      <DependentUpon>MediaPlayer.xaml</DependentUpon>
-    </Compile>
-    <Page Include="Navigation\NavigationControl.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Navigation\NavigationTile.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Navigation\NavigationViewer.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="PropertiesWindow.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Tile.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs">

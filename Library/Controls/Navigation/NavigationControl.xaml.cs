@@ -17,7 +17,7 @@ namespace Player.Controls.Navigation
 		private async void Button_MouseUp(object sender, MouseButtonEventArgs e)
 		{
 			BeginStoryboard(Resources["BackStoryboard"] as Storyboard);
-			await Task.Delay(850);
+			await Task.Delay(500);
 			BackClicked?.Invoke(this, e);
 		}
 

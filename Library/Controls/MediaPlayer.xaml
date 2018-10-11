@@ -5,9 +5,9 @@
 			 MouseMove="Element_MouseMove"
              Loaded="UserControl_Loaded" x:Name="ParentControl">
 	<Grid>
-        <Canvas x:Name="ElementCanvas" Background="Black" Margin="800,0,0,0">
+        <DockPanel x:Name="ElementCanvas" Background="Black" Margin="800,0,0,0">
 			<MediaElement x:Name="element" LoadedBehavior="Manual" ScrubbingEnabled="True" Stretch="Uniform" />
-		</Canvas>
+		</DockPanel>
 		<Grid x:Name="ControlsGrid" Background="Transparent" VerticalAlignment="Bottom" Height="94">
 			<Border HorizontalAlignment="Left" VerticalAlignment="Bottom" Width="149" Margin="73,0,0,4" CornerRadius="10">
 				<Grid Margin="0,14,0,0">
