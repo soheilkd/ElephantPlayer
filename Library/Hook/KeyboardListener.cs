@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using static Player.NativeMethods;
 
 namespace Player.Hook
 {
@@ -17,7 +18,7 @@ namespace Player.Hook
 		private IntPtr HookCallback(int nCode, IntPtr wParam, IntPtr lParam)
 		{
 			try { return HookCallbackInner(nCode, wParam, lParam); }
-			catch { return InterceptKeys.CallNextHookEx(hookId, nCode, wParam, lParam); }
+			catch { return CallNextHookEx(hookId, nCode, wParam, lParam); }
 		}
 
 		private IntPtr HookCallbackInner(int nCode, IntPtr wParam, IntPtr lParam)
@@ -28,12 +29,12 @@ namespace Player.Hook
 				if (wParam == (IntPtr)InterceptKeys.WM_KEYDOWN) KeyDown?.Invoke(this, new RawKeyEventArgs(vkCode, false));
 				else if (wParam == (IntPtr)InterceptKeys.WM_KEYUP) KeyUp?.Invoke(this, new RawKeyEventArgs(vkCode, false));
 			}
-			return InterceptKeys.CallNextHookEx(hookId, nCode, wParam, lParam);
+			return CallNextHookEx(hookId, nCode, wParam, lParam);
 		}
 
 		KeyboardListener() => hookId = InterceptKeys.SetHook(HookCallback);
 		~KeyboardListener() => Dispose();
 
-		public void Dispose() => InterceptKeys.UnhookWindowsHookEx(hookId);
+		public void Dispose() => UnhookWindowsHookEx(hookId);
 	}
 }

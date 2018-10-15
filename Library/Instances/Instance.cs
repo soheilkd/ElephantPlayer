@@ -62,7 +62,7 @@ namespace Player.Instances
 					try
 					{
 						using (TextReader reader = new StreamReader(cmdLinePath, System.Text.Encoding.Unicode))
-							args = Methods.CommandLineToArgvW(reader.ReadToEnd());
+							args = NativeMethods.CommandLineToArgvW(reader.ReadToEnd());
 						File.Delete(cmdLinePath);
 					}
 					catch (IOException) { }

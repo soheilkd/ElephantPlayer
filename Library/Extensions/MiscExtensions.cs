@@ -8,7 +8,7 @@ namespace Player.Extensions
 
 		public static void Repeat(this Action action, int times)
 		{
-			for (int i = 0; i < times; i++)
+			for (var i = 0; i < times; i++)
 				action();
 		}
 	}
