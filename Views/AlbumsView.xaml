@@ -1,0 +1,12 @@
+﻿<Grid x:Class="Player.Views.AlbumsView"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	  xmlns:nav="clr-namespace:Player.Controls.Navigation;assembly=Player">
+	<nav:NavigationViewer x:Name="AlbumNavigation">
+		<ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+			<Grid Loaded="Grid_Loaded">
+
+			</Grid>
+		</ScrollViewer>
+	</nav:NavigationViewer>
+</Grid>

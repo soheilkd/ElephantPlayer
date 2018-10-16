@@ -1,6 +1,0 @@
-﻿<Grid x:Class="Player.Views.ArtistView"
-      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-	  xmlns:controls="clr-namespace:Player.Controls;assembly=Library">
-	<controls:MediaDataGrid x:Name="MediaDataGrid" ArtistColumnVisibility="Hidden"/>
-</Grid>

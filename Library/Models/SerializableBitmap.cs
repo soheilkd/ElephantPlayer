@@ -1,9 +1,10 @@
-﻿using Player.Extensions;
-using System;
+﻿using System;
 using System.IO;
 using System.Runtime.Serialization;
 using System.Security.Permissions;
+using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using Player.Extensions;
 
 namespace Player.Models
 {
@@ -11,64 +12,52 @@ namespace Player.Models
 	public class SerializableBitmap : ISerializable
 	{
 		[NonSerialized]
-		private BitmapImage _source;
-		private byte[] _data;
+		private BitmapImage _Bitmap;
+		private byte[] _Data;
 
 		public SerializableBitmap() { }
-		public SerializableBitmap(BitmapImage source) : base() => _source = source;
+		public SerializableBitmap(BitmapImage bitmap) => _Bitmap = bitmap;
+		public SerializableBitmap(byte[] data)
+		{
+			_Data = data;
+			_Bitmap = data.ToBitmap();
+		}
+		protected SerializableBitmap(SerializationInfo info, StreamingContext context)
+		{
+			_Data = (byte[])info.GetValue("_data", typeof(byte[]));
+		}
 
 		[OnSerializing]
 		private void OnSerializing(StreamingContext context)
 		{
-			_data = GetBytes(_source);
+			_Data = _Bitmap.ToData();
 		}
 
 		[OnDeserializing]
 		private void OnDeserializing(StreamingContext context)
 		{
-			_source = GetBitmap(_data);
+			_Bitmap = _Data.ToBitmap();
 		}
 
-		public void GetObjectData(SerializationInfo info, StreamingContext context)
+		public virtual void GetObjectData(SerializationInfo info, StreamingContext context)
 		{
-
+			throw new NotImplementedException();
 		}
+
 		[SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.SerializationFormatter)]
 		void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context)
 		{
-
+			throw new NotImplementedException();
 		}
 
-		private static BitmapImage GetBitmap(byte[] data)
+		//Implicit and explicit operators for easy assigning .net's bitmap
+		public static implicit operator BitmapImage(SerializableBitmap bitmap) => bitmap._Bitmap;
+		public static implicit operator byte[] (SerializableBitmap bitmap)
 		{
-			if (data == null || data.Length == 0)
-				return new BitmapImage();
-			using (MemoryStream memStream = new MemoryStream())
-			{
-				data.For(eachByte => memStream.WriteByte(eachByte));
-				BitmapImage image = new BitmapImage();
-				image.BeginInit();
-				image.CacheOption = BitmapCacheOption.OnLoad;
-				image.StreamSource = memStream;
-				image.EndInit();
-				return image;
-			}
+			if (bitmap._Data == null)
+				bitmap._Data = bitmap._Bitmap.ToData();
+			return bitmap._Data;
 		}
-		private static byte[] GetBytes(BitmapImage bitmapImage)
-		{
-			byte[] data;
-			JpegBitmapEncoder encoder = new JpegBitmapEncoder();
-			encoder.Frames.Add(BitmapFrame.Create(bitmapImage));
-			using (MemoryStream ms = new MemoryStream())
-			{
-				encoder.Save(ms);
-				data = ms.ToArray();
-			}
-			return data;
-		}
-
-
-		public static implicit operator BitmapImage(SerializableBitmap bitmap) => bitmap._source;
 		public static explicit operator SerializableBitmap(BitmapImage bitmap) => new SerializableBitmap(bitmap);
 	}
 }

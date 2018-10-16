@@ -156,11 +156,18 @@ namespace Player.Controls
 		}
 
 		private void For(Action<Media> action) =>
-			this.SelectedItems.Cast<Media>().ToArray().For(each => action(each));
+			SelectedItems.Cast<Media>().ToArray().For(each => action(each));
 
 		private void DataGrid_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
 		{
+			if (SelectedItem == null)
+				return;
 			MediaRequested?.Invoke(this, new InfoExchangeArgs<(MediaQueue, Media)>((ItemsSource, SelectedItem as Media)));
+		}
+
+		private void DataGrid_LostFocus(object sender, RoutedEventArgs e)
+		{
+			SelectedItem = null;
 		}
 	}
 }

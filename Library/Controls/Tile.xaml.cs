@@ -9,7 +9,7 @@ namespace Player.Controls
 {
 	public partial class Tile : UserControl
 	{
-		public static readonly Size StandardSize = new Size(150, 40);
+		public static readonly Size StandardSize = new Size(110, 40);
 
 		public static readonly DependencyProperty ImageProperty =
 			DependencyProperty.Register(nameof(Image), typeof(ImageSource), typeof(Tile), new PropertyMetadata(null));
@@ -19,7 +19,11 @@ namespace Player.Controls
 		public ImageSource Image
 		{
 			get => (ImageSource)GetValue(ImageProperty);
-			set => SetValue(ImageProperty, value);
+			set
+			{
+				SetValue(ImageProperty, value);
+				MainImage.Source = value;
+			}
 		}
 		public TileStyle TileStyle
 		{

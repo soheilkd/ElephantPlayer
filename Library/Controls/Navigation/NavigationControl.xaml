@@ -6,7 +6,7 @@
 		<ControlTemplate TargetType="ContentControl">
 			<Grid>
 				<local:Button HorizontalAlignment="Left" VerticalAlignment="Top" Margin="5" MouseUp="Button_MouseUp" Icon="Back" Foreground="White"/>
-				<TextBlock Text="{TemplateBinding Tag}" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="24" FontWeight="Light" Margin="45,0,0,0" Foreground="White"/>
+				<TextBlock Text="{TemplateBinding Tag}" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="24" FontWeight="SemiBold" Margin="45,0,0,0" Foreground="White"/>
 				<ContentPresenter Content="{TemplateBinding Content}" Margin="0,40,0,0"/>
 			</Grid>
 		</ControlTemplate>

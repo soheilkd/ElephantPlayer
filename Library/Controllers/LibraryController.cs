@@ -6,14 +6,14 @@ using System.Runtime.Serialization.Formatters.Binary;
 using Player.Extensions;
 using Player.Models;
 
-namespace Player.Library
+namespace Player.Controllers
 {
-	public class Controller : ObservableCollection<Media>
+	public class LibraryController : ObservableCollection<Media>
 	{
 		private MediaQueue Data;
 		public event EventHandler<InfoExchangeArgs<Media>> MediaRequested;
-		
-		public Controller()
+
+		public LibraryController()
 		{
 			Load().For(each => Add(each));
 			Data = new MediaQueue(this);
@@ -25,7 +25,7 @@ namespace Player.Library
 				Directory.GetFiles(path, "*", SearchOption.AllDirectories).For(each => AddFromPath(each));
 			if (Media.TryLoadFromPath(path, out Media media))
 			{
-				var duplication = this.Where(item => item.Path == path);
+				System.Collections.Generic.IEnumerable<Media> duplication = this.Where(item => item.Path == path);
 				if (duplication.Count() != 0 && requestPlay)
 				{
 					MediaRequested?.Invoke(this, new InfoExchangeArgs<Media>(duplication.First()));
@@ -41,7 +41,7 @@ namespace Player.Library
 		public void SortBy<T>(Func<Media, T> keySelector, bool asc = true)
 		{
 			Media[] p = (asc ? this.OrderBy(keySelector) : this.OrderByDescending(keySelector)).ToArray();
-			for (int i = 0; i < Count; i++)
+			for (var i = 0; i < Count; i++)
 				if (p[i] != this[i])
 					Move(IndexOf(p[i]), i);
 		}
@@ -88,21 +88,21 @@ namespace Player.Library
 		{
 			if (!File.Exists(Settings.LibraryLocation))
 				return new Collection<Media>();
-			using (FileStream stream = new FileStream(Settings.LibraryLocation, FileMode.Open))
-				LoadedCollection = (Collection<Media>)(new BinaryFormatter()).Deserialize(stream);
+			using (var stream = new FileStream(Settings.LibraryLocation, FileMode.Open))
+				LoadedCollection = (Collection<Media>)new BinaryFormatter().Deserialize(stream);
 			return LoadedCollection;
 		}
 
 		public static void Save(Collection<Media> medias)
 		{
-			ObservableCollection<Media> coli = new ObservableCollection<Media>(medias);
-			using (FileStream stream = new FileStream(Settings.LibraryLocation, FileMode.Create))
-				(new BinaryFormatter()).Serialize(stream, coli);
+			var coli = new ObservableCollection<Media>(medias);
+			using (var stream = new FileStream(Settings.LibraryLocation, FileMode.Create))
+				new BinaryFormatter().Serialize(stream, coli);
 		}
 
 		public static bool TryLoad(string path, out Collection<Media> output)
 		{
-			string last = Settings.LibraryLocation;
+			var last = Settings.LibraryLocation;
 			Settings.LibraryLocation = path;
 			try
 			{
@@ -121,7 +121,7 @@ namespace Player.Library
 		}
 		#endregion
 
-		public static implicit operator MediaQueue(Controller controller)
+		public static implicit operator MediaQueue(LibraryController controller)
 		{
 			return controller.Data;
 		}
