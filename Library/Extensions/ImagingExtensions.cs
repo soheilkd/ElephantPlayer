@@ -24,7 +24,7 @@ namespace Player.Extensions
 			}
 		}
 
-		public static BitmapImage ToBitmap(this TagLib.IPicture picture)
+		public static BitmapImage ToBitmapImage(this TagLib.IPicture picture)
 		{
 			if (picture.Data.Count == 0)
 				return null;

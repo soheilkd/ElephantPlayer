@@ -1,29 +1,17 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
+using Player.Controllers;
 using Player.Controls.Navigation;
 using Player.Extensions;
 using Player.Models;
 
 namespace Player.Views
 {
-	/// <summary>
-	/// Interaction logic for AlbumsView.xaml
-	/// </summary>
 	public partial class AlbumsView : Grid
 	{
-		public event EventHandler<InfoExchangeArgs<(MediaQueue, Media)>> PlayRequested;
+		public event EventHandler<QueueEventArgs> PlayRequested;
 		private int CallTime = -1; //It's used for Lazy Loading, reaches 1 when user enters AlbumsView tab on MainWindow
 		public AlbumsView()
 		{
@@ -34,7 +22,7 @@ namespace Player.Views
 		{
 			if (CallTime++ != 0)
 				return;
-			var albums = Controllers.LibraryController.LoadedCollection.GroupBy(each => each.Album).OrderBy(each => each.Key);
+			IOrderedEnumerable<IGrouping<string, Media>> albums = Library.Data.GroupBy(each => each.Album).OrderBy(each => each.Key);
 			var grid = AlbumNavigation.GetChildContent(1) as Grid;
 			albums.ForEach(each =>
 				grid.Children.Add(
@@ -46,7 +34,7 @@ namespace Player.Views
 						{
 							Tag = each.Key,
 							Content = new GroupMediaView(new MediaQueue(each),
-							onPlay: (queue, media) => PlayRequested?.Invoke(this, new InfoExchangeArgs<(MediaQueue, Media)>((queue, media))))
+							onPlay: (queue, media) => PlayRequested?.Invoke(this, new QueueEventArgs(queue, media)))
 						}
 					}));
 			grid.AlignItems(Controls.Tile.StandardSize);

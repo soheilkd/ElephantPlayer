@@ -49,7 +49,7 @@ namespace Player.Controls
 			YearBox.Text = tag.Year.ToString() ?? string.Empty;
 			CopyrightBox.Text = tag.Copyright ?? string.Empty;
 			LyricsBox.Text = tag.Lyrics ?? string.Empty;
-			ArtworkImage.Source = tag.Pictures.Length >= 1 ? tag.Pictures[0].ToBitmap() : Properties.Resources.MusicLogo.ToImageSource();
+			ArtworkImage.Source = tag.Pictures.Length >= 1 ? tag.Pictures[0].ToBitmapImage() : Properties.Resources.MusicLogo.ToImageSource();
 			Show();
 		}
 

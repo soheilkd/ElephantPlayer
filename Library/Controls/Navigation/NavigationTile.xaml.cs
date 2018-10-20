@@ -80,29 +80,5 @@ namespace Player.Controls.Navigation
 		{
 			ParentNavigationViewer.ReturnToMainView();
 		}
-		
-		public void DownloadAndApplyImage<T>(Func<T, string> func, T arg)
-		{
-			Task.Run(() => DownloadAndApplyImage(func(arg)));
-		}
-		public void DownloadAndApplyImage(string url)
-		{
-			if (string.IsNullOrWhiteSpace(url))
-				return;
-			try
-			{
-				var client = new WebClient();
-				client.DownloadDataCompleted += (_, e) =>
-				{
-					Dispatcher.Invoke(() => Image = e.Result.ToBitmap());
-					Dispatcher.Invoke(() => ResourceController.AddOrSet(Tag.ToString(), new SerializableBitmap(Image as BitmapImage)));
-				};
-				client.DownloadDataAsync(new Uri(url));
-			}
-			catch (Exception)
-			{
-
-			}
-		}
 	}
 }

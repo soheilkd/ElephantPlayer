@@ -17,15 +17,15 @@ namespace Player
 		private static Lazy<SerializableSettings> LazySettings = new Lazy<SerializableSettings>(Load);
 		private static SerializableSettings Current => LazySettings.Value;
 		#endregion
-		
+
 		public static void Save()
 		{
-			using (FileStream stream = new FileStream($"{AppPath}Settings.xml", FileMode.Create))
+			using (var stream = new FileStream($"{AppPath}Settings.xml", FileMode.Create))
 				DefaultSerializer.Serialize(stream, Current);
 		}
 		private static SerializableSettings Load()
 		{
-			using (FileStream stream = new FileStream($"{AppPath}Settings.xml", FileMode.Open))
+			using (var stream = new FileStream($"{AppPath}Settings.xml", FileMode.Open))
 				return (SerializableSettings)DefaultSerializer.Deserialize(stream);
 		}
 
@@ -40,10 +40,10 @@ namespace Player
 		public static bool RememberMinimal { get => Current.RememberMinimal; set => Current.RememberMinimal = value; }
 		public static bool WasMinimal { get => Current.WasMinimal; set => Current.WasMinimal = value; }
 		public static int MouseTimeoutIndex { get => Current.MouseTimeoutIndex; set => Current.MouseTimeoutIndex = value; }
-		public static string LibraryLocation { get => Current.LibraryLocation; set => Current.LibraryLocation = value; }
+		public static string LibraryLocation => AppPath + "Library.bin";
 		public static Size LastSize { get => Current.LastSize; set => Current.LastSize = value; }
 		public static Point LastLocation { get => Current.LastLocation; set => Current.LastLocation = value; }
-		
+
 		public static int MouseOverTimeout
 		{
 			get

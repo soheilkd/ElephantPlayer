@@ -5,8 +5,8 @@
 	WindowTitleBrush="#FF43464B"
 	xmlns:mah="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
 	xmlns:system="clr-namespace:System;assembly=mscorlib"
-	xmlns:controls="clr-namespace:Player.Controls;assembly=Library"
-	xmlns:nav="clr-namespace:Player.Controls.Navigation;assembly=Library"
+	xmlns:controls="clr-namespace:Player.Controls;assembly=Player"
+	xmlns:nav="clr-namespace:Player.Controls.Navigation;assembly=Player"
 	xmlns:views="clr-namespace:Player.Views" Background="{DynamicResource MajorBackground}"
 	Title="Elephant Player" ShowIconOnTitleBar="False" AllowDrop="True"
 	Loaded="Window_Loaded" Closing="Window_Closing" Drop="Window_Drop" KeyUp="Window_KeyUp">
@@ -19,9 +19,6 @@
 							<controls:Icon Type="Menu"/>
 						</MenuItem.Header>
 						<MenuItem Header="Library">
-							<MenuItem Header="Import" Click="Menu_LibraryImportClick"/>
-							<MenuItem Header="Export" Click="Menu_LibraryExportClick"/>
-							<MenuItem Header="Heavy Load" Click="Menu_HeavyLoadClick"/>
 							<MenuItem Header="Revalidate" Click="Menu_RevalidateClick"/>
 						</MenuItem>
 						<MenuItem Header="About">
@@ -36,27 +33,15 @@
 		</mah:WindowCommands>
 	</mah:MetroWindow.LeftWindowCommands>
 	<Grid x:Name="ContentGrid">
-		<TabControl Background="Transparent" Margin="0,0,0,80">
+		<TabControl x:Name="TabControl" Background="Transparent" Margin="0,0,0,80">
 			<TabItem Header="Library">
-				<controls:MediaDataGrid x:Name="DataGrid" MouseDoubleClick="List_DoubleClick" Sorting="Data_Sorting"/>
+				<controls:MediaDataGrid x:Name="DataGrid" MediaRequested="DataGrid_MediaRequested" Sorting="Data_Sorting"/>
 			</TabItem>
 			<TabItem Header="Artists">
-				<nav:NavigationViewer x:Name="ArtistNavigation">
-					<ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
-						<Grid Loaded="ArtistGrid_Loaded">
-							
-						</Grid>
-					</ScrollViewer>
-				</nav:NavigationViewer>
+				<views:ArtistsView x:Name="ArtistsView"/>
 			</TabItem>
 			<TabItem Header="Albums">
-				<nav:NavigationViewer x:Name="AlbumNavigation">
-					<ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
-						<Grid Loaded="Grid_Loaded">
-							
-						</Grid>
-					</ScrollViewer>
-				</nav:NavigationViewer>
+				<views:AlbumsView x:Name="AlbumsView"/>
 			</TabItem>
 			<TabItem Header="Playlists">
 				<Frame>

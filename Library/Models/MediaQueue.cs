@@ -1,12 +1,12 @@
-﻿using Player.Extensions;
-using System;
-using System.Collections;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using Player.Extensions;
 
 namespace Player.Models
 {
+	[Serializable]
 	public class MediaQueue : ObservableCollection<Media>
 	{
 		private int _Position;
@@ -77,9 +77,9 @@ namespace Player.Models
 
 		public void Shuffle()
 		{
-			Random rand = new Random(DateTime.Now.Millisecond);
+			var rand = new Random(DateTime.Now.Millisecond);
 			Media[] t = this.ToArray();
-			int c = Count;
+			var c = Count;
 			Clear();
 			MiscExtensions.Repeat(() => Add(t[rand.Next(c)]), c);
 		}
@@ -87,7 +87,7 @@ namespace Player.Models
 		public void SortBy<T>(Func<Media, T> keySelector, bool asc = true)
 		{
 			Media[] p = (asc ? this.OrderBy(keySelector) : this.OrderByDescending(keySelector)).ToArray();
-			for (int i = 0; i < Count; i++)
+			for (var i = 0; i < Count; i++)
 				if (p[i] != this[i])
 					Move(IndexOf(p[i]), i);
 		}

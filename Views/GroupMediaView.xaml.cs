@@ -12,7 +12,7 @@ namespace Player.Views
 		{
 			InitializeComponent();
 			MediaDataGrid.ItemsSource = queue;
-			MediaDataGrid.MediaRequested += (_, e) => onPlay(e.Parameter.Item1, e.Parameter.Item2);
+			MediaDataGrid.MediaRequested += (_, e) => onPlay(e.Queue, e.Media);
 		}
 
 		public GroupMediaView()

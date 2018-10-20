@@ -6,7 +6,7 @@ using System.Runtime.Serialization.Formatters.Binary;
 
 namespace Player.Controllers
 {
-	public static class ResourceController
+	public static class Resource
 	{
 		public static string BinaryPath => $"{Settings.AppPath}Resources.rsc";
 
@@ -63,9 +63,7 @@ namespace Player.Controllers
 		}
 		public static byte[] Get(string key)
 		{
-			if (!Contains(key))
-				return default;
-			return Resources[key];
+			return Contains(key) ? Resources[key] : default;
 		}
 		public static void Set(string key, byte[] data)
 		{

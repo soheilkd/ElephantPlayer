@@ -27,9 +27,7 @@ namespace Player.Controls
 			}
 		}
 		
-		public event EventHandler<InfoExchangeArgs<(MediaQueue, Media)>> MediaRequested;
-		
-		public event EventHandler<InfoExchangeArgs<Media>> MediaRemoved;
+		public event EventHandler<QueueEventArgs> MediaRequested;
 
 		public static readonly DependencyProperty TitleColumnVisibilityProperty =
 			DependencyProperty.Register(nameof(TitleColumnVisibility), typeof(Visibility), typeof(MediaDataGrid), new PropertyMetadata(Visibility.Visible));
@@ -123,7 +121,7 @@ namespace Player.Controls
 		}
 		private void Menu_RemoveClick(object sender, RoutedEventArgs e)
 		{
-			For(item => MediaRemoved?.Invoke(this, new InfoExchangeArgs<Media>(item)));
+			For(each => ItemsSource.Remove(each));
 		}
 		private void Menu_DeleteClick(object sender, RoutedEventArgs e)
 		{
@@ -134,7 +132,7 @@ namespace Player.Controls
 			For(item =>
 			{
 				File.Delete(item.Path);
-				MediaRemoved?.Invoke(this, new InfoExchangeArgs<Media>(item));
+				ItemsSource.Remove(item);
 			});
 		}
 		private void Menu_LocationClick(object sender, RoutedEventArgs e)
@@ -162,12 +160,12 @@ namespace Player.Controls
 		{
 			if (SelectedItem == null)
 				return;
-			MediaRequested?.Invoke(this, new InfoExchangeArgs<(MediaQueue, Media)>((ItemsSource, SelectedItem as Media)));
+			MediaRequested?.Invoke(this, new QueueEventArgs(ItemsSource, SelectedItem as Media));
 		}
 
 		private void DataGrid_LostFocus(object sender, RoutedEventArgs e)
 		{
-			SelectedItem = null;
+			//SelectedItem = null;
 		}
 	}
 }
