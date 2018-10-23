@@ -1,11 +1,13 @@
-﻿using MahApps.Metro.Controls;
-using Microsoft.Win32;
-using Player.Extensions;
-using Player.Models;
-using System;
+﻿using System;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
+using Library.Extensions;
+using MahApps.Metro.Controls;
+using Microsoft.Win32;
+using Player.Models;
+using Library;
+using Player.Extensions;
 
 namespace Player.Controls
 {
@@ -21,7 +23,7 @@ namespace Player.Controls
 		};
 		private Media _Media;
 		private TagLib.File _TagFile;
-		public event EventHandler<InfoExchangeArgs<TagLib.File>> SaveRequested;
+		public event InfoExchangeHandler<TagLib.File> SaveRequested;
 
 		public PropertiesUI() => InitializeComponent();
 
@@ -67,9 +69,9 @@ namespace Player.Controls
 			_TagFile.Tag.Composers = ComposerBox.Text.Split(Seperator) ?? new string[0];
 			_TagFile.Tag.Conductor = ConductorBox.Text ?? string.Empty;
 			_TagFile.Tag.Genres = GenreBox.Text.Split(Seperator) ?? new string[0];
-			_TagFile.Tag.Track = uint.TryParse(TrackBox.Text ?? "0", out uint num) ? num : 0;
+			_TagFile.Tag.Track = uint.TryParse(TrackBox.Text ?? "0", out var num) ? num : 0;
 			_TagFile.Tag.Comment = CommentBox.Text ?? string.Empty;
-			_TagFile.Tag.Year = uint.TryParse(YearBox.Text ?? "0", out uint num2) ? num2 : 0;
+			_TagFile.Tag.Year = uint.TryParse(YearBox.Text ?? "0", out var num2) ? num2 : 0;
 			_TagFile.Tag.Copyright = CopyrightBox.Text ?? string.Empty;
 			_TagFile.Tag.Lyrics = LyricsBox.Text ?? string.Empty;
 

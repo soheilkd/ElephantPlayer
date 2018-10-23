@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.ObjectModel;
-using Player.Extensions;
+using Library.Extensions;
 
 namespace Player.Models
 {

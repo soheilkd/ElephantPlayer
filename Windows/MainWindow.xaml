@@ -5,9 +5,10 @@
 	WindowTitleBrush="#FF43464B"
 	xmlns:mah="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
 	xmlns:system="clr-namespace:System;assembly=mscorlib"
-	xmlns:controls="clr-namespace:Player.Controls;assembly=Player"
-	xmlns:nav="clr-namespace:Player.Controls.Navigation;assembly=Player"
-	xmlns:views="clr-namespace:Player.Views" Background="{DynamicResource MajorBackground}"
+	xmlns:controls="clr-namespace:Library.Controls;assembly=Library"
+	xmlns:nav="clr-namespace:Library.Controls.Navigation;assembly=Library"
+	xmlns:views="clr-namespace:Player.Views"
+	xmlns:controls1="clr-namespace:Player.Controls;assembly=Player" Background="{DynamicResource MajorBackground}"
 	Title="Elephant Player" ShowIconOnTitleBar="False" AllowDrop="True"
 	Loaded="Window_Loaded" Closing="Window_Closing" Drop="Window_Drop" KeyUp="Window_KeyUp">
 	<mah:MetroWindow.LeftWindowCommands>
@@ -16,7 +17,7 @@
 				<Menu x:Name="Menu">
 					<MenuItem>
 						<MenuItem.Header>
-							<controls:Icon Type="Menu"/>
+							<Image Source="pack://application:,,,/Resources/Player.ico"/>
 						</MenuItem.Header>
 						<MenuItem Header="Library">
 							<MenuItem Header="Revalidate" Click="Menu_RevalidateClick"/>
@@ -35,7 +36,7 @@
 	<Grid x:Name="ContentGrid">
 		<TabControl x:Name="TabControl" Background="Transparent" Margin="0,0,0,80">
 			<TabItem Header="Library">
-				<controls:MediaDataGrid x:Name="DataGrid" MediaRequested="DataGrid_MediaRequested" Sorting="Data_Sorting"/>
+				<controls1:MediaDataGrid x:Name="DataGrid" MediaRequested="DataGrid_MediaRequested" Sorting="Data_Sorting"/>
 			</TabItem>
 			<TabItem Header="Artists">
 				<views:ArtistsView x:Name="ArtistsView"/>
@@ -93,7 +94,7 @@
 				</Style>
 			</TabControl.Resources>
 		</TabControl>
-		<controls:MediaPlayer x:Name="Player"/>
+		<controls1:MediaPlayer x:Name="Player"/>
 		<controls:Button x:Name="MinimalViewButton" Icon="CollapsePane" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,12,35" MouseUp="MinimalButton_Clicked"/>
 		<Label x:Name="SearchLabel" Content="{Binding Text, ElementName=SearchBox}" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,190,20"/>
 		<controls:Button x:Name="SearchButton" HorizontalAlignment="Right" VerticalAlignment="Bottom" Icon="Search" MouseUp="SearchIcon_Click" Margin="0,0,195,35" Width="20" Height="20"/>

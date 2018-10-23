@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using Player.Extensions;
+using Library.Extensions;
 
 namespace Player.Models
 {

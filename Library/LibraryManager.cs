@@ -1,18 +1,18 @@
 ﻿using System;
-using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
-using Player.Extensions;
+using Library;
+using Library.Extensions;
 using Player.Models;
 
-namespace Player.Controllers
+namespace Player
 {
-	public static class Library
+	public static class LibraryManager
 	{
 		private static Lazy<MediaQueue> _LazyData = new Lazy<MediaQueue>(Load);
 		public static MediaQueue Data { get => _LazyData.Value; }
-		public static event EventHandler<InfoExchangeArgs<Media>> MediaRequested;
+		public static event InfoExchangeHandler<Media> MediaRequested;
 
 		public static void AddFromPath(string path, bool requestPlay = false)
 		{
@@ -51,7 +51,7 @@ namespace Player.Controllers
 			using (var stream = new FileStream(Settings.LibraryLocation, FileMode.Create))
 				new BinaryFormatter().Serialize(stream, Data);
 		}
-		
+
 		private static MediaQueue Load()
 		{
 			if (!File.Exists(Settings.LibraryLocation))

@@ -2,9 +2,10 @@
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using Library.Controls;
+using Library.Controls.Navigation;
+using Library.Extensions;
 using Player.Controllers;
-using Player.Controls.Navigation;
-using Player.Extensions;
 using Player.Models;
 
 namespace Player.Views
@@ -22,14 +23,14 @@ namespace Player.Views
 		{
 			if (CallTime++ != 0)
 				return;
-			IOrderedEnumerable<IGrouping<string, Media>> albums = Library.Data.GroupBy(each => each.Album).OrderBy(each => each.Key);
+			var albums = LibraryManager.Data.GroupBy(each => each.Album).OrderBy(each => each.Key);
 			var grid = AlbumNavigation.GetChildContent(1) as Grid;
 			albums.ForEach(each =>
 				grid.Children.Add(
 					new NavigationTile()
 					{
 						Tag = each.Key,
-						TileStyle = Controls.TileStyle.Default,
+						TileStyle = TileStyle.Default,
 						Navigation = new NavigationControl()
 						{
 							Tag = each.Key,
@@ -37,8 +38,8 @@ namespace Player.Views
 							onPlay: (queue, media) => PlayRequested?.Invoke(this, new QueueEventArgs(queue, media)))
 						}
 					}));
-			grid.AlignItems(Controls.Tile.StandardSize);
-			grid.SizeChanged += (_, __) => grid.AlignItems(Controls.Tile.StandardSize);
+			grid.AlignItems(Tile.StandardSize);
+			grid.SizeChanged += (_, __) => grid.AlignItems(Tile.StandardSize);
 		}
 	}
 }

@@ -6,9 +6,10 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media.Imaging;
+using Library.Controls;
+using Library.Controls.Navigation;
+using Library.Extensions;
 using Player.Controllers;
-using Player.Controls.Navigation;
-using Player.Extensions;
 using Player.Models;
 
 namespace Player.Views
@@ -27,7 +28,7 @@ namespace Player.Views
 			if (CallTime++ != 0)
 				return;
 
-			IOrderedEnumerable<IGrouping<string, Media>> artists = Library.Data.GroupBy(each => each.Artist).OrderBy(each => each.Key);
+			IOrderedEnumerable<IGrouping<string, Media>> artists = LibraryManager.Data.GroupBy(each => each.Artist).OrderBy(each => each.Key);
 			var grid = ArtistNavigation.GetChildContent(1) as Grid;
 			var navigations = new List<NavigationTile>();
 			artists.ForEach(each =>
@@ -35,7 +36,7 @@ namespace Player.Views
 					new NavigationTile()
 					{
 						Tag = each.Key,
-						TileStyle = Controls.TileStyle.Default,
+						TileStyle = TileStyle.Default,
 						Navigation = new NavigationControl()
 						{
 							Tag = each.Key,
@@ -44,8 +45,8 @@ namespace Player.Views
 						}
 					}));
 			navigations.For(each => grid.Children.Add(each));
-			grid.AlignItems(Controls.Tile.StandardSize);
-			grid.SizeChanged += (_, __) => grid.AlignItems(Controls.Tile.StandardSize);
+			grid.AlignItems(Tile.StandardSize);
+			grid.SizeChanged += (_, __) => grid.AlignItems(Tile.StandardSize);
 			Console.WriteLine($"Count: {navigations.Count}");
 			navigations.For(each =>
 			{

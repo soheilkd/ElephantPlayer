@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Windows;
 using System.Windows.Controls;
-using Player.Extensions;
+using Library.Extensions;
 using Player.Models;
 
 namespace Player.Views
@@ -22,7 +22,7 @@ namespace Player.Views
 
 		private void Grid_Loaded(object sender, RoutedEventArgs e)
 		{
-			TimeSpan totalLength = new TimeSpan(0);
+			var totalLength = new TimeSpan(0);
 			MediaDataGrid.ItemsSource.For(each => totalLength += each.Length);
 			BarTextBlock.Text = $"Showing {MediaDataGrid.ItemsSource.Count} media[s], totally {(int)totalLength.TotalMinutes} minutes";
 		}

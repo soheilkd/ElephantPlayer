@@ -1,7 +1,7 @@
-﻿using Player.Instances;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Windows;
+using Library.Instances;
 
 namespace Player
 {
@@ -13,12 +13,15 @@ namespace Player
 		public static void Main()
 		{
 			Settings.AppPath = Environment.GetCommandLineArgs()[0].Substring(0, Environment.GetCommandLineArgs()[0].LastIndexOf("\\") + 1);
-			AppDomain.CurrentDomain.ProcessExit += (_, __) => Hook.Events.Dispose();
+			AppDomain.CurrentDomain.ProcessExit += (_, __) => Library.Hook.Events.Dispose();
 			AppDomain.CurrentDomain.UnhandledException += (sender, e) =>
-				MessageBox.Show($"Unhandled {e.ExceptionObject}\r\n", "Exception", MessageBoxButton.OK, MessageBoxImage.Error);
+			{
+				Console.WriteLine($"Unhandled {e.ExceptionObject}\r\n", "Exception", MessageBoxButton.OK, MessageBoxImage.Error);
+				MessageBox.Show($"Unhandled error occurred", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+			};
 			if (Instance<App>.InitializeAsFirstInstance("ElephantIPC_soheilkd"))
 			{
-				App application = new App();
+				var application = new App();
 				application.InitializeComponent();
 				application.Run();
 				Instance<App>.Cleanup();

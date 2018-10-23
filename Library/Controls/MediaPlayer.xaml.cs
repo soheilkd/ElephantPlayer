@@ -6,17 +6,19 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
-using Player.Extensions;
+using Library;
+using Library.Controls;
+using Library.Extensions;
+using Library.Taskbar;
 using Player.Models;
-using Player.Taskbar;
 
 namespace Player.Controls
 {
 	public partial class MediaPlayer : UserControl
 	{
-		public event EventHandler<InfoExchangeArgs<Media>> MediaChanged;
+		public event InfoExchangeHandler<Media> MediaChanged;
+		public event InfoExchangeHandler<bool> VisionChanged;
 		public event EventHandler FullScreenToggled;
-		public event EventHandler<InfoExchangeArgs<bool>> VisionChanged;
 
 		public MediaQueue Queue { get; private set; } = new MediaQueue();
 		public Media Current => Queue.Current;
@@ -27,7 +29,7 @@ namespace Player.Controls
 			get => _BorderBack;
 			set
 			{
-				SolidColorBrush r = (SolidColorBrush)value;
+				var r = (SolidColorBrush)value;
 				_BorderBack = new SolidColorBrush(new Color()
 				{
 					R = r.Color.R,
@@ -145,11 +147,11 @@ namespace Player.Controls
 			VisionOffBoard.Completed += delegate { ElementCanvas.Visibility = Visibility.Hidden; };
 			VisionOnBoard.CurrentStateInvalidated += delegate { ElementCanvas.Visibility = Visibility.Visible; };
 		}
-		
+
 		private void Element_MediaOpened(object sender, RoutedEventArgs e)
 		{
 			ResetCountTimer();
-			bool isVideo = element.HasVideo;
+			var isVideo = element.HasVideo;
 			FullScreenButton.Visibility = isVideo ? Visibility.Visible : Visibility.Hidden;
 			if (IsFullScreen && !isVideo)
 				FullScreenButton.EmulateClick();
@@ -178,7 +180,7 @@ namespace Player.Controls
 
 		private async void Element_MouseMove(object sender, MouseEventArgs e)
 		{
-			double y = ControlsTranslation.Y;
+			var y = ControlsTranslation.Y;
 			await Task.Delay(50);
 			if (ControlsTranslation.Y < y)
 				return;
@@ -188,7 +190,7 @@ namespace Player.Controls
 
 		private async void RunUX()
 		{
-			UX:
+		UX:
 			await Task.Delay(250);
 			if (element.NaturalDuration.HasTimeSpan && element.NaturalDuration.TimeSpan != MediaTimeSpan)
 				MediaTimeSpan = element.NaturalDuration.TimeSpan;

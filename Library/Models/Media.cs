@@ -1,12 +1,11 @@
-﻿using Player.Extensions;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows;
-using System.Windows.Media;
+using Library.Extensions;
 
 namespace Player.Models
 {
@@ -55,9 +54,9 @@ namespace Player.Models
 
 		public bool Matches(string query)
 		{
-			if (string.IsNullOrWhiteSpace(query)) return true;
-			return
-				Title.IncaseContains(query) ||
+			return string.IsNullOrWhiteSpace(query)
+				? true
+				: Title.IncaseContains(query) ||
 				Name.IncaseContains(query) ||
 				Artist.IncaseContains(query) ||
 				Album.IncaseContains(query) ||
@@ -82,10 +81,13 @@ namespace Player.Models
 
 		private static MediaType GetMediaType(string path)
 		{
-			string ext = path.Substring(path.LastIndexOf('.') + 1).ToLower();
-			if (SupportedMusics.Contains(ext)) return MediaType.Music;
-			else if (SupportedVideos.Contains(ext)) return MediaType.Video;
-			else return MediaType.None;
+			var ext = path.Substring(path.LastIndexOf('.') + 1).ToLower();
+			if (SupportedMusics.Contains(ext))
+				return MediaType.Music;
+			else if (SupportedVideos.Contains(ext))
+				return MediaType.Video;
+			else
+				return MediaType.None;
 		}
 
 		public void Load()
@@ -102,7 +104,7 @@ namespace Player.Models
 			switch (Type = GetMediaType(Path))
 			{
 				case MediaType.Music:
-					using (TagLib.File t = TagLib.File.Create(Path))
+					using (var t = TagLib.File.Create(Path))
 					{
 						Artist = t.Tag.FirstPerformer ?? Path.Substring(0, Path.LastIndexOf("\\"));
 						Title = t.Tag.Title ?? Name.Substring(0, Name.LastIndexOf("."));
@@ -130,33 +132,32 @@ namespace Player.Models
 		{
 			string deleteWord(string target, string word)
 			{
-				string output = "";
-				int lit1 = target.ToLower().IndexOf(word);
+				var output = "";
+				var lit1 = target.ToLower().IndexOf(word);
 				if (target.StartsWith(word)) lit1 = 0;
 				if (lit1 == -1) return target;
-				string temp1 = target.Substring(0, lit1);
+				var temp1 = target.Substring(0, lit1);
 				if (temp1 == string.Empty) temp1 = " ";
 				if (temp1.LastIndexOf(' ') == -1) return " ";
-				string temp2 = temp1.Substring(0, temp1.LastIndexOf(' '));
+				var temp2 = temp1.Substring(0, temp1.LastIndexOf(' '));
 				output += temp2;
-				int lit2 = target.ToLower().LastIndexOf(word);
+				var lit2 = target.ToLower().LastIndexOf(word);
 				temp1 = target.Substring(lit2);
-				if (!temp1.EndsWith(temp1)) temp2 = temp1.Substring(temp1.IndexOf(' '));
-				else temp2 = "";
+				temp2 = !temp1.EndsWith(temp1) ? temp1.Substring(temp1.IndexOf(' ')) : "";
 				output += temp2;
 				return output;
 			}
 			string c(string target)
 			{
 				if (string.IsNullOrWhiteSpace(target)) return target;
-				string[] litretures = ".com;.ir;.org;www.;@;.me;.biz;.net".Split(';');
-				List<string> lit = new List<string>();
+				var litretures = ".com;.ir;.org;www.;@;.me;.biz;.net".Split(';');
+				var lit = new List<string>();
 				litretures.For(each => target.IncaseContains(each), each => lit.Add(each));
 				lit.ToArray().For(each => target = deleteWord(target, each));
 				return target;
 			}
 
-			using (TagLib.File file = TagLib.File.Create(Path))
+			using (var file = TagLib.File.Create(Path))
 			{
 				string[] form(TagLib.Tag tag2)
 				{
@@ -173,7 +174,7 @@ namespace Player.Models
 					};
 				}
 				TagLib.Tag tag = file.Tag;
-				string[] manip1 = form(tag);
+				var manip1 = form(tag);
 				tag.Album = c(tag.Album ?? " ");
 				tag.Comment = "";
 				tag.Composers = new string[] { c(tag.FirstComposer ?? " ") };
@@ -182,8 +183,8 @@ namespace Player.Models
 				tag.Genres = new string[] { c(tag.FirstGenre ?? " ") };
 				tag.Performers = new string[] { c(tag.FirstPerformer ?? " ") };
 				tag.Title = c(tag.Title ?? " ");
-				string[] manip2 = form(tag);
-				string manip = "Detergent will change these values: \r\n";
+				var manip2 = form(tag);
+				var manip = "Detergent will change these values: \r\n";
 				if (manip1[0] != manip2[0]) manip += "Album: " + manip1[0] + " => " + manip2[0] + "\r\n";
 				if (manip1[1] != manip2[1]) manip += "Comment: " + manip1[1] + " => " + manip2[1] + "\r\n";
 				if (manip1[2] != manip2[2]) manip += "Composer: " + manip1[2] + " => " + manip2[2] + "\r\n";

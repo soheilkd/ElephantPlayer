@@ -1,7 +1,7 @@
 ﻿<Grid x:Class="Player.Views.ArtistsView"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Loaded="Grid_Loaded"
-	  xmlns:nav="clr-namespace:Player.Controls.Navigation;assembly=Player">
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	  xmlns:nav="clr-namespace:Library.Controls.Navigation;assembly=Library" Loaded="Grid_Loaded">
 	<nav:NavigationViewer x:Name="ArtistNavigation">
 		<ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
 			<Grid>

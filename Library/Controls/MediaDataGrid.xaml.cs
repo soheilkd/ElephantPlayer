@@ -1,15 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using Library.Extensions;
 using Microsoft.Win32;
-using Player.Extensions;
 using Player.Models;
 
 namespace Player.Controls
@@ -26,7 +22,7 @@ namespace Player.Controls
 				_Items = value;
 			}
 		}
-		
+
 		public event EventHandler<QueueEventArgs> MediaRequested;
 
 		public static readonly DependencyProperty TitleColumnVisibilityProperty =
@@ -125,7 +121,7 @@ namespace Player.Controls
 		}
 		private void Menu_DeleteClick(object sender, RoutedEventArgs e)
 		{
-			string msg = "Sure? These will be deleted:\r\n";
+			var msg = "Sure? These will be deleted:\r\n";
 			For(item => msg += $"{item.Path}\r\n");
 			if (MessageBox.Show(msg, "Sure?", MessageBoxButton.OKCancel, MessageBoxImage.Warning) != MessageBoxResult.OK)
 				return;
@@ -146,8 +142,8 @@ namespace Player.Controls
 				var pro = new PropertiesUI();
 				pro.SaveRequested += (_, f) =>
 				{
-						f.Parameter.Save();
-						each.Reload();
+					f.Parameter.Save();
+					each.Reload();
 				};
 				pro.LoadFor(each);
 			});
