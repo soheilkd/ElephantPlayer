@@ -45,8 +45,9 @@
     <Reference Include="Hqub.Lastfm, Version=1.0.2.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Hqub.Last.fm.1.0.2\lib\net45\Hqub.Lastfm.dll</HintPath>
     </Reference>
-    <Reference Include="Library">
-      <HintPath>..\..\Library\Library\Library.dll</HintPath>
+    <Reference Include="Library, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\ElephantLibrary\Library.dll</HintPath>
     </Reference>
     <Reference Include="MahApps.Metro, Version=1.6.5.1, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\MahApps.Metro.1.6.5\lib\net47\MahApps.Metro.dll</HintPath>
@@ -143,8 +144,7 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\musiclogo.png" />
+    <None Include="Resources\MusicLogo.png" />
   </ItemGroup>
-  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
