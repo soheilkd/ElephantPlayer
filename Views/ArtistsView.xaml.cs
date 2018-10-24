@@ -28,7 +28,7 @@ namespace Player.Views
 			if (CallTime++ != 0)
 				return;
 
-			IOrderedEnumerable<IGrouping<string, Media>> artists = LibraryManager.Data.GroupBy(each => each.Artist).OrderBy(each => each.Key);
+			var artists = LibraryManager.Data.GroupBy(each => each.Artist).OrderBy(each => each.Key);
 			var grid = ArtistNavigation.GetChildContent(1) as Grid;
 			var navigations = new List<NavigationTile>();
 			artists.ForEach(each =>
@@ -62,21 +62,14 @@ namespace Player.Views
 						each.Dispatcher.Invoke(() => tag = each.Tag.ToString());
 						var url = Web.API.GetArtistImageUrl(tag);
 						if (string.IsNullOrWhiteSpace(url))
-							return;
-						try
+							each.Dispatcher.Invoke(() => each.Image = Properties.Resources.UnknownArtist.ToImageSource());
+						var client = new WebClient();
+						client.DownloadDataCompleted += (_, d) =>
 						{
-							var client = new WebClient();
-							client.DownloadDataCompleted += (_, d) =>
-							{
-								each.Dispatcher.Invoke(() => each.Image = d.Result.ToBitmap());
-								Dispatcher.Invoke(() => Resource.AddOrSet(tag, new SerializableBitmap(each.Image as BitmapImage)));
-							};
-							client.DownloadDataAsync(new Uri(url));
-						}
-						catch (Exception)
-						{
-
-						}
+							each.Dispatcher.Invoke(() => each.Image = d.Result.ToBitmap());
+							Dispatcher.Invoke(() => Resource.AddOrSet(tag, new SerializableBitmap(each.Image as BitmapImage)));
+						};
+						client.DownloadDataAsync(new Uri(url));
 					});
 				}
 			}
