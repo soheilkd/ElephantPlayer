@@ -4,13 +4,14 @@ using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using Library.Extensions;
 using Microsoft.Win32;
 using Player.Models;
 
 namespace Player.Controls
 {
-	public partial class MediaDataGrid : DataGrid
+	public partial class MediaDataGrid : ListBox
 	{
 		private MediaQueue _Items;
 		public new MediaQueue ItemsSource
@@ -25,42 +26,6 @@ namespace Player.Controls
 
 		public event EventHandler<QueueEventArgs> MediaRequested;
 
-		public static readonly DependencyProperty TitleColumnVisibilityProperty =
-			DependencyProperty.Register(nameof(TitleColumnVisibility), typeof(Visibility), typeof(MediaDataGrid), new PropertyMetadata(Visibility.Visible));
-		public static readonly DependencyProperty ArtistColumnVisibilityProperty =
-			DependencyProperty.Register(nameof(ArtistColumnVisibility), typeof(Visibility), typeof(MediaDataGrid), new PropertyMetadata(Visibility.Visible));
-		public static readonly DependencyProperty AlbumColumnVisibilityProperty =
-			DependencyProperty.Register(nameof(AlbumColumnVisibility), typeof(Visibility), typeof(MediaDataGrid), new PropertyMetadata(Visibility.Visible));
-		public static readonly DependencyProperty PlaysColumnVisibilityProperty =
-			DependencyProperty.Register(nameof(PlaysColumnVisibility), typeof(Visibility), typeof(MediaDataGrid), new PropertyMetadata(Visibility.Visible));
-		public static readonly DependencyProperty DateColumnVisibilityProperty =
-			DependencyProperty.Register(nameof(DateColumnVisibility), typeof(Visibility), typeof(MediaDataGrid), new PropertyMetadata(Visibility.Visible));
-
-		public Visibility TitleColumnVisibility
-		{
-			get => (Visibility)GetValue(TitleColumnVisibilityProperty);
-			set => SetValue(TitleColumnVisibilityProperty, value);
-		}
-		public Visibility ArtistColumnVisibility
-		{
-			get => (Visibility)GetValue(ArtistColumnVisibilityProperty);
-			set => SetValue(ArtistColumnVisibilityProperty, value);
-		}
-		public Visibility AlbumColumnVisibility
-		{
-			get => (Visibility)GetValue(AlbumColumnVisibilityProperty);
-			set => SetValue(AlbumColumnVisibilityProperty, value);
-		}
-		public Visibility PlaysColumnVisibility
-		{
-			get => (Visibility)GetValue(PlaysColumnVisibilityProperty);
-			set => SetValue(PlaysColumnVisibilityProperty, value);
-		}
-		public Visibility DateColumnVisibility
-		{
-			get => (Visibility)GetValue(DateColumnVisibilityProperty);
-			set => SetValue(DateColumnVisibilityProperty, value);
-		}
 		private SaveFileDialog MediaTransferDialog = new SaveFileDialog()
 		{
 			AddExtension = false,
@@ -162,6 +127,11 @@ namespace Player.Controls
 		private void DataGrid_LostFocus(object sender, RoutedEventArgs e)
 		{
 			//SelectedItem = null;
+		}
+
+		private void DGR_Border_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+		{
+			MediaRequested?.Invoke(this, new QueueEventArgs(ItemsSource, (Media)((ContentControl)sender).Content));
 		}
 	}
 }

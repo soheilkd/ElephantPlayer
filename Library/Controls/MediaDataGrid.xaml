@@ -1,75 +1,34 @@
-﻿<DataGrid
+﻿<ListBox
 	BorderThickness="0"
 	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 	x:Class="Player.Controls.MediaDataGrid"
 	LostFocus="DataGrid_LostFocus"
-	SelectionUnit="FullRow"
+	SelectionMode="Extended"
+	HorizontalContentAlignment="Stretch"
+	
 	MouseDoubleClick="DataGrid_MouseDoubleClick"
-	HorizontalGridLinesBrush="Transparent"
-	VerticalGridLinesBrush="Transparent"
-	AutoGenerateColumns="False"
-	Background="Transparent"
-	IsReadOnly="True">
-	<DataGrid.ColumnHeaderStyle>
-		<Style TargetType="{x:Type DataGridColumnHeader}">
-			<Setter Property="Background" Value="Transparent"/>
-			<Setter Property="Foreground" Value="White"/>
-			<Setter Property="BorderBrush" Value="#9AAA"/>
-			<Setter Property="BorderThickness" Value="0,1,2,2"/>
-			<Setter Property="Padding" Value="5"/>
-		</Style>
-	</DataGrid.ColumnHeaderStyle>
-	<DataGrid.Columns>
-		<DataGridTextColumn FontSize="15" Width="300" Header="Title" Binding="{Binding Title}"/>
-		<DataGridTextColumn Width="120" Header="Artist" Binding="{Binding Artist}"/>
-		<DataGridTextColumn Width="120" Header="Album" Binding="{Binding Album}"/>
-		<DataGridTextColumn Width="60" Header="Plays" Binding="{Binding PlayCount}"/>
-		<DataGridTextColumn Header="Date Added" Binding="{Binding AdditionDate}"/>
-	</DataGrid.Columns>
-	<DataGrid.RowStyle>
-		<Style TargetType="{x:Type DataGridRow}">
-			<Setter Property="Template" >
-				<Setter.Value>
-					<ControlTemplate TargetType="{x:Type DataGridRow}">
-						<Border x:Name="DGR_Border" Padding="3">
-							<DataGridCellsPresenter/>
-						</Border>
-						<ControlTemplate.Triggers>
-							<Trigger Property="IsMouseOver" Value="True">
-								<Setter TargetName="DGR_Border" Property="Background" Value="LightGray" />
-							</Trigger>
-							<Trigger Property="IsSelected" Value="True">
-								<Setter TargetName="DGR_Border" Property="Background" Value="#FF4A7BFF" />
-							</Trigger>
-							<DataTrigger Binding="{Binding IsPlaying}" Value="True">
-								<Setter TargetName="DGR_Border" Property="Background">
-									<Setter.Value>
-										<LinearGradientBrush EndPoint="0.5,1" MappingMode="RelativeToBoundingBox" StartPoint="0.5,0">
-											<GradientStop Color="#FF1E5AF9" Offset="1"/>
-											<GradientStop Color="#FF4A7BFF" Offset="0.502"/>
-											<GradientStop Color="#FF1E5AF9" Offset="0"/>
-										</LinearGradientBrush>
-									</Setter.Value>
-								</Setter>
-							</DataTrigger>
-						</ControlTemplate.Triggers>
-					</ControlTemplate>
-				</Setter.Value>
-			</Setter>
-		</Style>
-	</DataGrid.RowStyle>
-	<DataGrid.CellStyle>
-		<Style TargetType="DataGridCell">
-			<Style.Triggers>
-				<Trigger Property="IsSelected" Value="True">
-					<Setter Property="BorderBrush" Value="Transparent"/>
-					<Setter Property="Background" Value="#FF4A7BFF"/>
-				</Trigger>
-			</Style.Triggers>
-		</Style>
-	</DataGrid.CellStyle>
-	<DataGrid.ContextMenu>
+	Background="Transparent">
+	<ListBox.ItemTemplate>
+		<DataTemplate>
+			<Border x:Name="border" BorderBrush="#FF242527" BorderThickness="3,0,0,0" Background="#FF242527">
+				<StackPanel HorizontalAlignment="Stretch">
+					<TextBlock Text="{Binding Title}" Padding="2" FontSize="16" />
+					<StackPanel Orientation="Horizontal" Margin="3">
+						<TextBlock Text="{Binding Artist}" />
+						<TextBlock Text=" - "/>
+						<TextBlock Text="{Binding Album}"/>
+					</StackPanel>
+				</StackPanel>
+			</Border>
+			<DataTemplate.Triggers>
+				<DataTrigger Binding="{Binding IsPlaying}" Value="True">
+					<Setter TargetName="border" Property="BorderBrush" Value="#FF0F77CF"/>
+				</DataTrigger>
+			</DataTemplate.Triggers>
+		</DataTemplate>
+	</ListBox.ItemTemplate>
+	<ListBox.ContextMenu>
 		<ContextMenu>
 			<MenuItem Header="Clean Tag" Click="Menu_TagDetergent" />
 			<MenuItem Header="Move to..."/>
@@ -79,5 +38,11 @@
 			<MenuItem Header="Open Location" Click="Menu_LocationClick"/>
 			<MenuItem Header="Properties" Click="Menu_PropertiesClick"/>
 		</ContextMenu>
-	</DataGrid.ContextMenu>
-</DataGrid>
+	</ListBox.ContextMenu>
+	<ListBox.Resources>
+		<Style TargetType="ListBoxItem">
+			<Setter Property="Margin" Value="0"/>
+			<Setter Property="BorderThickness" Value="0"/>
+		</Style>
+	</ListBox.Resources>
+</ListBox>
