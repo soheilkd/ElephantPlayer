@@ -5,7 +5,6 @@ using System.Windows.Controls;
 using Library.Controls;
 using Library.Controls.Navigation;
 using Library.Extensions;
-using Player.Controllers;
 using Player.Models;
 
 namespace Player.Views
@@ -38,8 +37,8 @@ namespace Player.Views
 							onPlay: (queue, media) => PlayRequested?.Invoke(this, new QueueEventArgs(queue, media)))
 						}
 					}));
-			grid.AlignItems(Tile.StandardSize);
-			grid.SizeChanged += (_, __) => grid.AlignItems(Tile.StandardSize);
+			grid.AlignChildrenVertical();
+			grid.SizeChanged += (_, __) => grid.AlignChildrenVertical();
 		}
 	}
 }

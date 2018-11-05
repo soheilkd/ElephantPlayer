@@ -9,7 +9,6 @@ using System.Windows.Media.Animation;
 using Library;
 using Library.Controls;
 using Library.Extensions;
-using Library.Taskbar;
 using Player.Models;
 
 namespace Player.Controls
@@ -19,6 +18,8 @@ namespace Player.Controls
 		public event InfoExchangeHandler<Media> MediaChanged;
 		public event InfoExchangeHandler<bool> VisionChanged;
 		public event EventHandler FullScreenToggled;
+
+		public ThumbController Thumb { get; set; } = default;
 
 		public MediaQueue Queue { get; private set; } = new MediaQueue();
 		public Media Current => Queue.Current;
@@ -35,7 +36,7 @@ namespace Player.Controls
 					R = r.Color.R,
 					G = r.Color.G,
 					B = r.Color.B,
-					A = 255
+					A = 180
 				});
 			}
 		}
@@ -74,7 +75,6 @@ namespace Player.Controls
 			}
 		}
 
-		public ThumbManager Thumb = new ThumbManager();
 		private Timer PlayCountTimer = new Timer(60000) { AutoReset = false };
 		private Timer MouseMoveTimer = new Timer(5000);
 		public double MouseMoveInterval
@@ -128,15 +128,14 @@ namespace Player.Controls
 		public MediaPlayer()
 		{
 			InitializeComponent();
+			IsVisionOn = false;
+			VisionButton.Visibility = Visibility.Hidden;
+			FullScreenButton.Visibility = Visibility.Hidden;
 			VisionOnBoard = Resources["VisionOnBoard"] as Storyboard;
 			VisionOffBoard = Resources["VisionOffBoard"] as Storyboard;
 			FullOnBoard = Resources["FullOnBoard"] as Storyboard;
 			FullOffBoard = Resources["FullOffBoard"] as Storyboard;
 
-			Thumb.NextClicked += (obj, f) => Next();
-			Thumb.PauseClicked += (obj, f) => PlayPause();
-			Thumb.PlayClicked += (obj, f) => PlayPause();
-			Thumb.PrevClicked += (obj, f) => Previous();
 			MouseMoveTimer.Elapsed += (_, __) => AreControlsVisible = false;
 			PlayCountTimer.Elapsed += PlayCountTimer_Elapsed;
 			FullOnBoard.Completed += (_, __) => Cursor = Cursors.None;
@@ -153,11 +152,12 @@ namespace Player.Controls
 			ResetCountTimer();
 			var isVideo = element.HasVideo;
 			FullScreenButton.Visibility = isVideo ? Visibility.Visible : Visibility.Hidden;
+			VisionButton.Visibility = isVideo ? Visibility.Visible : Visibility.Hidden;
 			if (IsFullScreen && !isVideo)
 				FullScreenButton.EmulateClick();
 			//Next seems not so readable, it just checks if AutoOrientation is on, check proper conditions where operation is needed
 			if ((AutoOrinateVision && (isVideo && !IsVisionOn)) || (!isVideo && IsVisionOn))
-				Element_MouseUp(this, new MouseButtonEventArgs(Mouse.PrimaryDevice, 1, MouseButton.Left));
+				VisionButton.EmulateClick();
 		}
 
 		private void ResetCountTimer()
@@ -174,7 +174,7 @@ namespace Player.Controls
 
 		private void PlayCountTimer_Elapsed(object sender, ElapsedEventArgs e)
 		{
-			Queue.Current.PlayCount++;
+			Queue.Current.PlayTimes.Add(DateTime.Now);
 			PlayCountTimer.Stop();
 		}
 
@@ -190,7 +190,7 @@ namespace Player.Controls
 
 		private async void RunUX()
 		{
-		UX:
+			UX:
 			await Task.Delay(250);
 			if (element.NaturalDuration.HasTimeSpan && element.NaturalDuration.TimeSpan != MediaTimeSpan)
 				MediaTimeSpan = element.NaturalDuration.TimeSpan;
@@ -230,6 +230,7 @@ namespace Player.Controls
 		}
 		private void Play(Media media)
 		{
+			Position = TimeSpan.Zero;
 			Queue.ClearIsPlayings(except: media);
 			element.Source = new Uri(media.Path);
 			MediaChanged?.Invoke(this, new InfoExchangeArgs<Media>(media));
@@ -273,8 +274,8 @@ namespace Player.Controls
 			{
 				element.Play();
 				PlayPauseButton.Icon = IconType.Pause;
-				Thumb.SetPlayingState(true);
 			}
+			Thumb.SetPlayingStateOnThumb(true);
 		}
 		public void Pause(bool emulateClick = false)
 		{
@@ -287,8 +288,8 @@ namespace Player.Controls
 			{
 				element.Pause();
 				PlayPauseButton.Icon = IconType.Play;
-				Thumb.SetPlayingState(false);
 			}
+			Thumb.SetPlayingStateOnThumb(false);
 		}
 		public void SlidePosition(bool toRight, bool small = true)
 		{
@@ -301,19 +302,16 @@ namespace Player.Controls
 			element.Source = null;
 		}
 
-		private void Element_MouseUp(object sender, MouseButtonEventArgs e)
+		private void VisionButton_Clicked(object sender, MouseButtonEventArgs e)
 		{
 			IsVisionOn = !IsVisionOn;
-			VisionOnBoard.Begin();
+			if (IsVisionOn)
+				VisionOnBoard.Begin();
+			else
+				VisionOffBoard.Begin();
 			VisionChanged?.Invoke(this, new InfoExchangeArgs<bool>(IsVisionOn));
 			Resources["BorderBack"] = IsVisionOn ? BorderBack : Brushes.Transparent;
 			AreControlsVisible = true;
-			element.VerticalAlignment = IsVisionOn ? VerticalAlignment.Stretch : VerticalAlignment.Bottom;
-			element.HorizontalAlignment = IsVisionOn ? HorizontalAlignment.Stretch : HorizontalAlignment.Left;
-			element.Width = IsVisionOn ? double.NaN : 50d;
-			element.Height = IsVisionOn ? double.NaN : 50d;
-			element.Margin = IsVisionOn ? new Thickness(0) : new Thickness(6, 0, 0, 28);
-			element.SetValue(Panel.ZIndexProperty, IsVisionOn ? 0 : 1);
 		}
 
 		public void Next() => NextButton.EmulateClick();

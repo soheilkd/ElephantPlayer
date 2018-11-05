@@ -8,8 +8,8 @@ using System.Windows.Input;
 using Library.Controls;
 using Library.Extensions;
 using Library.Hook;
+using Library.Taskbar;
 using MahApps.Metro.Controls;
-using Player.Controllers;
 using Player.Models;
 using Player.Views;
 
@@ -54,7 +54,6 @@ namespace Player
 
 			DataGrid.ItemsSource = LibraryManager.Data;
 
-			TaskbarItemInfo = Player.Thumb.Info;
 			Resources["LastPath"] = Settings.LastPath;
 
 			Player.VisionChanged += (_, e) => ControlsNotNeededOnVisionVisibility = e.Parameter ? Visibility.Hidden : Visibility.Visible;
@@ -72,6 +71,7 @@ namespace Player
 				item.Background = Menu.Background;
 			ArtistsView.PlayRequested += (_, e) => Player.Play(e.Queue, e.Media);
 			AlbumsView.PlayRequested += (_, e) => Player.Play(e.Queue, e.Media);
+
 			#endregion
 
 			Left = Settings.LastLocation.X;
@@ -169,6 +169,11 @@ namespace Player
 
 		private async void Window_Loaded(object sender, RoutedEventArgs e)
 		{
+			TaskbarItemInfo = new System.Windows.Shell.TaskbarItemInfo();
+			Player.Thumb = new ThumbController(TaskbarItemInfo);
+			Player.Thumb.NextClicked += (_, __) => Player.Next();
+			Player.Thumb.PreviousClicked += (_, __) => Player.Previous();
+			Player.Thumb.PlayPauseClicked += (_, __) => Player.PlayPause();
 			TempHeight = Settings.LastSize.Height;
 			TempWidth = Settings.LastSize.Width;
 			if (Settings.RememberMinimal && Settings.WasMinimal)
@@ -193,7 +198,7 @@ namespace Player
 			Settings.WasMinimal = Height <= 131;
 			Settings.Volume = Player.Volume;
 			Settings.Save();
-			Resource.Save();
+			App.Resource.Save();
 			LibraryManager.Save();
 			Application.Current.Shutdown();
 		}
@@ -266,7 +271,7 @@ namespace Player
 					LibraryManager.SortBy(each => each.Album, asc);
 					break;
 				case 3:
-					LibraryManager.SortBy(each => each.PlayCount, asc);
+					LibraryManager.SortBy(each => each.PlayTimes.Count, asc);
 					break;
 				case 4:
 					LibraryManager.SortBy(each => each.AdditionDate, asc);
