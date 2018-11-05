@@ -18,7 +18,6 @@ namespace Player.Models
 		private string _Title;
 		private string _Album;
 		private string _Dir;
-		private int _PlayCount;
 		private bool _IsPlaying;
 		private TimeSpan _Len;
 		public MediaType Type;
@@ -31,9 +30,9 @@ namespace Player.Models
 		public string Title { get => _Title; set => Set(ref _Title, value); }
 		public string Album { get => _Album; set => Set(ref _Album, value); }
 		public string Directory { get => _Dir; set => Set(ref _Dir, value); }
-		public int PlayCount { get => _PlayCount; set => Set(ref _PlayCount, value); }
 		public bool IsPlaying { get => _IsPlaying; set => Set(ref _IsPlaying, value); }
 		public TimeSpan Length { get => _Len; set => Set(ref _Len, value); }
+		public List<DateTime> PlayTimes { get; } = new List<DateTime>();
 		public DateTime AdditionDate { get; set; }
 		public string Path { get; set; }
 		public bool IsVideo => Type == MediaType.Video;
@@ -66,6 +65,8 @@ namespace Player.Models
 		public void MoveTo(string dir)
 		{
 			dir += Name;
+			if (File.Exists(dir))
+				return;
 			File.Move(Path, dir);
 			Path = dir;
 		}
