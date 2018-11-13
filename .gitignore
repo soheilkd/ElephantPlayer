@@ -6,7 +6,7 @@
 /bin
 /obj
 /.vs
-/Controls/obj/Release
+/Controls/obj
+/Controls/bin
 /Library/bin
 /Library/obj
-/Controls/bin/Release
