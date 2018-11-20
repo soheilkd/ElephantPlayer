@@ -6,10 +6,10 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media.Imaging;
-using Library;
 using Library.Controls;
 using Library.Controls.Navigation;
 using Library.Extensions;
+using Library.Serialization.Models;
 using Player.Models;
 using static Player.App; //For Resource
 
@@ -29,7 +29,7 @@ namespace Player.Views
 			if (CallTime++ != 0)
 				return;
 			var unknownArtistImage = Properties.Resources.UnknownArtist.ToImageSource();
-			var artists = LibraryManager.Data.GroupBy(each => each.Artist).OrderBy(each => each.Key);
+			IOrderedEnumerable<IGrouping<string, Media>> artists = LibraryManager.Data.GroupBy(each => each.Artist).OrderBy(each => each.Key);
 			var grid = ArtistNavigation.GetChildContent(1) as Grid;
 			var navigations = new List<NavigationTile>();
 			artists.ForEach(each =>
@@ -46,14 +46,13 @@ namespace Player.Views
 						}
 					}));
 			navigations.For(each => grid.Children.Add(each));
-			grid.AlignChildrenVertical();
-			grid.SizeChanged += (_, __) => grid.AlignChildrenVertical();
-			Console.WriteLine($"Count: {navigations.Count}");
+			grid.AlignChildrenVertical(new Size(50, 100));
+			grid.SizeChanged += (_, __) => grid.AlignChildrenVertical(Tile.StandardSize);
 			navigations.For(each =>
 			{
-				if (Resource.Contains(each.Tag.ToString(), out var imageData))
+				if (Resource.Value.TryGetValue(each.Tag.ToString(), out byte[] imageData))
 				{
-					each.Image = new SerializableBitmap(Resource[each.Tag.ToString()]);
+					each.Image = new SerializableBitmap(imageData);
 				}
 				else
 				{
@@ -68,7 +67,7 @@ namespace Player.Views
 						client.DownloadDataCompleted += (_, d) =>
 						{
 							each.Dispatcher.Invoke(() => each.Image = d.Result.ToBitmap());
-							Dispatcher.Invoke(() => Resource[tag] = new SerializableBitmap(each.Image as BitmapImage));
+							Dispatcher.Invoke(() => Resource.Value[tag] = new SerializableBitmap(each.Image as BitmapImage));
 						};
 						client.DownloadDataAsync(new Uri(url));
 					});

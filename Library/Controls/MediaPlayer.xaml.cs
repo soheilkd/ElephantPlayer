@@ -233,7 +233,7 @@ namespace Player.Controls
 			Position = TimeSpan.Zero;
 			Queue.ClearIsPlayings(except: media);
 			element.Source = new Uri(media.Path);
-			MediaChanged?.Invoke(this, new InfoExchangeArgs<Media>(media));
+			MediaChanged.Invoke(media);
 			Play();
 		}
 		public void Play(MediaQueue queue, Media media)
@@ -256,7 +256,7 @@ namespace Player.Controls
 		private void FullScreenButton_Clicked(object sender, MouseButtonEventArgs e)
 		{
 			FullScreenButton.Icon = FullScreenButton.Icon == IconType.FullScreen ? IconType.FullScreenExit : IconType.FullScreen;
-			FullScreenToggled?.Invoke(this, null);
+			FullScreenToggled?.Invoke(this, default);
 		}
 		private void VolumeSlider_Changed(object sender, RoutedPropertyChangedEventArgs<double> e)
 		{
@@ -309,7 +309,7 @@ namespace Player.Controls
 				VisionOnBoard.Begin();
 			else
 				VisionOffBoard.Begin();
-			VisionChanged?.Invoke(this, new InfoExchangeArgs<bool>(IsVisionOn));
+			VisionChanged.Invoke(IsVisionOn);
 			Resources["BorderBack"] = IsVisionOn ? BorderBack : Brushes.Transparent;
 			AreControlsVisible = true;
 		}

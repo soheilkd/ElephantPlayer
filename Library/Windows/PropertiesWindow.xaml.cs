@@ -9,9 +9,9 @@ using Player.Models;
 using Library;
 using Player.Extensions;
 
-namespace Player.Controls
+namespace Player.Windows
 {
-	public partial class PropertiesUI : MetroWindow
+	public partial class PropertiesWindow : MetroWindow
 	{
 		private const char Seperator = ';';
 
@@ -25,7 +25,7 @@ namespace Player.Controls
 		private TagLib.File _TagFile;
 		public event InfoExchangeHandler<TagLib.File> SaveRequested;
 
-		public PropertiesUI() => InitializeComponent();
+		public PropertiesWindow() => InitializeComponent();
 
 		public void LoadFor(Media media)
 		{
@@ -37,7 +37,7 @@ namespace Player.Controls
 			}
 			_Media = media;
 			_TagFile = TagLib.File.Create(media.Path);
-			TagLib.Tag tag = _TagFile.Tag;
+			var tag = _TagFile.Tag;
 			_Media.Load();
 			TitleBox.Text = tag.Title ?? string.Empty;
 			AlbumBox.Text = tag.Album ?? string.Empty;
@@ -75,7 +75,7 @@ namespace Player.Controls
 			_TagFile.Tag.Copyright = CopyrightBox.Text ?? string.Empty;
 			_TagFile.Tag.Lyrics = LyricsBox.Text ?? string.Empty;
 
-			SaveRequested?.Invoke(this, new InfoExchangeArgs<TagLib.File>(_TagFile));
+			SaveRequested.Invoke(_TagFile);
 			Close();
 		}
 		private void ArtworkImage_MouseUp(object sender, MouseButtonEventArgs e)
@@ -85,6 +85,11 @@ namespace Player.Controls
 				_TagFile.Tag.Pictures = new TagLib.IPicture[] { new TagLib.Picture(_OpenArtDialog.FileName) };
 				ArtworkImage.Source = new BitmapImage(new Uri(_OpenArtDialog.FileName));
 			}
+		}
+
+		private void MenuItem_Click(object sender, RoutedEventArgs e)
+		{
+
 		}
 	}
 }

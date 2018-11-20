@@ -5,6 +5,8 @@
 	x:Class="Player.Controls.MediaDataGrid"
 	LostFocus="DataGrid_LostFocus"
 	SelectionMode="Extended"
+	ScrollViewer.CanContentScroll="false"
+	ScrollViewer.HorizontalScrollBarVisibility="Disabled"
 	HorizontalContentAlignment="Stretch"
 	
 	MouseDoubleClick="DataGrid_MouseDoubleClick"

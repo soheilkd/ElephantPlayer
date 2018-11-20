@@ -104,7 +104,7 @@ namespace Player.Controls
 		{
 			For(each =>
 			{
-				var pro = new PropertiesUI();
+				var pro = new Windows.PropertiesWindow();
 				pro.SaveRequested += (_, f) =>
 				{
 					f.Parameter.Save();
@@ -117,7 +117,7 @@ namespace Player.Controls
 		private void For(Action<Media> action) =>
 			SelectedItems.Cast<Media>().ToArray().For(each => action(each));
 
-		private void DataGrid_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
+		private void DataGrid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
 		{
 			if (SelectedItem == null)
 				return;

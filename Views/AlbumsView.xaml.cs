@@ -1,11 +1,16 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Net;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using Library.Controls;
 using Library.Controls.Navigation;
 using Library.Extensions;
+using Library.Serialization.Models;
 using Player.Models;
+using static Player.App; //For Resource
 
 namespace Player.Views
 {
@@ -18,14 +23,16 @@ namespace Player.Views
 			InitializeComponent();
 		}
 
-		private void Grid_Loaded(object sender, RoutedEventArgs e)
+		private async void Grid_Loaded(object sender, RoutedEventArgs e)
 		{
 			if (CallTime++ != 0)
 				return;
+			var unknownArtistImage = Properties.Resources.UnknownArtist.ToImageSource();
 			var albums = LibraryManager.Data.GroupBy(each => each.Album).OrderBy(each => each.Key);
 			var grid = AlbumNavigation.GetChildContent(1) as Grid;
+			var navigations = new List<NavigationTile>();
 			albums.ForEach(each =>
-				grid.Children.Add(
+				navigations.Add(
 					new NavigationTile()
 					{
 						Tag = each.Key,
@@ -37,8 +44,36 @@ namespace Player.Views
 							onPlay: (queue, media) => PlayRequested?.Invoke(this, new QueueEventArgs(queue, media)))
 						}
 					}));
-			grid.AlignChildrenVertical();
-			grid.SizeChanged += (_, __) => grid.AlignChildrenVertical();
+			navigations.For(each => grid.Children.Add(each));
+			grid.AlignChildrenVertical(new Size(50, 100));
+			grid.SizeChanged += (_, __) => grid.AlignChildrenVertical(Tile.StandardSize);
+			navigations.For(each =>
+			{
+				if (Resource.Value.TryGetValue(each.Tag.ToString(), out byte[] imageData))
+				{
+					each.Image = new SerializableBitmap(imageData);
+				}
+				else
+				{
+					Task.Run(() =>
+					{
+						var tag = string.Empty;
+						each.Dispatcher.Invoke(() => tag = each.Tag.ToString());
+						var url = Web.API.GetAlbumArtworkUrl(tag);
+						if (string.IsNullOrWhiteSpace(url))
+							each.Dispatcher.Invoke(() => each.Image = unknownArtistImage);
+						var client = new WebClient();
+						client.DownloadDataCompleted += (_, d) =>
+						{
+							each.Dispatcher.Invoke(() => each.Image = d.Result.ToBitmap());
+							Dispatcher.Invoke(() => Resource.Value[tag] = new SerializableBitmap(each.Image));
+						};
+						client.DownloadDataAsync(new Uri(url));
+					});
+				}
+			}
+			);
+			await Task.Delay(1);
 		}
 	}
 }

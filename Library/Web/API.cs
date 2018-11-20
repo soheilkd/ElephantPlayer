@@ -7,11 +7,11 @@ namespace Player.Web
 	{
 		private static readonly Session _Session = new Session("cab344dc5414176234071148bc813382", "ef529dce9081c695dc32f31b800c7b9a");
 
-		public static string GetAlbumArtworkUrl(string artist, string album)
+		public static string GetAlbumArtworkUrl(string album)
 		{
 			try
 			{
-				return new Album(artist, album, _Session).GetImageURL();
+				return Album.Search(album, _Session).GetFirstMatch().GetImageURL();
 			}
 			catch (Exception)
 			{
@@ -22,7 +22,7 @@ namespace Player.Web
 		{
 			try
 			{
-				return new Artist(name, _Session).GetImageURL();
+				return Artist.Search(name, _Session).GetFirstMatch().GetImageURL();
 			}
 			catch (Exception)
 			{

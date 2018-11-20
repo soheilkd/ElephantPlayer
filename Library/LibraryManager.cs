@@ -14,21 +14,22 @@ namespace Player
 		public static MediaQueue Data { get => _LazyData.Value; }
 		public static event InfoExchangeHandler<Media> MediaRequested;
 
+		public static bool Contains(string path, out Media output)
+		{
+			output = Data.Where(item => item.Path == path).FirstOrDefault();
+			return output != default;
+		}
 		public static void AddFromPath(string path, bool requestPlay = false)
 		{
 			if (Directory.Exists(path))
 				Directory.GetFiles(path, "*", SearchOption.AllDirectories).For(each => AddFromPath(each));
+			if (Contains(path, out var duplicate))
+				MediaRequested.Invoke(duplicate);
 			if (Media.TryLoadFromPath(path, out Media media))
 			{
-				System.Collections.Generic.IEnumerable<Media> duplication = Data.Where(item => item.Path == path);
-				if (duplication.Count() != 0 && requestPlay)
-				{
-					MediaRequested?.Invoke(default, new InfoExchangeArgs<Media>(duplication.First()));
-					return;
-				}
 				Data.Insert(0, media);
 				if (requestPlay)
-					MediaRequested?.Invoke(default, new InfoExchangeArgs<Media>(Data.First()));
+					MediaRequested.Invoke(Data.First());
 			}
 		}
 
