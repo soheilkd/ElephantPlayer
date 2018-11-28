@@ -15,8 +15,8 @@ using static Player.App; //For Resource
 
 namespace Player.Views
 {
-	public partial class ArtistsView : Grid
-	{
+    public partial class ArtistsView : ContentControl
+    {
 		public event EventHandler<QueueEventArgs> PlayRequested;
 		private int CallTime = -1; //It's used for Lazy Loading, reaches 1 when user enters AlbumsView tab on MainWindow
 		public ArtistsView()
@@ -41,7 +41,7 @@ namespace Player.Views
 						Navigation = new NavigationControl()
 						{
 							Tag = each.Key,
-							Content = new GroupMediaView(new MediaQueue(each),
+							Content = new ArtistView(new MediaQueue(each),
 							onPlay: (queue, media) => PlayRequested?.Invoke(this, new QueueEventArgs(queue, media)))
 						}
 					}));

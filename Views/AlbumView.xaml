@@ -1,4 +1,4 @@
-﻿<Grid x:Class="Player.Views.GroupMediaView"
+﻿<Grid x:Class="Player.Views.AlbumView"
 	  Loaded="Grid_Loaded"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"

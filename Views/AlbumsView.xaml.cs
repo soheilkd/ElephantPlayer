@@ -14,7 +14,10 @@ using static Player.App; //For Resource
 
 namespace Player.Views
 {
-	public partial class AlbumsView : Grid
+	/// <summary>
+	/// Interaction logic for AlbumsPage.xaml
+	/// </summary>
+	public partial class AlbumsView : ContentControl
 	{
 		public event EventHandler<QueueEventArgs> PlayRequested;
 		private int CallTime = -1; //It's used for Lazy Loading, reaches 1 when user enters AlbumsView tab on MainWindow
@@ -28,7 +31,7 @@ namespace Player.Views
 			if (CallTime++ != 0)
 				return;
 			var unknownArtistImage = Properties.Resources.UnknownArtist.ToImageSource();
-			var albums = LibraryManager.Data.GroupBy(each => each.Album).OrderBy(each => each.Key);
+			IOrderedEnumerable<IGrouping<string, Models.Media>> albums = LibraryManager.Data.GroupBy(each => each.Album).OrderBy(each => each.Key);
 			var grid = AlbumNavigation.GetChildContent(1) as Grid;
 			var navigations = new List<NavigationTile>();
 			albums.ForEach(each =>
@@ -40,7 +43,7 @@ namespace Player.Views
 						Navigation = new NavigationControl()
 						{
 							Tag = each.Key,
-							Content = new GroupMediaView(new MediaQueue(each),
+							Content = new AlbumView(new MediaQueue(each),
 							onPlay: (queue, media) => PlayRequested?.Invoke(this, new QueueEventArgs(queue, media)))
 						}
 					}));
@@ -49,7 +52,7 @@ namespace Player.Views
 			grid.SizeChanged += (_, __) => grid.AlignChildrenVertical(Tile.StandardSize);
 			navigations.For(each =>
 			{
-				if (Resource.Value.TryGetValue(each.Tag.ToString(), out byte[] imageData))
+				if (Resource.Value.TryGetValue(each.Tag.ToString(), out var imageData))
 				{
 					each.Image = new SerializableBitmap(imageData);
 				}

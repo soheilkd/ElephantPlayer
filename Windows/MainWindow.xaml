@@ -7,8 +7,8 @@
 	xmlns:system="clr-namespace:System;assembly=mscorlib"
 	xmlns:controls="clr-namespace:Library.Controls;assembly=Library"
 	xmlns:nav="clr-namespace:Library.Controls.Navigation;assembly=Library"
-	xmlns:views="clr-namespace:Player.Views"
-	xmlns:controls1="clr-namespace:Player.Controls;assembly=Player" Background="{DynamicResource MajorBackground}"
+	xmlns:controls1="clr-namespace:Player.Controls;assembly=Player"
+	xmlns:views="clr-namespace:Player.Views" Background="{DynamicResource MajorBackground}"
 	Title="Elephant Player" ShowIconOnTitleBar="False" AllowDrop="True"
 	Loaded="Window_Loaded" Closing="Window_Closing" Drop="Window_Drop" KeyUp="Window_KeyUp">
 	<mah:MetroWindow.LeftWindowCommands>
@@ -36,7 +36,7 @@
 	<Grid x:Name="ContentGrid">
 		<TabControl x:Name="TabControl" Background="Transparent" Margin="0,0,0,80" TabStripPlacement="Left" SelectedIndex="1">
 			<TabItem Header="Now Playing">
-				
+				<views:NowPlayingView/>
 			</TabItem>
 			<TabItem Header="Library">
 				<controls1:MediaDataGrid x:Name="DataGrid" MediaRequested="DataGrid_MediaRequested"/>
@@ -48,24 +48,10 @@
 				<views:AlbumsView x:Name="AlbumsView"/>
 			</TabItem>
 			<TabItem Header="Playlists">
-				<Frame>
-					<Frame.Content>
-						<StackPanel Orientation="Horizontal">
-							<nav:NavigationTile Tag="Test Tile" VerticalAlignment="Top" HorizontalAlignment="Left">
-								<nav:NavigationTile.Navigation>
-									<nav:NavigationControl>
-										<Grid Background="White">
-										</Grid>
-									</nav:NavigationControl>
-								</nav:NavigationTile.Navigation>
-							</nav:NavigationTile>
-							<nav:NavigationTile Tag="Test Tile 2" VerticalAlignment="Top" HorizontalAlignment="Left"/>
-						</StackPanel>
-					</Frame.Content>
-				</Frame>
+				<views:PlaylistsView/>
 			</TabItem>
 			<TabItem Header="Settings">
-				<views:SettingsView />
+				<views:SettingsView/>
 			</TabItem>
 			<TabControl.Resources>
 				<Style TargetType="TabItem">

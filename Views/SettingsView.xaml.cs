@@ -3,10 +3,12 @@ using System.Windows.Controls;
 
 namespace Player.Views
 {
-	public partial class SettingsView : StackPanel
+	public partial class SettingsView : ContentControl
 	{
-		public SettingsView() => InitializeComponent();
-
+		public SettingsView()
+		{
+			InitializeComponent();
+		}
 		private void PlayModeChanged(object sender, RoutedEventArgs e)
 		{
 			Settings.PlayMode = (PlayMode)int.Parse(((RadioButton)sender).Tag.ToString());

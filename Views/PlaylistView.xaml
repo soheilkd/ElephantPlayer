@@ -1,0 +1,13 @@
+﻿<ContentControl x:Class="Player.Views.PlaylistView"
+	  Loaded="Grid_Loaded"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	  xmlns:controls="clr-namespace:Player.Controls;assembly=Player">
+	<Grid>
+
+		<controls:MediaDataGrid x:Name="MediaDataGrid" Margin="0,0,0,20"/>
+		<DockPanel Height="20" VerticalAlignment="Bottom">
+			<TextBlock x:Name="BarTextBlock" FontSize="12" VerticalAlignment="Bottom" Foreground="White" FontWeight="SemiBold"/>
+		</DockPanel>
+	</Grid>
+</ContentControl>

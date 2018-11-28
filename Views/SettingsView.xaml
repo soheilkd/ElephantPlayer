@@ -1,30 +1,32 @@
-﻿<StackPanel x:Class="Player.Views.SettingsView" Loaded="StackPanel_Loaded"
-	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-	<CheckBox Margin="5" x:Name="OrinateCheck" Content="Orientation"/>
-	<CheckBox Margin="5" x:Name="LiveLibraryCheck" Content="Live Library"/>
-	<CheckBox Margin="5" x:Name="ExplicitCheck" Content="Explicit Content"/>
-	<CheckBox Margin="5" x:Name="PlayOnPosCheck" Content="Resume On Position Change"/>
-	<CheckBox Margin="5" x:Name="RevalidOnExitCheck" Content="Always Revalidate On Exit"/>
-	<CheckBox Margin="5" x:Name="RememberMinimalCheck" Content="Remember Minimal State"/>
-	<StackPanel Orientation="Horizontal" Margin="0 5 0 5">
-		<Label Content="Vision Timeout" />
-		<ComboBox x:Name="TimeoutCombo" Width="100">
-			<ComboBoxItem Content="0.5 s"/>
-			<ComboBoxItem Content="1 s"/>
-			<ComboBoxItem Content="2 s"/>
-			<ComboBoxItem Content="3 s"/>
-			<ComboBoxItem Content="4 s"/>
-			<ComboBoxItem Content="5 s"/>
-			<ComboBoxItem Content="10 s"/>
-			<ComboBoxItem Content="60 s"/>
-		</ComboBox>
-	</StackPanel>
-	<GroupBox Header="Play Mode" Width="200" HorizontalAlignment="Left" Padding="5" Margin="5">
-		<StackPanel>
-			<RadioButton x:Name="PlayModeRadio1" Padding="5" GroupName="PlayModeGroup" Checked="PlayModeChanged" Tag="0" Content="Repeat All"/>
-			<RadioButton x:Name="PlayModeRadio2" Padding="5" GroupName="PlayModeGroup" Checked="PlayModeChanged" Tag="1" Content="Repeat One"/>
-			<RadioButton x:Name="PlayModeRadio3" Padding="5" GroupName="PlayModeGroup" Checked="PlayModeChanged" Tag="2" Content="Shuffle"/>
+﻿<ContentControl x:Class="Player.Views.SettingsView"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Loaded="StackPanel_Loaded">
+	<StackPanel>
+		<CheckBox Margin="5" x:Name="OrinateCheck" Content="Orientation"/>
+		<CheckBox Margin="5" x:Name="LiveLibraryCheck" Content="Live Library"/>
+		<CheckBox Margin="5" x:Name="ExplicitCheck" Content="Explicit Content"/>
+		<CheckBox Margin="5" x:Name="PlayOnPosCheck" Content="Resume On Position Change"/>
+		<CheckBox Margin="5" x:Name="RevalidOnExitCheck" Content="Always Revalidate On Exit"/>
+		<CheckBox Margin="5" x:Name="RememberMinimalCheck" Content="Remember Minimal State"/>
+		<StackPanel Orientation="Horizontal" Margin="0 5 0 5">
+			<Label Content="Vision Timeout" />
+			<ComboBox x:Name="TimeoutCombo" Width="100">
+				<ComboBoxItem Content="0.5 s"/>
+				<ComboBoxItem Content="1 s"/>
+				<ComboBoxItem Content="2 s"/>
+				<ComboBoxItem Content="3 s"/>
+				<ComboBoxItem Content="4 s"/>
+				<ComboBoxItem Content="5 s"/>
+				<ComboBoxItem Content="10 s"/>
+				<ComboBoxItem Content="60 s"/>
+			</ComboBox>
 		</StackPanel>
-	</GroupBox>
-</StackPanel>
+		<GroupBox Header="Play Mode" Width="200" HorizontalAlignment="Left" Padding="5" Margin="5">
+			<StackPanel>
+				<RadioButton x:Name="PlayModeRadio1" Padding="5" GroupName="PlayModeGroup" Checked="PlayModeChanged" Tag="0" Content="Repeat All"/>
+				<RadioButton x:Name="PlayModeRadio2" Padding="5" GroupName="PlayModeGroup" Checked="PlayModeChanged" Tag="1" Content="Repeat One"/>
+				<RadioButton x:Name="PlayModeRadio3" Padding="5" GroupName="PlayModeGroup" Checked="PlayModeChanged" Tag="2" Content="Shuffle"/>
+			</StackPanel>
+		</GroupBox>
+	</StackPanel>
+</ContentControl>
