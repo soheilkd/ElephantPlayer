@@ -8,11 +8,10 @@ namespace Player.Views
 {
 	public partial class AlbumView : Grid
 	{
-		public AlbumView(MediaQueue queue, Action<MediaQueue, Media> onPlay)
+		public AlbumView(MediaQueue queue)
 		{
 			InitializeComponent();
 			MediaDataGrid.ItemsSource = queue;
-			MediaDataGrid.MediaRequested += (_, e) => onPlay(e.Queue, e.Media);
 		}
 
 		public AlbumView()

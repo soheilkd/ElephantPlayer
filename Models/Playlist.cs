@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using Library.Extensions;
+using Library.Serialization.Models;
 
 namespace Player.Models
 {

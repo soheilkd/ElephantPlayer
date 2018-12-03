@@ -9,7 +9,6 @@ using Library.Extensions;
 
 namespace Player.Models
 {
-
 	[Serializable]
 	public class Media : INotifyPropertyChanged
 	{
@@ -32,7 +31,7 @@ namespace Player.Models
 		public string Directory { get => _Dir; set => Set(ref _Dir, value); }
 		public bool IsPlaying { get => _IsPlaying; set => Set(ref _IsPlaying, value); }
 		public TimeSpan Length { get => _Len; set => Set(ref _Len, value); }
-		public List<DateTime> PlayTimes { get; } = new List<DateTime>();
+		public List<DateTime> PlayTimes { get; set; } = new List<DateTime>();
 		public DateTime AdditionDate { get; set; }
 		public string Path { get; set; }
 		public bool IsVideo => Type == MediaType.Video;

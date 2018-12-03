@@ -14,24 +14,20 @@ using static Player.App; //For Resource
 
 namespace Player.Views
 {
-	/// <summary>
-	/// Interaction logic for AlbumsPage.xaml
-	/// </summary>
 	public partial class AlbumsView : ContentControl
 	{
-		public event EventHandler<QueueEventArgs> PlayRequested;
 		private int CallTime = -1; //It's used for Lazy Loading, reaches 1 when user enters AlbumsView tab on MainWindow
 		public AlbumsView()
 		{
 			InitializeComponent();
 		}
-
+		
 		private async void Grid_Loaded(object sender, RoutedEventArgs e)
 		{
 			if (CallTime++ != 0)
 				return;
 			var unknownArtistImage = Properties.Resources.UnknownArtist.ToImageSource();
-			IOrderedEnumerable<IGrouping<string, Models.Media>> albums = LibraryManager.Data.GroupBy(each => each.Album).OrderBy(each => each.Key);
+			var albums = LibraryManager.Data.GroupBy(each => each.Album).OrderBy(each => each.Key);
 			var grid = AlbumNavigation.GetChildContent(1) as Grid;
 			var navigations = new List<NavigationTile>();
 			albums.ForEach(each =>
@@ -43,8 +39,7 @@ namespace Player.Views
 						Navigation = new NavigationControl()
 						{
 							Tag = each.Key,
-							Content = new AlbumView(new MediaQueue(each),
-							onPlay: (queue, media) => PlayRequested?.Invoke(this, new QueueEventArgs(queue, media)))
+							Content = new AlbumView(new MediaQueue(each))
 						}
 					}));
 			navigations.For(each => grid.Children.Add(each));

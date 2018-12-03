@@ -5,9 +5,9 @@ using System.Windows.Media.Imaging;
 using Library.Extensions;
 using MahApps.Metro.Controls;
 using Microsoft.Win32;
-using Player.Models;
 using Library;
 using Player.Extensions;
+using Player.Models;
 
 namespace Player.Windows
 {

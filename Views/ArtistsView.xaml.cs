@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media.Imaging;
+using Library;
 using Library.Controls;
 using Library.Controls.Navigation;
 using Library.Extensions;
@@ -17,19 +18,18 @@ namespace Player.Views
 {
     public partial class ArtistsView : ContentControl
     {
-		public event EventHandler<QueueEventArgs> PlayRequested;
-		private int CallTime = -1; //It's used for Lazy Loading, reaches 1 when user enters AlbumsView tab on MainWindow
+		private int CallTime = -1; //It's used for Lazy Loading, reaches 1 when user enters ArtistsView tab on MainWindow
 		public ArtistsView()
 		{
 			InitializeComponent();
 		}
-
+		
 		private async void Grid_Loaded(object sender, RoutedEventArgs e)
 		{
 			if (CallTime++ != 0)
 				return;
 			var unknownArtistImage = Properties.Resources.UnknownArtist.ToImageSource();
-			IOrderedEnumerable<IGrouping<string, Media>> artists = LibraryManager.Data.GroupBy(each => each.Artist).OrderBy(each => each.Key);
+			var artists = LibraryManager.Data.GroupBy(each => each.Artist).OrderBy(each => each.Key);
 			var grid = ArtistNavigation.GetChildContent(1) as Grid;
 			var navigations = new List<NavigationTile>();
 			artists.ForEach(each =>
@@ -41,8 +41,7 @@ namespace Player.Views
 						Navigation = new NavigationControl()
 						{
 							Tag = each.Key,
-							Content = new ArtistView(new MediaQueue(each),
-							onPlay: (queue, media) => PlayRequested?.Invoke(this, new QueueEventArgs(queue, media)))
+							Content = new ArtistView(new MediaQueue(each))
 						}
 					}));
 			navigations.For(each => grid.Children.Add(each));

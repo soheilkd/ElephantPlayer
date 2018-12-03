@@ -236,6 +236,7 @@ namespace Player.Controls
 			MediaChanged.Invoke(media);
 			Play();
 		}
+		public void Play((MediaQueue queue, Media media) tuple) => Play(tuple.queue, tuple.media);
 		public void Play(MediaQueue queue, Media media)
 		{
 			Queue.ClearIsPlayings();

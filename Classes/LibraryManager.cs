@@ -49,15 +49,15 @@ namespace Player
 
 		public static void Save()
 		{
-			using (var stream = new FileStream(Settings.LibraryLocation, FileMode.Create))
+			using (var stream = new FileStream(Controller.Settings.LibraryLocation, FileMode.Create))
 				new BinaryFormatter().Serialize(stream, Data);
 		}
 
 		private static MediaQueue Load()
 		{
-			if (!File.Exists(Settings.LibraryLocation))
+			if (!File.Exists(Controller.Settings.LibraryLocation))
 				return new MediaQueue();
-			using (var stream = new FileStream(Settings.LibraryLocation, FileMode.Open))
+			using (var stream = new FileStream(Controller.Settings.LibraryLocation, FileMode.Open))
 				return (MediaQueue)new BinaryFormatter().Deserialize(stream);
 		}
 	}

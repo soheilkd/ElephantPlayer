@@ -5,6 +5,7 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using Library;
 using Library.Extensions;
 using Microsoft.Win32;
 using Player.Models;
@@ -24,15 +25,13 @@ namespace Player.Controls
 			}
 		}
 
-		public event EventHandler<QueueEventArgs> MediaRequested;
-
 		private SaveFileDialog MediaTransferDialog = new SaveFileDialog()
 		{
 			AddExtension = false,
 			CheckPathExists = true,
 			CreatePrompt = false,
 			DereferenceLinks = true,
-			InitialDirectory = Settings.LastPath
+			InitialDirectory = Controller.Settings.LastPath
 		};
 
 		public MediaDataGrid()
@@ -52,8 +51,8 @@ namespace Player.Controls
 					MediaTransferDialog.Title = "Move";
 					if (MediaTransferDialog.ShowDialog().Value)
 					{
-						Settings.LastPath = MediaTransferDialog.FileName.Substring(0, MediaTransferDialog.FileName.LastIndexOf('\\') + 1);
-						Resources["LastPath"] = Settings.LastPath;
+						Controller.Settings.LastPath = MediaTransferDialog.FileName.Substring(0, MediaTransferDialog.FileName.LastIndexOf('\\') + 1);
+						Resources["LastPath"] = Controller.Settings.LastPath;
 						goto default;
 					}
 					break;
@@ -70,8 +69,8 @@ namespace Player.Controls
 					MediaTransferDialog.Title = "Copy";
 					if (MediaTransferDialog.ShowDialog().Value)
 					{
-						Settings.LastPath = MediaTransferDialog.FileName.Substring(0, MediaTransferDialog.FileName.LastIndexOf('\\') + 1);
-						Resources["LastPath"] = Settings.LastPath;
+						Controller.Settings.LastPath = MediaTransferDialog.FileName.Substring(0, MediaTransferDialog.FileName.LastIndexOf('\\') + 1);
+						Resources["LastPath"] = Controller.Settings.LastPath;
 						goto default;
 					}
 					break;
@@ -121,7 +120,7 @@ namespace Player.Controls
 		{
 			if (SelectedItem == null)
 				return;
-			MediaRequested?.Invoke(this, new QueueEventArgs(ItemsSource, SelectedItem as Media));
+			Controller.Play(ItemsSource, SelectedItem as Media);
 		}
 
 		private void DataGrid_LostFocus(object sender, RoutedEventArgs e)
@@ -131,7 +130,7 @@ namespace Player.Controls
 
 		private void DGR_Border_MouseDoubleClick(object sender, MouseButtonEventArgs e)
 		{
-			MediaRequested?.Invoke(this, new QueueEventArgs(ItemsSource, (Media)((ContentControl)sender).Content));
+			Controller.Play(ItemsSource, (Media)((ContentControl)sender).Content);
 		}
 	}
 }

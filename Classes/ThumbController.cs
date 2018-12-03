@@ -38,10 +38,10 @@ namespace Player
 			info.ThumbButtonInfos.Add(_PreviousThumb);
 			info.ThumbButtonInfos.Add(_PlayThumb);
 			info.ThumbButtonInfos.Add(_NextThumb);
-			_PlayThumb.Click += (s, e) => PlayPauseClicked?.Invoke(s, e);
-			_PauseThumb.Click += (s, e) => PlayPauseClicked?.Invoke(s, e);
-			_PreviousThumb.Click += (s, e) => PreviousClicked?.Invoke(s, e);
-			_NextThumb.Click += (s, e) => NextClicked?.Invoke(s, e);
+			_PlayThumb.Click += (s, e) => PlayPauseClicked?.Invoke(this, default);
+			_PauseThumb.Click += (s, e) => PlayPauseClicked?.Invoke(this, default);
+			_PreviousThumb.Click += (s, e) => PreviousClicked?.Invoke(this, default);
+			_NextThumb.Click += (s, e) => NextClicked?.Invoke(this, default);
 			_Info = info;
 		}
 

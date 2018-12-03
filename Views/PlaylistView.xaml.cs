@@ -8,11 +8,10 @@ namespace Player.Views
 {
 	public partial class PlaylistView : ContentControl
 	{
-		public PlaylistView(MediaQueue queue, Action<MediaQueue, Media> onPlay)
+		public PlaylistView(MediaQueue queue)
 		{
 			InitializeComponent();
 			MediaDataGrid.ItemsSource = queue;
-			MediaDataGrid.MediaRequested += (_, e) => onPlay(e.Queue, e.Media);
 		}
 
 		public PlaylistView()
