@@ -28,7 +28,7 @@ namespace Player.Views
 		{
 			if (CallTime++ != 0)
 				return;
-			var unknownArtistImage = Properties.Resources.UnknownArtist.ToImageSource();
+			var unknownArtistImage = IconProvider.GetBitmap(IconType.Person);
 			var artists = LibraryManager.Data.GroupBy(each => each.Artist).OrderBy(each => each.Key);
 			var grid = ArtistNavigation.GetChildContent(1) as Grid;
 			var navigations = new List<NavigationTile>();
