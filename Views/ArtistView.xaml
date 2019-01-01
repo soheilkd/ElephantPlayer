@@ -1,10 +1,14 @@
 ﻿<Grid x:Class="Player.Views.ArtistView"
 	  Loaded="Grid_Loaded"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" 
 	  xmlns:controls="clr-namespace:Player.Controls">
-	<controls:MediaDataGrid x:Name="MediaDataGrid" Margin="0,0,0,20"/>
-	<DockPanel Height="20" VerticalAlignment="Bottom">
-		<TextBlock x:Name="BarTextBlock" FontSize="12" VerticalAlignment="Bottom" Foreground="White" FontWeight="SemiBold"/>
+    <DockPanel Height="100" VerticalAlignment="Top" >
+        <Image x:Name="ArtistImage" Width="100" Height="100" Margin="5"/>
+        <TextBlock Margin="5" x:Name="ArtistDescription" FontSize="16" FontFamily="Segoe UI Semibold" TextWrapping="Wrap"/>
+    </DockPanel>
+    <controls:MediaDataGrid x:Name="MediaDataGrid" Margin="0,0,0,20"/>
+    <DockPanel Height="20" VerticalAlignment="Bottom">
+        <TextBlock x:Name="BarTextBlock" FontSize="12" VerticalAlignment="Bottom" Foreground="White" FontWeight="SemiBold"/>
 	</DockPanel>
 </Grid>

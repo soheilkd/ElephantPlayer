@@ -5,13 +5,15 @@ using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows;
+using System.Windows.Media.Imaging;
 using Library.Extensions;
+using Player.Extensions;
 
 namespace Player.Models
 {
 	[Serializable]
 	public class Media : INotifyPropertyChanged
-	{
+	{ 
 		private string _Name;
 		private string _Artist;
 		private string _Title;
@@ -36,6 +38,18 @@ namespace Player.Models
 		public string Path { get; set; }
 		public bool IsVideo => Type == MediaType.Video;
 		public bool DoesExist => File.Exists(Path);
+		public BitmapSource Artwork
+		{
+			get
+			{
+				using (var file = TagLib.File.Create(Path))
+				{
+					return file.Tag.Pictures.Length != 0
+						? file.Tag.Pictures.First().ToBitmapImage()
+						: Library.Controls.IconProvider.GetBitmap(Library.Controls.IconType.Music);
+				}
+			}
+		}
 
 		public Media() { }
 		public Media(string path)

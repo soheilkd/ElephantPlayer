@@ -10,6 +10,7 @@ using Library;
 using Library.Controls;
 using Library.Extensions;
 using Player.Models;
+using static Player.Controller;
 
 namespace Player.Controls
 {
@@ -21,7 +22,6 @@ namespace Player.Controls
 
 		public ThumbController Thumb { get; set; } = default;
 
-		public MediaQueue Queue { get; private set; } = new MediaQueue();
 		public Media Current => Queue.Current;
 
 		private Brush _BorderBack = Brushes.White;
@@ -121,13 +121,12 @@ namespace Player.Controls
 				});
 			}
 		}
-		public bool PlayOnPositionChange { get; set; }
-		public bool AutoOrinateVision { get; set; }
 		private Storyboard VisionOnBoard, VisionOffBoard, FullOnBoard, FullOffBoard;
 
 		public MediaPlayer()
 		{
 			InitializeComponent();
+			Controller.PlayRequest += (_, e) => Play(e.Parameter);
 			IsVisionOn = false;
 			VisionButton.Visibility = Visibility.Hidden;
 			FullScreenButton.Visibility = Visibility.Hidden;
@@ -156,7 +155,7 @@ namespace Player.Controls
 			if (IsFullScreen && !isVideo)
 				FullScreenButton.EmulateClick();
 			//Next seems not so readable, it just checks if AutoOrientation is on, check proper conditions where operation is needed
-			if ((AutoOrinateVision && (isVideo && !IsVisionOn)) || (!isVideo && IsVisionOn))
+			if ((Settings.VisionOrientation && (isVideo && !IsVisionOn)) || (!isVideo && IsVisionOn))
 				VisionButton.EmulateClick();
 		}
 
@@ -209,7 +208,7 @@ namespace Player.Controls
 				await Task.Delay(50);
 			if (but == IconType.Pause)
 				element.Play();
-			else if (PlayOnPositionChange)
+			else if (Settings.PlayOnPositionChange)
 				Play();
 		}
 		private void Position_Changed(object sender, RoutedPropertyChangedEventArgs<double> e)

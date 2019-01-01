@@ -8,6 +8,7 @@ using Microsoft.Win32;
 using Library;
 using Player.Extensions;
 using Player.Models;
+using Library.Controls;
 
 namespace Player.Windows
 {
@@ -51,14 +52,14 @@ namespace Player.Windows
 			YearBox.Text = tag.Year.ToString() ?? string.Empty;
 			CopyrightBox.Text = tag.Copyright ?? string.Empty;
 			LyricsBox.Text = tag.Lyrics ?? string.Empty;
-			ArtworkImage.Source = tag.Pictures.Length >= 1 ? tag.Pictures[0].ToBitmapImage() : Properties.Resources.MusicLogo.ToImageSource();
+			ArtworkImage.Source = tag.Pictures.Length >= 1 ? tag.Pictures[0].ToBitmapImage() : IconProvider.GetBitmap(IconType.Music);
 			Show();
 		}
 
 		private void RemoveArtworkClick(object sender, MouseButtonEventArgs e)
 		{
 			_TagFile.Tag.Pictures = new TagLib.IPicture[0];
-			ArtworkImage.Source = Properties.Resources.MusicLogo.ToImageSource();
+			ArtworkImage.Source = IconProvider.GetBitmap(IconType.Music);
 		}
 		private void SaveButtonClick(object sender, MouseButtonEventArgs e)
 		{

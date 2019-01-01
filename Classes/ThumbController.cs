@@ -1,4 +1,5 @@
 ﻿using System;
+using Player.Controls;
 using System.Windows.Shell;
 using Library.Controls;
 
@@ -7,10 +8,6 @@ namespace Player
 	public class ThumbController
 	{
 		private TaskbarItemInfo _Info;
-
-		public event EventHandler PlayPauseClicked;
-		public event EventHandler PreviousClicked;
-		public event EventHandler NextClicked;
 
 		private readonly ThumbButtonInfo _PlayThumb = new ThumbButtonInfo()
 		{
@@ -33,15 +30,15 @@ namespace Player
 			ImageSource = IconProvider.GetBitmap(IconType.Next)
 		};
 
-		public ThumbController(TaskbarItemInfo info)
+		public ThumbController(TaskbarItemInfo info, MediaPlayer player)
 		{
 			info.ThumbButtonInfos.Add(_PreviousThumb);
 			info.ThumbButtonInfos.Add(_PlayThumb);
 			info.ThumbButtonInfos.Add(_NextThumb);
-			_PlayThumb.Click += (s, e) => PlayPauseClicked?.Invoke(this, default);
-			_PauseThumb.Click += (s, e) => PlayPauseClicked?.Invoke(this, default);
-			_PreviousThumb.Click += (s, e) => PreviousClicked?.Invoke(this, default);
-			_NextThumb.Click += (s, e) => NextClicked?.Invoke(this, default);
+			_PlayThumb.Click += (s, e) => player.PlayPause();
+			_PauseThumb.Click += (s, e) => player.PlayPause();
+			_PreviousThumb.Click += (s, e) => player.Previous();
+			_NextThumb.Click += (s, e) => player.Next();
 			_Info = info;
 		}
 

@@ -1,65 +1,38 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using Library.Controls;
 using Library.Extensions;
 using Library.Hook;
-using Library.Taskbar;
 using MahApps.Metro.Controls;
 using Player.Models;
-using Player.Views;
+using static Player.Controller;
 
 namespace Player
 {
 	public partial class MainWindow : MetroWindow
 	{
-		private const int HeightOnMinimal = 112;
-		private const int WidthOnMinimal = 300;
-		private double TempHeight
-		{
-			get => (double)Resources["MinimalHeightTemp"];
-			set => Resources["MinimalHeightTemp"] = value;
-		}
-		private double TempWidth
-		{
-			get => (double)Resources["MinimalWidthTemp"];
-			set => Resources["MinimalWidthTemp"] = value;
-		}
-
-		private Visibility ControlsNotNeededOnVisionVisibility
-		{
-			set
-			{
-				SearchButton.Visibility = value;
-				SearchLabel.Visibility = value;
-				MinimalViewButton.Visibility = value;
-			}
-		}
-		private bool WasMaximized, WasMinimal;
+        private bool WasMaximized;
 
 		public MainWindow()
 		{
 			InitializeComponent();
 			#region Initialization
-			App.NewInstanceRequested += (_, e) => e.Args.For(each => LibraryManager.AddFromPath(each, true));
+			App.NewInstanceRequested += (_, e) => Controller.Library.Add(e.Args);
 			Events.KeyDown += KeyboardListener_KeyDown;
-
-			LibraryManager.MediaRequested += (_, e) => Player.Play(LibraryManager.Data, e.Parameter);
+			
 			Player.FullScreenToggled += Player_FullScreenClicked;
-			Player.UpdateLayout();
 
-			DataGrid.ItemsSource = LibraryManager.Data;
+			DataGrid.ItemsSource = Controller.Library;
 
 			Resources["LastPath"] = Settings.LastPath;
 
-			Player.VisionChanged += (_, e) => ControlsNotNeededOnVisionVisibility = e.Parameter ? Visibility.Hidden : Visibility.Visible;
+			Player.VisionChanged += Player_VisionChanged;
 			Player.MediaChanged += (_, e) => Title = $"{(Topmost ? "" : "Elephant Player | ")}{e.Parameter.Artist} - {e.Parameter.Title}";
-			Player.AutoOrinateVision = Settings.VisionOrientation;
-			Player.PlayOnPositionChange = Settings.PlayOnPositionChange;
 
 			Player.BorderBack = Background;
 			Player.ChangeVolumeBySlider(Settings.Volume * 100);
@@ -69,13 +42,18 @@ namespace Player
 				item.Background = Menu.Background;
 			foreach (MenuItem item in DataGrid.ContextMenu.Items)
 				item.Background = Menu.Background;
-			ArtistsView.PlayRequested += (_, e) => Player.Play(e.Queue, e.Media);
-			AlbumsView.PlayRequested += (_, e) => Player.Play(e.Queue, e.Media);
 
 			#endregion
 
 			Left = Settings.LastLocation.X;
 			Top = Settings.LastLocation.Y;
+		}
+
+		private void Player_VisionChanged(object sender, Library.InfoExchangeArgs<bool> e)
+		{
+			//Hide the controls which is not needed when vision is on, or make them visible if vision is going to hide
+			SearchButton.Visibility = e.Parameter ? Visibility.Hidden : Visibility.Visible;
+			SearchLabel.Visibility = e.Parameter ? Visibility.Hidden : Visibility.Visible;
 		}
 
 		private void Player_FullScreenClicked(object sender, EventArgs e)
@@ -95,41 +73,6 @@ namespace Player
 			}
 			else
 				WindowState = WasMaximized ? WindowState.Maximized : WindowState.Normal;
-		}
-
-		private void MinimalButton_Clicked(object sender, MouseButtonEventArgs e)
-		{
-			Hide();
-			Topmost = !Topmost;
-			Player.IsMinimal = Topmost;
-			Title = $"{(Topmost ? "" : "Elephant Player | ")}{Player.Current.Artist} - {Player.Current.Title}";
-			LeftWindowCommands.Visibility = Topmost ? Visibility.Collapsed : Visibility.Visible;
-			MinimalViewButton.Icon = Topmost ? IconType.ExpandPane : IconType.CollapsePane;
-			Menu.Visibility = Topmost ? Visibility.Hidden : Visibility.Visible;
-			SearchButton.Visibility = Menu.Visibility;
-			WindowStyle = Topmost ? WindowStyle.ToolWindow : WindowStyle.ThreeDBorderWindow;
-			ResizeMode = Topmost ? ResizeMode.CanMinimize : ResizeMode.CanResize;
-			if (Topmost)
-			{
-				WasMaximized = WindowState == WindowState.Maximized;
-				WindowState = WindowState.Normal;
-				TempHeight = ActualHeight;
-				TempWidth = ActualWidth;
-				Height = HeightOnMinimal;
-				Width = WidthOnMinimal;
-			}
-			else
-			{
-				if (WasMaximized)
-					WindowState = WindowState.Maximized;
-				Height = TempHeight;
-				Width = TempWidth;
-				if (Left + Width > 1366)
-					Left = 1366 - Width;
-				if (Top + Height > 720)
-					Top = 720 - Height;
-			}
-			Show();
 		}
 
 		private async void KeyboardListener_KeyDown(object sender, RawKeyEventArgs e)
@@ -164,42 +107,27 @@ namespace Player
 		private void List_DoubleClick(object sender, MouseButtonEventArgs e)
 		{
 			if (DataGrid.SelectedItem is Media med)
-				Player.Play(LibraryManager.Data, med);
+				Player.Play(Controller.Library, med);
 		}
 
 		private async void Window_Loaded(object sender, RoutedEventArgs e)
 		{
 			TaskbarItemInfo = new System.Windows.Shell.TaskbarItemInfo();
-			Player.Thumb = new ThumbController(TaskbarItemInfo);
-			Player.Thumb.NextClicked += (_, __) => Player.Next();
-			Player.Thumb.PreviousClicked += (_, __) => Player.Previous();
-			Player.Thumb.PlayPauseClicked += (_, __) => Player.PlayPause();
-			TempHeight = Settings.LastSize.Height;
-			TempWidth = Settings.LastSize.Width;
-			if (Settings.RememberMinimal && Settings.WasMinimal)
-			{
-				MinimalViewButton.EmulateClick();
-				TempHeight = Settings.LastSize.Height;
-				TempWidth = Settings.LastSize.Width;
-			}
-			else
-			{
-				Height = TempHeight;
-				Width = TempWidth;
-			}
+			Player.Thumb = new ThumbController(TaskbarItemInfo, Player);
 			while (!Player.IsFullyLoaded)
 				await Task.Delay(10);
-			Environment.GetCommandLineArgs().For(each => LibraryManager.AddFromPath(each, true));
+
+			int countBefore = Controller.Library.Count;
+			Environment.GetCommandLineArgs().For(each => Controller.Library.Add(each));
+			if (countBefore != Controller.Library.Count)
+				Controller.Play(Controller.Library.First());
 		}
 		private void Window_Closing(object sender, CancelEventArgs e)
 		{
-			Settings.LastSize = new Size(Width <= 310 ? TempWidth : Width, Height <= 130 ? TempHeight : Height);
+            Settings.LastSize = new Size(Width, Height);
 			Settings.LastLocation = new Point(Left, Top);
-			Settings.WasMinimal = Height <= 131;
 			Settings.Volume = Player.Volume;
-			Settings.Save();
-			App.Resource.Save();
-			LibraryManager.Save();
+			SaveAll();
 			Application.Current.Shutdown();
 		}
 		private void Window_KeyUp(object sender, KeyEventArgs e)
@@ -209,38 +137,17 @@ namespace Player
 		}
 		private void Window_Drop(object sender, DragEventArgs e)
 		{
-			((string[])e.Data.GetData(DataFormats.FileDrop)).For(each => LibraryManager.AddFromPath(each));
+			((string[])e.Data.GetData(DataFormats.FileDrop)).For(each => Controller.Library.Add(each));
 		}
 
 		private void Play(MediaQueue queue, Media media, bool inc)
 		{
 			Player.Play(queue, media);
-
-			MinimalViewButton.Visibility = media.IsVideo ? Visibility.Hidden : Visibility.Visible;
-			if (media.IsVideo)
-			{
-				if (WasMinimal)
-					return;
-				if (ActualHeight <= 131)
-				{
-					MinimalViewButton.EmulateClick();
-					WasMinimal = true;
-				}
-				else
-					WasMinimal = false;
-			}
-			else if (WasMinimal && ActualHeight > 131)
-			{
-				MinimalViewButton.EmulateClick();
-				WasMinimal = false;
-			}
 		}
-
-		private bool IsQueried = false;
+		
 		private void SearchBox_TextChanged(object sender, TextChangedEventArgs e)
 		{
-			IsQueried = !string.IsNullOrWhiteSpace(SearchBox.Text);
-			LibraryManager.Filter(SearchBox.Text);
+            DataGrid.ItemsSource = Controller.Library.Search(SearchBox.Text);
 
 		}
 		private void SearchIcon_Click(object sender, MouseButtonEventArgs e)
@@ -249,57 +156,11 @@ namespace Player
 			SearchBox.Focus();
 		}
 
-		private void Menu_RevalidateClick(object sender, RoutedEventArgs e)
+        private void Menu_RevalidateClick(object sender, RoutedEventArgs e)
 		{
 			Hide();
 			Close();
 			Process.Start("Elephant Player.exe");
-		}
-
-		private void Data_Sorting(object sender, DataGridSortingEventArgs e)
-		{
-			var asc = (e.Column.SortDirection ?? ListSortDirection.Ascending) == ListSortDirection.Descending;
-			switch (e.Column.DisplayIndex)
-			{
-				case 0:
-					LibraryManager.SortBy(each => each.Title, asc);
-					break;
-				case 1:
-					LibraryManager.SortBy(each => each.Artist, asc);
-					break;
-				case 2:
-					LibraryManager.SortBy(each => each.Album, asc);
-					break;
-				case 3:
-					LibraryManager.SortBy(each => each.PlayTimes.Count, asc);
-					break;
-				case 4:
-					LibraryManager.SortBy(each => each.AdditionDate, asc);
-					break;
-				default:
-					break;
-			}
-		}
-
-		private bool Loaded1 = false, Loaded2 = false;
-
-		private void DataGrid_MediaRequested(object sender, QueueEventArgs e)
-		{
-			Player.Play(e.Queue, e.Media);
-		}
-
-		private void Grid_Loaded(object sender, RoutedEventArgs e)
-		{
-			if (Loaded1)
-				return;
-			Loaded1 = true;
-		}
-
-		private void ArtistGrid_Loaded(object sender, RoutedEventArgs e)
-		{
-			if (Loaded2)
-				return;
-			Loaded2 = true;
 		}
 	}
 }

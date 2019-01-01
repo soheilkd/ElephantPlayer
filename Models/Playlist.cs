@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using Library.Extensions;
 using Library.Serialization.Models;
@@ -8,12 +9,14 @@ namespace Player.Models
 	[Serializable]
 	public class Playlist : ObservableCollection<Media>
 	{
+		public string Name { get; set; }
 		public SerializableBitmap Thumbnail { get; set; }
 
-		public Playlist(Collection<Media> medias, SerializableBitmap thumbnail = default) : base(medias)
+		public Playlist(string name = "New Playlist", Collection<Media> medias = default, SerializableBitmap thumbnail = default) : base(new List<Media>())
 		{
 			Thumbnail = thumbnail;
-			medias.For(each => Add(each));
+			if (medias != default)
+				medias.For(each => Add(each));
 		}
 	}
 }

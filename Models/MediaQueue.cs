@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using Library.Extensions;
 
@@ -90,6 +91,52 @@ namespace Player.Models
 			for (var i = 0; i < Count; i++)
 				if (p[i] != this[i])
 					Move(IndexOf(p[i]), i);
+		}
+		public MediaQueue Search(string query = "")
+		{
+			if (string.IsNullOrWhiteSpace(query))
+			{
+				var col = from item in this where item.Matches(query) select item;
+				if (col.Count() != 0)
+					return new MediaQueue(col);
+			}
+			return this;
+		}
+
+		public void Add(string fromPath)
+		{
+			if (Directory.Exists(fromPath))
+				Directory.GetFiles(fromPath, "*", SearchOption.AllDirectories).For(each => Add(each));
+			if (Contains(fromPath, out var duplicate))
+				Controller.Play(duplicate, this);
+			if (Media.TryLoadFromPath(fromPath, out Media media))
+				Insert(0, media);
+		}
+		public void Add(Collection<Media> collection)
+		{
+			var c = Count;
+			collection.For(each => Add(each));
+			if (c != Count) //Means something is added
+				Controller.Play(this.First());
+		}
+		public void Add(string[] fromPaths)
+		{
+			fromPaths.For(each => Add(each));
+		}
+
+		public bool Contains(string path, out Media output)
+		{
+			output = this.Where(item => item.Path == path).FirstOrDefault();
+			return output != default;
+		}
+
+		public string[] GetArtists()
+		{
+			return this.Select(each => each.Artist).Distinct().ToArray();
+		}
+		public string[] GetAlbums()
+		{
+			return this.Select(each => each.Album).Distinct().ToArray();
 		}
 	}
 }

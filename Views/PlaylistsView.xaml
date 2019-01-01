@@ -1,4 +1,12 @@
 ﻿<ContentControl x:Class="Player.Views.PlaylistsView"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+				xmlns:nav="clr-namespace:Library.Controls.Navigation;assembly=Library">
+	<nav:NavigationViewer x:Name="PlaylistNavigation" >
+		<ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+			<Grid>
+				
+			</Grid>
+		</ScrollViewer>
+	</nav:NavigationViewer>
 </ContentControl>

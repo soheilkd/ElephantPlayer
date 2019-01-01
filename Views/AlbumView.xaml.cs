@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Specialized;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using Library.Extensions;
@@ -8,22 +10,29 @@ namespace Player.Views
 {
 	public partial class AlbumView : Grid
 	{
-		public AlbumView(MediaQueue queue)
-		{
-			InitializeComponent();
-			MediaDataGrid.ItemsSource = queue;
-		}
+        private string AlbumName;
 
-		public AlbumView()
-		{
-			InitializeComponent();
-		}
+        public AlbumView(string album) : this()
+        {
+            MediaDataGrid.ItemsSource = new MediaQueue(Controller.Library.Where(each => each.Album == album));
+            AlbumName = album;
+        }
 
-		private void Grid_Loaded(object sender, RoutedEventArgs e)
-		{
-			var totalLength = new TimeSpan(0);
-			MediaDataGrid.ItemsSource.For(each => totalLength += each.Length);
-			BarTextBlock.Text = $"Showing {MediaDataGrid.ItemsSource.Count} media[s], totally {(int)totalLength.TotalMinutes} minutes";
-		}
-	}
+        public AlbumView()
+        {
+            InitializeComponent();
+        }
+
+        private void Grid_Loaded(object sender, RoutedEventArgs e)
+        {
+            var totalLength = new TimeSpan(0);
+            MediaDataGrid.ItemsSource.For(each => totalLength += each.Length);
+            Controller.Library.CollectionChanged += Library_CollectionChanged;
+        }
+
+        private void Library_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            MediaDataGrid.ItemsSource = new MediaQueue(Controller.Library.Where(each => each.Album == AlbumName));
+        }
+    }
 }

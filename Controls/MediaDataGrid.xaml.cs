@@ -5,10 +5,10 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using Library;
 using Library.Extensions;
 using Microsoft.Win32;
 using Player.Models;
+using Player.Windows;
 
 namespace Player.Controls
 {
@@ -37,6 +37,8 @@ namespace Player.Controls
 		public MediaDataGrid()
 		{
 			InitializeComponent();
+			ContextMenu.Items.Add(AddToPlaylistMenu);
+			ContextMenu.Items.Add(RemoveFromPlaylistMenu);
 		}
 
 		private void Menu_TagDetergent(object sender, RoutedEventArgs e)
@@ -120,17 +122,63 @@ namespace Player.Controls
 		{
 			if (SelectedItem == null)
 				return;
-			Controller.Play(ItemsSource, SelectedItem as Media);
+			Controller.Play(SelectedItem as Media, ItemsSource);
 		}
 
 		private void DataGrid_LostFocus(object sender, RoutedEventArgs e)
 		{
-			//SelectedItem = null;
+
 		}
 
 		private void DGR_Border_MouseDoubleClick(object sender, MouseButtonEventArgs e)
 		{
-			Controller.Play(ItemsSource, (Media)((ContentControl)sender).Content);
+			Controller.Play((Media)((ContentControl)sender).Content, ItemsSource);
 		}
+
+		public MenuItem AddToPlaylistMenu = new MenuItem()
+		{
+			Header = "Add To Playlist"
+		};
+		public MenuItem RemoveFromPlaylistMenu = new MenuItem()
+		{
+			Header = "Remove From Playlist"
+		};
+		private void ListBox_ContextMenuOpening(object sender, ContextMenuEventArgs e)
+		{
+			AddToPlaylistMenu.Items.Clear();
+			var notIncluded = Controller.Playlists.Where(each => !each.Contains(SelectedItem as Media));
+			notIncluded.ForEach(each =>
+			{
+				var item = new MenuItem()
+				{
+					Header = each.Name
+				};
+				item.Click += (_, __) => each.Add(SelectedItem as Media);
+				AddToPlaylistMenu.Items.Add(item);
+			});
+			var addNew = new MenuItem()
+			{
+				Header = "New Playlist..."
+			};
+			addNew.Click += (_, __) =>
+			{
+				var name = NewPlaylistWindow.RequestName();
+				Controller.Playlists.Add(new Playlist(name));
+			};
+			AddToPlaylistMenu.Items.Add(addNew);
+
+			RemoveFromPlaylistMenu.Items.Clear();
+			var included = Controller.Playlists.Where(each => each.Contains(SelectedItem as Media));
+			included.ForEach(each =>
+			{
+				var item = new MenuItem()
+				{
+					Header = each.Name
+				};
+				item.Click += (_, __) => each.Remove(SelectedItem as Media);
+			});
+			RemoveFromPlaylistMenu.Visibility = RemoveFromPlaylistMenu.Items.Count > 0 ? Visibility.Visible : Visibility.Hidden;
+		}
+
 	}
 }

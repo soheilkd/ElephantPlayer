@@ -4,7 +4,7 @@
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 	x:Class="Player.Controls.MediaDataGrid"
 	LostFocus="DataGrid_LostFocus"
-	SelectionMode="Extended"
+	SelectionMode="Extended" ContextMenuOpening="ListBox_ContextMenuOpening"
 	ScrollViewer.CanContentScroll="false"
 	ScrollViewer.HorizontalScrollBarVisibility="Disabled"
 	HorizontalContentAlignment="Stretch"

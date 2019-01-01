@@ -5,24 +5,38 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
+using Library.Controls;
+using Library.Controls.Navigation;
+using Library.Extensions;
 
 namespace Player.Views
 {
-    /// <summary>
-    /// Interaction logic for PlaylistsPage.xaml
-    /// </summary>
     public partial class PlaylistsView : ContentControl
     {
         public PlaylistsView()
         {
             InitializeComponent();
-        }
-    }
+
+			var grid = PlaylistNavigation.GetChildContent(1) as Grid;
+			var navigations = new List<NavigationTile>();
+			Controller.Playlists.ForEach(each =>
+			{
+				navigations.Add(
+					new NavigationTile()
+					{
+						Tag = each.Name,
+						TileStyle = TileStyle.Default,
+						Navigation = new NavigationControl()
+						{
+							Tag = each.Name,
+							Content = new PlaylistView(each)
+						}
+					});
+			});
+			navigations.ForEach(each => grid.Children.Add(each));
+			grid.AlignChildrenVertical(new Size(50, 100));
+			grid.SizeChanged +=  (_, __) => grid.AlignChildrenVertical(Tile.StandardSize);
+		}
+	}
 }

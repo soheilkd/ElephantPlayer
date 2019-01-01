@@ -8,10 +8,10 @@ namespace Player.Views
 {
 	public partial class PlaylistView : ContentControl
 	{
-		public PlaylistView(MediaQueue queue)
+		public PlaylistView(Playlist playlist)
 		{
 			InitializeComponent();
-			MediaDataGrid.ItemsSource = queue;
+			MediaDataGrid.ItemsSource = new MediaQueue(playlist);
 		}
 
 		public PlaylistView()

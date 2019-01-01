@@ -6,8 +6,7 @@
 	xmlns:mah="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
 	xmlns:system="clr-namespace:System;assembly=mscorlib"
 	xmlns:controls="clr-namespace:Library.Controls;assembly=Library"
-	xmlns:nav="clr-namespace:Library.Controls.Navigation;assembly=Library"
-	xmlns:controls1="clr-namespace:Player.Controls;assembly=Player"
+	xmlns:controls1="clr-namespace:Player.Controls"
 	xmlns:views="clr-namespace:Player.Views" Background="{DynamicResource MajorBackground}"
 	Title="Elephant Player" ShowIconOnTitleBar="False" AllowDrop="True"
 	Loaded="Window_Loaded" Closing="Window_Closing" Drop="Window_Drop" KeyUp="Window_KeyUp">
@@ -15,21 +14,21 @@
 		<mah:WindowCommands>
 			<StackPanel Orientation="Horizontal">
 				<Menu x:Name="Menu">
-					<MenuItem>
-						<MenuItem.Header>
-							<Image Source="pack://application:,,,/Resources/Player.ico"/>
-						</MenuItem.Header>
-						<MenuItem Header="Library">
-							<MenuItem Header="Revalidate" Click="Menu_RevalidateClick"/>
-						</MenuItem>
-						<MenuItem Header="About">
-							<Grid>
-								<TextBlock Text="Elephant Player v1.2A" FontSize="19" FontWeight="Light"/>
-								<TextBlock Text="soheilkd ©" Margin="92,35,0,0" FontSize="16" FontWeight="SemiBold"/>
-							</Grid>
-						</MenuItem>
-					</MenuItem>
-				</Menu>
+                    <MenuItem>
+                        <MenuItem.Header>
+                            <controls:Icon Type="Elephant" />
+                        </MenuItem.Header>
+                        <MenuItem Header="Library">
+                            <MenuItem Header="Revalidate" Click="Menu_RevalidateClick"/>
+                        </MenuItem>
+                        <MenuItem Header="About">
+                            <Grid>
+                                <TextBlock Text="Elephant Player v1.2A" FontSize="19" FontWeight="Light"/>
+                                <TextBlock Text="soheilkd ©" Margin="92,35,0,0" FontSize="16" FontWeight="SemiBold"/>
+                            </Grid>
+                        </MenuItem>
+                    </MenuItem>
+                </Menu>
 			</StackPanel>
 		</mah:WindowCommands>
 	</mah:MetroWindow.LeftWindowCommands>
@@ -39,7 +38,7 @@
 				<views:NowPlayingView/>
 			</TabItem>
 			<TabItem Header="Library">
-				<controls1:MediaDataGrid x:Name="DataGrid" MediaRequested="DataGrid_MediaRequested"/>
+				<controls1:MediaDataGrid x:Name="DataGrid"/>
 			</TabItem>
 			<TabItem Header="Artists">
 				<views:ArtistsView x:Name="ArtistsView"/>
@@ -84,7 +83,6 @@
 			</TabControl.Resources>
 		</TabControl>
 		<controls1:MediaPlayer x:Name="Player"/>
-		<controls:Button x:Name="MinimalViewButton" Icon="CollapsePane" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,12,35" MouseUp="MinimalButton_Clicked"/>
 		<Label x:Name="SearchLabel" Content="{Binding Text, ElementName=SearchBox}" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,190,20"/>
 		<controls:Button x:Name="SearchButton" HorizontalAlignment="Right" VerticalAlignment="Bottom" Icon="Search" MouseUp="SearchIcon_Click" Margin="0,0,195,35" Width="20" Height="20"/>
 		<Popup x:Name="SearchPopup" PlacementTarget="{Binding ElementName=SearchButton}" StaysOpen="False" Placement="Bottom" PopupAnimation="Fade" AllowsTransparency="True">
@@ -101,10 +99,8 @@
 				<ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Accents/BaseDark.xaml" />
 			</ResourceDictionary.MergedDictionaries>
 
-			<SolidColorBrush x:Key="MajorBackground" Color="#FF242527"/>
-			<system:Double x:Key="MinimalWidthTemp" />
-			<system:Double x:Key="MinimalHeightTemp" />
-			<system:String x:Key="LastPath">D:\\</system:String>
+            <SolidColorBrush x:Key="MajorBackground" Color="#FF242527"/>
+            <system:String x:Key="LastPath">D:\\</system:String>
 			<Style TargetType="DataGridRow">
 				<Style.Triggers>
 					<DataTrigger Binding="{Binding IsPlaying}" Value="True">
