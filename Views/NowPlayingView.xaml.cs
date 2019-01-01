@@ -1,28 +1,23 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
+using Library;
+using Player.Models;
 
 namespace Player.Views
 {
-    /// <summary>
-    /// Interaction logic for NowPlayingPage.xaml
-    /// </summary>
     public partial class NowPlayingView : ContentControl
     {
         public NowPlayingView()
         {
             InitializeComponent();
+			Controller.PlayRequest += Controller_PlayRequest;
         }
-    }
+
+		private void Controller_PlayRequest(object sender, InfoExchangeArgs<(MediaQueue, Media)> e)
+		{
+			MediaDataGrid.ItemsSource = e.Parameter.Item1;
+			ArtworkImage.Source = e.Parameter.Item2.Artwork;
+			MainTextBlock.Text = $"{e.Parameter.Item2.Artist} - {e.Parameter.Item2.Title}\r\n{e.Parameter.Item2.Album}";
+		}
+	}
 }

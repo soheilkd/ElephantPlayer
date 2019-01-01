@@ -1,8 +1,10 @@
 ﻿<ContentControl x:Class="Player.Views.NowPlayingView"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-
-    <Grid>
-        
-    </Grid>
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+				xmlns:controls="clr-namespace:Player.Controls">
+	<Grid> 
+		<Image x:Name="ArtworkImage" Width="100" Height="100" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="5"/>
+			<TextBlock x:Name="MainTextBlock" FontSize="18" FontWeight="SemiBold" FontFamily="Segoe U" Text="Taham - Minimal" Margin="110,5,0,0"/>
+			<controls:MediaDataGrid x:Name="MediaDataGrid" Margin="0,105,0,0"/>
+	</Grid>
 </ContentControl>
