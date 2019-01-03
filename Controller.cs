@@ -7,7 +7,7 @@ namespace Player
 {
 	public static class Controller
 	{
-		public static string AppPath { get; set; }
+		public static string AppPath => App.Path;
 
 		#region Player Related
 		public static MediaQueue Queue { get; set; } = new MediaQueue();
@@ -23,9 +23,27 @@ namespace Player
 		{
 			PlayRequest?.Invoke(default, (queue ?? Library, media));
 		}
+
+		public static void Play(string path)
+		{
+			var media = Library.Add(path);
+			if (media != default)
+				Play(media);
+		}
+		public static void Play(string[] paths)
+		{
+			Media latestMedia = default;
+			Media currentMedia = default;
+			foreach (var item in paths)
+				if ((currentMedia = Library.Add(item)) != default)
+					latestMedia = currentMedia;
+			if (latestMedia != default)
+				Play(latestMedia);
+		}
+
 		#endregion
 		#region Public Settings
-
+		
 		private static LazyXml<SerializableSettings> _Settings = new LazyXml<SerializableSettings>($"{AppPath}Settings.xml");
 		public static SerializableSettings Settings => _Settings.Value;
 

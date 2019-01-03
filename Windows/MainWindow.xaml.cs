@@ -116,11 +116,8 @@ namespace Player
 			Player.Thumb = new ThumbController(TaskbarItemInfo, Player);
 			while (!Player.IsFullyLoaded)
 				await Task.Delay(10);
-
-			int countBefore = Controller.Library.Count;
-			Environment.GetCommandLineArgs().For(each => Controller.Library.Add(each));
-			if (countBefore != Controller.Library.Count)
-				Controller.Play(Controller.Library.First());
+			
+			Controller.Play(Environment.GetCommandLineArgs());
 		}
 		private void Window_Closing(object sender, CancelEventArgs e)
 		{

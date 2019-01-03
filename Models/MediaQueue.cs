@@ -102,22 +102,24 @@ namespace Player.Models
 			}
 			return this;
 		}
-
-		public void Add(string fromPath)
+		
+		public Media Add(string fromPath)
 		{
 			if (Directory.Exists(fromPath))
 				Directory.GetFiles(fromPath, "*", SearchOption.AllDirectories).For(each => Add(each));
 			if (Contains(fromPath, out var duplicate))
-				Controller.Play(duplicate, this);
+				return duplicate;
 			if (Media.TryLoadFromPath(fromPath, out Media media))
+			{
 				Insert(0, media);
+				return media;
+			}
+			return default;
 		}
 		public void Add(Collection<Media> collection)
 		{
 			var c = Count;
 			collection.For(each => Add(each));
-			if (c != Count) //Means something is added
-				Controller.Play(this.First());
 		}
 		public void Add(string[] fromPaths)
 		{
