@@ -12,15 +12,11 @@ namespace Player.Views
 	{
         private string AlbumName;
 
-        public AlbumView(string album) : this()
+		public AlbumView() => InitializeComponent();
+		public AlbumView(string album) : this()
         {
             MediaDataGrid.ItemsSource = new MediaQueue(Controller.Library.Where(each => each.Album == album));
             AlbumName = album;
-        }
-
-        public AlbumView()
-        {
-            InitializeComponent();
         }
 
         private void Grid_Loaded(object sender, RoutedEventArgs e)
