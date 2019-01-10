@@ -6,7 +6,7 @@
 			 MouseMove="Element_MouseMove"
              Loaded="UserControl_Loaded" x:Name="ParentControl">
 	<Grid>
-        <DockPanel x:Name="ElementCanvas" Background="Black" Margin="300">
+		<DockPanel x:Name="ElementCanvas" Background="Black" Margin="300">
 			<MediaElement x:Name="element" LoadedBehavior="Manual" ScrubbingEnabled="True" Stretch="Uniform" />
 		</DockPanel>
 		<Grid x:Name="ControlsGrid" Background="Transparent" VerticalAlignment="Bottom" Height="94">
@@ -43,6 +43,7 @@
 				<TranslateTransform x:Name="ControlsTranslation" Y="0" />
 			</Grid.RenderTransform>
 		</Grid>
+		<Image x:Name="ArtworkImage" VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="10,0,0,30" Height="60" Width="60"/>
 	</Grid>
 	<UserControl.Resources>
 		<SolidColorBrush x:Key="BorderBack" Color="#FFDEDEDE"/>

@@ -24,7 +24,6 @@ namespace Player.Views
 			grid.SizeChanged += (_, __) => grid.AlignChildrenVertical(Tile.StandardSize);
 		}
 
-
 		public static NavigationTile GetTile(string name, Type viewType)
 		{
 			return

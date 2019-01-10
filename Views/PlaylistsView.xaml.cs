@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using static Player.Views.ViewerOperator;
 
 namespace Player.Views
 {
@@ -13,7 +14,10 @@ namespace Player.Views
 		private void Content_Loaded(object sender, RoutedEventArgs e)
 		{
 			if (CallTime++ == 0)
-				ViewerOperator.ApplyNavigations(Controller.Playlists.Select(each => each.Name).ToArray(), default, typeof(PlaylistView), PlaylistNavigation);
+			{
+				var playlistNames = Controller.Playlists.Select(each => each.Name).ToArray();
+				ApplyNavigations(playlistNames, default, typeof(PlaylistView), PlaylistNavigation);
+			}
 		}
 	}
 }

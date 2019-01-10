@@ -126,7 +126,7 @@ namespace Player.Controls
 		public MediaPlayer()
 		{
 			InitializeComponent();
-			Controller.PlayRequest += (_, e) => Play(e.Parameter);
+			PlayRequest += (_, e) => Play(e.Parameter);
 			IsVisionOn = false;
 			VisionButton.Visibility = Visibility.Hidden;
 			FullScreenButton.Visibility = Visibility.Hidden;
@@ -234,6 +234,8 @@ namespace Player.Controls
 			element.Source = new Uri(media.Path);
 			MediaChanged.Invoke(media);
 			Play();
+			if (!media.IsVideo)
+				ArtworkImage.Source = media.Artwork;
 		}
 		public void Play((MediaQueue queue, Media media) tuple) => Play(tuple.queue, tuple.media);
 		public void Play(MediaQueue queue, Media media)

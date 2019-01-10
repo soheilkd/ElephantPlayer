@@ -13,7 +13,18 @@ namespace Player.Models
 {
 	[Serializable]
 	public class Media : INotifyPropertyChanged
-	{ 
+	{
+		public string Sublabel
+		{
+			get
+			{
+				if (string.IsNullOrWhiteSpace(Album))
+					return Artist;
+				else
+					return $"{Artist} - {Album}";
+			}
+		}
+
 		private string _Name;
 		private string _Artist;
 		private string _Title;
@@ -24,6 +35,7 @@ namespace Player.Models
 		public MediaType Type;
 		public string Lyrics = "";
 		[field: NonSerialized] public bool IsLoaded = false;
+		[field: NonSerialized] private BitmapSource _Artwork = default;
 		[field: NonSerialized] public event PropertyChangedEventHandler PropertyChanged;
 
 		public string Name { get => _Name; set => Set(ref _Name, value); }
@@ -42,12 +54,15 @@ namespace Player.Models
 		{
 			get
 			{
-				using (var file = TagLib.File.Create(Path))
-				{
-					return file.Tag.Pictures.Length != 0
-						? file.Tag.Pictures.First().ToBitmapImage()
-						: Library.Controls.IconProvider.GetBitmap(Library.Controls.IconType.Music);
-				}
+				if (_Artwork == default)
+					using (var file = TagLib.File.Create(Path))
+					{
+						_Artwork = file.Tag.Pictures.Length != 0
+							? file.Tag.Pictures.First().ToBitmapImage()
+							: Library.Controls.IconProvider.GetBitmap(Library.Controls.IconType.Music);
+						return _Artwork;
+					}
+				return _Artwork;
 			}
 		}
 

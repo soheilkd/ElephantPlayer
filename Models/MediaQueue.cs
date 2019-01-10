@@ -92,9 +92,9 @@ namespace Player.Models
 				if (p[i] != this[i])
 					Move(IndexOf(p[i]), i);
 		}
-		public MediaQueue Search(string query = "")
+		public MediaQueue Search(string query = default)
 		{
-			if (string.IsNullOrWhiteSpace(query))
+			if (!string.IsNullOrWhiteSpace(query))
 			{
 				var col = from item in this where item.Matches(query) select item;
 				if (col.Count() != 0)
