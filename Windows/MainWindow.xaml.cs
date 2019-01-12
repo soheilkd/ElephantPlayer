@@ -145,19 +145,11 @@ namespace Player
 		private void SearchBox_TextChanged(object sender, TextChangedEventArgs e)
 		{
             DataGrid.ItemsSource = Controller.Library.Search(SearchBox.Text);
-
 		}
 		private void SearchIcon_Click(object sender, MouseButtonEventArgs e)
 		{
 			SearchPopup.IsOpen = true;
 			SearchBox.Focus();
-		}
-
-        private void Menu_RevalidateClick(object sender, RoutedEventArgs e)
-		{
-			Hide();
-			Close();
-			Process.Start("Elephant Player.exe");
 		}
 	}
 }

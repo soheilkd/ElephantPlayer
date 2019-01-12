@@ -15,19 +15,14 @@
 			<StackPanel Orientation="Horizontal">
 				<Menu x:Name="Menu">
                     <MenuItem>
-                        <MenuItem.Header>
-                            <controls:Icon Type="Elephant" />
-                        </MenuItem.Header>
-                        <MenuItem Header="Library">
-                            <MenuItem Header="Revalidate" Click="Menu_RevalidateClick"/>
-                        </MenuItem>
-                        <MenuItem Header="About">
-                            <Grid>
-                                <TextBlock Text="Elephant Player v1.2A" FontSize="19" FontWeight="Light"/>
-                                <TextBlock Text="soheilkd ©" Margin="92,35,0,0" FontSize="16" FontWeight="SemiBold"/>
-                            </Grid>
-                        </MenuItem>
-                    </MenuItem>
+						<MenuItem.Header>
+							<controls:Icon Type="Elephant" />
+						</MenuItem.Header>
+						<Grid>
+							<TextBlock Text="Elephant Player v1.2A" FontSize="19" FontWeight="Light"/>
+							<TextBlock Text="soheilkd ©" Margin="92,35,0,0" FontSize="16" FontWeight="SemiBold"/>
+						</Grid>
+					</MenuItem>
                 </Menu>
 			</StackPanel>
 		</mah:WindowCommands>
