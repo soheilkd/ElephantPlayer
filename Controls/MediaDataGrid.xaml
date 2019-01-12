@@ -3,7 +3,6 @@
 	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 	x:Class="Player.Controls.MediaDataGrid"
-	LostFocus="DataGrid_LostFocus"
 	SelectionMode="Extended" ContextMenuOpening="ListBox_ContextMenuOpening"
 	ScrollViewer.CanContentScroll="false"
 	ScrollViewer.HorizontalScrollBarVisibility="Disabled"
@@ -35,6 +34,8 @@
 			<MenuItem Header="Delete" Click="Menu_DeleteClick" />
 			<MenuItem Header="Open Location" Click="Menu_LocationClick"/>
 			<MenuItem Header="Properties" Click="Menu_PropertiesClick"/>
+			<MenuItem Header="Add To Playlist" x:Name="AddToPlaylistMenu"/>
+			<MenuItem Header="Remove From Playlist" x:Name="RemoveFromPlaylistMenu"/>
 		</ContextMenu>
 	</ListBox.ContextMenu>
 	<ListBox.Resources>

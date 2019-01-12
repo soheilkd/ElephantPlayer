@@ -1,4 +1,6 @@
-﻿using System.Linq;
+﻿using Library.Extensions;
+using Player.Models;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using static Player.Views.ViewerOperator;
@@ -18,6 +20,15 @@ namespace Player.Views
 				var playlistNames = Controller.Playlists.Select(each => each.Name).ToArray();
 				ApplyNavigations(playlistNames, default, typeof(PlaylistView), PlaylistNavigation);
 			}
+		}
+
+		private void CreateButtonClick(object sender, RoutedEventArgs e)
+		{
+			Controller.Playlists.Add(new Playlist(NewPlaylistBox.Text));
+			NewPlaylistBox.Text = "New Playlist Name";
+			var playlistNames = Controller.Playlists.Select(each => each.Name).ToArray();
+			ApplyNavigations(playlistNames, default, typeof(PlaylistView), PlaylistNavigation);
+			PlaylistNavigation.Focus();
 		}
 	}
 }
