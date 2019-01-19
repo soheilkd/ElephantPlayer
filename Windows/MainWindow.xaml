@@ -33,7 +33,7 @@
 				<views:NowPlayingView/>
 			</TabItem>
 			<TabItem Header="Library">
-				<controls1:MediaDataGrid x:Name="DataGrid"/>
+				<views:LibraryView/>
 			</TabItem>
 			<TabItem Header="Artists">
 				<views:ArtistsView x:Name="ArtistsView"/>
@@ -78,11 +78,6 @@
 			</TabControl.Resources>
 		</TabControl>
 		<controls1:MediaPlayer x:Name="Player"/>
-		<Label x:Name="SearchLabel" Content="{Binding Text, ElementName=SearchBox}" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,190,20"/>
-		<controls:Button x:Name="SearchButton" HorizontalAlignment="Right" VerticalAlignment="Bottom" Icon="Search" MouseUp="SearchIcon_Click" Margin="0,0,195,35" Width="20" Height="20"/>
-		<Popup x:Name="SearchPopup" PlacementTarget="{Binding ElementName=SearchButton}" StaysOpen="False" Placement="Bottom" PopupAnimation="Fade" AllowsTransparency="True">
-			<TextBox HorizontalAlignment="Right" VerticalAlignment="Top" Width="140" Height="20" x:Name="SearchBox" TextChanged="SearchBox_TextChanged" />
-		</Popup>
 	</Grid>
 	<Window.Resources>
 		<ResourceDictionary>

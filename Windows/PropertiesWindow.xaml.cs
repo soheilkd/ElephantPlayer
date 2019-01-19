@@ -1,14 +1,13 @@
-﻿using System;
+﻿using Library;
+using Library.Controls;
+using MahApps.Metro.Controls;
+using Microsoft.Win32;
+using Player.Extensions;
+using Player.Models;
+using System;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
-using Library.Extensions;
-using MahApps.Metro.Controls;
-using Microsoft.Win32;
-using Library;
-using Player.Extensions;
-using Player.Models;
-using Library.Controls;
 
 namespace Player.Windows
 {
@@ -38,8 +37,13 @@ namespace Player.Windows
 			}
 			_Media = media;
 			_TagFile = TagLib.File.Create(media.Path);
-			var tag = _TagFile.Tag;
 			_Media.Load();
+			LoadUIForMedia();
+			Show();
+		}
+		private void LoadUIForMedia()
+		{
+			TagLib.Tag tag = _TagFile.Tag;
 			TitleBox.Text = tag.Title ?? string.Empty;
 			AlbumBox.Text = tag.Album ?? string.Empty;
 			ArtistBox.Text = string.Join(Seperator.ToString(), tag.Performers) ?? string.Empty;
@@ -52,8 +56,7 @@ namespace Player.Windows
 			YearBox.Text = tag.Year.ToString() ?? string.Empty;
 			CopyrightBox.Text = tag.Copyright ?? string.Empty;
 			LyricsBox.Text = tag.Lyrics ?? string.Empty;
-			ArtworkImage.Source = tag.Pictures.Length >= 1 ? tag.Pictures[0].ToBitmapImage() : IconProvider.GetBitmap(IconType.Music);
-			Show();
+			ArtworkImage.Source = tag.Pictures.Length >= 1 ? tag.Pictures[0].GetBitmapImage() : IconProvider.GetBitmap(IconType.Music);
 		}
 
 		private void RemoveArtworkClick(object sender, MouseButtonEventArgs e)
@@ -86,11 +89,6 @@ namespace Player.Windows
 				_TagFile.Tag.Pictures = new TagLib.IPicture[] { new TagLib.Picture(_OpenArtDialog.FileName) };
 				ArtworkImage.Source = new BitmapImage(new Uri(_OpenArtDialog.FileName));
 			}
-		}
-
-		private void MenuItem_Click(object sender, RoutedEventArgs e)
-		{
-
 		}
 	}
 }

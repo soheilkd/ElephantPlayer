@@ -17,12 +17,9 @@ namespace Player.Views
 
 		private void StackPanel_Loaded(object sender, RoutedEventArgs e)
 		{
-			OrinateCheck.IsChecked = Settings.VisionOrientation;
-			LiveLibraryCheck.IsChecked = Settings.LiveLibrary;
-			ExplicitCheck.IsChecked = Settings.ExplicitContent;
 			PlayOnPosCheck.IsChecked = Settings.PlayOnPositionChange;
-			RevalidOnExitCheck.IsChecked = Settings.RevalidateOnExit;
-			TimeoutCombo.SelectedIndex = Settings.MouseTimeoutIndex;
+			TimeoutSlider.Value = Settings.MouseTimeout;
+
 			switch (Settings.PlayMode)
 			{
 				case PlayMode.Repeat:
@@ -37,20 +34,10 @@ namespace Player.Views
 				default:
 					break;
 			}
-
-			TimeoutCombo.SelectionChanged += (_, __) => Settings.MouseTimeoutIndex = TimeoutCombo.SelectedIndex;
-			OrinateCheck.Checked += (_, __) => Settings.VisionOrientation = true;
-			OrinateCheck.Unchecked += (_, __) => Settings.VisionOrientation = false;
-			LiveLibraryCheck.Checked += (_, __) => Settings.LiveLibrary = true;
-			LiveLibraryCheck.Unchecked += (_, __) => Settings.LiveLibrary = false;
-			ExplicitCheck.Checked += (_, __) => Settings.ExplicitContent = true;
-			ExplicitCheck.Unchecked += (_, __) => Settings.ExplicitContent = false;
+			
+			TimeoutSlider.ValueChanged += (_, __) => Settings.MouseTimeout = TimeoutSlider.Value;
 			PlayOnPosCheck.Checked += (_, __) => Settings.PlayOnPositionChange = true;
 			PlayOnPosCheck.Unchecked += (_, __) => Settings.PlayOnPositionChange = false;
-			RevalidOnExitCheck.Checked += (_, __) => Settings.RevalidateOnExit = true;
-			RevalidOnExitCheck.Unchecked += (_, __) => Settings.RevalidateOnExit = false;
-			RememberMinimalCheck.Checked += (_, __) => Settings.RememberMinimal = true;
-			RememberMinimalCheck.Unchecked += (_, __) => Settings.RememberMinimal = false;
 		}
 	}
 }

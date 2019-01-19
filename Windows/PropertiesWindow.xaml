@@ -1,19 +1,13 @@
 ﻿<mah:MetroWindow x:Class="Player.Windows.PropertiesWindow" xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
-        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" BorderBrush="#FF242527"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" AllowsTransparency="True"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" BorderBrush="#FF6C6F76"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" AllowsTransparency="True" BorderThickness="1"
         WindowStartupLocation="CenterScreen" Background="#FF242527" WindowTitleBrush="#FF242527"
         xmlns:lib="clr-namespace:Library.Controls;assembly=Library"
         ResizeMode="NoResize" TitleAlignment="Center"
         Title="Properties" Height="630" Width="269">
 	<mah:MetroWindow.LeftWindowCommands>
 		<mah:WindowCommands>
-			<Menu>
-				<MenuItem Click="MenuItem_Click">
-					<MenuItem.Header>
-						<lib:Icon MouseUp="SaveButtonClick" Type="Save" Height="22" Width="22"/>
-					</MenuItem.Header>
-				</MenuItem>
-			</Menu>
+			<lib:Button Icon="Save" MouseUp="SaveButtonClick" Margin="5"/>
 		</mah:WindowCommands>
 	</mah:MetroWindow.LeftWindowCommands>
 	<Grid>
@@ -81,6 +75,7 @@
 				<Setter Property="Background" Value="Transparent" />
 				<Setter Property="Width" Value="150" />
 				<Setter Property="Margin" Value="2"/>
+				<Setter Property="mah:TextBoxHelper.ClearTextButton" Value="True"/>
 			</Style>
 		</Grid.Resources>
 	</Grid>
