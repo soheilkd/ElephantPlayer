@@ -9,7 +9,7 @@
 	xmlns:controls1="clr-namespace:Player.Controls"
 	xmlns:views="clr-namespace:Player.Views" Background="{DynamicResource MajorBackground}"
 	Title="Elephant Player" ShowIconOnTitleBar="False" AllowDrop="True"
-	Loaded="Window_Loaded" Closing="Window_Closing" Drop="Window_Drop" KeyUp="Window_KeyUp">
+	Loaded="Window_Loaded" Closing="Window_Closing" Drop="Window_Drop">
 	<mah:MetroWindow.LeftWindowCommands>
 		<mah:WindowCommands>
 			<StackPanel Orientation="Horizontal">
@@ -49,11 +49,11 @@
 			</TabItem>
 			<TabControl.Resources>
 				<Style TargetType="TabItem">
-					<Setter Property="Foreground" Value="#FFF"/>
+					<Setter Property="Foreground" Value="#DDD"/>
 					<Setter Property="HeaderTemplate">
 						<Setter.Value>
 							<DataTemplate>
-								<TextBlock x:Name="textBlock" Padding="7" Text="{Binding}" FontSize="18" FontWeight="SemiBold"/>
+								<TextBlock x:Name="textBlock" Padding="10" Text="{Binding}" FontSize="18"/>
 							</DataTemplate>
 						</Setter.Value>
 					</Setter>
@@ -62,13 +62,29 @@
 							<ControlTemplate TargetType="{x:Type TabItem}">
 								<Grid>
 									<Border  Name="Border" BorderBrush="{DynamicResource AccentColorBrush}">
-										<ContentPresenter ContentSource="Header" RecognizesAccessKey="True"/>
+										<ContentPresenter ContentSource="Header" />
 									</Border>
 								</Grid>
 								<ControlTemplate.Triggers>
 									<Trigger Property="IsSelected" Value="True">
-										<Setter Property="Panel.ZIndex" Value="100" />
-										<Setter TargetName="Border" Property="BorderThickness" Value="3,0,0,0" />
+										<Trigger.EnterActions>
+											<BeginStoryboard>
+												<Storyboard>
+													<ThicknessAnimation SpeedRatio="3" From="0" To="3,0,0,0" Storyboard.TargetName="Border" Storyboard.TargetProperty="BorderThickness"/>
+												</Storyboard>
+											</BeginStoryboard>
+										</Trigger.EnterActions>
+										<Setter Property="Foreground" Value="#FFF"/>
+										<Setter Property="Panel.ZIndex" Value="1" />
+										<Trigger.ExitActions>
+											<BeginStoryboard>
+												<Storyboard>
+													<ThicknessAnimation SpeedRatio="2" Storyboard.TargetName="Border" Storyboard.TargetProperty="BorderThickness" From="3,0,0,0" To="0"/>
+												</Storyboard>
+											</BeginStoryboard>
+										</Trigger.ExitActions>
+									</Trigger>
+									<Trigger Property="IsSelected" Value="False">
 									</Trigger>
 								</ControlTemplate.Triggers>
 							</ControlTemplate>

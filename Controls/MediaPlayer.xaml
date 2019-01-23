@@ -1,13 +1,12 @@
 ﻿<UserControl x:Class="Player.Controls.MediaPlayer"
 			 xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
 			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-			 xmlns:player="clr-namespace:Player.Controls"
 			 xmlns:lib="clr-namespace:Library.Controls;assembly=Library"
 			 MouseMove="Element_MouseMove"
              Loaded="UserControl_Loaded" x:Name="ParentControl">
 	<Grid>
 		<DockPanel x:Name="ElementCanvas" Background="Black" Margin="300">
-			<MediaElement x:Name="element" LoadedBehavior="Manual" ScrubbingEnabled="True" Stretch="Uniform" />
+			<MediaElement x:Name="Element" MediaOpened="Element_MediaOpened" LoadedBehavior="Manual" ScrubbingEnabled="True" Stretch="Uniform"/>
 		</DockPanel>
 		<Grid x:Name="ControlsGrid" Background="Transparent" VerticalAlignment="Bottom" Height="94">
 			<Border HorizontalAlignment="Left" VerticalAlignment="Bottom" Width="149" Margin="73,0,0,27" CornerRadius="20,20,0,0">
@@ -46,7 +45,7 @@
 		<Image x:Name="ArtworkImage" VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="10,0,0,30" Height="60" Width="60"/>
 	</Grid>
 	<UserControl.Resources>
-		<SolidColorBrush x:Key="BorderBack" Color="#FFDEDEDE"/>
+		<SolidColorBrush x:Key="BorderBack" Color="#FF242527"/>
 		<Style TargetType="Border">
 			<Setter Property="Background" Value="{DynamicResource BorderBack}"/>
 		</Style>

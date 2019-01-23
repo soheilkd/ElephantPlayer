@@ -6,14 +6,18 @@ namespace Player.Extensions
 {
 	public static class ImagingExtensions
 	{
-		public static BitmapImage ToBitmapImage(this IPicture picture)
+		public static byte[] GetBytes(this IPicture picture)
 		{
-			if (picture.Data.Count == 0)
-				return null;
-			var pixels = new byte[picture.Data.Count];
-			picture.Data.CopyTo(pixels, 0);
+			var bytes = new byte[picture.Data.Count];
+			picture.Data.CopyTo(bytes, 0);
+			return bytes;
+		}
+		public static BitmapImage GetBitmapImage(this byte[] bytes)
+		{
+			if (bytes.Length == 0)
+				return default;
 			var image = new BitmapImage();
-			using (var ms = new MemoryStream(pixels))
+			using (var ms = new MemoryStream(bytes))
 			{
 				image.BeginInit();
 				image.CacheOption = BitmapCacheOption.OnLoad;
@@ -22,6 +26,9 @@ namespace Player.Extensions
 			}
 			return image;
 		}
+		public static BitmapImage GetBitmapImage(this IPicture picture)
+		{
+			return picture.GetBytes().GetBitmapImage();
+		}
 	}
-
 }

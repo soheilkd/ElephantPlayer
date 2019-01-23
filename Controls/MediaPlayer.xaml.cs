@@ -181,13 +181,12 @@ namespace Player.Controls
 		}
 		private void Play(Media media)
 		{
-			Element.Stop();
 			Queue.ClearIsPlayings(except: media);
 			Element.Source = new Uri(media.Path);
 			MediaChanged.Invoke(media);
 			Play();
 			if (!media.IsVideo)
-				Dispatcher.Invoke(() => ArtworkImage.Source = media.Artwork);
+				ArtworkImage.Source = media.Artwork;
 		}
 		public void Play(MediaQueue queue, Media media)
 		{

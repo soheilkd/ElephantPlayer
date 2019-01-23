@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Library.Extensions;
+using Player.Extensions;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
@@ -6,8 +8,6 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Media.Imaging;
-using Library.Extensions;
-using Player.Extensions;
 
 namespace Player.Models
 {
@@ -35,7 +35,7 @@ namespace Player.Models
 		public MediaType Type;
 		public string Lyrics = "";
 		[field: NonSerialized] public bool IsLoaded = false;
-		[field: NonSerialized] private BitmapSource _Artwork = default;
+		[field: NonSerialized] private byte[] _Artwork = default;
 		[field: NonSerialized] public event PropertyChangedEventHandler PropertyChanged;
 
 		public string Name { get => _Name; set => Set(ref _Name, value); }
@@ -50,19 +50,14 @@ namespace Player.Models
 		public string Path { get; set; }
 		public bool IsVideo => Type == MediaType.Video;
 		public bool DoesExist => File.Exists(Path);
-		public BitmapSource Artwork
+		public BitmapImage Artwork
 		{
 			get
 			{
 				if (_Artwork == default)
 					using (var file = TagLib.File.Create(Path))
-					{
-						_Artwork = file.Tag.Pictures.Length != 0
-							? file.Tag.Pictures.First().ToBitmapImage()
-							: Library.Controls.IconProvider.GetBitmap(Library.Controls.IconType.Music);
-						return _Artwork;
-					}
-				return _Artwork;
+						_Artwork = file.Tag.Pictures.Length != 0 ? file.Tag.Pictures[0].GetBytes() : new byte[0];
+				return _Artwork.GetBitmapImage();
 			}
 		}
 
@@ -213,23 +208,23 @@ namespace Player.Models
 				tag.Performers = new string[] { c(tag.FirstPerformer ?? " ") };
 				tag.Title = c(tag.Title ?? " ");
 				var manip2 = form(tag);
-				var manip = "Detergent will change these values: \r\n";
-				if (manip1[0] != manip2[0]) manip += "Album: " + manip1[0] + " => " + manip2[0] + "\r\n";
-				if (manip1[1] != manip2[1]) manip += "Comment: " + manip1[1] + " => " + manip2[1] + "\r\n";
-				if (manip1[2] != manip2[2]) manip += "Composer: " + manip1[2] + " => " + manip2[2] + "\r\n";
-				if (manip1[3] != manip2[3]) manip += "Conductor: " + manip1[3] + " => " + manip2[3] + "\r\n";
-				if (manip1[4] != manip2[4]) manip += "Copyright: " + manip1[4] + " => " + manip2[4] + "\r\n";
-				if (manip1[5] != manip2[5]) manip += "Genre: " + manip1[5] + " => " + manip2[5] + "\r\n";
-				if (manip1[6] != manip2[6]) manip += "Artist: " + manip1[6] + " => " + manip2[6] + "\r\n";
-				if (manip1[7] != manip2[7]) manip += "Title: " + manip1[7] + " => " + manip2[7] + "\r\n";
-				if (manip.Length <= 42)
-				{
-					MessageBox.Show("Couldn't find any changable thing", "JIZZZ", MessageBoxButton.OK, MessageBoxImage.Asterisk);
-					return;
-				}
-				manip += "\r\nContinue?";
 				if (prompt)
 				{
+					var manip = "Detergent will change these values: \r\n";
+					if (manip1[0] != manip2[0]) manip += "Album: " + manip1[0] + " => " + manip2[0] + "\r\n";
+					if (manip1[1] != manip2[1]) manip += "Comment: " + manip1[1] + " => " + manip2[1] + "\r\n";
+					if (manip1[2] != manip2[2]) manip += "Composer: " + manip1[2] + " => " + manip2[2] + "\r\n";
+					if (manip1[3] != manip2[3]) manip += "Conductor: " + manip1[3] + " => " + manip2[3] + "\r\n";
+					if (manip1[4] != manip2[4]) manip += "Copyright: " + manip1[4] + " => " + manip2[4] + "\r\n";
+					if (manip1[5] != manip2[5]) manip += "Genre: " + manip1[5] + " => " + manip2[5] + "\r\n";
+					if (manip1[6] != manip2[6]) manip += "Artist: " + manip1[6] + " => " + manip2[6] + "\r\n";
+					if (manip1[7] != manip2[7]) manip += "Title: " + manip1[7] + " => " + manip2[7] + "\r\n";
+					if (manip.Length <= 42)
+					{
+						MessageBox.Show("Couldn't find any changable thing", "JIZZZ", MessageBoxButton.OK, MessageBoxImage.Asterisk);
+						return;
+					}
+					manip += "\r\nContinue?";
 					MessageBoxResult res = MessageBox.Show(manip, "Continue?", MessageBoxButton.YesNo, MessageBoxImage.Question, MessageBoxResult.Yes);
 					if (res == MessageBoxResult.No) return;
 				}

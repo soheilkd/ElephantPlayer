@@ -23,14 +23,11 @@ namespace Player
 
 			Player.FullScreenToggled += Player_FullScreenClicked;
 
-			Player.MediaChanged += (_, e) => Title = $"{(Topmost ? "" : "Elephant Player | ")}{e.Parameter.Artist} - {e.Parameter.Title}";
+			Player.MediaChanged += (_, e) => Title = $"Elephant Player | {e.Parameter.Artist} - {e.Parameter.Title}";
 
 			Player.Volume = Settings.Volume;
 
 			#endregion
-
-			Left = Settings.LastLocation.X;
-			Top = Settings.LastLocation.Y;
 		}
 
 		private void Player_FullScreenClicked(object sender, EventArgs e)
@@ -70,30 +67,20 @@ namespace Player
 		{
 			TaskbarItemInfo = new System.Windows.Shell.TaskbarItemInfo();
 			Player.Thumb = new ThumbController(TaskbarItemInfo, Player);
-			var num = 0;
 			while (!Player.IsFullyLoaded)
-			{
-				num++;
 				await Task.Delay(10);
-			}
-			Console.WriteLine(num);
 			Play(Environment.GetCommandLineArgs());
 		}
 		private void Window_Closing(object sender, CancelEventArgs e)
 		{
 			Settings.LastSize = new Size(Width, Height);
-			Settings.LastLocation = new Point(Left, Top);
 			Settings.Volume = Player.Volume;
 			SaveAll();
 			Application.Current.Shutdown();
 		}
-		private void Window_KeyUp(object sender, KeyEventArgs e)
-		{
-
-		}
 		private void Window_Drop(object sender, DragEventArgs e)
 		{
-			((string[])e.Data.GetData(DataFormats.FileDrop)).For(each => Controller.Library.Add(each));
+			Controller.Library.Add(e.Data.GetData(DataFormats.FileDrop).As<string[]>());
 		}
 	}
 }
