@@ -1,32 +1,12 @@
-﻿<mah:MetroWindow 
+﻿<Window
 	x:Class="Player.MainWindow" x:Name="window" 
 	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" BorderBrush="#FF242527"
-	WindowTitleBrush="#FF242527"
-	xmlns:mah="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
 	xmlns:system="clr-namespace:System;assembly=mscorlib"
-	xmlns:controls="clr-namespace:Library.Controls;assembly=Library"
-	xmlns:controls1="clr-namespace:Player.Controls"
+	xmlns:controls1="clr-namespace:Player.Controls" 
 	xmlns:views="clr-namespace:Player.Views" Background="{DynamicResource MajorBackground}"
-	Title="Elephant Player" ShowIconOnTitleBar="False" AllowDrop="True"
+	Title="Elephant Player" AllowDrop="True"
 	Loaded="Window_Loaded" Closing="Window_Closing" Drop="Window_Drop">
-	<mah:MetroWindow.LeftWindowCommands>
-		<mah:WindowCommands>
-			<StackPanel Orientation="Horizontal">
-				<Menu x:Name="Menu">
-                    <MenuItem>
-						<MenuItem.Header>
-							<controls:Icon Type="Elephant" />
-						</MenuItem.Header>
-						<Grid>
-							<TextBlock Text="Elephant Player v1.2A" FontSize="19" FontWeight="Light"/>
-							<TextBlock Text="soheilkd ©" Margin="92,35,0,0" FontSize="16" FontWeight="SemiBold"/>
-						</Grid>
-					</MenuItem>
-                </Menu>
-			</StackPanel>
-		</mah:WindowCommands>
-	</mah:MetroWindow.LeftWindowCommands>
 	<Grid x:Name="ContentGrid">
 		<TabControl x:Name="TabControl" Background="Transparent" Margin="0,0,0,80" TabStripPlacement="Left" SelectedIndex="1">
 			<TabItem Header="Now Playing">
@@ -122,4 +102,4 @@
 			</Style>
 		</ResourceDictionary>
 	</Window.Resources>
-</mah:MetroWindow>
+</Window>

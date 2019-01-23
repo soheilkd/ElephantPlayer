@@ -1,6 +1,5 @@
 ﻿using Library.Extensions;
 using Library.Hook;
-using MahApps.Metro.Controls;
 using System;
 using System.ComponentModel;
 using System.Threading.Tasks;
@@ -10,7 +9,7 @@ using static Player.Controller;
 
 namespace Player
 {
-	public partial class MainWindow : MetroWindow
+	public partial class MainWindow : Window
 	{
 		private bool WasMaximized;
 
@@ -32,9 +31,6 @@ namespace Player
 
 		private void Player_FullScreenClicked(object sender, EventArgs e)
 		{
-			IgnoreTaskbarOnMaximize = Player.IsFullScreen;
-			ShowTitleBar = !Player.IsFullScreen;
-			ShowCloseButton = !Player.IsFullScreen;
 			ResizeMode = Player.IsFullScreen ? ResizeMode.NoResize : ResizeMode.CanResize;
 			WindowStyle = Player.IsFullScreen ? WindowStyle.None : WindowStyle.SingleBorderWindow;
 			UpdateLayout();
