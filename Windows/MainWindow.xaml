@@ -1,14 +1,15 @@
 ﻿<Window
 	x:Class="Player.MainWindow" x:Name="window" 
 	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" BorderBrush="#FF242527"
-	xmlns:system="clr-namespace:System;assembly=mscorlib"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	Foreground="#DDD"
 	xmlns:controls1="clr-namespace:Player.Controls" 
-	xmlns:views="clr-namespace:Player.Views" Background="{DynamicResource MajorBackground}"
+	xmlns:views="clr-namespace:Player.Views"
+	xmlns:controls="clr-namespace:Library.Controls;assembly=Library" Background="#FF242527"
 	Title="Elephant Player" AllowDrop="True"
 	Loaded="Window_Loaded" Closing="Window_Closing" Drop="Window_Drop">
 	<Grid x:Name="ContentGrid">
-		<TabControl x:Name="TabControl" Background="Transparent" Margin="0,0,0,80" TabStripPlacement="Left" SelectedIndex="1">
+		<TabControl x:Name="TabControl" Background="Transparent" Margin="0,0,0,80" TabStripPlacement="Left" SelectedIndex="1" BorderThickness="0">
 			<TabItem Header="Now Playing">
 				<views:NowPlayingView/>
 			</TabItem>
@@ -29,44 +30,44 @@
 			</TabItem>
 			<TabControl.Resources>
 				<Style TargetType="TabItem">
-					<Setter Property="Foreground" Value="#DDD"/>
 					<Setter Property="HeaderTemplate">
 						<Setter.Value>
 							<DataTemplate>
-								<TextBlock x:Name="textBlock" Padding="10" Text="{Binding}" FontSize="18"/>
+								<Border  Name="Border" BorderBrush="#FF0F77CF" Width="110" Height="40" CornerRadius="0,10,10,0">
+									<TextBlock x:Name="textBlock" Foreground="#999" Padding="9" Text="{Binding}" FontSize="16"/>
+								</Border>
+								<DataTemplate.Triggers>
+									<Trigger Property="IsMouseOver" Value="True">
+										<Setter TargetName="Border" Property="Background" Value="#FF525457"/>
+									</Trigger>
+									<DataTrigger Binding="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type TabItem}}, Path=IsSelected}" Value="True">
+										<DataTrigger.EnterActions>
+											<BeginStoryboard>
+												<Storyboard SpeedRatio="3">
+													<DoubleAnimation Storyboard.TargetName="textBlock" Storyboard.TargetProperty="FontSize" From="16" To="17"/>
+													<ColorAnimation Storyboard.TargetName="textBlock" Storyboard.TargetProperty="Foreground.Color" From="#999" To="#EEE"/>
+													<ThicknessAnimation Storyboard.TargetName="Border" Storyboard.TargetProperty="BorderThickness" From="0" To="3,0,0,0"/>
+												</Storyboard>
+											</BeginStoryboard>
+										</DataTrigger.EnterActions>
+										<DataTrigger.ExitActions>
+											<BeginStoryboard>
+												<Storyboard SpeedRatio="3">
+													<DoubleAnimation Storyboard.TargetName="textBlock" Storyboard.TargetProperty="FontSize" From="17" To="16"/>
+													<ColorAnimation Storyboard.TargetName="textBlock" Storyboard.TargetProperty="Foreground.Color" From="#EEE" To="#999"/>
+													<ThicknessAnimation Storyboard.TargetName="Border" Storyboard.TargetProperty="BorderThickness" From="3,0,0,0" To="0"/>
+												</Storyboard>
+											</BeginStoryboard>
+										</DataTrigger.ExitActions>
+									</DataTrigger>
+								</DataTemplate.Triggers>
 							</DataTemplate>
 						</Setter.Value>
 					</Setter>
 					<Setter Property="Template">
 						<Setter.Value>
 							<ControlTemplate TargetType="{x:Type TabItem}">
-								<Grid>
-									<Border  Name="Border" BorderBrush="{DynamicResource AccentColorBrush}">
-										<ContentPresenter ContentSource="Header" />
-									</Border>
-								</Grid>
-								<ControlTemplate.Triggers>
-									<Trigger Property="IsSelected" Value="True">
-										<Trigger.EnterActions>
-											<BeginStoryboard>
-												<Storyboard>
-													<ThicknessAnimation SpeedRatio="3" From="0" To="3,0,0,0" Storyboard.TargetName="Border" Storyboard.TargetProperty="BorderThickness"/>
-												</Storyboard>
-											</BeginStoryboard>
-										</Trigger.EnterActions>
-										<Setter Property="Foreground" Value="#FFF"/>
-										<Setter Property="Panel.ZIndex" Value="1" />
-										<Trigger.ExitActions>
-											<BeginStoryboard>
-												<Storyboard>
-													<ThicknessAnimation SpeedRatio="2" Storyboard.TargetName="Border" Storyboard.TargetProperty="BorderThickness" From="3,0,0,0" To="0"/>
-												</Storyboard>
-											</BeginStoryboard>
-										</Trigger.ExitActions>
-									</Trigger>
-									<Trigger Property="IsSelected" Value="False">
-									</Trigger>
-								</ControlTemplate.Triggers>
+								<ContentPresenter ContentSource="Header" />
 							</ControlTemplate>
 						</Setter.Value>
 					</Setter>
@@ -77,26 +78,8 @@
 	</Grid>
 	<Window.Resources>
 		<ResourceDictionary>
-			<ResourceDictionary.MergedDictionaries>
-				<!-- MahApps.Metro resource dictionaries -->
-				<ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Controls.xaml" />
-				<ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Colors.xaml" />
-				<!-- Accent and AppTheme setting -->
-				<ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Accents/BaseDark.xaml" />
-			</ResourceDictionary.MergedDictionaries>
-
-            <SolidColorBrush x:Key="MajorBackground" Color="#FF242527"/>
-            <system:String x:Key="LastPath">D:\\</system:String>
-			<Style TargetType="DataGridRow">
-				<Style.Triggers>
-					<DataTrigger Binding="{Binding IsPlaying}" Value="True">
-						<Setter Property="Background" Value="#6777" />
-						<Setter Property="Foreground" Value="Cyan"/>
-					</DataTrigger>
-				</Style.Triggers>
-			</Style>
 			<Style TargetType="Menu">
-				<Setter Property="Background" Value="{DynamicResource MajorBackground}"/>
+				<Setter Property="Background" Value="#FF242527"/>
 				<Setter Property="Foreground" Value="#EEE"/>
 				<Setter Property="FontSize" Value="14"/>
 			</Style>
