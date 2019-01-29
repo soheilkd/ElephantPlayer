@@ -1,6 +1,5 @@
 ﻿using Library;
 using Library.Controls;
-using MahApps.Metro.Controls;
 using Microsoft.Win32;
 using Player.Extensions;
 using Player.Models;
@@ -11,7 +10,7 @@ using System.Windows.Media.Imaging;
 
 namespace Player.Windows
 {
-	public partial class PropertiesWindow : MetroWindow
+	public partial class PropertiesWindow : Window
 	{
 		private const char Seperator = ';';
 
@@ -48,12 +47,8 @@ namespace Player.Windows
 			AlbumBox.Text = tag.Album ?? string.Empty;
 			ArtistBox.Text = string.Join(Seperator.ToString(), tag.Performers) ?? string.Empty;
 			AlbumArtistBox.Text = string.Join(Seperator.ToString(), tag.AlbumArtists) ?? string.Empty;
-			ComposerBox.Text = string.Join(Seperator.ToString(), tag.Composers) ?? string.Empty;
-			ConductorBox.Text = tag.Conductor ?? string.Empty;
 			GenreBox.Text = string.Join(Seperator.ToString(), tag.Genres) ?? string.Empty;
-			TrackBox.Text = tag.Track.ToString() ?? string.Empty;
 			CommentBox.Text = tag.Comment ?? string.Empty;
-			YearBox.Text = tag.Year.ToString() ?? string.Empty;
 			CopyrightBox.Text = tag.Copyright ?? string.Empty;
 			LyricsBox.Text = tag.Lyrics ?? string.Empty;
 			ArtworkImage.Source = tag.Pictures.Length >= 1 ? tag.Pictures[0].GetBitmapImage() : IconProvider.GetBitmap(IconType.Music);
@@ -70,12 +65,8 @@ namespace Player.Windows
 			_TagFile.Tag.Album = AlbumBox.Text ?? string.Empty;
 			_TagFile.Tag.Performers = ArtistBox.Text.Split(Seperator) ?? new string[0];
 			_TagFile.Tag.AlbumArtists = AlbumArtistBox.Text.Split(Seperator) ?? new string[0];
-			_TagFile.Tag.Composers = ComposerBox.Text.Split(Seperator) ?? new string[0];
-			_TagFile.Tag.Conductor = ConductorBox.Text ?? string.Empty;
 			_TagFile.Tag.Genres = GenreBox.Text.Split(Seperator) ?? new string[0];
-			_TagFile.Tag.Track = uint.TryParse(TrackBox.Text ?? "0", out var num) ? num : 0;
 			_TagFile.Tag.Comment = CommentBox.Text ?? string.Empty;
-			_TagFile.Tag.Year = uint.TryParse(YearBox.Text ?? "0", out var num2) ? num2 : 0;
 			_TagFile.Tag.Copyright = CopyrightBox.Text ?? string.Empty;
 			_TagFile.Tag.Lyrics = LyricsBox.Text ?? string.Empty;
 
