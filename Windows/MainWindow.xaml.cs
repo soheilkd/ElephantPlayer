@@ -17,7 +17,7 @@ namespace Player
 		{
 			InitializeComponent();
 			#region Initialization
-			App.NewInstanceRequested += (_, e) => Controller.Library.Add(e.Args);
+			App.NewInstanceRequested += (_, e) => Controller.Play(e.Args);
 			Events.KeyDown += KeyboardListener_KeyDown;
 
 			Player.FullScreenToggled += Player_FullScreenClicked;
