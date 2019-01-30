@@ -114,7 +114,7 @@
 	</ListBox.Template>
 	<ListBox.ItemTemplate>
 		<DataTemplate>
-			<Border x:Name="border" BorderBrush="#FF242527" Padding="2">
+			<Border x:Name="border" BorderBrush="{DynamicResource WindowsColor}" Padding="5,2">
 				<StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch" VerticalAlignment="Center">
 					<TextBlock Text="{Binding Title}" Margin="2" FontSize="16" Foreground="White"/>
 					<TextBlock Text=" - "/>
@@ -123,7 +123,6 @@
 			</Border>
 			<DataTemplate.Triggers>
 				<DataTrigger Binding="{Binding IsPlaying}" Value="True">
-					<Setter TargetName="border" Property="BorderBrush" Value="#FF0F77CF"/>
 					<DataTrigger.EnterActions>
 						<BeginStoryboard>
 							<Storyboard Storyboard.TargetName="border">

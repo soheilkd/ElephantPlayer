@@ -1,7 +1,8 @@
-﻿using System;
+﻿using Library.Instances;
+using System;
 using System.Collections.Generic;
 using System.Windows;
-using Library.Instances;
+using System.Windows.Media;
 
 namespace Player
 {
@@ -18,6 +19,7 @@ namespace Player
 			{
 				var application = new App();
 				application.InitializeComponent();
+				Current.Resources["WindowsColor"] = new SolidColorBrush(Library.Controls.Colors.WindowsColor);
 				application.Run();
 				Instance<App>.Cleanup();
 			}

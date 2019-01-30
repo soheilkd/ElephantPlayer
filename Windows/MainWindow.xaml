@@ -5,7 +5,7 @@
 	Foreground="#DDD"
 	xmlns:controls1="clr-namespace:Player.Controls" 
 	xmlns:views="clr-namespace:Player.Views"
-	xmlns:controls="clr-namespace:Library.Controls;assembly=Library" Background="#FF242527"
+	Background="#FF242527"
 	Title="Elephant Player" AllowDrop="True"
 	Loaded="Window_Loaded" Closing="Window_Closing" Drop="Window_Drop">
 	<Grid x:Name="ContentGrid">
@@ -33,7 +33,7 @@
 					<Setter Property="HeaderTemplate">
 						<Setter.Value>
 							<DataTemplate>
-								<Border  Name="Border" BorderBrush="#FF0F77CF" Width="110" Height="40" CornerRadius="0,10,10,0">
+								<Border  Name="Border" BorderBrush="{DynamicResource WindowsColor}" Width="110" Height="40" CornerRadius="0,10,10,0">
 									<TextBlock x:Name="textBlock" Foreground="#999" Padding="9" Text="{Binding}" FontSize="16"/>
 								</Border>
 								<DataTemplate.Triggers>

@@ -88,7 +88,7 @@
 								<Border x:Name="TrackBackground"/>
 								<Track x:Name="PART_Track" Grid.Row="1">
 									<Track.DecreaseRepeatButton>
-										<RepeatButton Command="{x:Static Slider.DecreaseLarge}" Style="{StaticResource RepeatButtonTransparent}" Background="#FF0F77CF"/>
+										<RepeatButton Command="{x:Static Slider.DecreaseLarge}" Style="{StaticResource RepeatButtonTransparent}" Background="{DynamicResource WindowsColor}"/>
 									</Track.DecreaseRepeatButton>
 									<Track.IncreaseRepeatButton>
 										<RepeatButton Command="{x:Static Slider.IncreaseLarge}" Style="{StaticResource RepeatButtonTransparent}" Background="#AAA"/>
@@ -97,7 +97,7 @@
 										<Thumb x:Name="Thumb" Focusable="False" OverridesDefaultStyle="True" VerticalAlignment="Center" Margin="-2,0">
 											<Thumb.Template>
 												<ControlTemplate TargetType="{x:Type Thumb}">
-													<Border x:Name="grip" HorizontalAlignment="Center" VerticalAlignment="Center" Height="17" Width="10" CornerRadius="3" Background="#888"/>
+													<Border x:Name="grip" HorizontalAlignment="Center" VerticalAlignment="Center" Height="17" Width="10" CornerRadius="3" Background="{DynamicResource WindowsColor}"/>
 													<ControlTemplate.Triggers>
 														<Trigger Property="IsMouseOver" Value="true">
 															<Setter Property="Background" TargetName="grip" Value="#BBB"/>
