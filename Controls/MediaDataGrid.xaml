@@ -116,9 +116,9 @@
 		<DataTemplate>
 			<Border x:Name="border" BorderBrush="{DynamicResource WindowsColor}" Padding="5,2">
 				<StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch" VerticalAlignment="Center">
-					<TextBlock Text="{Binding Title}" Margin="2" FontSize="16" Foreground="White"/>
+					<TextBlock Text="{Binding Title}"/>
 					<TextBlock Text=" - "/>
-					<TextBlock Text="{Binding Sublabel}" Foreground="White"/>
+					<TextBlock Text="{Binding Sublabel}"/>
 				</StackPanel>
 			</Border>
 			<DataTemplate.Triggers>
@@ -139,6 +139,13 @@
 					</DataTrigger.ExitActions>
 				</DataTrigger>
 			</DataTemplate.Triggers>
+			<DataTemplate.Resources>
+				<Style TargetType="TextBlock">
+					<Setter Property="Foreground" Value="White"/>
+					<Setter Property="VerticalAlignment" Value="Center"/>
+					<Setter Property="FontSize" Value="16"/>
+				</Style>
+			</DataTemplate.Resources>
 		</DataTemplate>
 	</ListBox.ItemTemplate>
 	<ListBox.ContextMenu>
