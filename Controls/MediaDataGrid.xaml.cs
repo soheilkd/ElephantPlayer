@@ -8,7 +8,6 @@ using System.Windows.Input;
 using Library.Extensions;
 using Microsoft.Win32;
 using Player.Models;
-using Player.Windows;
 
 namespace Player.Controls
 {
@@ -166,5 +165,9 @@ namespace Player.Controls
 			OrganizeRemoveFromPlaylistMenu();
 		}
 
+		private void SearchTextChanged(object sender, TextChangedEventArgs e)
+		{
+			SetValue(ItemsSourceProperty, ItemsSource.Search(sender.As<TextBox>().Text));
+		}
 	}
 }

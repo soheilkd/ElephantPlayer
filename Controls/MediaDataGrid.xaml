@@ -36,7 +36,7 @@
 	</ListBox.Resources>
 	<ListBox.Template>
 		<ControlTemplate TargetType="{x:Type ListBox}">
-			<Border x:Name="Bd" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Background="{TemplateBinding Background}" Padding="1" SnapsToDevicePixels="true">
+			<Border x:Name="Bd">
 				<ScrollViewer Focusable="false">
 					<ItemsPresenter />
 					<ScrollViewer.Template>
@@ -46,8 +46,33 @@
 									<ColumnDefinition Width="*"/>
 									<ColumnDefinition Width="Auto"/>
 								</Grid.ColumnDefinitions>
-								<ScrollContentPresenter x:Name="PART_ScrollContentPresenter" Grid.Column="0"/>
-								<ScrollBar x:Name="PART_VerticalScrollBar" AutomationProperties.AutomationId="VerticalScrollBar" Cursor="Arrow" Grid.Column="1" Maximum="{TemplateBinding ScrollableHeight}" Minimum="0" Grid.Row="0" Visibility="{TemplateBinding ComputedVerticalScrollBarVisibility}" Value="{Binding VerticalOffset, Mode=OneWay, RelativeSource={RelativeSource TemplatedParent}}" ViewportSize="{TemplateBinding ViewportHeight}">
+								<Grid.RowDefinitions>
+									<RowDefinition Height="Auto"/>
+									<RowDefinition Height="*"/>
+								</Grid.RowDefinitions>
+
+								<Border Height="30" Padding="6,0">
+									<Grid>
+										<TextBox x:Name="SearchTextBox" Background="Transparent" BorderThickness="0" Foreground="DarkGray" FontSize="16" FontWeight="SemiBold" Margin="30,0" VerticalAlignment="Center" TextChanged="SearchTextChanged"/>
+										<TextBlock IsHitTestVisible="False" Text="Search" VerticalAlignment="Center" HorizontalAlignment="Left" Foreground="Gray" FontSize="16" FontWeight="SemiBold" Margin="30,0">
+											<TextBlock.Style>
+												<Style TargetType="{x:Type TextBlock}">
+													<Setter Property="Visibility" Value="Collapsed"/>
+													<Style.Triggers>
+														<DataTrigger Binding="{Binding Text, ElementName=SearchTextBox}" Value="">
+															<Setter Property="Visibility" Value="Visible"/>
+														</DataTrigger>
+													</Style.Triggers>
+												</Style>
+											</TextBlock.Style>
+										</TextBlock>
+										<controls:Icon Type="Search" HorizontalAlignment="Left" Foreground="Gray" Margin="7"/>
+									</Grid>
+								</Border>
+								
+								<ScrollContentPresenter x:Name="PART_ScrollContentPresenter" Grid.Column="0" Grid.Row="1"/>
+								<ScrollBar x:Name="PART_VerticalScrollBar"  Cursor="Arrow" Grid.Column="1" Grid.Row="1" Maximum="{TemplateBinding ScrollableHeight}" Visibility="{TemplateBinding ComputedVerticalScrollBarVisibility}"
+										   Value="{Binding VerticalOffset, Mode=OneWay, RelativeSource={RelativeSource TemplatedParent}}" ViewportSize="{TemplateBinding ViewportHeight}">
 									<ScrollBar.Template>
 										<ControlTemplate TargetType="{x:Type ScrollBar}">
 											<Grid Width="14">
