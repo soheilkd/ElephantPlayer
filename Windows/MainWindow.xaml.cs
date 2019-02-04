@@ -16,24 +16,21 @@ namespace Player
 		public MainWindow()
 		{
 			InitializeComponent();
-			#region Initialization
-			App.NewInstanceRequested += (_, e) => Controller.Play(e.Args);
+
+			App.NewInstanceRequested += (_, e) => Play(e.Args);
 			Events.KeyDown += KeyboardListener_KeyDown;
 
 			Player.FullScreenToggled += Player_FullScreenClicked;
-
 			Player.MediaChanged += (_, e) => Title = $"Elephant Player | {e.Parameter.Artist} - {e.Parameter.Title}";
-
 			Player.Volume = Settings.Volume;
 
-			#endregion
+			Drop += (_,e) => Controller.Library.Add(e.Data.GetData(DataFormats.FileDrop).As<string[]>());
 		}
 
 		private void Player_FullScreenClicked(object sender, EventArgs e)
 		{
 			ResizeMode = Player.IsFullScreen ? ResizeMode.NoResize : ResizeMode.CanResize;
 			WindowStyle = Player.IsFullScreen ? WindowStyle.None : WindowStyle.SingleBorderWindow;
-			UpdateLayout();
 			if (Player.IsFullScreen)
 			{
 				WasMaximized = WindowState == WindowState.Maximized;
@@ -59,12 +56,10 @@ namespace Player
 			if (e.Key == Key.MediaPreviousTrack) Player.Previous();
 		}
 
-		private async void Window_Loaded(object sender, RoutedEventArgs e)
+		private void Window_Loaded(object sender, RoutedEventArgs e)
 		{
 			TaskbarItemInfo = new System.Windows.Shell.TaskbarItemInfo();
 			Player.Thumb = new ThumbController(TaskbarItemInfo, Player);
-			while (!Player.IsFullyLoaded)
-				await Task.Delay(10);
 			Play(Environment.GetCommandLineArgs());
 		}
 		private void Window_Closing(object sender, CancelEventArgs e)
@@ -72,11 +67,6 @@ namespace Player
 			Settings.LastSize = new Size(Width, Height);
 			Settings.Volume = Player.Volume;
 			SaveAll();
-			Application.Current.Shutdown();
-		}
-		private void Window_Drop(object sender, DragEventArgs e)
-		{
-			Controller.Library.Add(e.Data.GetData(DataFormats.FileDrop).As<string[]>());
 		}
 	}
 }
