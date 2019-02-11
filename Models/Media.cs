@@ -152,7 +152,7 @@ namespace Player.Models
 			Load();
 		}
 		#endregion
-		public void CleanTag(bool prompt = true)
+		public void CleanTag()
 		{
 			string deleteWord(string target, string word)
 			{
@@ -174,7 +174,7 @@ namespace Player.Models
 			string c(string target)
 			{
 				if (string.IsNullOrWhiteSpace(target)) return target;
-				var litretures = ".com;.ir;.org;www.;@;.me;.biz;.net".Split(';');
+				var litretures = ".com;.ir;.org;www.;@;.me;.biz;.net;.us;.az".Split(';');
 				var lit = new List<string>();
 				litretures.For(each => target.IncaseContains(each), each => lit.Add(each));
 				lit.ToArray().For(each => target = deleteWord(target, each));
@@ -183,22 +183,7 @@ namespace Player.Models
 
 			using (var file = TagLib.File.Create(Path))
 			{
-				string[] form(TagLib.Tag tag2)
-				{
-					return new string[]
-					{
-						tag2.Album,
-						tag2.Comment,
-						tag2.FirstComposer,
-						tag2.Conductor,
-						tag2.Copyright,
-						tag2.FirstGenre,
-						tag2.FirstPerformer,
-						tag2.Title
-					};
-				}
 				TagLib.Tag tag = file.Tag;
-				var manip1 = form(tag);
 				tag.Album = c(tag.Album ?? " ");
 				tag.Comment = "";
 				tag.Composers = new string[] { c(tag.FirstComposer ?? " ") };
@@ -207,27 +192,6 @@ namespace Player.Models
 				tag.Genres = new string[] { c(tag.FirstGenre ?? " ") };
 				tag.Performers = new string[] { c(tag.FirstPerformer ?? " ") };
 				tag.Title = c(tag.Title ?? " ");
-				var manip2 = form(tag);
-				if (prompt)
-				{
-					var manip = "Detergent will change these values: \r\n";
-					if (manip1[0] != manip2[0]) manip += "Album: " + manip1[0] + " => " + manip2[0] + "\r\n";
-					if (manip1[1] != manip2[1]) manip += "Comment: " + manip1[1] + " => " + manip2[1] + "\r\n";
-					if (manip1[2] != manip2[2]) manip += "Composer: " + manip1[2] + " => " + manip2[2] + "\r\n";
-					if (manip1[3] != manip2[3]) manip += "Conductor: " + manip1[3] + " => " + manip2[3] + "\r\n";
-					if (manip1[4] != manip2[4]) manip += "Copyright: " + manip1[4] + " => " + manip2[4] + "\r\n";
-					if (manip1[5] != manip2[5]) manip += "Genre: " + manip1[5] + " => " + manip2[5] + "\r\n";
-					if (manip1[6] != manip2[6]) manip += "Artist: " + manip1[6] + " => " + manip2[6] + "\r\n";
-					if (manip1[7] != manip2[7]) manip += "Title: " + manip1[7] + " => " + manip2[7] + "\r\n";
-					if (manip.Length <= 42)
-					{
-						MessageBox.Show("Couldn't find any changable thing", "JIZZZ", MessageBoxButton.OK, MessageBoxImage.Asterisk);
-						return;
-					}
-					manip += "\r\nContinue?";
-					MessageBoxResult res = MessageBox.Show(manip, "Continue?", MessageBoxButton.YesNo, MessageBoxImage.Question, MessageBoxResult.Yes);
-					if (res == MessageBoxResult.No) return;
-				}
 				file.Save();
 				Reload();
 			}
