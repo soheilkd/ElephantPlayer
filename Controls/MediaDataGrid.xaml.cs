@@ -126,7 +126,7 @@ namespace Player.Controls
 		{
 			var medias = SelectedItems.Cast<Media>();
 			AddToPlaylistMenu.Items.Clear();
-			foreach (var item in Controller.Playlists)
+			foreach (var item in Controller.Library.Playlists)
 			{
 				if (!medias.All(each => item.Contains(each)))
 				{
@@ -144,7 +144,7 @@ namespace Player.Controls
 		{
 			var medias = SelectedItems.Cast<Media>();
 			RemoveFromPlaylistMenu.Items.Clear();
-			foreach (var item in Controller.Playlists)
+			foreach (var item in Controller.Library.Playlists)
 			{
 				if (medias.All(each => item.Contains(each)))
 				{

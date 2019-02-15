@@ -13,7 +13,7 @@ namespace Player.Views
 		private void Grid_Loaded(object sender, RoutedEventArgs e)
 		{
 			if (CallTime++ == 0)
-				ApplyNavigations(Controller.Library.GetArtists(), typeof(Artist), typeof(ArtistView), ArtistNavigation);
+				ApplyNavigations(Controller.Library.Artists.Keys, typeof(Artist), typeof(ArtistView), ArtistNavigation);
 		}
 	}
 }

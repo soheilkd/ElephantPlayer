@@ -4,9 +4,9 @@ using System;
 using System.Net;
 using System.Windows.Media.Imaging;
 
-namespace Player.Web
+namespace Player
 {
-    public static class API
+    public static class Web
     {
         //Session is required for API connection to LastFM 
         private static readonly Session _Session = new Session("cab344dc5414176234071148bc813382", "ef529dce9081c695dc32f31b800c7b9a");

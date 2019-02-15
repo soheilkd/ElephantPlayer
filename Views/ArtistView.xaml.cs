@@ -1,50 +1,30 @@
-﻿using System;
-using System.Collections.Specialized;
-using System.Linq;
+﻿using Lastfm.Services;
+using Library.Serialization.Models;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using Lastfm.Services;
-using Library.Extensions;
-using Library.Serialization.Models;
-using Player.Models;
 
 namespace Player.Views
 {
 	public partial class ArtistView : Grid
 	{
-		private string ArtistName;
-
 		public ArtistView() => InitializeComponent();
 		public ArtistView(string artistName) : this()
-        {
-            MediaDataGrid.ItemsSource = new MediaQueue(Controller.Library.Where(each => each.Artist == artistName));
-            ArtistName = artistName;
-            LoadArtist();
+		{
+			MediaDataGrid.ItemsSource = Controller.Library.Artists[artistName];
+			LoadArtistInfo(artistName);
 		}
 
-
-		private void Grid_Loaded(object sender, RoutedEventArgs e)
+		public void LoadArtistInfo(string artistName)
 		{
-			var totalLength = new TimeSpan(0);
-			MediaDataGrid.ItemsSource.For(each => totalLength += each.Length);
-			Controller.Library.CollectionChanged += Library_CollectionChanged;
-		}
-
-		private void Library_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
-		{
-			MediaDataGrid.ItemsSource = new MediaQueue(Controller.Library.Where(each => each.Artist == ArtistName));
-		}
-		
-		public void LoadArtist()
-		{
-			if (Controller.Resource.ContainsKey(ArtistName))
+			if (Controller.Resource.ContainsKey(artistName))
 			{
-				ArtistImage.Source = new SerializableBitmap(Controller.Resource[ArtistName]);
+				ArtistImage.Source = new SerializableBitmap(Controller.Resource[artistName]);
 				MediaDataGrid.Margin = new Thickness(0, 100, 0, 20);
 				Task.Run(() =>
 				{
-					var artist = Web.API.GetArtist(ArtistName);
+					Artist artist = Web.GetArtist(artistName);
+					if (artist == null) return;
 					var summary = artist.Bio.GetSummary();
 					if (summary.StartsWith("<a"))
 						summary = "No Content";

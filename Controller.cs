@@ -42,6 +42,7 @@ namespace Player
 		}
 
 		#endregion
+
 		#region Public Settings
 		
 		private static LazyXml<SerializableSettings> _Settings = new LazyXml<SerializableSettings>($"{AppPath}Settings.xml");
@@ -61,23 +62,15 @@ namespace Player
 
 		#endregion
 
-		#region Playlists
-
-		private static LazySerializable<List<Playlist>> _Playlists = new LazySerializable<List<Playlist>>("Playlists.bin");
-		public static List<Playlist> Playlists => _Playlists.Value;
-
-		#endregion
-
 		#region Library 
 
-		private static LazySerializable<MediaQueue> _Library = new LazySerializable<MediaQueue>($"{AppPath}Library.bin");
-		public static MediaQueue Library => _Library.Value;
+		private static LazySerializable<Models.Library> _Library = new LazySerializable<Models.Library>($"{AppPath}Library.bin");
+		public static Models.Library Library=> _Library.Value;
 
 		#endregion
 
 		public static void SaveAll()
 		{
-			_Playlists.Save();
 			_Settings.Save();
 			_Resource.Save();
 			_Library.Save();

@@ -1,7 +1,9 @@
 ﻿using Lastfm.Services;
+using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
 using static Player.Views.ViewerOperator;
+using System.Linq;
 
 namespace Player.Views
 {
@@ -14,7 +16,7 @@ namespace Player.Views
 		private void Grid_Loaded(object sender, RoutedEventArgs e)
 		{
 			if (CallTime++ == 0)
-				ApplyNavigations(Controller.Library.GetAlbums(), typeof(Album), typeof(AlbumView), AlbumNavigation);
+				ApplyNavigations(Controller.Library.Albums.Keys, typeof(Album), typeof(AlbumView), AlbumNavigation);
 		}
 	}
 }

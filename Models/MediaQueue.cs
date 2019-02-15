@@ -10,6 +10,7 @@ namespace Player.Models
 	[Serializable]
 	public class MediaQueue : ObservableCollection<Media>
 	{
+        public string Name { get; set; }
 		private int _Position;
 		public Media Current => Position < Count ? this[Position] : new Media();
 
@@ -130,15 +131,6 @@ namespace Player.Models
 		{
 			output = this.Where(item => item.Path == path).FirstOrDefault();
 			return output != default;
-		}
-
-		public string[] GetArtists()
-		{
-			return this.Select(each => each.Artist).Distinct().ToArray();
-		}
-		public string[] GetAlbums()
-		{
-			return this.Select(each => each.Album).Distinct().ToArray();
 		}
 	}
 }
