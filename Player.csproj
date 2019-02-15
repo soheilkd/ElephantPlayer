@@ -147,7 +147,7 @@
     <Compile Include="Controls\MediaPlayer.xaml.cs">
       <DependentUpon>MediaPlayer.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Models\Playlist.cs" />
+    <Compile Include="Models\Library.cs" />
     <Compile Include="Models\PlayMode.cs" />
     <Compile Include="Models\Media.cs" />
     <Compile Include="Models\MediaQueue.cs" />
@@ -177,7 +177,7 @@
       <DependentUpon>SettingsView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\ViewerOperator.cs" />
-    <Compile Include="Web\API.cs" />
+    <Compile Include="Web.cs" />
     <Compile Include="Windows\MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
     </Compile>
