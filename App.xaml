@@ -2,6 +2,6 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              x:Class="Player.App" StartupUri="Windows/MainWindow.xaml">
     <Application.Resources>
-		<SolidColorBrush x:Key="WindowsColor" />
+		<SolidColorBrush x:Key="WindowsColor" Color="AliceBlue"/>
 	</Application.Resources>
 </Application>
