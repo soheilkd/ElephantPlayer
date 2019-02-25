@@ -6,5 +6,5 @@
         <Image x:Name="ArtistImage" Width="100" Height="100" Margin="5"/>
         <TextBlock Margin="5" x:Name="ArtistDescription" FontSize="16" FontFamily="Segoe UI Semibold" TextWrapping="Wrap" Foreground="#DDD"/>
     </DockPanel>
-	<controls:MediaDataGrid x:Name="MediaDataGrid" Margin="0,0,0,20"/>
+	<controls:MediaList x:Name="MediaDataGrid" Margin="0,0,0,20"/>
 </Grid>

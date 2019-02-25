@@ -3,6 +3,6 @@
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 	  xmlns:controls1="clr-namespace:Player.Controls">
 	<Grid>
-		<controls1:MediaDataGrid x:Name="DataGrid" />
+		<controls1:MediaList x:Name="DataGrid" />
 	</Grid>
 </ContentControl>

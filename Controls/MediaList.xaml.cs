@@ -13,7 +13,7 @@ using Player.Windows;
 
 namespace Player.Controls
 {
-	public partial class MediaDataGrid : UserControl
+	public partial class MediaList : UserControl
 	{
 		private MediaQueue _Items;
 		public MediaQueue Items
@@ -44,7 +44,7 @@ namespace Player.Controls
 			InitialDirectory = Controller.Settings.LastPath
 		};
 
-		public MediaDataGrid()
+		public MediaList()
 		{
 			InitializeComponent();
 		}

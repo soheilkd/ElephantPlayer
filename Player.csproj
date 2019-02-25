@@ -141,8 +141,8 @@
     <Compile Include="Classes\SerializableSettings.cs" />
     <Compile Include="Classes\ThumbController.cs" />
     <Compile Include="Controller.cs" />
-    <Compile Include="Controls\MediaDataGrid.xaml.cs">
-      <DependentUpon>MediaDataGrid.xaml</DependentUpon>
+    <Compile Include="Controls\MediaList.xaml.cs">
+      <DependentUpon>MediaList.xaml</DependentUpon>
     </Compile>
     <Compile Include="Controls\MediaPlayer.xaml.cs">
       <DependentUpon>MediaPlayer.xaml</DependentUpon>
@@ -193,7 +193,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Controls\MediaDataGrid.xaml">
+    <Page Include="Controls\MediaList.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
