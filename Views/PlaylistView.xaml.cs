@@ -8,7 +8,7 @@ namespace Player.Views
 		public PlaylistView(string playlistName)
 		{
 			InitializeComponent();
-			MediaDataGrid.ItemsSource = Controller.Library.Playlists.Where(each => each.Name == playlistName).First();
+			MediaDataGrid.Items = Controller.Library.Playlists.Where(each => each.Name == playlistName).First();
 		}
 	}
 }

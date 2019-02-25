@@ -208,5 +208,11 @@ namespace Player.Models
 
 		public static implicit operator Uri(Media media) => new Uri(media.Path);
 		public static implicit operator MediaType(Media media) => media.Type;
+
+		public override string ToString()
+		{
+			return Title + " - " + Sublabel;
+		}
+		public string Label => ToString();
 	}
 }

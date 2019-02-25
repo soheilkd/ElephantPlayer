@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -8,20 +9,30 @@ using System.Windows.Input;
 using Library.Extensions;
 using Microsoft.Win32;
 using Player.Models;
+using Player.Windows;
 
 namespace Player.Controls
 {
-	public partial class MediaDataGrid : ListBox
+	public partial class MediaDataGrid : UserControl
 	{
 		private MediaQueue _Items;
-		public new MediaQueue ItemsSource
+		public MediaQueue Items
 		{
 			get => _Items;
 			set
 			{
-				SetValue(ItemsSourceProperty, value);
+				MainList.ItemsSource = value;
 				_Items = value;
 			}
+		}
+		public IEnumerable<Media> SelectedItems => MainList.SelectedItems.Cast<Media>();
+		public Media SelectedItem => MainList.SelectedItem as Media;
+		//Because of search functionality, it changes ActualQueue to ensure correct queue for player, and also not damaging the main ItemsSource;
+		private MediaQueue _ActualQueue;
+		public MediaQueue ActualQueue
+		{
+			get => _ActualQueue ?? Items;
+			set => _ActualQueue = value;
 		}
 
 		private SaveFileDialog MediaTransferDialog = new SaveFileDialog()
@@ -80,7 +91,7 @@ namespace Player.Controls
 		}
 		private void Menu_RemoveClick(object sender, RoutedEventArgs e)
 		{
-			For(each => ItemsSource.Remove(each));
+			For(each => Items.Remove(each));
 		}
 		private void Menu_DeleteClick(object sender, RoutedEventArgs e)
 		{
@@ -91,7 +102,7 @@ namespace Player.Controls
 			For(item =>
 			{
 				File.Delete(item.Path);
-				ItemsSource.Remove(item);
+				Items.Remove(item);
 			});
 		}
 		private void Menu_LocationClick(object sender, RoutedEventArgs e)
@@ -100,16 +111,7 @@ namespace Player.Controls
 		}
 		private void Menu_PropertiesClick(object sender, RoutedEventArgs e)
 		{
-			For(each =>
-			{
-				var pro = new Windows.PropertiesWindow();
-				pro.SaveRequested += (_, f) =>
-				{
-					f.Parameter.Save();
-					each.Reload();
-				};
-				pro.LoadFor(each);
-			});
+			For(each => PropertiesWindow.OpenNewWindowFor(each));
 		}
 
 		private void For(Action<Media> action) =>
@@ -119,7 +121,7 @@ namespace Player.Controls
 		{
 			if (SelectedItem == null)
 				return;
-			Controller.Play(SelectedItem as Media, ItemsSource);
+			Controller.Play(SelectedItem as Media, ActualQueue);
 		}
 
 		private void OrganizeAddToPlaylistMenu()
@@ -167,7 +169,14 @@ namespace Player.Controls
 
 		private void SearchTextChanged(object sender, TextChangedEventArgs e)
 		{
-			SetValue(ItemsSourceProperty, ItemsSource.Search(sender.As<TextBox>().Text));
+			ActualQueue = Items.Search(sender.As<TextBox>().Text);
+			MainList.ItemsSource = ActualQueue;
+		}
+
+		private void ListBox_KeyUp(object sender, KeyEventArgs e)
+		{
+			SearchTextBox.Text = e.Key.ToString();
+			SearchTextBox.Focus();
 		}
 	}
 }

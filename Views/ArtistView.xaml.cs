@@ -11,7 +11,7 @@ namespace Player.Views
 		public ArtistView() => InitializeComponent();
 		public ArtistView(string artistName) : this()
 		{
-			MediaDataGrid.ItemsSource = Controller.Library.Artists[artistName];
+			MediaDataGrid.Items = Controller.Library.Artists[artistName];
 			LoadArtistInfo(artistName);
 		}
 
