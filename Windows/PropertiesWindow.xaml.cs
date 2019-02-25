@@ -22,10 +22,15 @@ namespace Player.Windows
 		};
 		private Media _Media;
 		private TagLib.File _TagFile;
-		public event InfoExchangeHandler<TagLib.File> SaveRequested;
 
 		public PropertiesWindow() => InitializeComponent();
 
+		public static void OpenNewWindowFor(Media media)
+		{
+			var window = new PropertiesWindow();
+			window.LoadFor(media);
+			window.Show();
+		}
 		public void LoadFor(Media media)
 		{
 			if (media.Type != MediaType.Music)
@@ -37,20 +42,19 @@ namespace Player.Windows
 			_Media = media;
 			_TagFile = TagLib.File.Create(media.Path);
 			_Media.Load();
-			LoadUIForMedia();
-			Show();
+			ApplyTagForUI(_TagFile.Tag);
 		}
-		private void LoadUIForMedia()
+		private void ApplyTagForUI(TagLib.Tag tag)
 		{
-			TagLib.Tag tag = _TagFile.Tag;
-			TitleBox.Text = tag.Title ?? string.Empty;
-			AlbumBox.Text = tag.Album ?? string.Empty;
-			ArtistBox.Text = string.Join(Seperator.ToString(), tag.Performers) ?? string.Empty;
-			AlbumArtistBox.Text = string.Join(Seperator.ToString(), tag.AlbumArtists) ?? string.Empty;
-			GenreBox.Text = string.Join(Seperator.ToString(), tag.Genres) ?? string.Empty;
-			CommentBox.Text = tag.Comment ?? string.Empty;
-			CopyrightBox.Text = tag.Copyright ?? string.Empty;
-			LyricsBox.Text = tag.Lyrics ?? string.Empty;
+			TitleBox.Text = tag.Title;
+			AlbumBox.Text = tag.Album;
+			ArtistBox.Text = tag.Title;
+			AlbumBox.Text = string.Join(Seperator.ToString(), tag.Performers);
+			AlbumArtistBox.Text = string.Join(Seperator.ToString(), tag.AlbumArtists);
+			GenreBox.Text = string.Join(Seperator.ToString(), tag.Genres);
+			CommentBox.Text = tag.Comment;
+			CopyrightBox.Text = tag.Copyright;
+			LyricsBox.Text = tag.Lyrics;
 			ArtworkImage.Source = tag.Pictures.Length >= 1 ? tag.Pictures[0].GetBitmapImage() : IconProvider.GetBitmap(IconType.Music);
 		}
 
@@ -61,16 +65,17 @@ namespace Player.Windows
 		}
 		private void SaveButtonClick(object sender, MouseButtonEventArgs e)
 		{
-			_TagFile.Tag.Title = TitleBox.Text ?? string.Empty;
-			_TagFile.Tag.Album = AlbumBox.Text ?? string.Empty;
-			_TagFile.Tag.Performers = ArtistBox.Text.Split(Seperator) ?? new string[0];
-			_TagFile.Tag.AlbumArtists = AlbumArtistBox.Text.Split(Seperator) ?? new string[0];
-			_TagFile.Tag.Genres = GenreBox.Text.Split(Seperator) ?? new string[0];
-			_TagFile.Tag.Comment = CommentBox.Text ?? string.Empty;
-			_TagFile.Tag.Copyright = CopyrightBox.Text ?? string.Empty;
-			_TagFile.Tag.Lyrics = LyricsBox.Text ?? string.Empty;
+			_TagFile.Tag.Title = TitleBox.Text;
+			_TagFile.Tag.Album = AlbumBox.Text;
+			_TagFile.Tag.Performers = ArtistBox.Text.Split(Seperator);
+			_TagFile.Tag.AlbumArtists = AlbumArtistBox.Text.Split(Seperator);
+			_TagFile.Tag.Genres = GenreBox.Text.Split(Seperator);
+			_TagFile.Tag.Comment = CommentBox.Text;
+			_TagFile.Tag.Copyright = CopyrightBox.Text;
+			_TagFile.Tag.Lyrics = LyricsBox.Text;
 
-			SaveRequested.Invoke(_TagFile);
+			_TagFile.Save();
+			_Media.Reload();
 			Close();
 		}
 		private void ArtworkImage_MouseUp(object sender, MouseButtonEventArgs e)
