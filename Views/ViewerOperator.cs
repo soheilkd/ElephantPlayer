@@ -2,7 +2,6 @@
 using Library.Controls;
 using Library.Controls.Navigation;
 using Library.Extensions;
-using Library.Serialization.Models;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -14,10 +13,10 @@ namespace Player.Views
 {
 	public static class ViewerOperator
 	{
-		public static void ApplyNavigations(string[] keys, Type lookupType, Type viewType, NavigationViewer viewer)
+		public static void ApplyNavigations(IEnumerable<string> keys, Type lookupType, Type viewType, NavigationViewer viewer)
 		{
 			var navigations = new List<NavigationTile>();
-			keys.For(each => navigations.Add(GetTile(each, viewType)));
+			keys.ForEach(each => navigations.Add(GetTile(each, viewType)));
 			LoadImagesOfTiles(navigations, lookupType);
 			AddNavigations(navigations, viewer);
 			var grid = viewer.GetChildContent(1) as Grid;
@@ -30,6 +29,7 @@ namespace Player.Views
 					new NavigationTile()
 					{
 						Tag = name,
+						Foreground = System.Windows.Media.Brushes.White,
 						Navigation = new NavigationControl()
 						{
 							Tag = name,
@@ -37,40 +37,60 @@ namespace Player.Views
 						}
 					};
 		}
-
+		public static string GetImageUrl(string key, Type lookupType)
+		{
+			try
+			{
+				if (lookupType == typeof(Artist))
+				{
+					Artist artist = Web.GetArtist(key);
+					return artist == null ? default : artist.GetImageURL();
+				}
+				else if (lookupType == typeof(Album))
+				{
+					Album album = Web.GetAlbum(key);
+					return album == null ? default : album.GetImageURL();
+				}
+				else
+					return default;
+			}
+			catch (Exception)
+			{
+				return default;
+			}
+		}
 		public static void LoadImagesOfTiles(List<NavigationTile> navigations, Type lookupType)
 		{
-			if (lookupType == default)
-				return;
 			BitmapSource unknownArtistImage = IconProvider.GetBitmap(IconType.Person);
 			navigations.For(each =>
 			{
-				if (Resource.TryGetValue(each.Tag.ToString(), out var imageData))
+				string tag = default;
+				each.Dispatcher.Invoke(() => tag = each.Tag.ToString());
+				Task.Run(() =>
 				{
-					each.Image = new SerializableBitmap(imageData);
-				}
-				else
-				{
-					Task.Run(() =>
+					if (Resource.ContainsKey(tag))
 					{
-						var tag = string.Empty;
-						each.Dispatcher.Invoke(() => tag = each.Tag.ToString());
-						string url = default;
-						if (lookupType == typeof(Artist))
-							url = Web.API.GetArtist(tag).GetImageURL();
-						else if (lookupType == typeof(Album))
-							url = Web.API.GetAlbum(tag).GetImageURL();
-						else
-							throw new ArgumentException(nameof(lookupType));
+						if (Resource[tag].Length != 0) each.ChangeImageByDispatcher(Resource[tag].ToBitmap());
+						else each.Dispatcher.Invoke(() => each.Image = unknownArtistImage);
+					}
+					else
+					{
+						var url = GetImageUrl(tag, lookupType);
 						if (string.IsNullOrWhiteSpace(url))
-							each.Dispatcher.Invoke(() => each.Image = unknownArtistImage);
-						Web.API.DownloadImage(url, image =>
 						{
-							each.Dispatcher.Invoke(() => each.Image = image);
-							Resource[tag] = new SerializableBitmap(image);
-						});
-					});
-				}
+							each.ChangeImageByDispatcher(unknownArtistImage);
+							Resource.Add(tag, new byte[0]);
+						}
+						else
+						{
+							Web.DownloadImage(url, image =>
+							{
+								each.ChangeImageByDispatcher(image);
+								Resource.Add(tag, image.ToData());
+							});
+						}
+					}
+				});
 			}
 			);
 		}
