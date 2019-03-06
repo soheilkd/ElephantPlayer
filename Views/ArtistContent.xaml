@@ -1,0 +1,19 @@
+﻿<UserControl x:Class="Player.Views.ArtistContent"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Height="200" Grid.Column="0" MinWidth="300" VerticalAlignment="Top"
+			 xmlns:controls="clr-namespace:Player.Controls">
+    <Grid Background="#3EEE">
+		<Grid.ColumnDefinitions>
+			<ColumnDefinition Width="200"/>
+			<ColumnDefinition Width="*"/>
+		</Grid.ColumnDefinitions>
+		<Grid.RowDefinitions>
+			<RowDefinition Height="60"/>
+			<RowDefinition Height="*"/>
+		</Grid.RowDefinitions>
+		<Image x:Name="MainImage" Grid.RowSpan="2"/>
+		<TextBlock x:Name="MainTextBlock" Grid.Column="1" Text="This is sample text"/>
+		<controls:MediaList x:Name="MainList" Grid.Column="1" Grid.Row="1"/>
+	</Grid>
+</UserControl>

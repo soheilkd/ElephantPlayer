@@ -1,12 +1,9 @@
 ﻿<ContentControl x:Class="Player.Views.ArtistsView" Loaded="Grid_Loaded"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-	  xmlns:nav="clr-namespace:Library.Controls.Navigation;assembly=Library">
-	<nav:NavigationViewer x:Name="ArtistNavigation">
-		<ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
-			<Grid>
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+	<ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+		<Grid x:Name="MainGrid">
 
-			</Grid>
-		</ScrollViewer>
-	</nav:NavigationViewer>
+		</Grid>
+	</ScrollViewer>
 </ContentControl>

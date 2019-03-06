@@ -1,0 +1,11 @@
+﻿<UserControl x:Class="Player.Views.AlbumTile"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+			 xmlns:controls="clr-namespace:Library.Controls;assembly=Library">
+	<Grid Height="140">
+		<controls:Icon Type="Elephant" Height="100" Width="100" Margin="0,0,0,25" VerticalAlignment="Top" Foreground="#EEE"/>
+		<Image x:Name="MainImage" Width="100" Height="100" Margin="0,0,0,25" VerticalAlignment="Top"/>
+		<TextBlock x:Name="MainTextBlock" Text="TestArtist" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="5,15" TextWrapping="Wrap"/>
+		<ToggleButton x:Name="MainToggle" Template="{StaticResource MaterialToggle}"/>
+	</Grid>
+</UserControl>

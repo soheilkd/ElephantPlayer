@@ -152,23 +152,32 @@
     <Compile Include="Models\Media.cs" />
     <Compile Include="Models\MediaQueue.cs" />
     <Compile Include="Models\MediaType.cs" />
+    <Compile Include="Views\AlbumContent.xaml.cs">
+      <DependentUpon>AlbumContent.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\AlbumsView.xaml.cs">
       <DependentUpon>AlbumsView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\AlbumTile.xaml.cs">
+      <DependentUpon>AlbumTile.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\ArtistContent.xaml.cs">
+      <DependentUpon>ArtistContent.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\ArtistsView.xaml.cs">
       <DependentUpon>ArtistsView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\ArtistView.xaml.cs">
-      <DependentUpon>ArtistView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\AlbumView.xaml.cs">
-      <DependentUpon>AlbumView.xaml</DependentUpon>
+    <Compile Include="Views\ArtistTile.xaml.cs">
+      <DependentUpon>ArtistTile.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\LibraryView.xaml.cs">
       <DependentUpon>LibraryView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\PlaylistView.xaml.cs">
-      <DependentUpon>PlaylistView.xaml</DependentUpon>
+    <Compile Include="Views\PlaylistContent.xaml.cs">
+      <DependentUpon>PlaylistContent.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\PlaylistTile.xaml.cs">
+      <DependentUpon>PlaylistTile.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\PlaylistsView.xaml.cs">
       <DependentUpon>PlaylistsView.xaml</DependentUpon>
@@ -201,29 +210,41 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="Views\AlbumContent.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\AlbumsView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Views\AlbumTile.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\ArtistContent.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\ArtistsView.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\ArtistView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Views\AlbumView.xaml">
-      <Generator>MSBuild:Compile</Generator>
+    <Page Include="Views\ArtistTile.xaml">
       <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\LibraryView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\PlaylistView.xaml">
-      <Generator>MSBuild:Compile</Generator>
+    <Page Include="Views\PlaylistContent.xaml">
       <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\PlaylistTile.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\PlaylistsView.xaml">
       <SubType>Designer</SubType>
