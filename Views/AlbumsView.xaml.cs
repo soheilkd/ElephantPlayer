@@ -1,10 +1,8 @@
-﻿using Library;
 using Library.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
-using static Player.Views.ViewerOperator;
 
 namespace Player.Views
 {
@@ -12,16 +10,16 @@ namespace Player.Views
 	{
 		private bool IsAnyItemExpanded => _CurrentAlbumContent.Visibility == Visibility.Visible;
 		private AlbumContent _CurrentAlbumContent = new AlbumContent();
-		private AlbumTile _CurrentAlbumTile = new AlbumTile();
+		private AlbumTile _CurrentAlbumTile = null;
 		private List<AlbumTile> _Tiles = new List<AlbumTile>();
-		private int CallTime = -1; //It's used for Lazy Loading, reaches 1 when user enters ArtistsView tab on MainWindow
+		private int CallTime = -1; //It's used for Lazy Loading, reaches 1 when user enters AlbumsView tab on MainWindow
 		public AlbumsView() => InitializeComponent();
 
 		private void Grid_Loaded(object sender, RoutedEventArgs e)
 		{
 			if (CallTime++ == 0)
 			{
-				Controller.Library.Albums.Keys.ForEach(each =>
+					Controller.Library.Albums.Keys.ForEach(each =>
 				{
 					var tile = new AlbumTile(each);
 					tile.Expanded += Tile_Expanded;
@@ -29,38 +27,50 @@ namespace Player.Views
 					MainGrid.Children.Add(tile);
 					_Tiles.Add(tile);
 				});
+				MainGrid.SizeChanged += (_, __) =>
+				{
+					MainGrid.Children.Remove(_CurrentAlbumContent);
+					MainGrid.AlignChildrenVertical(Controller.TileSize);
+					if (_CurrentAlbumTile != null)
+					{
+						MainGrid.Children.Add(_CurrentAlbumContent);
+						AlignAlbumContent(_CurrentAlbumTile.GetRow());
+					}
+				};
+				MainGrid.AlignChildrenVertical(Controller.TileSize);
 				MainGrid.Children.Add(_CurrentAlbumContent);
-				MainGrid.SizeChanged += (_, __) => MainGrid.AlignChildrenVertical(TileSize);
-				MainGrid.AlignChildrenVertical(TileSize);
 			}
-			_CurrentAlbumContent.Visibility = Visibility.Collapsed;
 		}
 
 		private void Tile_Collapsed(object sender, EventArgs e)
 		{
-			_CurrentAlbumContent.Visibility = Visibility.Collapsed;
+			MainGrid.Children.Remove(_CurrentAlbumContent);
 			_Tiles.For(each => each.Margin = default);
+			_CurrentAlbumTile = null;
 		}
 
-		private void Tile_Expanded(object sender, InfoExchangeArgs<string> e)
+		private void Tile_Expanded(object sender, Library.InfoExchangeArgs<string> e)
 		{
+			_CurrentAlbumTile = sender as AlbumTile;
+			if (MainGrid.Children.IndexOf(_CurrentAlbumContent) < 0)
+				MainGrid.Children.Add(_CurrentAlbumContent);
 			_CurrentAlbumContent.ChangeAlbum(e.Parameter);
-			_CurrentAlbumContent.Visibility = Visibility.Visible;
-			var senderTile = sender as ArtistTile;
 			_Tiles.For(each => each.ChangeStatus(false));
-			senderTile.ChangeStatus(true);
-			if (senderTile.GetRow() != _CurrentAlbumContent.GetRow())
+			_CurrentAlbumTile.ChangeStatus(true);
+			if (_CurrentAlbumTile.GetRow() != _CurrentAlbumContent.GetRow())
+				AlignAlbumContent(_CurrentAlbumTile.GetRow());
+		}
+
+		private void AlignAlbumContent(int row)
+		{
+			_Tiles.For(each => each.Margin = default);
+			_Tiles.For(each =>
 			{
-				var row = senderTile.GetRow() + 1;
-				_Tiles.For(each =>
-				{
-					if (each.GetRow() == row)
-						each.Margin = new Thickness(0, 200, 0, 0);
-				});
-				Grid.SetRow(_CurrentAlbumContent, row);
-				Grid.SetColumn(_CurrentAlbumContent, 0);
-				Grid.SetColumnSpan(_CurrentAlbumContent, MainGrid.ColumnDefinitions.Count);
-			}
+				if (each.GetRow() == row)
+					each.Margin = new Thickness(0, 0, 0, 200);
+			});
+			Grid.SetRow(_CurrentAlbumContent, row);
+			Grid.SetColumnSpan(_CurrentAlbumContent, MainGrid.ColumnDefinitions.Count);
 		}
 	}
 }

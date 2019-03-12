@@ -1,4 +1,4 @@
-﻿using Library;
+using Library;
 using System;
 using System.Windows.Controls;
 
@@ -12,19 +12,19 @@ namespace Player.Views
 
 		public PlaylistTile() => InitializeComponent();
 
-		public PlaylistTile(string Playlist)
+		public PlaylistTile(string playlist)
 		{
 			InitializeComponent();
 
-			MainTextBlock.Text = Playlist;
+			MainTextBlock.Text = playlist;
 
-			MainToggle.Checked += delegate { if (!_IsStatusChangingByCode) Expanded.Invoke(this, Playlist); };
+			MainToggle.Checked += delegate { if (!_IsStatusChangingByCode) Expanded.Invoke(this, playlist); };
 			MainToggle.Unchecked += delegate { if (!_IsStatusChangingByCode) Collapsed.Invoke(this, null); };
 		}
 
-		public void ChangeStatus(bool? isChecked)
+		public void ChangeStatus(bool? isChecked, bool raiseEvent = false)
 		{
-			_IsStatusChangingByCode = true;
+			_IsStatusChangingByCode = !raiseEvent;
 			MainToggle.IsChecked = isChecked;
 			_IsStatusChangingByCode = false;
 		}

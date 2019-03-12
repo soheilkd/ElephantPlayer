@@ -1,20 +1,9 @@
-﻿<ContentControl x:Class="Player.Views.PlaylistsView"
-				xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" 
-				xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" 
-				xmlns:nav="clr-namespace:Library.Controls.Navigation;assembly=Library">
-	<Grid>
-		<ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
-			<Grid x:Name="MainGrid">
+<ContentControl x:Class="Player.Views.PlaylistsView" Loaded="Grid_Loaded"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+	<ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+		<Grid x:Name="MainGrid">
 
-			</Grid>
-		</ScrollViewer>
-		<DockPanel VerticalAlignment="Bottom">
-			<Expander ExpandDirection="Right">
-				<StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-					<TextBox x:Name="NewPlaylistBox" Width="200" Margin="2" TextAlignment="Center" VerticalContentAlignment="Center" FontSize="15" FontWeight="SemiBold" Text="New Playlist Name"/>
-					<Button Content="Create" Margin="2" Width="80" Click="CreateButtonClick"/>
-				</StackPanel>
-			</Expander>
-		</DockPanel>
-	</Grid>
+		</Grid>
+	</ScrollViewer>
 </ContentControl>

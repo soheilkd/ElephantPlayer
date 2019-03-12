@@ -1,14 +1,18 @@
-﻿using Library;
+using Library;
+using Library.Controls;
+using Library.Extensions;
 using Library.Serialization.Models;
-using Player.Models;
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Controls;
+using System.Windows.Media.Imaging;
 
 namespace Player.Views
 {
 	public partial class AlbumTile : UserControl
 	{
+		private static readonly byte[] un = IconProvider.GetBitmap(IconType.Person).ToData();
 		public event InfoExchangeHandler<string> Expanded;
 		public event EventHandler Collapsed;
 		private bool _IsStatusChangingByCode = false;
@@ -23,17 +27,17 @@ namespace Player.Views
 
 			MainToggle.Checked += delegate { if (!_IsStatusChangingByCode) Expanded.Invoke(this, album); };
 			MainToggle.Unchecked += delegate { if (!_IsStatusChangingByCode) Collapsed.Invoke(this, null); };
-
-			Task.Run(async () =>
+			//MainImage.Source = Library.Controls.IconProvider.GetBitmap(Library.Controls.IconType.Person);
+			Task.Run(() =>
 			{
-				var image = await Web.GetAlbumImage(album);
-				MainImage.Dispatcher.Invoke(() => MainImage.Source = image);
+				var image = Web.GetAlbumImage(album) ?? un;
+				Dispatcher.Invoke(() => MainImage.Source = image.ToBitmap());
 			});
 		}
 
-		public void ChangeStatus(bool? isChecked)
+		public void ChangeStatus(bool? isChecked, bool raiseEvent = false)
 		{
-			_IsStatusChangingByCode = true;
+			_IsStatusChangingByCode = !raiseEvent;
 			MainToggle.IsChecked = isChecked;
 			_IsStatusChangingByCode = false;
 		}

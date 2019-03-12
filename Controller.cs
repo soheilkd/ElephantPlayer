@@ -2,12 +2,14 @@
 using Library.Serialization.Models;
 using Player.Models;
 using System.Collections.Generic;
+using System.Windows;
 
 namespace Player
 {
 	public static class Controller
 	{
 		public static string AppPath => App.Path;
+		public static readonly Size TileSize = new Size(120, 170);
 
 		#region Player Related
 		public static MediaQueue Queue { get; set; } = new MediaQueue();
