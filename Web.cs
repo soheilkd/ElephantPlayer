@@ -1,10 +1,6 @@
 ﻿using Lastfm.Services;
-using Library.Extensions;
 using System;
-using System.Collections.Concurrent;
 using System.Net;
-using System.Threading.Tasks;
-using System.Windows.Media.Imaging;
 
 namespace Player
 {
@@ -12,70 +8,75 @@ namespace Player
 	{
 		//Session is required for API connection to LastFM 
 		private static readonly Session _Session = new Session("cab344dc5414176234071148bc813382", "ef529dce9081c695dc32f31b800c7b9a");
-		private static BlockingCollection<(string key, string)> ImageDatas = new BlockingCollection<(string, string)>(4);
+
+		public static Artist GetArtist(string name) => new Artist(name, _Session);
+		public static bool TryGetArtist(string name, out Artist artist)
+		{
+			try
+			{
+				artist = new Artist(name, _Session);
+				return artist != null;
+			}
+			catch (Exception)
+			{
+				artist = null;
+				return false;
+			}
+		}
+		public static byte[] GetArtistImage(string name)
+		{
+			if (Controller.Resource.TryGetValue(name, out var data))
+				return data;
+			if (TryGetArtist(name, out Artist artist))
+			{
+				var image = Download(artist.GetImageURL());
+				Controller.Resource.Add(name, image);
+				return image;
+			}
+			else
+				return null;
+		}
 
 		public static Album GetAlbum(string album, string artist = default)
 		{
-			try
-			{
-				if (artist != default)
-					return new Album(artist, album, _Session);
-				return Album.Search(album, _Session).GetFirstMatch();
-			}
-			catch (Exception)
-			{
-				return default;
-			}
+			if (artist != default)
+				return new Album(artist, album, _Session);
+			return Album.Search(album, _Session).GetFirstMatch();
 		}
-		public static Artist GetArtist(string name)
+		public static bool TryGetAlbum(string name, out Album album)
 		{
 			try
 			{
-				return Artist.Search(name, _Session).GetFirstMatch();
+				album = GetAlbum(name);
+				return album != null;
 			}
 			catch (Exception)
 			{
-				return default;
+				album = null;
+				return false;
 			}
 		}
-
-		public static async Task<BitmapImage> GetArtistImage(string name)
+		public static byte[] GetAlbumImage(string name)
 		{
 			if (Controller.Resource.TryGetValue(name, out var data))
-				return data.ToBitmap();
-			var artist = GetArtist(name);
-			if (artist == null)
+				return data;
+			if (TryGetAlbum(name, out Album album))
+			{
+				var image = Download(album.GetImageURL());
+				Controller.Resource.Add(name, image);
+				return image;
+			}
+			else
 				return null;
-			var image = await DownloadImage(artist.GetImageURL());
-			Controller.Resource.Add(name, image.ToData());
-			return image;
 		}
 
-		public static async Task<BitmapImage> GetAlbumImage(string name)
-		{
-			if (Controller.Resource.TryGetValue(name, out var data))
-				return data.ToBitmap();
-			var album = GetAlbum(name);
-			if (album == null)
-				return null;
-			var image = await DownloadImage(album.GetImageURL());
-			Controller.Resource.Add(name, image.ToData());
-			return image;
-		}
-
-		public static void DownloadImageSync(string url, Action<BitmapImage> onDone)
-		{
-			var client = new WebClient();
-			client.DownloadDataCompleted += (_, d) => onDone(d.Result.ToBitmap());
-			client.DownloadDataAsync(new Uri(url));
-		}
-		public static async Task<BitmapImage> DownloadImage(string url)
+		public static byte[] Download(string url)
 		{
 			if (string.IsNullOrWhiteSpace(url))
 				return null;
 			var client = new WebClient();
-			var image = await client.DownloadDataTaskAsync(url);
-			return image.ToBitmap();
+			try { return client.DownloadData(url); }
+			catch (Exception) { return new byte[0]; }
 		}
 	}
 }
