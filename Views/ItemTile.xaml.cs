@@ -10,27 +10,27 @@ using System.Windows.Media.Imaging;
 
 namespace Player.Views
 {
-	public partial class ArtistTile : UserControl
+	public partial class ItemTile : UserControl
 	{
 		private static readonly byte[] un = IconProvider.GetBitmap(IconType.Person).ToData();
 		public event InfoExchangeHandler<string> Expanded;
 		public event EventHandler Collapsed;
 		private bool _IsStatusChangingByCode = false;
 
-		public ArtistTile() => InitializeComponent();
+		public ItemTile() => InitializeComponent();
 
-		public ArtistTile(string artist)
+		public ItemTile(string title, Func<string, byte[]> imageLoader)
 		{
 			InitializeComponent();
 
-			MainTextBlock.Text = artist;
+			MainTextBlock.Text = title;
 
-			MainToggle.Checked += delegate { if (!_IsStatusChangingByCode) Expanded.Invoke(this, artist); };
+			MainToggle.Checked += delegate { if (!_IsStatusChangingByCode) Expanded.Invoke(this, title); };
 			MainToggle.Unchecked += delegate { if (!_IsStatusChangingByCode) Collapsed.Invoke(this, null); };
 			//MainImage.Source = Library.Controls.IconProvider.GetBitmap(Library.Controls.IconType.Person);
 			Task.Run(() =>
 			{
-				var image = Web.GetArtistImage(artist) ?? un;
+				var image = imageLoader(title) ?? un;
 				Dispatcher.Invoke(() => MainImage.Source = image.ToBitmap());
 			});
 		}
