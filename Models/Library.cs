@@ -1,49 +1,65 @@
-﻿using Library.Extensions;
-using Library.Models;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Collections.Specialized;
-using System.ComponentModel;
+using System.Threading.Tasks;
+using Windows.Storage;
 
 namespace Player.Models
 {
 	[Serializable]
-	public class Library : MediaQueue
+	public class Library
 	{
-		public SortedAutoDictionary<string, MediaQueue, Media> Artists { get; } = new SortedAutoDictionary<string, MediaQueue, Media>(each => each.Artist);
-		public SortedAutoDictionary<string, MediaQueue, Media> Albums { get; } = new SortedAutoDictionary<string, MediaQueue, Media>(each => each.Album);
-		public List<MediaQueue> Playlists { get; } = new List<MediaQueue>();
+		public MediaQueue<Song> Songs { get; set; } = new MediaQueue<Song>();
+		public MediaQueue<Video> Videos { get; set; } = new MediaQueue<Video>();
+		public List<MediaQueue> Playlists { get; set; } = new List<MediaQueue>();
 
-		protected override void OnCollectionChanged(NotifyCollectionChangedEventArgs e)
+		public async Task ReadMusicLibrary()
 		{
-			base.OnCollectionChanged(e);
-			switch (e.Action)
+			StorageLibrary musics = await StorageLibrary.GetLibraryAsync(KnownLibraryId.Music);
+			foreach (StorageFolder folder in musics.Folders)
+				await AddMusicFolder(folder);
+		}
+		public async Task AddMusicFolder(StorageFolder folder)
+		{
+			foreach (var subitem in await folder.GetItemsAsync())
 			{
-				case NotifyCollectionChangedAction.Add:
-					Artists.Add(this[0]);
-					Albums.Add(this[0]);
-					break;
-				case NotifyCollectionChangedAction.Remove:
-					Media m = e.OldItems[0].To<Media>();
-					Artists.Remove(m);
-					Albums.Remove(m);
-					Playlists.For(each => each.Remove(m));
-					break;
-				case NotifyCollectionChangedAction.Reset:
-					Artists.Clear();
-					Albums.Clear();
-					Playlists.For(each => each.Clear());
-					break;
-				default:
-					break;
+				if (subitem is StorageFolder subfolder)
+					await AddMusicFolder(subfolder);
+				else if (subitem is StorageFile file)
+					AddMusic(file);
 			}
 		}
-
-		protected override void OnPropertyChanged(PropertyChangedEventArgs e)
+		public void AddMusic(StorageFile file)
 		{
-			base.OnPropertyChanged(e);
-			if (e.PropertyName == "Artist") Artists.Reorganize();
-			if (e.PropertyName == "Album") Albums.Reorganize();
+			if (!Songs.Contains(file.Path))
+				Songs.Add(new Song(file));
+		}
+
+		public async Task ReadVideoLibrary()
+		{
+			StorageLibrary videos = await StorageLibrary.GetLibraryAsync(KnownLibraryId.Videos);
+			foreach (StorageFolder folder in videos.Folders)
+				await AddVideoFolder(folder);
+		}
+		public async Task AddVideoFolder(StorageFolder folder)
+		{
+			foreach (var subitem in await folder.GetItemsAsync())
+			{
+				if (subitem is StorageFolder subfolder)
+					await AddVideoFolder(subfolder);
+				else if (subitem is StorageFile file)
+					AddVideo(file);
+			}
+		}
+		public void AddVideo(StorageFile file)
+		{
+			if (!Videos.Contains(file.Path))
+				Videos.Add(new Video(file));
+		}
+
+		public async void ReadLibrary()
+		{
+			await ReadMusicLibrary();
+			await ReadVideoLibrary();
 		}
 	}
 }

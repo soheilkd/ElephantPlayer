@@ -6,7 +6,4 @@
 /bin
 /obj
 /.vs
-/Controls/obj
-/Controls/bin
-/Library/bin
-/Library/obj
+/UWPPlayer/bin/x64/Release
