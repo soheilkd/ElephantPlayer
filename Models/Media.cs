@@ -2,21 +2,30 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
+using System.Runtime.Serialization;
 using Windows.Storage;
 
 #pragma warning disable CS1998 //Disable async - await warning for ReadProperties
 
 namespace Player.Models
 {
-	[Serializable]
+	[DataContract]
 	public abstract class Media : INotifyPropertyChanged
 	{
+		[DataMember]
 		public List<DateTime> PlayTimes { get; set; } = new List<DateTime>();
-		public DateTime AdditionDate { get; set; }
+		[DataMember]
+		public DateTime AdditionDate { get; private set; }
+		[DataMember]
+		public string Title { get; protected set; }
+		[DataMember]
+		public TimeSpan Duration { get; protected set; }
+		[DataMember]
 		public string Path { get; set; }
 		public bool DoesExist => File.Exists(Path);
+		[IgnoreDataMember]
 		public bool IsPlaying { get; set; }
-
+		[field:IgnoreDataMember]
 		public event PropertyChangedEventHandler PropertyChanged;
 
 		public Media() => AdditionDate = DateTime.Now;

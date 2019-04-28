@@ -1,17 +1,37 @@
 ﻿using System;
+using System.Runtime.Serialization;
 using Windows.Storage;
 using Windows.Storage.FileProperties;
 
 namespace Player.Models
 {
+	[DataContract]
 	public class Song : Media
 	{
-		public MusicProperties Properties { get; private set; } = default;
-		public string Artist => Properties.Artist;
-		public string Album => Properties.Album;
-		public string AlbumArtist => Properties.AlbumArtist;
-		public string Title => Properties.Title;
-		public TimeSpan Duration => Properties.Duration;
+		[IgnoreDataMember]
+		private MusicProperties _Properties;
+		public MusicProperties Properties
+		{
+			get => _Properties;
+			private set
+			{
+				_Properties = value;
+
+				//Data will be stored in properties to make the class serializable, since MusicProperties is not serializable
+				Artist = value.Artist;
+				Album = value.Album;
+				AlbumArtist = value.AlbumArtist;
+				Title = value.Title;
+				Duration = value.Duration;
+			}
+		}
+
+		[DataMember]
+		public string Artist { get; private set; }
+		[DataMember]
+		public string Album { get; private set; }
+		[DataMember]
+		public string AlbumArtist { get; private set; }
 
 		public Song(string path) : base(path) { }
 		public Song(StorageFile file) : base(file) { }
