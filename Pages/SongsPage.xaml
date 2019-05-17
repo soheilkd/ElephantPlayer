@@ -1,23 +1,23 @@
 ﻿<Page
     x:Class="Player.Pages.SongsPage" NavigationCacheMode="Required"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-	xmlns:controls="using:Player.Controls">
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 	<Grid>
 		<Pivot>
 			<PivotItem Header="Tracks">
-				<ListBox x:Name="TracksListBox">
-					<ListBox.ItemTemplate>
+				<ListView x:Name="TracksListView" DoubleTapped="TracksListBox_DoubleTapped" IsMultiSelectCheckBoxEnabled="True" >
+					<ListView.ItemTemplate>
 						<DataTemplate>
 							<StackPanel Orientation="Horizontal">
 								<TextBlock Text="{Binding Artist}" Width="200"/>
 								<TextBlock Text="{Binding Title}" Width="200"/>
-								<SymbolIcon Symbol="Play" Width="40"/>
+								<TextBlock Text="{Binding Album}"/>
+								<AppBarButton Icon="Play" Visibility="{Binding IsMouseOver}"/>
 								<TextBlock Text="{Binding Duration}"/>
 							</StackPanel>
 						</DataTemplate>
-					</ListBox.ItemTemplate>
-				</ListBox>
+					</ListView.ItemTemplate>
+				</ListView>
 			</PivotItem>
 			<PivotItem Header="Artists">
 				

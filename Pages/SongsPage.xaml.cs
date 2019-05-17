@@ -1,10 +1,12 @@
-﻿using System;
+﻿using Player.Models;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
+using Windows.UI.Popups;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
@@ -22,7 +24,12 @@ namespace Player.Pages
 		public SongsPage()
 		{
 			this.InitializeComponent();
-			TracksListBox.ItemsSource = Controller.Library.Songs;
+			TracksListView.ItemsSource = Controller.Library.Songs;
+		}
+
+		private void TracksListBox_DoubleTapped(object sender, DoubleTappedRoutedEventArgs e)
+		{
+			Controller.Play(TracksListView.SelectedItem as Media);
 		}
 	}
 }
