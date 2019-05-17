@@ -1,9 +1,6 @@
 ﻿using Library;
 using Player.Models;
-using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Runtime.Serialization;
 using System.Windows;
 using Windows.Foundation;
 using Windows.Storage;
@@ -30,17 +27,22 @@ namespace Player
 
 		public static ApplicationDataContainer Settings => ApplicationData.Current.LocalSettings;
 		public static StorageFolder Local => ApplicationData.Current.LocalFolder;
-		private static string LibraryPath => Local.Path + "\\Library.bin";
 
 		#region Library 
 
-		public static Models.Library Library { get; } = ContractSerialization.Deserialize<Models.Library>(LibraryPath) ?? new Models.Library();
+		static Controller()
+		{
+			
+			Library.ReadLibrary();
+		}
+
+		public static Models.Library Library { get; } = Serialization.Deserialize<Models.Library>(Local.Path + "Library.bin")  ?? new Models.Library();
 
 		#endregion
 
 		public static void SaveAll()
 		{
-			ContractSerialization.Serialize(LibraryPath, Library);
+			Serialization.Serialize(Library, Local.Path + "Library.bin");
 		}
 	}
 }

@@ -27,13 +27,5 @@ namespace Player
 			else if (index == 3) contentFrame.Navigate(typeof(CurrentlyPlayingPage));
 			else if (index == 4) contentFrame.Navigate(typeof(StreamPage));
 		}
-
-		private void Page_Loaded(object sender, Windows.UI.Xaml.RoutedEventArgs e)
-		{
-			Controller.Library.ReadLibrary();
-			
-			Controller.Library.Songs.CollectionChanged += (_, __) => Controller.SaveAll();
-			Controller.Library.Videos.CollectionChanged += (_, __) => Controller.SaveAll();
-		}
 	}
 }
