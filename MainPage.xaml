@@ -5,8 +5,6 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 	xmlns:views="using:Player.Views"
-	xmlns:player="using:Player"
-	Loaded="Page_Loaded"
 	mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 	<Grid x:Name="ContentGrid">
@@ -15,10 +13,11 @@
 				<NavigationViewItem Icon="Audio" Content="Songs" Tag="0"/>
 				<NavigationViewItem Icon="Video" Content="Videos" Tag="1"/>
 				<NavigationViewItem Icon="MusicInfo" Content="Playlists" Tag="2"/>
+				<NavigationViewItem Icon="Placeholder" Content="Currently Playing" Tag="3"/>
 				<NavigationViewItem Icon="Globe" Content="Stream" Tag="4"/>
 			</NavigationView.MenuItems>
 			<Frame x:Name="contentFrame"/>
 		</NavigationView>
-		<player:PlayerControl/>
+		<MediaElement x:Name="Player"/>
 	</Grid>
 </Page>

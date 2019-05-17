@@ -21,6 +21,11 @@ namespace Player
 			PlayRequest?.Invoke(queue, media);
 		}
 
+		public static async void Play(string path)
+		{
+
+		}
+
 		#endregion
 
 		public static ApplicationDataContainer Settings => ApplicationData.Current.LocalSettings;

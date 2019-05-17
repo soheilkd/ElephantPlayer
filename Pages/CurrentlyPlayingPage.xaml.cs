@@ -17,12 +17,11 @@ using Windows.UI.Xaml.Navigation;
 
 namespace Player.Pages
 {
-	public sealed partial class SongsPage : Page
+	public sealed partial class CurrentlyPlayingPage : Page
 	{
-		public SongsPage()
+		public CurrentlyPlayingPage()
 		{
 			this.InitializeComponent();
-			TracksListBox.ItemsSource = Controller.Library.Songs;
 		}
 	}
 }

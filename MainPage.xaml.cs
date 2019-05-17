@@ -24,7 +24,8 @@ namespace Player
 			else if (index == 0) contentFrame.Navigate(typeof(SongsPage));
 			else if (index == 1) contentFrame.Navigate(typeof(VideosPage));
 			else if (index == 2) contentFrame.Navigate(typeof(PlaylistsPage));
-			else if (index == 3) contentFrame.Navigate(typeof(StreamPage));
+			else if (index == 3) contentFrame.Navigate(typeof(CurrentlyPlayingPage));
+			else if (index == 4) contentFrame.Navigate(typeof(StreamPage));
 		}
 
 		private void Page_Loaded(object sender, Windows.UI.Xaml.RoutedEventArgs e)
