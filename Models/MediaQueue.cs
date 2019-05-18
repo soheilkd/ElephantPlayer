@@ -3,14 +3,12 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Runtime.Serialization;
 
 namespace Player.Models
 {
-	[CollectionDataContract]
-	public class MediaQueue<T> : ObservableCollection<T> where T : Media
+    [Serializable]
+    public class MediaQueue<T> : ObservableCollection<T> where T : Media
     {
-		[DataMember]
         private int _Position;
         public T Current => Position < Count ? this[Position] : default;
         public new T this[int index]
