@@ -25,7 +25,16 @@ namespace Player
 		}
 		public static byte[] GetArtistImage(string name)
 		{
-			return null;
+			if (Controller.Resource.TryGetValue(name, out var data))
+				return data;
+			if (TryGetArtist(name, out Artist artist))
+			{
+				var image = Download(artist.GetImageURL());
+				Controller.Resource.Add(name, image);
+				return image;
+			}
+			else
+				return null;
 		}
 
 		public static Album GetAlbum(string album, string artist = default)
@@ -49,7 +58,16 @@ namespace Player
 		}
 		public static byte[] GetAlbumImage(string name)
 		{
-			return null;
+			if (Controller.Resource.TryGetValue(name, out var data))
+				return data;
+			if (TryGetAlbum(name, out Album album))
+			{
+				var image = Download(album.GetImageURL());
+				Controller.Resource.Add(name, image);
+				return image;
+			}
+			else
+				return null;
 		}
 
 		public static byte[] Download(string url)
