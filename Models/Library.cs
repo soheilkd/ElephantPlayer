@@ -1,49 +1,74 @@
-﻿using Library.Extensions;
-using Library.Models;
+﻿using Player.Classes;
 using System;
 using System.Collections.Generic;
-using System.Collections.Specialized;
-using System.ComponentModel;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Player.Models
 {
 	[Serializable]
-	public class Library : MediaQueue
+	public class Library
 	{
-		public SortedAutoDictionary<string, MediaQueue, Media> Artists { get; } = new SortedAutoDictionary<string, MediaQueue, Media>(each => each.Artist);
-		public SortedAutoDictionary<string, MediaQueue, Media> Albums { get; } = new SortedAutoDictionary<string, MediaQueue, Media>(each => each.Album);
-		public List<MediaQueue> Playlists { get; } = new List<MediaQueue>();
+		public MediaQueue Songs { get; set; } = new MediaQueue();
+		public MediaQueue Videos { get; set; } = new MediaQueue();
+		public Dictionary<string, MediaQueue> Playlists { get; set; } = new Dictionary<string, MediaQueue>();
 
-		protected override void OnCollectionChanged(NotifyCollectionChangedEventArgs e)
+		public async void ReadLibraryAsync()
 		{
-			base.OnCollectionChanged(e);
-			switch (e.Action)
-			{
-				case NotifyCollectionChangedAction.Add:
-					Artists.Add(this[0]);
-					Albums.Add(this[0]);
-					break;
-				case NotifyCollectionChangedAction.Remove:
-					Media m = e.OldItems[0].To<Media>();
-					Artists.Remove(m);
-					Albums.Remove(m);
-					Playlists.For(each => each.Remove(m));
-					break;
-				case NotifyCollectionChangedAction.Reset:
-					Artists.Clear();
-					Albums.Clear();
-					Playlists.For(each => each.Clear());
-					break;
-				default:
-					break;
-			}
+			await Task.Run(() => ReadLibrary());
+		}
+		public void ReadLibrary()
+		{
+			ReadMusicLibrary();
+			ReadVideoLibrary();
 		}
 
-		protected override void OnPropertyChanged(PropertyChangedEventArgs e)
+		public async void ReadMusicLibraryAsync()
 		{
-			base.OnPropertyChanged(e);
-			if (e.PropertyName == "Artist") Artists.Reorganize();
-			if (e.PropertyName == "Album") Albums.Reorganize();
+			await Task.Run(() => ReadMusicLibrary());
+		}
+		public void ReadMusicLibrary()
+		{
+			var songs = GetFiles(Environment.SpecialFolder.MyMusic);
+			foreach (var item in songs)
+				AddSong(item);
+		}
+		public void AddSong(string path)
+		{
+			if (Songs.Where(song => song.Path == path).Count() != 0)
+				Songs.Add(new Song(path));
+		}
+
+		public async void ReadVideoLibraryAsync()
+		{
+			await Task.Run(() => ReadVideoLibrary());
+		}
+		public void ReadVideoLibrary()
+		{
+			var videos = GetFiles(Environment.SpecialFolder.MyVideos);
+			foreach (var item in videos)
+				AddSong(item);
+		}
+		public void AddVideo(string path)
+		{
+			if (Videos.Where(video => video.Path == path).Count() != 0)
+				Videos.Add(new Video(path));
+		}
+
+		public void AddMedia(string path)
+		{
+			var media = MediaFactory.GetMedia(path);
+			if (media is Song)
+				Songs.Add(media);
+			else if (media is Video)
+				Videos.Add(media);
+			else return;
+		}
+
+		private string[] GetFiles(Environment.SpecialFolder specialFolder)
+		{
+			return Directory.GetFiles(Environment.GetFolderPath(specialFolder));
 		}
 	}
 }
