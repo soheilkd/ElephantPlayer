@@ -1,0 +1,73 @@
+{
+  "format": 1,
+  "restore": {
+    "D:\\Dev\\Projects\\ElephantPlayer\\UWP\\EPlayer.UWP.csproj": {}
+  },
+  "projects": {
+    "D:\\Dev\\Projects\\ElephantPlayer\\UWP\\EPlayer.UWP.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "D:\\Dev\\Projects\\ElephantPlayer\\UWP\\EPlayer.UWP.csproj",
+        "projectName": "EPlayer.UWP",
+        "projectPath": "D:\\Dev\\Projects\\ElephantPlayer\\UWP\\EPlayer.UWP.csproj",
+        "packagesPath": "C:\\Users\\sohei\\.nuget\\packages\\",
+        "outputPath": "D:\\Dev\\Projects\\ElephantPlayer\\UWP\\obj\\",
+        "projectStyle": "PackageReference",
+        "skipContentFileWrite": true,
+        "fallbackFolders": [
+          "C:\\Microsoft\\Xamarin\\NuGet\\",
+          "C:\\Program Files (x86)\\Microsoft SDKs\\UWPNuGetPackages\\"
+        ],
+        "configFilePaths": [
+          "C:\\Users\\sohei\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Xamarin.Offline.config"
+        ],
+        "originalTargetFrameworks": [
+          "uap10.0.17763"
+        ],
+        "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "uap10.0.17763": {
+            "projectReferences": {}
+          }
+        }
+      },
+      "frameworks": {
+        "uap10.0.17763": {
+          "imports": [
+            "net461"
+          ],
+          "assetTargetFallback": true,
+          "warn": true
+        }
+      },
+      "runtimes": {
+        "win10-arm": {
+          "#import": []
+        },
+        "win10-arm-aot": {
+          "#import": []
+        },
+        "win10-arm64-aot": {
+          "#import": []
+        },
+        "win10-x64": {
+          "#import": []
+        },
+        "win10-x64-aot": {
+          "#import": []
+        },
+        "win10-x86": {
+          "#import": []
+        },
+        "win10-x86-aot": {
+          "#import": []
+        }
+      }
+    }
+  }
+}

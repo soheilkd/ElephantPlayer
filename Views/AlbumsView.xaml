@@ -1,9 +1,0 @@
-<ContentControl x:Class="Player.Views.AlbumsView" Loaded="Grid_Loaded"
-      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-	<ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
-		<Grid x:Name="MainGrid">
-
-		</Grid>
-	</ScrollViewer>
-</ContentControl>
