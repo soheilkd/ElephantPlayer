@@ -1,0 +1,47 @@
+<resources>
+    <string name="app_name">Elephant Player</string>
+    <string name="title_home">Home</string>
+    <string name="title_dashboard">Dashboard</string>
+    <string name="title_notifications">Notifications</string>
+	
+	<string name="ui_recentlyadded">Recently Added</string>
+	<string name="ui_mostplayed">Most Played</string>
+	<string name="ui_artists">Artists</string>
+	<string name="ui_albums">Albums</string>
+	<string name="ui_seemore">See More</string>
+	<string name="ui_createplaylist">Create Playlist</string>
+	<string name="ui_nowplaying">Now Playing</string>
+	
+	<string name="nav_home">Home</string>
+	<string name="nav_songs">Songs</string>
+	<string name="nav_artists">Artists</string>
+	<string name="nav_albums">Albums</string>
+	<string name="nav_playlists">Playlists</string>
+	<string name="nav_genres">Genres</string>
+	
+	<string name="ui_menu_play">Play</string>
+	<string name="ui_menu_playnext">Play Next</string>
+	<string name="ui_menu_addtoqueue">Add To Queue</string>
+	<string name="ui_menu_remove">Remove</string>
+	<string name="ui_menu_delete">Delete</string>
+	<string name="ui_menu_cleantag">Clean Tag</string>
+	<string name="ui_menu_gotoartist">Go To Artist</string>
+	<string name="ui_menu_gotoalbum">Go To Album</string>
+	<string name="ui_menu_properties">Properties</string>
+	<string name="ui_menu_information">Information</string>
+	<string name="ui_menu_open">Open</string>
+	
+	<string name="ui_media_repeatall">Repeat All</string>
+	<string name="ui_media_repeatone">Repeat One</string>
+	<string name="ui_media_repeatnone">No Repeat</string>
+	<string name="ui_media_shuffleon">Shuffle On</string>
+	<string name="ui_media_shuffleoff">Shuffle Off</string>
+	<string name="ui_media_like">Like</string>
+	<string name="ui_media_dislike">Dislike</string>
+	<string name="ui_media_previous">Previous</string>
+	<string name="ui_media_play">Play</string>
+	<string name="ui_media_pause">Pause</string>
+	<string name="ui_media_next">Next</string>
+	<string name="ui_media_queue">Queue</string>
+	<string name="ui_media_lyrics">Lyrics</string>
+</resources>
